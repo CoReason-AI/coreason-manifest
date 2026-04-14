@@ -922,6 +922,7 @@
           "taxonomic_restructure": "#/$defs/TaxonomicRestructureIntent",
           "temporal_invalidation": "#/$defs/TemporalEdgeInvalidationIntent",
           "topological_projection": "#/$defs/TopologicalProjectionIntent",
+          "topological_sort": "#/$defs/TopologicalSortIntent",
           "zero_trust_contract": "#/$defs/EpistemicZeroTrustContract"
         },
         "propertyName": "topology_class"
@@ -983,6 +984,9 @@
         },
         {
           "$ref": "#/$defs/ContinuousSpatialMutationIntent"
+        },
+        {
+          "$ref": "#/$defs/TopologicalSortIntent"
         },
         {
           "$ref": "#/$defs/AgentBidIntent"
@@ -1141,6 +1145,7 @@
           "counterfactual_regret": "#/$defs/CounterfactualRegretEvent",
           "crosswalk_resolution": "#/$defs/CrosswalkResolutionReceipt",
           "custody_receipt": "#/$defs/CustodyReceipt",
+          "cycle_detection_receipt": "#/$defs/CycleDetectionReceipt",
           "defeasible_attack": "#/$defs/DefeasibleAttackEvent",
           "epistemic_axiom_verification": "#/$defs/EpistemicAxiomVerificationReceipt",
           "epistemic_flow_state": "#/$defs/EpistemicFlowStateReceipt",
@@ -1168,6 +1173,7 @@
           "temporal_graph_crdt": "#/$defs/TemporalGraphCRDTManifest",
           "token_burn": "#/$defs/TokenBurnReceipt",
           "tool_invocation": "#/$defs/ToolInvocationEvent",
+          "topological_guillotine": "#/$defs/TopologicalGuillotineEvent",
           "verdict": "#/$defs/InterventionReceipt",
           "zero_trust_receipt": "#/$defs/EpistemicZeroTrustReceipt"
         },
@@ -1302,6 +1308,12 @@
         },
         {
           "$ref": "#/$defs/EpistemicStarvationEvent"
+        },
+        {
+          "$ref": "#/$defs/CycleDetectionReceipt"
+        },
+        {
+          "$ref": "#/$defs/TopologicalGuillotineEvent"
         },
         {
           "$ref": "#/$defs/SPARQLQueryResultReceipt"
@@ -4332,6 +4344,37 @@
       "title": "CollectiveIntelligenceProfile",
       "type": "object"
     },
+    "CombinatorialCounterModel": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The deterministic mechanistic penalty envelope when the ASP solver detects an impossible constraint matrix.\n\nCAUSAL AFFORDANCE: Acts as a mechanistic penalty that forces the LLM to perform defeasible reasoning strictly on conflicting axioms rather than stochastically hallucinating new ones.\n\nEPISTEMIC BOUNDS: The `unsat_core` array is mathematically sorted by the `_enforce_canonical_sort` hook to guarantee zero-variance RFC 8785 canonical hashing across distributed nodes when the counter-model is recorded on the Merkle-DAG.\n\nMCP ROUTING TRIGGERS: Mechanistic Penalty, Defeasible Reasoning, Answer Set Programming, Combinatorial Counter Model, UNSAT Core",
+      "properties": {
+        "topology_class": {
+          "const": "combinatorial_counter_model",
+          "default": "combinatorial_counter_model",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "failed_premise_cid": {
+          "$ref": "#/$defs/NodeCIDState",
+          "description": "Points to the specific EpistemicLogicPremise that collapsed."
+        },
+        "unsat_core": {
+          "description": "The exact subset of contradictory ASP rules/clauses extracted from clingo.",
+          "items": {
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "title": "Unsat Core",
+          "type": "array"
+        }
+      },
+      "required": [
+        "failed_premise_cid",
+        "unsat_core"
+      ],
+      "title": "CombinatorialCounterModel",
+      "type": "object"
+    },
     "CompositeNodeProfile": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements a Fractal Graph Abstraction, allowing the recursive encapsulation of entire workflow sub-topologies within a single, unified macroscopic vertex.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator to suspend the parent graph, injecting state variables into the isolated topology (`AnyTopologyManifest`) via `input_mappings`, and extracting terminal output via `output_mappings`.\n\nEPISTEMIC BOUNDS: The `@model_validator` `_enforce_canonical_sort_mappings` deterministically sorts `input_mappings` by `parent_key` and `output_mappings` by `child_key`, guaranteeing zero-variance RFC 8785 canonical Merkle-DAG hashes across distributed nodes.\n\nMCP ROUTING TRIGGERS: Fractal Graph Abstraction, Recursive Encapsulation, State Projection, Bijective Mapping, Sub-Topology",
@@ -5960,6 +6003,84 @@
         "redaction_timestamp_unix_nano"
       ],
       "title": "CustodyReceipt",
+      "type": "object"
+    },
+    "CycleDetectionReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing the algorithmic evaluation of a graph for cyclical paradoxes via rustworkx.\n\nCAUSAL AFFORDANCE: Emits a mathematical boolean flag (`has_cycles`) and an optional `shortest_pathological_path`. This allows the Truth Maintenance System to decisively prune invalid edges or trigger a TopologicalGuillotineEvent without non-monotonic hallucination.\n\nEPISTEMIC BOUNDS: Bounded to the target_graph_cid (128-char CID). The `shortest_pathological_path` avoids array sorting via a Topological Exemption to preserve the exact chronological cycle sequence.\n\nMCP ROUTING TRIGGERS: Cycle Detection, Paradox Resolution, DAG Validation, Rustworkx Substrate, Mathematical Receipt",
+      "properties": {
+        "event_cid": {
+          "description": "The unique CID for this event.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic hash of the prior event.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "description": "The logical timestamp of the event.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "topology_class": {
+          "const": "cycle_detection_receipt",
+          "default": "cycle_detection_receipt",
+          "description": "Receipt for detected cycles.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "target_graph_cid": {
+          "$ref": "#/$defs/NodeCIDState",
+          "description": "The graph where cycles were evaluated."
+        },
+        "has_cycles": {
+          "description": "Indicates whether the graph has cycles.",
+          "title": "Has Cycles",
+          "type": "boolean"
+        },
+        "shortest_pathological_path": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/NodeCIDState"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "coreason_topological_exemption": true,
+          "default": null,
+          "description": "The chronologically exact pathological path causing the cycle.",
+          "title": "Shortest Pathological Path"
+        }
+      },
+      "required": [
+        "event_cid",
+        "timestamp",
+        "target_graph_cid",
+        "has_cycles"
+      ],
+      "title": "CycleDetectionReceipt",
       "type": "object"
     },
     "CyclicEdgeProfile": {
@@ -11169,6 +11290,18 @@
           ],
           "title": "Satisfiability",
           "type": "string"
+        },
+        "counter_model": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CombinatorialCounterModel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Populated when satisfiability is UNSATISFIABLE or UNKNOWN (syntax error)."
         },
         "answer_sets": {
           "coreason_topological_exemption": true,
@@ -20012,6 +20145,14 @@
           "title": "Violation Receipts",
           "type": "array"
         },
+        "logic_counter_models": {
+          "description": "The mechanistic penalty (UNSAT core) from logical counter-models.",
+          "items": {
+            "$ref": "#/$defs/CombinatorialCounterModel"
+          },
+          "title": "Logic Counter Models",
+          "type": "array"
+        },
         "ast_gradient": {
           "anyOf": [
             {
@@ -21329,6 +21470,106 @@
       "title": "TopologicalFidelityReceipt",
       "type": "object"
     },
+    "TopologicalGuillotineEvent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A terminal state event triggered when a proposed edge violates the Zero-Orphan Invariant or creates an illegal graph cycle.\n\nCAUSAL AFFORDANCE: Physically slices the invalid payload out of the MCP differential, acting as a hardware-level circuit breaker to drop the offending edge or node before it permanently fractures the immutable ledger.\n\nEPISTEMIC BOUNDS: The `violation_type` is rigidly confined to the Literal automaton [\"illegal_cycle\", \"orphan_node_detected\"]. The `severed_edges` array is deterministically sorted for invariant hashing.\n\nMCP ROUTING TRIGGERS: Topological Guillotine, Circuit Breaker, Zero-Orphan Invariant, Cycle Prevention, Mechanistic Penalty",
+      "properties": {
+        "event_cid": {
+          "description": "The unique CID for this event.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic hash of the prior event.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "description": "The logical timestamp of the event.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "topology_class": {
+          "const": "topological_guillotine",
+          "default": "topological_guillotine",
+          "description": "Event severing invalid topology.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "offending_intent_cid": {
+          "$ref": "#/$defs/NodeCIDState",
+          "description": "The intent causing the invalid topology."
+        },
+        "violation_type": {
+          "description": "The category of the invariant violation.",
+          "enum": [
+            "illegal_cycle",
+            "orphan_node_detected"
+          ],
+          "title": "Violation Type",
+          "type": "string"
+        },
+        "pathological_path": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/NodeCIDState"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "coreason_topological_exemption": true,
+          "default": null,
+          "description": "The chronologically exact pathological path causing the cycle.",
+          "title": "Pathological Path"
+        },
+        "severed_edges": {
+          "description": "Edges mathematically severed from the graph to restore invariance.",
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "$ref": "#/$defs/NodeCIDState"
+              },
+              {
+                "$ref": "#/$defs/NodeCIDState"
+              }
+            ],
+            "type": "array"
+          },
+          "title": "Severed Edges",
+          "type": "array"
+        }
+      },
+      "required": [
+        "event_cid",
+        "timestamp",
+        "offending_intent_cid",
+        "violation_type"
+      ],
+      "title": "TopologicalGuillotineEvent",
+      "type": "object"
+    },
     "TopologicalProjectionIntent": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The transitional mathematical contract that calculates the Gromov-Wasserstein distance and authorizes or denies the collapse of a stochastic manifold into a deterministic structure.\n\nCAUSAL AFFORDANCE: Calculates optimal transport mapping and either authorizes downstream kinetic execution or rejects the transition due to topology tears.\n\nEPISTEMIC BOUNDS: Enforces a strict isomorphism confidence interval [0.0, 1.0], acting as a hardware-level guillotine that mandates a minimum 0.85 threshold.\n\nMCP ROUTING TRIGGERS: Gromov-Wasserstein Distance, Topological Compiler, Optimal Transport Mapping, Manifold Collapse, Deterministic Projection",
@@ -21469,6 +21710,54 @@
         "aggregation_method"
       ],
       "title": "TopologicalRewardContract",
+      "type": "object"
+    },
+    "TopologicalSortIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Kahn's Algorithm and Depth-First Search for Topological Sorting using the high-performance Rust graphing substrate (rustworkx). As an ...Intent suffix, this is an authorized kinetic execution trigger.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator to natively compile an unstructured list of nodes and edges into a deterministic, chronological execution flow, or fail if a cycle is present.\n\nEPISTEMIC BOUNDS: The search space geometry is rigidly locked by the provided nodes and edges arrays. The @model_validator mathematically sorts these arrays to guarantee invariant RFC 8785 Canonical Hashing.\n\nMCP ROUTING TRIGGERS: Topological Sort, Kahn's Algorithm, Directed Acyclic Graph, Rustworkx Substrate, Execution Ordering",
+      "properties": {
+        "topology_class": {
+          "const": "topological_sort",
+          "default": "topological_sort",
+          "description": "Topological Sort Intent",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "target_graph_cid": {
+          "$ref": "#/$defs/NodeCIDState",
+          "description": "The target graph CID."
+        },
+        "nodes": {
+          "description": "Nodes to sort",
+          "items": {
+            "$ref": "#/$defs/NodeCIDState"
+          },
+          "title": "Nodes",
+          "type": "array"
+        },
+        "edges": {
+          "description": "Edges to sort",
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "$ref": "#/$defs/NodeCIDState"
+              },
+              {
+                "$ref": "#/$defs/NodeCIDState"
+              }
+            ],
+            "type": "array"
+          },
+          "title": "Edges",
+          "type": "array"
+        }
+      },
+      "required": [
+        "target_graph_cid"
+      ],
+      "title": "TopologicalSortIntent",
       "type": "object"
     },
     "TopologyHashReceipt": {
