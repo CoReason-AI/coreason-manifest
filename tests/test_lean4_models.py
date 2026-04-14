@@ -1,9 +1,9 @@
-import pytest
 from coreason_manifest.spec.ontology import (
     EpistemicLean4Premise,
     Lean4VerificationReceipt,
     TacticStateGoal,
 )
+
 
 def test_epistemic_lean4_premise_sorting():
     premise = EpistemicLean4Premise(
@@ -13,7 +13,7 @@ def test_epistemic_lean4_premise_sorting():
             "did:example:3",
             "did:example:1",
             "did:example:2",
-        ]
+        ],
     )
     assert premise.dependency_graph_cids == [
         "did:example:1",
@@ -37,7 +37,7 @@ def test_lean4_verification_receipt_sorting():
         tactic_state_tree=[
             TacticStateGoal(hypothesis_context=["h : B"], target_type="C"),
             TacticStateGoal(hypothesis_context=["h : A"], target_type="B"),
-        ]
+        ],
     )
 
     assert receipt.tactic_state_tree is not None
