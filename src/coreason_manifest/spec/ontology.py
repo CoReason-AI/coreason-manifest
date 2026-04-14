@@ -6881,6 +6881,9 @@ class System2RemediationIntent(CoreasonBaseState):
     violation_receipts: list[ManifestViolationReceipt] = Field(
         min_length=1, description="The deterministic array of exact structural faults the agent must correct."
     )
+    logic_counter_models: list[CombinatorialCounterModel] = Field(
+        default_factory=list, description="The mechanistic penalty (UNSAT core) from logical counter-models."
+    )
     ast_gradient: ASTGradientReceipt | None = Field(
         default=None, description="The structural loss vector guiding AST repair."
     )
@@ -6890,6 +6893,16 @@ class System2RemediationIntent(CoreasonBaseState):
         """Mathematically sort receipts to guarantee deterministic canonical hashing."""
         object.__setattr__(
             self, "violation_receipts", sorted(self.violation_receipts, key=operator.attrgetter("failing_pointer"))
+        )
+        return self
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort_logic_counter_models(self) -> Self:
+        """Mathematically sort counter models to guarantee deterministic canonical hashing."""
+        object.__setattr__(
+            self,
+            "logic_counter_models",
+            sorted(self.logic_counter_models, key=operator.attrgetter("failed_premise_cid")),
         )
         return self
 
@@ -7066,6 +7079,32 @@ class Lean4VerificationReceipt(CoreasonBaseState):
     topology_class: Literal["lean4_verification_receipt"] = Field(default="lean4_verification_receipt")
 
 
+class CombinatorialCounterModel(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: The deterministic mechanistic penalty envelope when the ASP solver detects an impossible constraint matrix.
+
+    CAUSAL AFFORDANCE: Acts as a mechanistic penalty that forces the LLM to perform defeasible reasoning strictly on conflicting axioms rather than stochastically hallucinating new ones.
+
+    EPISTEMIC BOUNDS: The `unsat_core` array is mathematically sorted by the `_enforce_canonical_sort` hook to guarantee zero-variance RFC 8785 canonical hashing across distributed nodes when the counter-model is recorded on the Merkle-DAG.
+
+    MCP ROUTING TRIGGERS: Mechanistic Penalty, Defeasible Reasoning, Answer Set Programming, Combinatorial Counter Model, UNSAT Core
+    """
+
+    topology_class: Literal["combinatorial_counter_model"] = Field(default="combinatorial_counter_model")
+    failed_premise_cid: NodeCIDState = Field(
+        description="Points to the specific EpistemicLogicPremise that collapsed.",
+    )
+    unsat_core: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
+        description="The exact subset of contradictory ASP rules/clauses extracted from clingo."
+    )
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        """Mathematically sort unsat_core to guarantee deterministic canonical hashing."""
+        object.__setattr__(self, "unsat_core", sorted(self.unsat_core))
+        return self
+
+
 class EpistemicLogicPremise(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Unlocks Answer Set Programming (Clingo) for NP-hard combinatorial constraint satisfaction.
@@ -7091,6 +7130,9 @@ class FormalLogicProofReceipt(CoreasonBaseState):
     timestamp: float
     prior_event_hash: str | None = Field(default=None)
     satisfiability: Literal["SATISFIABLE", "UNSATISFIABLE", "UNKNOWN", "OPTIMUM FOUND"]
+    counter_model: CombinatorialCounterModel | None = Field(
+        default=None, description="Populated when satisfiability is UNSATISFIABLE or UNKNOWN (syntax error)."
+    )
     answer_sets: list[list[Annotated[str, StringConstraints(max_length=1024)]]] = Field(
         default_factory=list,
         json_schema_extra={"coreason_topological_exemption": True},
@@ -7101,6 +7143,15 @@ class FormalLogicProofReceipt(CoreasonBaseState):
     def serialize_answer_sets(self, answer_sets: list[list[str]], _info: Any) -> list[list[str]]:
         # Topological Exemption: Explicitly freeze the exact list sequence.
         return answer_sets
+
+    @model_validator(mode="after")
+    def enforce_unsat_physics(self) -> Self:
+        """Mathematically enforce physics of counter models vs satisfiability."""
+        if self.satisfiability == "UNSATISFIABLE" and self.counter_model is None:
+            raise ValueError("Epistemic Violation: counter_model MUST be present when satisfiability is UNSATISFIABLE.")
+        if self.satisfiability == "SATISFIABLE" and self.counter_model is not None:
+            raise ValueError("Epistemic Violation: counter_model MUST be None when satisfiability is SATISFIABLE.")
+        return self
 
 
 class EpistemicPrologPremise(CoreasonBaseState):
@@ -15252,6 +15303,7 @@ EpistemicProxyState.model_rebuild()
 EpistemicLean4Premise.model_rebuild()
 Lean4VerificationReceipt.model_rebuild()
 EpistemicLogicPremise.model_rebuild()
+CombinatorialCounterModel.model_rebuild()
 FormalLogicProofReceipt.model_rebuild()
 EpistemicPrologPremise.model_rebuild()
 PrologDeductionReceipt.model_rebuild()
