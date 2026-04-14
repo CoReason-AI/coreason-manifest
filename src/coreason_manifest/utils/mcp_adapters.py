@@ -9,8 +9,11 @@
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
 from typing import Any, cast
-import msgspec  # type: ignore[import-not-found]
+
+import msgspec
+
 from coreason_manifest.spec.ontology import ExecutionEnvelopeState, MCPToolDefinition
+
 
 def generate_lean4_mcp_tool() -> MCPToolDefinition:
     return MCPToolDefinition(
@@ -75,5 +78,5 @@ class DeterministicTransportAdapter:
             "params": payload_dict,
             "id": payload_dict.get("envelope_cid", "unknown"),
         }
-        encoder = msgspec.json.Encoder(sort_keys=True)
-        return cast(bytes, encoder.encode(wrapped_payload))
+        encoder = msgspec.json.Encoder(sort_keys=True)  # type: ignore[call-arg]
+        return cast("bytes", encoder.encode(wrapped_payload))

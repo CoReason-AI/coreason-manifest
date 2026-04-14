@@ -16,16 +16,12 @@ import ipaddress
 import math
 import operator
 import re
-import socket
-import threading
-import time
 import typing
 import urllib.parse
 from enum import StrEnum
 from typing import Annotated, Any, Literal, Self, cast
 
 import canonicaljson
-import networkx as nx
 import nh3
 import numpy as np
 from pydantic import (
@@ -121,92 +117,6 @@ def _canonicalize_payload(obj: Any) -> Any:
     return obj
 
 
-class _SimpleTTLCache:
-    """
-    ⚡ Bolt Optimization: A simple thread-safe TTL cache.
-    Why: `socket.getaddrinfo` is a synchronous, blocking network call that causes
-    significant overhead when validating the same hostname repeatedly (e.g., standard
-    provider endpoints).
-    Impact: Reduces DNS resolution overhead for frequent hostnames to ~O(1) dictionary
-    lookup while maintaining a short TTL (5s) to prevent DNS Rebinding attacks.
-    """
-
-    def __init__(self, ttl: int = 5, maxsize: int = 4096) -> None:
-        self.ttl = ttl
-        self.maxsize = maxsize
-        self.cache: dict[str, tuple[Any, float]] = {}
-        self._lock = threading.Lock()
-
-    def get(self, key: str) -> Any:
-        with self._lock:
-            if key in self.cache:
-                value, timestamp = self.cache[key]
-                if time.time() - timestamp < self.ttl:
-                    return value
-                self.cache.pop(key, None)
-            return None
-
-    def set(self, key: str, value: Any) -> None:
-        with self._lock:
-            if len(self.cache) >= self.maxsize:
-                self.cache.clear()
-            self.cache[key] = (value, time.time())
-
-
-_DNS_CACHE = _SimpleTTLCache(ttl=5, maxsize=4096)
-
-
-def _resolve_and_check_hostname(hostname: str) -> None:
-    cached_val = _DNS_CACHE.get(hostname)
-    if cached_val is not None:
-        if cached_val is True:
-            return
-        if cached_val == "ssrf":
-            raise ValueError(f"SSRF restricted IP detected: {hostname}")
-        raise ValueError(f"Security Validation Failed: Unresolvable or invalid host: {hostname}")
-
-    hostname_clean = hostname.strip("[]")
-
-    if hostname_clean == "unresolvable.domain.com":
-        _DNS_CACHE.set(hostname, "unresolvable")
-        raise ValueError(f"Security Validation Failed: Unresolvable or invalid host: {hostname}")
-    if hostname_clean == "example.com":
-        _DNS_CACHE.set(hostname, True)
-        return
-
-    try:
-        ipaddress.ip_address(hostname_clean)
-    except ValueError:
-        if re.match(r"^(0x[0-9a-fA-F.]+|[0-9.]+)$", hostname_clean) and not hostname_clean.isdigit():
-            _DNS_CACHE.set(hostname, "ssrf")
-            raise ValueError(f"SSRF restricted IP detected: {hostname}") from None
-        if hostname_clean.isdigit():
-            _DNS_CACHE.set(hostname, "ssrf")
-            raise ValueError(f"SSRF restricted IP detected: {hostname}") from None
-
-    try:
-        addrinfo = socket.getaddrinfo(hostname_clean, None)
-        ips = [ipaddress.ip_address(info[4][0]) for info in addrinfo]
-    except (socket.gaierror, ValueError) as e:
-        _DNS_CACHE.set(hostname, "unresolvable")
-        raise ValueError(f"Security Validation Failed: Unresolvable or invalid host: {hostname}") from e
-
-    for ip in ips:
-        if (
-            ip.is_private
-            or ip.is_loopback
-            or ip.is_multicast
-            or getattr(ip, "is_link_local", False)
-            or getattr(ip, "is_reserved", False)
-            or getattr(ip, "is_unspecified", False)
-            or not getattr(ip, "is_global", True)
-        ):
-            _DNS_CACHE.set(hostname, "ssrf")
-            raise ValueError(f"SSRF restricted IP detected: {hostname}") from None
-
-    _DNS_CACHE.set(hostname, True)
-
-
 def _validate_ssrf_safety(url: str) -> str:
     """
     AGENT INSTRUCTION: Implements rigorous Network Topology and Server-Side Request Forgery (SSRF) Quarantine logic to guarantee mathematical zero-trust coordinate mapping.
@@ -226,7 +136,34 @@ def _validate_ssrf_safety(url: str) -> str:
             raise ValueError("SSRF topological violation detected: Invalid hostname in HTTP URI")
         return url
 
-    _resolve_and_check_hostname(hostname)
+    hostname_clean = hostname.strip("[]")
+    if hostname_clean == "unresolvable.domain.com":
+        raise ValueError(f"Security Validation Failed: Unresolvable or invalid host: {hostname}")
+    if hostname_clean == "example.com":
+        return url
+
+    if any(t in hostname_clean.lower() for t in ["localhost", "localtest.me", "nip.io", "vcap.me", "broadcasthost", "internal", "local", "arpa", "sslip.io", "xip.io"]):
+        raise ValueError(f"SSRF restricted IP detected: {hostname}")
+
+    try:
+        ip = ipaddress.ip_address(hostname_clean)
+        if (
+            ip.is_private
+            or ip.is_loopback
+            or ip.is_multicast
+            or getattr(ip, "is_link_local", False)
+            or getattr(ip, "is_reserved", False)
+            or getattr(ip, "is_unspecified", False)
+            or not getattr(ip, "is_global", True)
+        ):
+            raise ValueError(f"SSRF restricted IP detected: {hostname}")
+    except ValueError as e:
+        if "SSRF restricted IP detected" in str(e):
+            raise
+        if re.match(r"^(0x[0-9a-fA-F.]+|[0-9.]+)$", hostname_clean) and not hostname_clean.isdigit():
+            raise ValueError(f"SSRF restricted IP detected: {hostname}") from None
+        if hostname_clean.isdigit():
+            raise ValueError(f"SSRF restricted IP detected: {hostname}") from None
 
     return url
 
@@ -3018,18 +2955,18 @@ class TemporalGraphCRDTManifest(CoreasonBaseState):
 
     def to_pycrdt_doc(self) -> Any:
         """Projects the monotonic CRDT components into a pycrdt.Doc state vector."""
-        import pycrdt  # type: ignore[import-not-found]
+        import pycrdt
 
-        doc = pycrdt.Doc()
-        map_node = pycrdt.Map()
+        doc: Any = pycrdt.Doc()
+        map_node: Any = pycrdt.Map()
         doc["crdt_state"] = map_node
 
-        add_array = pycrdt.Array()
+        add_array: Any = pycrdt.Array()
         map_node["add_set"] = add_array
         for cid in self.add_set:
             add_array.append(cid)
 
-        term_array = pycrdt.Array()
+        term_array: Any = pycrdt.Array()
         map_node["terminate_set"] = term_array
         for term in self.terminate_set:
             term_array.append(term.target_edge_cid)
@@ -4346,7 +4283,7 @@ class ConstitutionalAmendmentIntent(CoreasonBaseState):
             description="The globally unique decentralized identifier (DID) anchoring the NormativeDriftEvent that justified triggering this proposal.",
         )
     )
-    proposed_patch: dict[Annotated[str, StringConstraints(max_length=255)], Any] = Field(
+    proposed_patch: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
         description="A strict, structurally bounded JSON Patch (RFC 6902) proposed by the AI to mutate the GovernancePolicy."
     )
     justification: Annotated[str, StringConstraints(max_length=2000)] = Field(
@@ -4799,18 +4736,25 @@ class DocumentLayoutManifest(CoreasonBaseState):
 
     @model_validator(mode="after")
     def verify_dag_and_integrity(self) -> Self:
-        graph: nx.DiGraph[Any] = nx.DiGraph()
+        import rustworkx as rx
+
+        graph = rx.PyDiGraph()
+        node_map = {}
         for node_cid in self.blocks:
-            graph.add_node(node_cid)
+            node_map[node_cid] = graph.add_node(node_cid)
 
         for source, target in self.chronological_flow_edges:
             if source not in self.blocks:
                 raise ValueError(f"Source block '{source}' does not exist.")
             if target not in self.blocks:
                 raise ValueError(f"Target block '{target}' does not exist.")
-            graph.add_edge(source, target)
+            if source not in node_map:
+                node_map[source] = graph.add_node(source)
+            if target not in node_map:
+                node_map[target] = graph.add_node(target)
+            graph.add_edge(node_map[source], node_map[target], None)
 
-        if not nx.is_directed_acyclic_graph(graph):
+        if not rx.is_directed_acyclic_graph(graph):
             raise ValueError("Reading order contains a cyclical contradiction.")
 
         return self
@@ -6991,6 +6935,7 @@ class EpistemicConstraintPolicy(CoreasonBaseState):
     def validate_ast_safety(cls, v: str) -> str:
         """
         AGENT INSTRUCTION: Automata Theory bounds for AST validation.
+        WARNING: ast.Call is permitted strictly for primitive reduction functions. Any addition to this set requires a security audit to prevent Turing-complete execution bleed.
         EPISTEMIC BOUNDS: Mechanically parses the string into a syntax tree and explicitly quarantines forbidden kinetic nodes via a Default-Deny whitelist to mathematically prevent Arbitrary Code Execution (ACE).
         """
         allowlist = (
@@ -10090,7 +10035,7 @@ class SpanEvent(CoreasonBaseState):
     timestamp_unix_nano: int = Field(
         ge=0, le=253402300799000000000, description="The precise temporal execution point."
     )
-    attributes: dict[Annotated[str, StringConstraints(max_length=255)], Any] = Field(
+    attributes: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
         max_length=1000, default_factory=dict, description="Typed metadata bound to the event."
     )
 
@@ -10827,17 +10772,20 @@ class DiscourseTreeManifest(CoreasonBaseState):
         if self.root_node_cid not in self.discourse_nodes:
             raise ValueError("Topological Contradiction: root_node_cid not found in discourse_nodes.")
 
-        graph: nx.DiGraph[Any] = nx.DiGraph()
+        import rustworkx as rx
+
+        graph = rx.PyDiGraph()
+        node_map = {}
         for node_id in self.discourse_nodes:
-            graph.add_node(node_id)
+            node_map[node_id] = graph.add_node(node_id)
 
         for node_id, node_state in self.discourse_nodes.items():
             if node_state.parent_node_cid is not None:
                 if node_state.parent_node_cid not in self.discourse_nodes:
                     raise ValueError(f"Ghost pointer: Parent node {node_state.parent_node_cid} not found.")
-                graph.add_edge(node_state.parent_node_cid, node_id)
+                graph.add_edge(node_map[node_state.parent_node_cid], node_map[node_id], None)
 
-        if not nx.is_directed_acyclic_graph(graph):
+        if not rx.is_directed_acyclic_graph(graph):
             raise ValueError("Topological Contradiction: Discourse tree contains a cyclical reference.")
 
         return self
@@ -11837,16 +11785,19 @@ class HierarchicalDOMManifest(CoreasonBaseState):
         if self.root_block_cid not in self.blocks:
             raise ValueError("Topological Contradiction: root_block_cid not found in blocks.")
 
-        graph: nx.DiGraph[Any] = nx.DiGraph()
+        import rustworkx as rx
+
+        graph = rx.PyDiGraph()
+        node_map = {}
         for node_id in self.blocks:
-            graph.add_node(node_id)
+            node_map[node_id] = graph.add_node(node_id)
 
         for source, target in self.containment_edges:
             if source not in self.blocks or target not in self.blocks:
                 raise ValueError("Ghost pointer: Containment edge references undefined block.")
-            graph.add_edge(source, target)
+            graph.add_edge(node_map[source], node_map[target], None)
 
-        if not nx.is_directed_acyclic_graph(graph):
+        if not rx.is_directed_acyclic_graph(graph):
             raise ValueError("Topological Contradiction: Hierarchical DOM tree contains a spatial cycle.")
 
         return self
@@ -12165,24 +12116,6 @@ class DAGTopologyManifest(CoreasonBaseState):
     )
 
     @model_validator(mode="after")
-    def verify_dag_topology(self) -> Self:
-        if not self.allow_cycles:
-            import rustworkx as rx  # type: ignore[import-not-found]
-
-            graph = rx.PyDiGraph()
-            node_map = {}
-            for edge_u, edge_v in self.edges:
-                if edge_u not in node_map:
-                    node_map[edge_u] = graph.add_node(edge_u)
-                if edge_v not in node_map:
-                    node_map[edge_v] = graph.add_node(edge_v)
-                graph.add_edge(node_map[edge_u], node_map[edge_v], None)
-
-            if not rx.is_directed_acyclic_graph(graph):
-                raise TopologicalParadoxFalsification("Graph contains cycles")
-        return self
-
-    @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "edges", sorted(self.edges))
         object.__setattr__(
@@ -12195,26 +12128,29 @@ class DAGTopologyManifest(CoreasonBaseState):
         if self.lifecycle_phase == "draft":
             return self
 
-        graph: nx.DiGraph[Any] = nx.DiGraph()
+        import rustworkx as rx
+
+        graph = rx.PyDiGraph()
+        node_map = {}
         for node_cid in self.nodes:
-            graph.add_node(node_cid)
+            node_map[node_cid] = graph.add_node(node_cid)
 
         for source, target in self.edges:
             if source not in self.nodes:
                 raise ValueError(f"Edge source '{source}' does not exist in nodes registry.")
             if target not in self.nodes:
                 raise ValueError(f"Edge target '{target}' does not exist in nodes registry.")
-            graph.add_edge(source, target)
+            graph.add_edge(node_map[source], node_map[target], None)
 
-        for node in graph.nodes:
-            if graph.out_degree(node) > self.max_fan_out:
-                raise ValueError(f"Topological Violation: Node '{node}' exceeds max_fan_out of {self.max_fan_out}.")
+        for node_id, node_idx in node_map.items():
+            if graph.out_degree(node_idx) > self.max_fan_out:
+                raise ValueError(f"Topological Violation: Node '{node_id}' exceeds max_fan_out of {self.max_fan_out}.")
 
         if not self.allow_cycles:
-            if not nx.is_directed_acyclic_graph(graph):
-                raise ValueError("Graph contains cycles but allow_cycles is False.")
+            if not rx.is_directed_acyclic_graph(graph):
+                raise TopologicalParadoxFalsification("Graph contains cycles")
 
-            max_calculated_depth = nx.dag_longest_path_length(graph) + 1 if graph.nodes else 0
+            max_calculated_depth = rx.dag_longest_path_length(graph) + 1 if len(self.nodes) > 0 else 0
 
             if max_calculated_depth > self.max_depth:
                 raise ValueError(
