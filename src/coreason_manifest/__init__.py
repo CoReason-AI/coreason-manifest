@@ -68,7 +68,6 @@ __all__ = [
     "AuctionState",
     "BackpressurePolicy",
     "BargeInInterruptEvent",
-
     "BeliefMutationEvent",
     "BoundedInterventionScopePolicy",
     "BoundedJSONRPCIntent",
