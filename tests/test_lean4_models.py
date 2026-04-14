@@ -1,45 +1,69 @@
+from hypothesis import given
+from hypothesis import strategies as st
+
 from coreason_manifest.spec.ontology import (
     EpistemicLean4Premise,
     Lean4VerificationReceipt,
     TacticStateGoal,
 )
 
+# A simple strategy to generate valid CIDs for testing
+valid_cid_strategy = st.from_regex(r"^did:[a-z0-9]+:[a-zA-Z0-9.\-_:]+$", fullmatch=True).filter(lambda x: len(x) >= 7)
 
-def test_epistemic_lean4_premise_sorting():
+
+@given(
+    target_theorem=st.text(max_size=65536),
+    tactics_script=st.text(max_size=100000),
+    dependency_graph_cids=st.lists(valid_cid_strategy, max_size=10) | st.none(),
+)
+def test_epistemic_lean4_premise_sorting(target_theorem, tactics_script, dependency_graph_cids):
     premise = EpistemicLean4Premise(
-        target_theorem="theorem test : True",
-        tactics_script="exact True.intro",
-        dependency_graph_cids=[
-            "did:example:3",
-            "did:example:1",
-            "did:example:2",
-        ],
+        target_theorem=target_theorem,
+        tactics_script=tactics_script,
+        dependency_graph_cids=dependency_graph_cids,
     )
-    assert premise.dependency_graph_cids == [
-        "did:example:1",
-        "did:example:2",
-        "did:example:3",
-    ]
+    if dependency_graph_cids is not None:
+        assert premise.dependency_graph_cids == sorted(dependency_graph_cids)
+    else:
+        assert premise.dependency_graph_cids is None
 
 
-def test_tactic_state_goal_sorting():
+@given(
+    hypothesis_context=st.lists(st.text(max_size=2000), max_size=10),
+    target_type=st.text(max_size=2000),
+    complexity_score=st.floats(min_value=0.0, max_value=1.0) | st.none(),
+)
+def test_tactic_state_goal_sorting(hypothesis_context, target_type, complexity_score):
     goal = TacticStateGoal(
-        hypothesis_context=["h2 : B", "h1 : A"],
-        target_type="C",
-        complexity_score=0.5,
+        hypothesis_context=hypothesis_context,
+        target_type=target_type,
+        complexity_score=complexity_score,
     )
-    assert goal.hypothesis_context == ["h1 : A", "h2 : B"]
+    assert goal.hypothesis_context == sorted(hypothesis_context)
 
 
-def test_lean4_verification_receipt_sorting():
+@given(
+    is_proved=st.booleans(),
+    tactic_state_trees=st.lists(
+        st.builds(
+            TacticStateGoal,
+            hypothesis_context=st.lists(st.text(max_size=10), max_size=5),
+            target_type=st.text(max_size=10),
+            complexity_score=st.none(),
+        ),
+        max_size=5,
+    )
+    | st.none(),
+)
+def test_lean4_verification_receipt_sorting(is_proved, tactic_state_trees):
     receipt = Lean4VerificationReceipt(
-        is_proved=False,
-        tactic_state_tree=[
-            TacticStateGoal(hypothesis_context=["h : B"], target_type="C"),
-            TacticStateGoal(hypothesis_context=["h : A"], target_type="B"),
-        ],
+        is_proved=is_proved,
+        tactic_state_tree=tactic_state_trees,
     )
-
-    assert receipt.tactic_state_tree is not None
-    assert receipt.tactic_state_tree[0].target_type == "B"
-    assert receipt.tactic_state_tree[1].target_type == "C"
+    if tactic_state_trees is not None:
+        assert receipt.tactic_state_tree is not None
+        sorted_trees = sorted(tactic_state_trees, key=lambda x: x.target_type)
+        for expected, actual in zip(sorted_trees, receipt.tactic_state_tree, strict=True):
+            assert expected.target_type == actual.target_type
+    else:
+        assert receipt.tactic_state_tree is None
