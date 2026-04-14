@@ -12,7 +12,22 @@ from typing import Any, cast
 
 import msgspec
 
-from coreason_manifest.spec.ontology import ExecutionEnvelopeState, _canonicalize_payload
+from coreason_manifest.spec.ontology import ExecutionEnvelopeState
+
+
+def _canonicalize_payload(payload: Any) -> Any:
+    """
+    Recursively strips all `None` values from dictionaries and lists to mathematically prevent Null Contagion.
+    """
+    if isinstance(payload, dict):
+        return {
+            k: _canonicalize_payload(v)
+            for k, v in payload.items()
+            if v is not None
+        }
+    if isinstance(payload, list):
+        return [_canonicalize_payload(v) for v in payload if v is not None]
+    return payload
 
 
 class DeterministicTransportAdapter:
