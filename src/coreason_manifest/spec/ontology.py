@@ -7116,9 +7116,6 @@ class Lean4VerificationReceipt(CoreasonBaseState):
     """
 
     is_proved: bool
-    failing_tactic_state: str | None = Field(
-        default=None, description="Deprecated/Legacy flat error string. Replaced by tactic_state_tree."
-    )
     tactic_state_tree: list[TacticStateGoal] | None = Field(
         default=None, description="The hierarchical breakdown of unresolved goals required for MCTS reward shaping."
     )
