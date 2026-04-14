@@ -479,7 +479,7 @@ def evaluate_topological_reachability() -> None:
             root_idx = name_to_idx[root]
             reachable_indices.add(root_idx)
             reachable_indices.update(rx.descendants(graph, root_idx))
-    orphaned_nodes = set(idx_to_name[idx] for idx in graph.node_indices() if idx not in reachable_indices)
+    orphaned_nodes = {idx_to_name[idx] for idx in graph.node_indices() if idx not in reachable_indices}
     if len(orphaned_nodes) > 0:
         print("CRITICAL FAULT: True Orphaned Nodes Detected")
         print("-" * 50)
