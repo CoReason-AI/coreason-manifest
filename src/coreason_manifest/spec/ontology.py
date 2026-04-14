@@ -6970,9 +6970,8 @@ class EpistemicConstraintPolicy(CoreasonBaseState):
                     raise ValueError("Kinetic execution bleed detected: Forbidden AST node Pow")
                 if isinstance(node, ast.Attribute) and node.attr.startswith("__"):
                     raise ValueError(f"Kinetic execution bleed detected: Forbidden attribute {node.attr}")
-                if isinstance(node, ast.Call):
-                    if not isinstance(node.func, ast.Name) or node.func.id not in {"len", "sum", "min", "max", "abs", "round", "all", "any"}:
-                        raise ValueError(f"Kinetic execution bleed detected: Forbidden function call")
+                if isinstance(node, ast.Call) and (not isinstance(node.func, ast.Name) or node.func.id not in {"len", "sum", "min", "max", "abs", "round", "all", "any"}):
+                    raise ValueError("Kinetic execution bleed detected: Forbidden function call")
         except SyntaxError as e:
             raise ValueError(f"Invalid syntax in constraint AST: {e}") from e
         return v
