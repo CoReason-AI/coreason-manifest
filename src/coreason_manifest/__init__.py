@@ -12,6 +12,17 @@
 
 
 from coreason_manifest.spec.ontology import *  # noqa: F403
+from coreason_manifest.spec.ontology import (
+    FaultCategoryProfile,
+    LifecycleTriggerEvent,
+    MCPTransportProfile,
+    MCPTransportProtocolProfile,
+    NodeCIDState,
+    OptimizationDirectionProfile,
+    PatchOperationProfile,
+    ProfileCIDState,
+    QoSClassificationProfile,
+)
 from coreason_manifest.utils.algebra import (
     align_semantic_manifolds,
     calculate_latent_alignment,
@@ -57,10 +68,7 @@ __all__ = [
     "AuctionState",
     "BackpressurePolicy",
     "BargeInInterruptEvent",
-    "BaseIntent",
-    "BaseNodeProfile",
-    "BaseStateEvent",
-    "BaseTopologyManifest",
+
     "BeliefMutationEvent",
     "BoundedInterventionScopePolicy",
     "BoundedJSONRPCIntent",
@@ -187,8 +195,6 @@ __all__ = [
     "HomomorphicEncryptionProfile",
     "HypothesisGenerationEvent",
     "HypothesisStakeReceipt",
-    "InformationClassificationProfile",
-    "InformationalIntent",
     "InputMappingContract",
     "InsightCardProfile",
     "IntentClassificationReceipt",
@@ -225,7 +231,6 @@ __all__ = [
     "NeuroSymbolicHandoffContract",
     "NodeCIDState",
     "NormativeDriftEvent",
-    "ObservabilityPolicy",
     "ObservationEvent",
     "OntologicalAlignmentPolicy",
     "OntologicalHandshakeReceipt",
@@ -274,8 +279,6 @@ __all__ = [
     "SpanEvent",
     "SpanKindProfile",
     "SpanStatusCodeProfile",
-    "SpatialBoundingBoxProfile",
-    "SpatialCoordinateProfile",
     "SpatialKinematicActionIntent",
     "SpatialToolManifest",
     "StateContract",

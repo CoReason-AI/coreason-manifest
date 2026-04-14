@@ -11,6 +11,17 @@
 # ruff: noqa: F403, F405
 
 from .ontology import *
+from .ontology import (
+    FaultCategoryProfile,
+    LifecycleTriggerEvent,
+    MCPTransportProfile,
+    MCPTransportProtocolProfile,
+    NodeCIDState,
+    OptimizationDirectionProfile,
+    PatchOperationProfile,
+    ProfileCIDState,
+    QoSClassificationProfile,
+)
 
 __all__ = [
     "ActivationSteeringContract",
@@ -42,10 +53,7 @@ __all__ = [
     "AuctionState",
     "BackpressurePolicy",
     "BargeInInterruptEvent",
-    "BaseIntent",
-    "BaseNodeProfile",
-    "BaseStateEvent",
-    "BaseTopologyManifest",
+
     "BeliefMutationEvent",
     "BoundedInterventionScopePolicy",
     "BoundedJSONRPCIntent",
@@ -172,8 +180,6 @@ __all__ = [
     "HomomorphicEncryptionProfile",
     "HypothesisGenerationEvent",
     "HypothesisStakeReceipt",
-    "InformationClassificationProfile",
-    "InformationalIntent",
     "InputMappingContract",
     "InsightCardProfile",
     "IntentClassificationReceipt",
@@ -210,7 +216,6 @@ __all__ = [
     "NeuroSymbolicHandoffContract",
     "NodeCIDState",
     "NormativeDriftEvent",
-    "ObservabilityPolicy",
     "ObservationEvent",
     "OntologicalAlignmentPolicy",
     "OntologicalHandshakeReceipt",
@@ -259,8 +264,6 @@ __all__ = [
     "SpanEvent",
     "SpanKindProfile",
     "SpanStatusCodeProfile",
-    "SpatialBoundingBoxProfile",
-    "SpatialCoordinateProfile",
     "SpatialKinematicActionIntent",
     "SpatialToolManifest",
     "StateContract",
