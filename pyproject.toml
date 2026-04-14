@@ -20,7 +20,8 @@ classifiers = [
 ]
 dependencies = [
     "pydantic>=2.12.5",
-    "networkx>=3.6",
+    "rustworkx>=0.14.0",
+
     "jsonpatch>=1.33",
     "numpy>=2.4",
     "canonicaljson>=2.0.0",
@@ -50,7 +51,7 @@ dev = [
     "hypothesis>=6.151.9",
     "hypothesis-jsonschema>=0.23.1",
     "syrupy>=5.1.0",
-    "types-networkx>=3.6.1.20260408",
+
     "types-defusedxml>=0.7.0.20260408",
 ]
 
