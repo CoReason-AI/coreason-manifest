@@ -140,9 +140,6 @@ def test_empirical_falsification_contract_instantiation() -> None:
     assert contract.falsifying_observation_signature == "error.*"
 
 
-
-
-
 def test_volumetric_fuzzing_sd_jwt_payload_too_long():
     with pytest.raises(ValidationError):
         CryptographicAttestationReceipt(
