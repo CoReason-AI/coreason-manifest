@@ -124,6 +124,9 @@ jobs:
           enable-cache: true
           python-version: "3.14"
 
+      - name: Install Dependencies
+        run: uv sync --all-extras
+
       - name: Architectural Gate
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -136,9 +139,6 @@ jobs:
 
       - name: Instantiation Bounds Gate
         run: uv run python scripts/universal_ontology_compiler.py evaluate_ast_instantiation_bounds
-
-      - name: Install Dependencies
-        run: uv sync
 
       - name: Bandit Security Check
         run: uvx bandit -r src/ scripts/ tests/ -s B101,B404
