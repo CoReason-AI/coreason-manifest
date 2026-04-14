@@ -25,6 +25,7 @@ dependencies = [
     "numpy>=2.4",
     "canonicaljson>=2.0.0",
     "nh3>=0.2.17",
+    "authlib>=1.6.10",
 ]
 
 [project.urls]
@@ -52,6 +53,7 @@ dev = [
     "syrupy>=5.1.0",
     "types-networkx>=3.6.1.20260408",
     "types-defusedxml>=0.7.0.20260408",
+    "types-authlib>=1.6.9.20260408",
 ]
 
 [tool.hatch.build.targets.wheel]

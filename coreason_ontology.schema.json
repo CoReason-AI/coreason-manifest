@@ -897,6 +897,7 @@
           "escalation": "#/$defs/EscalationIntent",
           "fallback_intent": "#/$defs/FallbackIntent",
           "falsification_contract": "#/$defs/FalsificationContract",
+          "federated_handshake": "#/$defs/FederatedHandshakeIntent",
           "forced_adjudication": "#/$defs/AdjudicationIntent",
           "fyi": "#/$defs/FYIIntent",
           "human_directive": "#/$defs/HumanDirectiveIntent",
@@ -925,6 +926,9 @@
         "propertyName": "topology_class"
       },
       "oneOf": [
+        {
+          "$ref": "#/$defs/FederatedHandshakeIntent"
+        },
         {
           "$ref": "#/$defs/TemporalEdgeInvalidationIntent"
         },
@@ -1129,6 +1133,7 @@
           "circuit_breaker_event": "#/$defs/CircuitBreakerEvent",
           "cognitive_prediction": "#/$defs/CognitivePredictionReceipt",
           "cognitive_reward_evaluation": "#/$defs/CognitiveRewardEvaluationReceipt",
+          "connection_severance": "#/$defs/ConnectionSeveranceEvent",
           "counterfactual_regret": "#/$defs/CounterfactualRegretEvent",
           "crosswalk_resolution": "#/$defs/CrosswalkResolutionReceipt",
           "custody_receipt": "#/$defs/CustodyReceipt",
@@ -1165,6 +1170,9 @@
         "propertyName": "topology_class"
       },
       "oneOf": [
+        {
+          "$ref": "#/$defs/ConnectionSeveranceEvent"
+        },
         {
           "$ref": "#/$defs/TemporalGraphCRDTManifest"
         },
@@ -4671,6 +4679,70 @@
       "title": "ComputeTierProfile",
       "type": "string"
     },
+    "ConnectionSeveranceEvent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "topology_class": {
+          "const": "connection_severance",
+          "default": "connection_severance",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "event_cid": {
+          "description": "A globally unique CID bounding string for the event.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "target_ip_or_did": {
+          "maxLength": 1024,
+          "title": "Target Ip Or Did",
+          "type": "string"
+        },
+        "severance_reason": {
+          "enum": [
+            "pqc_signature_invalid",
+            "sd_jwt_tampered",
+            "did_resolution_failed",
+            "unauthorized_scope"
+          ],
+          "title": "Severance Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event_cid",
+        "timestamp",
+        "target_ip_or_did",
+        "severance_reason"
+      ],
+      "title": "ConnectionSeveranceEvent",
+      "type": "object"
+    },
     "ConsensusFederationTopologyManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A Zero-Cost Macro abstraction that deterministically projects a Practical Byzantine Fault Tolerance (pBFT) consensus ring into a multi-agent workflow. As a ...Manifest suffix, this defines a frozen coordinate of a topological structure.\n\nCAUSAL AFFORDANCE: Unrolls into a base CouncilTopologyManifest, enforcing strict quorum rules and sequential adjudication to guarantee ledger alignment and truth maintenance across a decentralized, zero-trust swarm.\n\nEPISTEMIC BOUNDS: Mathematically ensures Byzantine security by requiring a minimum of 3 participant_cids. The adjudicator_cid is physically isolated from the voting pool via the verify_adjudicator_isolation hook. The participant_cids array is deterministically sorted for invariant hashing.\n\nMCP ROUTING TRIGGERS: Practical Byzantine Fault Tolerance, pBFT, Distributed Consensus, Sybil Resistance, Macro Abstraction",
@@ -5677,6 +5749,48 @@
         "grounding_confidence"
       ],
       "title": "CrosswalkResolutionReceipt",
+      "type": "object"
+    },
+    "CryptographicAttestationReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "topology_class": {
+          "const": "cryptographic_attestation",
+          "default": "cryptographic_attestation",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "issuer_did": {
+          "$ref": "#/$defs/NodeCIDState"
+        },
+        "subject_did": {
+          "$ref": "#/$defs/NodeCIDState"
+        },
+        "sd_jwt_payload": {
+          "maxLength": 500000,
+          "pattern": "^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+(~[A-Za-z0-9_-]+)*$",
+          "title": "Sd Jwt Payload",
+          "type": "string"
+        },
+        "pqc_signature": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PostQuantumSignatureReceipt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "issuer_did",
+        "subject_did",
+        "sd_jwt_payload",
+        "pqc_signature"
+      ],
+      "title": "CryptographicAttestationReceipt",
       "type": "object"
     },
     "CryptographicProvenancePolicy": {
@@ -10823,6 +10937,43 @@
         "supported_ontologies"
       ],
       "title": "FederatedDiscoveryManifest",
+      "type": "object"
+    },
+    "FederatedHandshakeIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology",
+      "properties": {
+        "topology_class": {
+          "const": "federated_handshake",
+          "default": "federated_handshake",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "initiator_node_cid": {
+          "$ref": "#/$defs/NodeCIDState"
+        },
+        "target_node_cid": {
+          "$ref": "#/$defs/NodeCIDState"
+        },
+        "attestation": {
+          "$ref": "#/$defs/CryptographicAttestationReceipt"
+        },
+        "requested_scopes": {
+          "items": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "title": "Requested Scopes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "initiator_node_cid",
+        "target_node_cid",
+        "attestation",
+        "requested_scopes"
+      ],
+      "title": "FederatedHandshakeIntent",
       "type": "object"
     },
     "FederatedPeftContract": {
@@ -16139,9 +16290,9 @@
         "pq_algorithm": {
           "description": "The NIST FIPS post-quantum cryptographic algorithm used.",
           "enum": [
-            "ml-dsa",
-            "slh-dsa",
-            "falcon"
+            "ml-dsa-44",
+            "ml-dsa-65",
+            "slh-dsa-sha2-128s"
           ],
           "title": "Pq Algorithm",
           "type": "string"
@@ -16156,7 +16307,7 @@
         },
         "pq_signature_blob": {
           "description": "The base64-encoded post-quantum signature. Bounded to 100KB to safely accommodate massive SPHINCS+ hash trees without OOM crashes.",
-          "maxLength": 100000,
+          "maxLength": 10000,
           "title": "Pq Signature Blob",
           "type": "string"
         }
