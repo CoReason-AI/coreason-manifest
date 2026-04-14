@@ -32,7 +32,7 @@ function canonicalizePayload(obj: any): any {
  * Guarantees RFC 8785 byte-for-byte serialization invariance when VSCode transmits JSON-RPC envelopes
  * across the network, exactly matching Python's DeterministicTransportAdapter.
  */
-export function serializeEnvelope(envelope: ExecutionEnvelopeState): string {
+export function serializeEnvelope(envelope: ExecutionEnvelopeState<any>): string {
     // 1. Strip nulls to match Python's exclusion physics
     const canonicalParams = canonicalizePayload(envelope);
     

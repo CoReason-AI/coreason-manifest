@@ -30,12 +30,14 @@ class DeterministicTransportAdapter:
     def serialize_envelope(envelope: ExecutionEnvelopeState[Any]) -> bytes:
         payload_dict = envelope.model_dump(mode="json", exclude_none=True, by_alias=True)
         canonical_dict = _canonicalize_payload(payload_dict)
-        # Note: External Protocol Exemption. (JSON-RPC 2.0)
+        trace_context = payload_dict.get("trace_context", {})
+        request_id = trace_context.get("trace_cid", "unknown")
+        
         wrapped_payload = {
             "jsonrpc": "2.0",
             "method": "coreason_execute",
             "params": canonical_dict,
-            "id": payload_dict.get("envelope_cid", "unknown"),
+            "id": request_id,
         }
         encoder = msgspec.json.Encoder(sort_keys=True)  # type: ignore[call-arg]
         return cast("bytes", encoder.encode(wrapped_payload))
