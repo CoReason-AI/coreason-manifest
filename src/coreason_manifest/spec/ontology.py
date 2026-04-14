@@ -1376,43 +1376,15 @@ class VolumetricPartitionState(CoreasonBaseState):
 
 class TopologicalSortIntent(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Authorizes topological sorting operations.
+    AGENT INSTRUCTION: Implements Kahn's Algorithm and Depth-First Search for Topological Sorting using the high-performance Rust graphing substrate (rustworkx). As an ...Intent suffix, this is an authorized kinetic execution trigger.
 
-    CAUSAL AFFORDANCE: Reorders nodes deterministically based on topological constraints.
+    CAUSAL AFFORDANCE: Authorizes the orchestrator to natively compile an unstructured list of nodes and edges into a deterministic, chronological execution flow, or fail if a cycle is present.
 
-    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
+    EPISTEMIC BOUNDS: The search space geometry is rigidly locked by the provided nodes and edges arrays. The @model_validator mathematically sorts these arrays to guarantee invariant RFC 8785 Canonical Hashing.
 
-    MCP ROUTING TRIGGERS: Topological Sort, Graph Theory, Deterministic Order
+    MCP ROUTING TRIGGERS: Topological Sort, Kahn's Algorithm, Directed Acyclic Graph, Rustworkx Substrate, Execution Ordering
     """
 
-    """
-    AGENT INSTRUCTION: Authorizes topological sorting operations.
-
-    CAUSAL AFFORDANCE: Reorders nodes deterministically based on topological constraints.
-
-    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
-
-    MCP ROUTING TRIGGERS: Topological Sort, Graph Theory, Deterministic Order
-    """
-    """
-    AGENT INSTRUCTION: Authorizes topological sorting operations.
-
-    CAUSAL AFFORDANCE: Reorders nodes deterministically based on topological constraints.
-
-    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
-
-    MCP ROUTING TRIGGERS: Topological Sort, Graph Theory, Deterministic Order
-    """
-
-    """
-    AGENT INSTRUCTION: Authorizes topological sorting operations.
-
-    CAUSAL AFFORDANCE: Reorders nodes deterministically based on topological constraints.
-
-    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
-
-    MCP ROUTING TRIGGERS: Topological Sort, Graph Theory, Deterministic Order
-    """
     topology_class: Literal["topological_sort"] = Field(
         default="topological_sort", description="Topological Sort Intent"
     )
@@ -1429,45 +1401,21 @@ class TopologicalSortIntent(CoreasonBaseState):
 
 class CycleDetectionReceipt(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Provides receipt of a detected cycle within a structural topology.
+    AGENT INSTRUCTION: A cryptographically frozen historical fact representing the algorithmic evaluation of a graph for cyclical paradoxes via rustworkx.
 
-    CAUSAL AFFORDANCE: Physically documents an epistemic violation (a graph cycle).
+    CAUSAL AFFORDANCE: Emits a mathematical boolean flag (`has_cycles`) and an optional `shortest_pathological_path`. This allows the Truth Maintenance System to decisively prune invalid edges or trigger a TopologicalGuillotineEvent without non-monotonic hallucination.
 
-    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
+    EPISTEMIC BOUNDS: Bounded to the target_graph_cid (128-char CID). The `shortest_pathological_path` avoids array sorting via a Topological Exemption to preserve the exact chronological cycle sequence.
 
-    MCP ROUTING TRIGGERS: Cycle Detection, Epistemic Violation, Topological Guillotine
+    MCP ROUTING TRIGGERS: Cycle Detection, Paradox Resolution, DAG Validation, Rustworkx Substrate, Mathematical Receipt
     """
 
-    """
-    AGENT INSTRUCTION: Provides receipt of a detected cycle within a structural topology.
-
-    CAUSAL AFFORDANCE: Physically documents an epistemic violation (a graph cycle).
-
-    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
-
-    MCP ROUTING TRIGGERS: Cycle Detection, Epistemic Violation, Topological Guillotine
-    """
-    """
-    AGENT INSTRUCTION: Provides receipt of a detected cycle within a structural topology.
-
-    CAUSAL AFFORDANCE: Physically documents an epistemic violation (a graph cycle).
-
-    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
-
-    MCP ROUTING TRIGGERS: Cycle Detection, Epistemic Violation, Topological Guillotine
-    """
-
-    """
-    AGENT INSTRUCTION: Provides receipt of a detected cycle within a structural topology.
-
-    CAUSAL AFFORDANCE: Physically documents an epistemic violation (a graph cycle).
-
-    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
-
-    MCP ROUTING TRIGGERS: Cycle Detection, Epistemic Violation, Topological Guillotine
-    """
-    event_cid: str = Field(default_factory=lambda: "event_0000", description="The unique CID for this event.")
-    prior_event_hash: str | None = Field(default=None, description="Cryptographic hash of the prior event.")
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        ..., description="The unique CID for this event."
+    )
+    prior_event_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(default=None, description="Cryptographic hash of the prior event.")
     timestamp: float = Field(ge=0.0, le=253402300799.0, description="The logical timestamp of the event.")
     topology_class: Literal["cycle_detection_receipt"] = Field(
         default="cycle_detection_receipt", description="Receipt for detected cycles."
@@ -1483,45 +1431,21 @@ class CycleDetectionReceipt(CoreasonBaseState):
 
 class TopologicalGuillotineEvent(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Triggers the execution of the topological guillotine on an offending subgraph.
+    AGENT INSTRUCTION: A terminal state event triggered when a proposed edge violates the Zero-Orphan Invariant or creates an illegal graph cycle.
 
-    CAUSAL AFFORDANCE: Mathematically severs invalid topological subgraphs to maintain system integrity.
+    CAUSAL AFFORDANCE: Physically slices the invalid payload out of the MCP differential, acting as a hardware-level circuit breaker to drop the offending edge or node before it permanently fractures the immutable ledger.
 
-    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
+    EPISTEMIC BOUNDS: The `violation_type` is rigidly confined to the Literal automaton ["illegal_cycle", "orphan_node_detected"]. The `severed_edges` array is deterministically sorted for invariant hashing.
 
-    MCP ROUTING TRIGGERS: Topological Guillotine, State Amputation, Epistemic Violation
+    MCP ROUTING TRIGGERS: Topological Guillotine, Circuit Breaker, Zero-Orphan Invariant, Cycle Prevention, Mechanistic Penalty
     """
 
-    """
-    AGENT INSTRUCTION: Triggers the execution of the topological guillotine on an offending subgraph.
-
-    CAUSAL AFFORDANCE: Mathematically severs invalid topological subgraphs to maintain system integrity.
-
-    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
-
-    MCP ROUTING TRIGGERS: Topological Guillotine, State Amputation, Epistemic Violation
-    """
-    """
-    AGENT INSTRUCTION: Triggers the execution of the topological guillotine on an offending subgraph.
-
-    CAUSAL AFFORDANCE: Mathematically severs invalid topological subgraphs to maintain system integrity.
-
-    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
-
-    MCP ROUTING TRIGGERS: Topological Guillotine, State Amputation, Epistemic Violation
-    """
-
-    """
-    AGENT INSTRUCTION: Triggers the execution of the topological guillotine on an offending subgraph.
-
-    CAUSAL AFFORDANCE: Mathematically severs invalid topological subgraphs to maintain system integrity.
-
-    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
-
-    MCP ROUTING TRIGGERS: Topological Guillotine, State Amputation, Epistemic Violation
-    """
-    event_cid: str = Field(default_factory=lambda: "event_0000", description="The unique CID for this event.")
-    prior_event_hash: str | None = Field(default=None, description="Cryptographic hash of the prior event.")
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        ..., description="The unique CID for this event."
+    )
+    prior_event_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(default=None, description="Cryptographic hash of the prior event.")
     timestamp: float = Field(ge=0.0, le=253402300799.0, description="The logical timestamp of the event.")
     topology_class: Literal["topological_guillotine"] = Field(
         default="topological_guillotine", description="Event severing invalid topology."
