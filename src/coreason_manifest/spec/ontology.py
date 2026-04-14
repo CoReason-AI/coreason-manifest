@@ -6900,7 +6900,9 @@ class System2RemediationIntent(CoreasonBaseState):
     def _enforce_canonical_sort_logic_counter_models(self) -> Self:
         """Mathematically sort counter models to guarantee deterministic canonical hashing."""
         object.__setattr__(
-            self, "logic_counter_models", sorted(self.logic_counter_models, key=operator.attrgetter("failed_premise_cid"))
+            self,
+            "logic_counter_models",
+            sorted(self.logic_counter_models, key=operator.attrgetter("failed_premise_cid")),
         )
         return self
 
