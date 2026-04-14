@@ -27,7 +27,7 @@ class AssumptionTransformer(Transformer):
         self.rule_idx = 0
         self.rule_map = rule_map
 
-    def visit_Rule(self, rule: clingo.ast.AST) -> clingo.ast.AST:
+    def visit_Rule(self, rule: clingo.ast.AST) -> clingo.ast.AST:  # noqa: N802
         idx = self.rule_idx
         self.rule_idx += 1
 
