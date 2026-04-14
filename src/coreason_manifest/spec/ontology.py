@@ -665,6 +665,19 @@ class RefusalToReasonEvent(ValueError):  # noqa: N818
     """
 
 
+class TopologicalParadoxFalsification(RefusalToReasonEvent):
+    """
+    AGENT INSTRUCTION: Exception raised when a topological loop is detected natively in a DAG topology.
+
+    CAUSAL AFFORDANCE: Operates as a circuit breaker immediately shattering execution if cyclic recursion is detected.
+
+    EPISTEMIC BOUNDS: Physically bounded to the `RefusalToReasonEvent` class.
+
+    MCP ROUTING TRIGGERS: Topological Falsification, Zero-Trust Architecture, Cycle Detection, Execution Abort
+    """
+
+
+
 class CoreasonBaseState(BaseModel):
     r"""
     AGENT INSTRUCTION: The immutable mathematical bedrock of the Hollow Data Plane, utilizing RFC 8785 Canonical JSON Serialization to guarantee structural determinism across the swarm.
@@ -3002,6 +3015,26 @@ class TemporalGraphCRDTManifest(CoreasonBaseState):
             self, "terminate_set", sorted(self.terminate_set, key=operator.attrgetter("target_edge_cid"))
         )
         return self
+
+    def to_pycrdt_doc(self) -> Any:
+        """Projects the monotonic CRDT components into a pycrdt.Doc state vector."""
+        import pycrdt  # type: ignore[import-not-found]
+
+        doc = pycrdt.Doc()
+        map_node = pycrdt.Map()
+        doc["crdt_state"] = map_node
+
+        add_array = pycrdt.Array()
+        map_node["add_set"] = add_array
+        for cid in self.add_set:
+            add_array.append(cid)
+
+        term_array = pycrdt.Array()
+        map_node["terminate_set"] = term_array
+        for term in self.terminate_set:
+            term_array.append(term.target_edge_cid)
+
+        return doc
 
 
 class EpistemicHydrationPolicy(CoreasonBaseState):
@@ -12128,8 +12161,26 @@ class DAGTopologyManifest(CoreasonBaseState):
     max_depth: int = Field(ge=1, le=256, description="The maximum recursive depth of the routing DAG.")
     max_fan_out: int = Field(ge=1, le=1024, description="The maximum number of parallel child nodes.")
     speculative_boundaries: list[SpeculativeExecutionPolicy] = Field(
-        default_factory=list, description="The deterministic speculative boundaries executing within the DAG."
+        default_factory=list, description="Topological bounds for non-monotonic test-time compute branching."
     )
+
+    @model_validator(mode="after")
+    def verify_dag_topology(self) -> Self:
+        if not self.allow_cycles:
+            import rustworkx as rx  # type: ignore[import-not-found]
+
+            graph = rx.PyDiGraph()
+            node_map = {}
+            for edge_u, edge_v in self.edges:
+                if edge_u not in node_map:
+                    node_map[edge_u] = graph.add_node(edge_u)
+                if edge_v not in node_map:
+                    node_map[edge_v] = graph.add_node(edge_v)
+                graph.add_edge(node_map[edge_u], node_map[edge_v], None)
+
+            if not rx.is_directed_acyclic_graph(graph):
+                raise TopologicalParadoxFalsification("Graph contains cycles")
+        return self
 
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
@@ -14686,7 +14737,7 @@ class MCPToolDefinition(CoreasonBaseState):
     timestamp: float = Field(default=0.0)
     name: Annotated[str, StringConstraints(max_length=64, pattern="^[a-zA-Z0-9_-]+$")]
     description: Annotated[str, StringConstraints(max_length=2048)]
-    input_schema: dict[str, Any] = Field(
+    input_schema: dict[str, JsonPrimitiveState] = Field(
         alias="inputSchema", description="The JSON Schema payload mirroring our Pydantic limits."
     )
 
