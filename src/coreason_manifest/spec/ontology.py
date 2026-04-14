@@ -1375,6 +1375,44 @@ class VolumetricPartitionState(CoreasonBaseState):
 
 
 class TopologicalSortIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Authorizes topological sorting operations.
+
+    CAUSAL AFFORDANCE: Reorders nodes deterministically based on topological constraints.
+
+    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
+
+    MCP ROUTING TRIGGERS: Topological Sort, Graph Theory, Deterministic Order
+    """
+
+    """
+    AGENT INSTRUCTION: Authorizes topological sorting operations.
+
+    CAUSAL AFFORDANCE: Reorders nodes deterministically based on topological constraints.
+
+    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
+
+    MCP ROUTING TRIGGERS: Topological Sort, Graph Theory, Deterministic Order
+    """
+    """
+    AGENT INSTRUCTION: Authorizes topological sorting operations.
+
+    CAUSAL AFFORDANCE: Reorders nodes deterministically based on topological constraints.
+
+    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
+
+    MCP ROUTING TRIGGERS: Topological Sort, Graph Theory, Deterministic Order
+    """
+
+    """
+    AGENT INSTRUCTION: Authorizes topological sorting operations.
+
+    CAUSAL AFFORDANCE: Reorders nodes deterministically based on topological constraints.
+
+    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
+
+    MCP ROUTING TRIGGERS: Topological Sort, Graph Theory, Deterministic Order
+    """
     topology_class: Literal["topological_sort"] = Field(
         default="topological_sort", description="Topological Sort Intent"
     )
@@ -1390,9 +1428,47 @@ class TopologicalSortIntent(CoreasonBaseState):
 
 
 class CycleDetectionReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Provides receipt of a detected cycle within a structural topology.
+
+    CAUSAL AFFORDANCE: Physically documents an epistemic violation (a graph cycle).
+
+    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
+
+    MCP ROUTING TRIGGERS: Cycle Detection, Epistemic Violation, Topological Guillotine
+    """
+
+    """
+    AGENT INSTRUCTION: Provides receipt of a detected cycle within a structural topology.
+
+    CAUSAL AFFORDANCE: Physically documents an epistemic violation (a graph cycle).
+
+    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
+
+    MCP ROUTING TRIGGERS: Cycle Detection, Epistemic Violation, Topological Guillotine
+    """
+    """
+    AGENT INSTRUCTION: Provides receipt of a detected cycle within a structural topology.
+
+    CAUSAL AFFORDANCE: Physically documents an epistemic violation (a graph cycle).
+
+    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
+
+    MCP ROUTING TRIGGERS: Cycle Detection, Epistemic Violation, Topological Guillotine
+    """
+
+    """
+    AGENT INSTRUCTION: Provides receipt of a detected cycle within a structural topology.
+
+    CAUSAL AFFORDANCE: Physically documents an epistemic violation (a graph cycle).
+
+    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
+
+    MCP ROUTING TRIGGERS: Cycle Detection, Epistemic Violation, Topological Guillotine
+    """
     event_cid: str = Field(default_factory=lambda: "event_0000", description="The unique CID for this event.")
     prior_event_hash: str | None = Field(default=None, description="Cryptographic hash of the prior event.")
-    timestamp: float = Field(default_factory=lambda: 0.0, description="The logical timestamp of the event.")
+    timestamp: float = Field(ge=0.0, le=253402300799.0, description="The logical timestamp of the event.")
     topology_class: Literal["cycle_detection_receipt"] = Field(
         default="cycle_detection_receipt", description="Receipt for detected cycles."
     )
@@ -1406,9 +1482,47 @@ class CycleDetectionReceipt(CoreasonBaseState):
 
 
 class TopologicalGuillotineEvent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Triggers the execution of the topological guillotine on an offending subgraph.
+
+    CAUSAL AFFORDANCE: Mathematically severs invalid topological subgraphs to maintain system integrity.
+
+    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
+
+    MCP ROUTING TRIGGERS: Topological Guillotine, State Amputation, Epistemic Violation
+    """
+
+    """
+    AGENT INSTRUCTION: Triggers the execution of the topological guillotine on an offending subgraph.
+
+    CAUSAL AFFORDANCE: Mathematically severs invalid topological subgraphs to maintain system integrity.
+
+    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
+
+    MCP ROUTING TRIGGERS: Topological Guillotine, State Amputation, Epistemic Violation
+    """
+    """
+    AGENT INSTRUCTION: Triggers the execution of the topological guillotine on an offending subgraph.
+
+    CAUSAL AFFORDANCE: Mathematically severs invalid topological subgraphs to maintain system integrity.
+
+    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
+
+    MCP ROUTING TRIGGERS: Topological Guillotine, State Amputation, Epistemic Violation
+    """
+
+    """
+    AGENT INSTRUCTION: Triggers the execution of the topological guillotine on an offending subgraph.
+
+    CAUSAL AFFORDANCE: Mathematically severs invalid topological subgraphs to maintain system integrity.
+
+    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
+
+    MCP ROUTING TRIGGERS: Topological Guillotine, State Amputation, Epistemic Violation
+    """
     event_cid: str = Field(default_factory=lambda: "event_0000", description="The unique CID for this event.")
     prior_event_hash: str | None = Field(default=None, description="Cryptographic hash of the prior event.")
-    timestamp: float = Field(default_factory=lambda: 0.0, description="The logical timestamp of the event.")
+    timestamp: float = Field(ge=0.0, le=253402300799.0, description="The logical timestamp of the event.")
     topology_class: Literal["topological_guillotine"] = Field(
         default="topological_guillotine", description="Event severing invalid topology."
     )
@@ -4832,7 +4946,7 @@ class DocumentLayoutManifest(CoreasonBaseState):
 
         if not rx.is_directed_acyclic_graph(graph):
             cycle = rx.digraph_find_cycle(graph)
-            pathological_path = [graph.get_node_data(idx) for idx, _ in cycle]
+            pathological_path = [graph.get_node_data(edge[0]) for edge in cycle]
             raise ValueError(f"Reading order contains a cyclical contradiction. pathological_path: {pathological_path}")
 
         return self
@@ -10842,10 +10956,20 @@ class DiscourseTreeManifest(CoreasonBaseState):
 
         if not rx.is_directed_acyclic_graph(graph):
             cycle = rx.digraph_find_cycle(graph)
-            pathological_path = [graph.get_node_data(idx) for idx, _ in cycle]
+            pathological_path = [graph.get_node_data(edge[0]) for edge in cycle]
             raise ValueError(
                 f"Topological Contradiction: Discourse tree contains a cyclical reference. pathological_path: {pathological_path}"
             )
+
+        for node_id in self.discourse_nodes:
+            idx = mapping[node_id]
+            if (
+                len(self.discourse_nodes) > 1
+                and node_id != self.root_node_cid
+                and graph.in_degree(idx) == 0
+                and graph.out_degree(idx) == 0
+            ):
+                raise ValueError(f"orphan_node_detected: Node '{node_id}' has in_degree 0 and out_degree 0.")
 
         return self
 
@@ -11856,10 +11980,20 @@ class HierarchicalDOMManifest(CoreasonBaseState):
 
         if not rx.is_directed_acyclic_graph(graph):
             cycle = rx.digraph_find_cycle(graph)
-            pathological_path = [graph.get_node_data(idx) for idx, _ in cycle]
+            pathological_path = [graph.get_node_data(edge[0]) for edge in cycle]
             raise ValueError(
                 f"Topological Contradiction: Hierarchical DOM tree contains a spatial cycle. pathological_path: {pathological_path}"
             )
+
+        for node_id in self.blocks:
+            idx = mapping[node_id]
+            if (
+                len(self.blocks) > 1
+                and node_id != self.root_block_cid
+                and graph.in_degree(idx) == 0
+                and graph.out_degree(idx) == 0
+            ):
+                raise ValueError(f"orphan_node_detected: Node '{node_id}' has in_degree 0 and out_degree 0.")
 
         return self
 
@@ -12217,7 +12351,7 @@ class DAGTopologyManifest(CoreasonBaseState):
         if not self.allow_cycles:
             if not rx.is_directed_acyclic_graph(graph):
                 cycle = rx.digraph_find_cycle(graph)
-                pathological_path = [graph.get_node_data(idx) for idx, _ in cycle]
+                pathological_path = [graph.get_node_data(edge[0]) for edge in cycle]
                 raise ValueError(
                     f"Graph contains cycles but allow_cycles is False. pathological_path: {pathological_path}"
                 )
