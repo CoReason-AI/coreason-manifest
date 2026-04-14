@@ -13,6 +13,23 @@
 
 from coreason_manifest.spec.ontology import *  # noqa: F403
 from coreason_manifest.spec.ontology import (
+    AnyIntent,
+    AnyInterventionState,
+    AnyNodeProfile,
+    AnyPanelProfile,
+    AnyPresentationIntent,
+    AnyResilienceIntent,
+    AnyStateEvent,
+    AnyToolchainState,
+    AnyTopologyManifest,
+    AttackVectorProfile,
+    AttestationMechanismProfile,
+    AuctionMechanismProfile,
+    CapabilityPointerState,
+    CausalIntervalProfile,
+    CognitiveTierProfile,
+    CrossoverMechanismProfile,
+    DistributionShapeProfile,
     FaultCategoryProfile,
     LifecycleTriggerEvent,
     MCPTransportProfile,
@@ -22,6 +39,14 @@ from coreason_manifest.spec.ontology import (
     PatchOperationProfile,
     ProfileCIDState,
     QoSClassificationProfile,
+    SanitizationActionIntent,
+    SemanticVersionState,
+    SpanKindProfile,
+    SpanStatusCodeProfile,
+    TelemetryContextProfile,
+    TelemetryScalarState,
+    TieBreakerPolicy,
+    TopologyHashReceipt,
 )
 from coreason_manifest.utils.algebra import (
     align_semantic_manifolds,
