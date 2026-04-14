@@ -26,6 +26,10 @@ dependencies = [
     "nh3>=0.2.17",
     "msgspec>=0.21.1",
     "pycrdt>=0.12.50",
+]
+
+[project.optional-dependencies]
+graph = [
     "rustworkx>=0.17.1",
 ]
 
