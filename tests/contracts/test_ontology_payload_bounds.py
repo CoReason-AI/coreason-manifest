@@ -289,41 +289,32 @@ def test_semantic_mapping_heuristic_proposal_payload_bounds() -> None:
     assert "String should have at most 65536 characters" in str(exc_info.value)
 
 
-def test_epistemic_logic_premise_bounds() -> None:
+def test_formal_logic_premise_bounds() -> None:
     from pydantic import ValidationError
 
-    from coreason_manifest.spec.ontology import EpistemicLogicPremise
+    from coreason_manifest.spec.ontology import FormalLogicPremise
 
     # Valid payload
-    premise = EpistemicLogicPremise(asp_program="a :- b.")
-    assert premise.asp_program == "a :- b."
-
-    # Invalid payload (exceeds length constraint 65536)
-    large_string = "a" * 65537
-
-    with pytest.raises(ValidationError) as exc_info:
-        EpistemicLogicPremise(asp_program=large_string)
-    assert "String should have at most 65536 characters" in str(exc_info.value)
-
-
-def test_epistemic_lean4_premise_bounds() -> None:
-    from pydantic import ValidationError
-
-    from coreason_manifest.spec.ontology import EpistemicLean4Premise
-
-    # Valid payload
-    premise = EpistemicLean4Premise(
-        target_theorem="theorem test : True := by trivial",
-        tactics_script="trivial",
+    premise = FormalLogicPremise(
+        dialect_urn="urn:coreason:dialect:clingo",
+        formal_statement="a :- b.",
     )
-    assert premise.tactics_script == "trivial"
+    assert premise.formal_statement == "a :- b."
+
+    # Valid payload with verification_script
+    premise_with_script = FormalLogicPremise(
+        dialect_urn="urn:coreason:dialect:lean4",
+        formal_statement="theorem test : True := by trivial",
+        verification_script="trivial",
+    )
+    assert premise_with_script.verification_script == "trivial"
 
     # Invalid payload (exceeds length constraint 100000)
     large_string = "a" * 100001
 
     with pytest.raises(ValidationError) as exc_info:
-        EpistemicLean4Premise(
-            target_theorem="theorem test : True := by trivial",
-            tactics_script=large_string,
+        FormalLogicPremise(
+            dialect_urn="urn:coreason:dialect:lean4",
+            formal_statement=large_string,
         )
     assert "String should have at most 100000 characters" in str(exc_info.value)

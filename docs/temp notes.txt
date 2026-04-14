@@ -127,3 +127,80 @@ This release **destroys static type checking for hardware and execution dialects
 
 1. **Dynamic Capability Registries (`coreason-runtime`):** Your execution orchestrators can no longer rely on Python `Enum` or `match` blocks to route workloads to engines like Docling or SGLang. You must implement a dynamic registry pattern that resolves inbound `urn:coreason:dialect:*` and `urn:coreason:accelerator:*` strings against the local host's actual installed dependencies and physical hardware.
 2. **LSP Autocomplete (`coreason-vscode`):** The generated JSON schema will no longer provide a convenient dropdown of valid hardware types. Your IDE extension must now implement a Language Server Protocol (LSP) fetcher to hydrate IntelliSense with valid URN strings dynamically from our `LEXICON.md` definitions.
+
+
+
+----
+
+
+
+**Subject: Release Notes — Epic 3: Topological Isomorphism (Collapse of Formal Logic Constructs)**
+
+---
+
+# 🚀 Release Notes: coreason-manifest (Epic 3 Update)
+
+## Executive Summary
+We have successfully merged **Epic 3: Topological Isomorphism** into the `coreason-manifest` ontology.
+
+Previously, our AST suffered from severe structural fragmentation. Whenever a new formal logic prover or constraint solver was integrated into the swarm (e.g., Lean 4, Clingo/ASP, SWI-Prolog), we minted entirely new Pydantic models for both the intent premise and the verification receipt. This bloated the context window, confused the LLMs generating the topologies, and forced constant schema version bumps.
+
+By applying **Category Theory** principles, we recognized that all formal theorem provers and logic solvers are structurally isomorphic: they consume a declarative formal grammar string, process it via an oracle, and return a cryptographic receipt containing a truth value and optional bindings/counter-models. 
+
+This release completely eradicates the solver-specific primitives from the AST, collapsing them into two unified, substrate-independent abstractions: `FormalLogicPremise` and `FormalVerificationReceipt`.
+
+---
+
+## 🏗️ Key Architectural Changes
+
+### 1. Eradication of Fragmented Logic Constructs
+**What Changed:**
+The following highly specific AST nodes (and their supporting tests/registry entries) have been deleted:
+* `EpistemicLean4Premise` & `Lean4VerificationReceipt`
+* `EpistemicLogicPremise` & `FormalLogicProofReceipt` (Clingo/ASP)
+* `EpistemicPrologPremise` & `PrologDeductionReceipt` (SWI-Prolog)
+
+Additionally, the hardcoded Python generator functions for their corresponding MCP tools (`generate_lean4_mcp_tool`, `generate_clingo_mcp_tool`, `generate_prolog_mcp_tool`) have been removed. Tool definitions will now be hydrated dynamically by the runtime using the URN definitions.
+
+**Architectural Justification:**
+The schema must not bloat exponentially as we add support for Z3, Coq, or new SAT solvers. Removing these hardcoded classes reduces the cognitive load on the LLM planners and drastically shrinks the overall size of the compiled `coreason_ontology.schema.json` (Total definitions dropped from 411 to 407).
+
+### 2. Injection of Unified Categorical Abstractions
+**What Changed:**
+Two new universal classes have been introduced to replace the deleted fragments:
+
+1.  **`FormalLogicPremise`:** * Takes an extensible `dialect_urn` (e.g., `"urn:coreason:dialect:lean4"`, `"urn:coreason:dialect:clingo"`).
+    * Takes a `formal_statement` (the primary query, theorem, or ASP program).
+    * Takes an optional `verification_script` (auxiliary scripts, tactic proofs, or ephemeral facts).
+2.  **`FormalVerificationReceipt`:** * Returns a definitive `is_proved` boolean.
+    * Returns an optional `satisfiability_state` (`SATISFIABLE`, `UNSATISFIABLE`, `UNKNOWN`, `OPTIMUM FOUND`).
+    * Returns `failing_context` for System 2 remediation loops.
+    * Returns `extracted_bindings` (merging the old concepts of "answer sets" and "variable bindings" into a single, topologically exempt dictionary array).
+
+**Architectural Justification:**
+By utilizing the URN extensibility pattern established in Epic 2, we can now support infinite mathematical logic engines without ever altering the AST structure. The manifest defines the *intent* of the mathematical proof, and the `dialect_urn` dictates the required substrate routing. Furthermore, we implemented a custom `@field_serializer` on `extracted_bindings` to freeze the outer array sequence (preserving mathematical evaluation order) while deterministically sorting the inner dictionary keys to guarantee **RFC 8785 Canonical Hashing compliance**.
+
+### 3. Deep Contract Updates
+**What Changed:**
+Downstream contracts that govern execution bounds have been updated to reference the new unified receipt:
+* `FalsificationContract.counter_model_receipt_cid` now demands a `FormalVerificationReceipt` evaluating to `SATISFIABLE` to collapse a hypothesis.
+* `FormalVerificationContract.verified_receipt_cid` now points to `FormalVerificationReceipt` to prove safety invariants.
+* `EvidentiaryGroundingSLA.required_deduction_receipt_cid` relies on `FormalVerificationReceipt` with `is_proved=True` when executing hierarchical grounding.
+
+### 4. Cross-Language & CI Synchronization
+**What Changed:**
+* `algebra.py` was updated, collapsing 6 registry entries into 2 unified entries.
+* The test suite was heavily refactored: `test_coverage_gaps.py` and `test_ontology_payload_bounds.py` were rewritten to test the new abstractions. `test_static_tool_definitions.py` was completely deleted.
+* Successfully generated new TypeScript (15,735 lines) and Rust (119,345 lines) bindings representing the optimized AST.
+
+---
+
+## ⚠️ Downstream Impact & Migration Guide
+
+**Attention: `coreason-runtime` and `coreason-ecosystem` Maintainers**
+
+This release completely refactors how formal logic tasks are dispatched and verified across the swarm. 
+
+1. **Routing Mesh Refactor:** `coreason-ecosystem` routing loops can no longer use `isinstance(node, EpistemicLean4Premise)` to dispatch tasks to the Lean 4 worker nodes. You must refactor your orchestration layer to implement a **Factory Pattern** that inspects the `FormalLogicPremise.dialect_urn` string to route the payload to the correct logic oracle.
+2. **Oracle Return Payloads:** The runtime adapters for SWI-Prolog, Clingo, and Lean 4 must be updated to map their specific standard outputs/errors into the unified `FormalVerificationReceipt` schema. Unification variables and ASP answer sets must both be mapped to the `extracted_bindings` array.
+3. **System 2 Remediation Loops:** Agents acting as "Proposers" in the `macro_neurosymbolic` topologies have had their schemas simplified. Prompt templates targeting these agents must be updated to instruct them to emit `FormalLogicPremise` instead of the legacy logic-specific intents.

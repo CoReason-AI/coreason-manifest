@@ -458,35 +458,29 @@ class TestAlgebraSemanticGraphBranch:
 # ---------------------------------------------------------------------------
 
 
-class TestFormalLogicProofReceiptSerializer:
-    """Verify answer_sets serialization round-trip."""
+class TestFormalVerificationReceiptSerializer:
+    """Verify extracted_bindings serialization round-trip and key sorting."""
 
-    def test_answer_sets_serializer(self) -> None:
-        obj = o.FormalLogicProofReceipt(
-            causal_provenance_id="did:a:1",
+    def test_extracted_bindings_serializer(self) -> None:
+        obj = o.FormalVerificationReceipt(
             event_cid="test-cid",
             timestamp=1000.0,
-            satisfiability="SATISFIABLE",
-            answer_sets=[["a", "b"], ["c"]],
+            is_proved=True,
+            satisfiability_state="SATISFIABLE",
+            extracted_bindings=[{"z_var": "value", "a_var": "value"}],
         )
         data = obj.model_dump(mode="json")
-        assert data["answer_sets"] == [["a", "b"], ["c"]]
-
-
-class TestPrologDeductionReceiptSerializer:
-    """Verify variable_bindings dict key canonical sorting."""
-
-    def test_variable_bindings_sorted_keys(self) -> None:
-        obj = o.PrologDeductionReceipt(
-            causal_provenance_id="did:a:1",
-            event_cid="test-cid",
-            timestamp=1000.0,
-            truth_value=True,
-            variable_bindings=[{"z_var": "value", "a_var": "value"}],
-        )
-        data = obj.model_dump(mode="json")
-        keys = list(data["variable_bindings"][0].keys())
+        keys = list(data["extracted_bindings"][0].keys())
         assert keys == ["a_var", "z_var"]
+
+    def test_empty_bindings(self) -> None:
+        obj = o.FormalVerificationReceipt(
+            event_cid="test-cid",
+            timestamp=1000.0,
+            is_proved=False,
+        )
+        data = obj.model_dump(mode="json")
+        assert data["extracted_bindings"] == []
 
 
 # ---------------------------------------------------------------------------

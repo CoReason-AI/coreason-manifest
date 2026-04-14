@@ -5431,7 +5431,7 @@ class EvidentiaryGroundingSLA(CoreasonBaseState):
     allowed_evidence_domains: list[Annotated[str, StringConstraints(max_length=255)]] = Field(default_factory=list)
     required_deduction_receipt_cid: NodeCIDState | None = Field(
         default=None,
-        description="If grounding via strict hierarchies (e.g., medical ontologies), this MUST point to a PrologDeductionReceipt with truth_value=True.",
+        description="If grounding via strict hierarchies (e.g., medical ontologies), this MUST point to a FormalVerificationReceipt with is_proved=True.",
     )
 
     @model_validator(mode="after")
@@ -6078,7 +6078,7 @@ class FalsificationContract(CoreasonBaseState):
     target_hypothesis_cid: NodeCIDState = Field(description="Pointer to the hypothesis claim being challenged.")
     counter_model_receipt_cid: NodeCIDState | None = Field(
         default=None,
-        description="MUST point to a FormalLogicProofReceipt evaluating to SATISFIABLE to collapse the hypothesis.",
+        description="MUST point to a FormalVerificationReceipt evaluating to SATISFIABLE to collapse the hypothesis.",
     )
 
 
@@ -6116,7 +6116,7 @@ class FormalVerificationContract(CoreasonBaseState):
     )
     verified_receipt_cid: NodeCIDState | None = Field(
         default=None,
-        description="Pointer to a Lean4VerificationReceipt or HoareLogicProofReceipt validating the logic.",
+        description="Pointer to a FormalVerificationReceipt or HoareLogicProofReceipt validating the logic.",
     )
 
 
@@ -7115,114 +7115,76 @@ type AnyPresentationIntent = Annotated[
 ]
 
 
-class EpistemicLean4Premise(CoreasonBaseState):
+class FormalLogicPremise(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: This premise acts as a logic hypothesis that triggers constructive mathematical proof or software auto-formalization via Lean 4.
+    AGENT INSTRUCTION: A unified categorical abstraction for all formal logic, constraint satisfaction, and theorem-proving hypotheses.
 
-    CAUSAL AFFORDANCE: Unlocks formal theorem proving physics for the orchestrator by instantiating a Lean 4 validation track.
+    CAUSAL AFFORDANCE: Physically authorizes the orchestrator to model and solve logic domains by mapping the declarative payload to the target solver defined by the dialect_urn.
 
-    EPISTEMIC BOUNDS: Bounded to strict string constraints for the theorem and tactics script.
+    EPISTEMIC BOUNDS: Constrained strictly to formal syntaxes (e.g., SMT-LIB, Lean 4, ASP, Prolog) via high-capacity string bounds.
 
-    MCP ROUTING TRIGGERS: Calculus of Inductive Constructions, Dependent Type Theory, Theorem Proving, Auto-formalization
-    """
-
-    target_theorem: Annotated[str, StringConstraints(max_length=65536)]
-    tactics_script: Annotated[str, StringConstraints(max_length=100000)]
-    topology_class: Literal["epistemic_lean4_premise"] = Field(default="epistemic_lean4_premise")
-
-
-class Lean4VerificationReceipt(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: A cryptographically frozen fact representing the success or failure of a Lean 4 proof. Tailored as a receipt.
-
-    CAUSAL AFFORDANCE: Unlocks System 2 remediation loops by providing deterministic failure execution traces.
-
-    EPISTEMIC BOUNDS: The boolean flag definitively represents mathematical truth, and the string accurately caps the textual bounds of failure.
-
-    MCP ROUTING TRIGGERS: System 2 Remediation, Mathematical Truth, Proof Verification, Proof Engine
+    MCP ROUTING TRIGGERS: Automated Theorem Proving, Constraint Satisfaction, Logic Programming, Substrate Oracle
     """
 
-    is_proved: bool
-    failing_tactic_state: str | None = None
-    topology_class: Literal["lean4_verification_receipt"] = Field(default="lean4_verification_receipt")
-
-
-class EpistemicLogicPremise(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Unlocks Answer Set Programming (Clingo) for NP-hard combinatorial constraint satisfaction.
-
-    CAUSAL AFFORDANCE: Physically authorizes the orchestrator to model and solve NP-hard combinatorial domains.
-
-    EPISTEMIC BOUNDS: Constrained strictly to the answer set programming language inputs via tight syntactic length bounds.
-
-    MCP ROUTING TRIGGERS: Answer Set Programming, Combinatorial Constraint Satisfaction, Clingo, Combinatorial Domain
-    """
-
-    asp_program: Annotated[str, StringConstraints(max_length=65536)]
-    topology_class: Literal["epistemic_logic_premise"] = Field(default="epistemic_logic_premise")
-
-
-class FormalLogicProofReceipt(CoreasonBaseState):
-    """AGENT INSTRUCTION: The immutable receipt from the Clingo solver."""
-
-    topology_class: Literal["formal_logic_proof"] = Field(default="formal_logic_proof")
-    causal_provenance_id: NodeCIDState
-
-    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
-    timestamp: float
-    prior_event_hash: str | None = Field(default=None)
-    satisfiability: Literal["SATISFIABLE", "UNSATISFIABLE", "UNKNOWN", "OPTIMUM FOUND"]
-    answer_sets: list[list[Annotated[str, StringConstraints(max_length=1024)]]] = Field(
-        default_factory=list,
-        json_schema_extra={"coreason_topological_exemption": True},
-        description="Topological Exemption: DO NOT SORT.",
+    topology_class: Literal["formal_logic_premise"] = Field(default="formal_logic_premise")
+    dialect_urn: Annotated[str, StringConstraints(pattern=r"^urn:coreason:.*$")] = Field(
+        description="The URN identifying the specific formal dialect or solver (e.g., 'urn:coreason:dialect:lean4', 'urn:coreason:dialect:clingo')."
+    )
+    formal_statement: Annotated[str, StringConstraints(max_length=100000)] = Field(
+        description="The primary logical query, theorem, or ASP program."
+    )
+    verification_script: Annotated[str, StringConstraints(max_length=100000)] | None = Field(
+        default=None,
+        description="Optional auxiliary scripts required for verification, such as Lean 4 tactic proofs or Prolog ephemeral facts.",
     )
 
-    @field_serializer("answer_sets")
-    def serialize_answer_sets(self, answer_sets: list[list[str]], _info: Any) -> list[list[str]]:
-        # Topological Exemption: Explicitly freeze the exact list sequence.
-        return answer_sets
 
-
-class EpistemicPrologPremise(CoreasonBaseState):
+class FormalVerificationReceipt(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Unlocks SWI-Prolog for backward-chaining deductive evaluation over hierarchical graphs.
+    AGENT INSTRUCTION: A cryptographically frozen historical fact representing the unified outcome of a formal logic evaluation or theorem proof.
 
-    CAUSAL AFFORDANCE: Instructs the orchestrator to execute exact subgraph isomorphism and deductive logic queries.
+    CAUSAL AFFORDANCE: Unlocks System 2 remediation loops or graph progression by providing deterministic, algebraically verified execution traces and truth values.
 
-    EPISTEMIC BOUNDS: Restricts logic programming bounds to strict Horn clauses and exact query boundaries.
+    EPISTEMIC BOUNDS: Cryptographically anchored to the Merkle-DAG. The boolean 'is_proved' definitively represents mathematical truth.
 
-    MCP ROUTING TRIGGERS: SWI-Prolog, Backward-Chaining, Deductive Evaluation, Hierarchical Knowledge Bases
+    MCP ROUTING TRIGGERS: System 2 Remediation, Mathematical Truth, Proof Verification, Epistemic Ledger
     """
 
-    query: str
-    horn_clauses: str
-    topology_class: Literal["epistemic_prolog_premise"] = Field(default="epistemic_prolog_premise")
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG."
+    )
+    prior_event_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(default=None, description="The RFC 8785 Canonical hash of the immediate causal ancestor.")
+    timestamp: float = Field(ge=0.0, description="The precise temporal coordinate of the event realization.")
 
-
-class PrologDeductionReceipt(CoreasonBaseState):
-    """AGENT INSTRUCTION: The immutable receipt representing SWI-Prolog backward-chaining execution."""
-
-    topology_class: Literal["prolog_deduction_receipt"] = Field(default="prolog_deduction_receipt")
-    causal_provenance_id: NodeCIDState
-
-    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
-    timestamp: float
-    prior_event_hash: str | None = Field(default=None)
-    truth_value: bool
-    variable_bindings: list[dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState]] = Field(
+    topology_class: Literal["formal_verification_receipt"] = Field(default="formal_verification_receipt")
+    causal_provenance_id: NodeCIDState | None = Field(
+        default=None, description="Pointer to the specific node or intent that requested this formal verification."
+    )
+    is_proved: bool = Field(
+        description="The definitive Boolean evaluating whether the proof succeeded, the program is satisfiable, or the deduction holds true."
+    )
+    satisfiability_state: Literal["SATISFIABLE", "UNSATISFIABLE", "UNKNOWN", "OPTIMUM FOUND"] | None = Field(
+        default=None, description="Detailed satisfiability state, primarily utilized by ASP/SMT solvers."
+    )
+    failing_context: Annotated[str, StringConstraints(max_length=100000)] | None = Field(
+        default=None,
+        description="The specific failing tactic state, counter-model, or syntax error preventing verification.",
+    )
+    extracted_bindings: list[dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState]] = Field(
         default_factory=list,
         json_schema_extra={"coreason_topological_exemption": True},
-        description="Topological Exemption: DO NOT SORT.",
+        description="Topological Exemption: DO NOT SORT. Captures answer sets or unification bindings extracted by the oracle.",
     )
 
-    @field_serializer("variable_bindings")
-    def serialize_variable_bindings(
-        self, variable_bindings: list[dict[str, JsonPrimitiveState]], _info: Any
+    @field_serializer("extracted_bindings")
+    def serialize_extracted_bindings(
+        self, bindings: list[dict[str, JsonPrimitiveState]], _info: Any
     ) -> list[dict[str, JsonPrimitiveState]]:
-        # Topological Exemption: Freeze the outer list sequence (the mathematical order of unification).
+        # Topological Exemption: Freeze the outer list sequence (the mathematical order of unification/answer sets).
         # However, to maintain RFC 8785 compliance, sort the keys *inside* the individual dictionaries.
-        return [dict(sorted(b.items())) for b in variable_bindings]
+        return [dict(sorted(b.items())) for b in bindings]
 
 
 class DocumentKnowledgeGraphManifest(CoreasonBaseState):
@@ -7512,9 +7474,7 @@ type AnyIntent = Annotated[
     | SubstrateHydrationManifest
     | NeurosymbolicInferenceIntent
     | TopologicalProjectionIntent
-    | EpistemicLean4Premise
-    | EpistemicLogicPremise
-    | EpistemicPrologPremise
+    | FormalLogicPremise
     | CausalPropagationIntent
     | RDFSerializationIntent
     | SPARQLQueryIntent
@@ -14755,48 +14715,6 @@ class MCPToolDefinition(CoreasonBaseState):
     )
 
 
-def generate_lean4_mcp_tool() -> MCPToolDefinition:
-    return MCPToolDefinition(
-        name="verify_lean4_theorem",
-        description="Use this tool to evaluate constructive mathematical proofs and universal invariants in Lean 4. Returns the verification status or the failing tactic state.",
-        input_schema={
-            "type": "object",
-            "properties": {
-                "formal_statement": {"type": "string", "maxLength": 100000},
-                "tactic_proof": {"type": "string", "maxLength": 100000},
-            },
-            "required": ["formal_statement", "tactic_proof"],
-        },
-    )
-
-
-def generate_clingo_mcp_tool() -> MCPToolDefinition:
-    return MCPToolDefinition(
-        name="execute_clingo_falsification",
-        description="Use this tool to hunt for counter-models and evaluate NP-hard constraint satisfaction problems using Answer Set Programming (ASP).",
-        input_schema={
-            "type": "object",
-            "properties": {
-                "asp_program": {"type": "string", "maxLength": 65536},
-                "max_models": {"type": "integer", "default": 1},
-            },
-            "required": ["asp_program"],
-        },
-    )
-
-
-def generate_prolog_mcp_tool() -> MCPToolDefinition:
-    return MCPToolDefinition(
-        name="execute_prolog_deduction",
-        description="Use this tool for evidentiary grounding, exact subgraph isomorphism, and traversing hierarchical knowledge bases via backward-chaining resolution.",
-        input_schema={
-            "type": "object",
-            "properties": {"prolog_query": {"type": "string"}, "ephemeral_facts": {"type": "string"}},
-            "required": ["prolog_query"],
-        },
-    )
-
-
 type AnyStateEvent = Annotated[
     TemporalGraphCRDTManifest
     | MCPToolDefinition
@@ -14834,9 +14752,7 @@ type AnyStateEvent = Annotated[
     | CustodyReceipt
     | DefeasibleAttackEvent
     | EpistemicRejectionReceipt
-    | Lean4VerificationReceipt
-    | FormalLogicProofReceipt
-    | PrologDeductionReceipt
+    | FormalVerificationReceipt
     | BeliefModulationReceipt
     | RDFExportReceipt
     | EpistemicStarvationEvent
@@ -15380,12 +15296,8 @@ SchemaDrivenExtractionSLA.model_rebuild()
 EvidentiaryGroundingSLA.model_rebuild()
 EpistemicProxyState.model_rebuild()
 
-EpistemicLean4Premise.model_rebuild()
-Lean4VerificationReceipt.model_rebuild()
-EpistemicLogicPremise.model_rebuild()
-FormalLogicProofReceipt.model_rebuild()
-EpistemicPrologPremise.model_rebuild()
-PrologDeductionReceipt.model_rebuild()
+FormalLogicPremise.model_rebuild()
+FormalVerificationReceipt.model_rebuild()
 OpticalParsingSLA.model_rebuild()
 TabularCellState.model_rebuild()
 TabularMatrixProfile.model_rebuild()
