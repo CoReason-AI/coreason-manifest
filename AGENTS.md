@@ -333,6 +333,7 @@ LLMs and external endpoints (like SPARQL triplestores or JSON-RPC servers) can e
 LLMs will hallucinate URIs, and adversarial prompts will attempt to force the swarm to query local network architecture (e.g., `http://169.254.169.254/latest/meta-data/`).
 * **The Rule:** Any schema field typed as `HttpUrl` or `AnyUrl` that dictates a *kinetic outbound network request* (e.g., `SPARQLQueryIntent`, `EvidentiaryCitationState`, `HTTPTransportProfile`) MUST be protected by a `@field_validator(..., mode="after")` that routes the string through the `_validate_ssrf_safety` function.
 * **Mechanics:** This mechanically rejects any IP topology that resolves to Bogon space, localhost, link-local, multicast, or private IP ranges via native C-backed IP stack evaluation.
+* **The Air-Gap Mandate:** The manifest is mathematically barred from invoking `socket.gethostbyname` or performing live DNS resolution during Pydantic validation. SSRF IP blocking evaluates string literals only; dynamic DNS resolution is deferred to the Tier-1 Compute Plane.
 
 ### **3. The Merkle-DAG Coordinate Standard (Ledger Binding)**
 For the Epistemic Ledger to mathematically prove chain of custody, historical facts cannot be floating objects. 
@@ -344,6 +345,7 @@ For the Epistemic Ledger to mathematically prove chain of custody, historical fa
 
 </security_directive>
 
+<architectural_invariant action="falsify_if_violated">
 ## **1. The "No Execution" Directives**
 
 You are strictly forbidden from introducing "Active" or "Runtime" logic into this repository. Adhere to the following architectural laws without exception:
@@ -363,6 +365,7 @@ You are strictly forbidden from introducing "Active" or "Runtime" logic into thi
 ### **Law 4: Passive Ontological Projection (The "MCP" Rule)**
 * **Constraint:** Any Model Context Protocol (MCP) server implementation in this repository MUST act strictly as a passive data plane projecting structural ontology.
 * **Forbidden:** Registering kinetic or active endpoints using `@mcp.tool()`.
+</architectural_invariant>
 
 ---
 
@@ -399,6 +402,12 @@ You are strictly forbidden from introducing "Active" or "Runtime" logic into thi
   `Field(..., json_schema_extra={"coreason_topological_exemption": True})`
   The CI/CD AST compiler (`enforce_cryptographic_determinism.py`) will physically crash the build if an array lacks either a deterministic `@model_validator` sorting hook or this explicit metadata flag.
 
+### **The Transport Sterilization Mandate (Anti-Null Contagion)**
+* **The Physics of Serialization:** Standard Python `json`, TS `JSON.stringify`, and Pydantic `.model_dump_json()` are mathematically banned for generating `ExecutionEnvelope` transport payloads. 
+* **The Null Contagion:** Because Pydantic's `exclude_none` fails to recursively purge `None` values from loosely typed boundaries (e.g., `JsonPrimitiveState`), all JSON-RPC parameters MUST be mathematically stripped of nulls via the `_canonicalize_payload` functor prior to serialization.
+* **The Substrate Match:** * **Python (Tier 0):** Must exclusively use `msgspec.json.Encoder(sort_keys=True)`.
+  * **TypeScript (Tier 3):** Must exclusively use `fast-json-stable-stringify`.
+
 ### **The Strict Instantiation Boundary (Anti-Lazy Validation Mandate)**
 * **The Physics of State Creation:** **Lazy validation or post-init bounding is mathematically impossible and strictly forbidden.** All topological boundaries and Euclidean limits MUST be enforced strictly during initiation via Pydantic `@field_validator` and `@model_validator(mode="after")` hooks.
 
@@ -415,6 +424,7 @@ You are strictly bound to the **"God Context" Monolith Directive**. You are EXPL
 * **`src/coreason_manifest/`**:
   * **`spec/ontology.py`**: The SINGLE, monolithic file containing ALL Pydantic models. **Do not split this file.**
   * **`utils/algebra.py`**: The SINGLE file containing all pure algebraic functors and detached validation logic.
+  * **`utils/mcp_adapters.py`**: The SINGLE authorized transport serialization boundary. It is mathematically barred from importing `socket`, `httpx`, or any active network clients. It must only contain the `DeterministicTransportAdapter` (via `msgspec`).
 * **`scripts/`**:
   * **`universal_ontology_compiler.py`**: Topological reachability and DAG health.
   * **`enforce_cryptographic_determinism.py`**: The AST-reflection sorting guillotine.
