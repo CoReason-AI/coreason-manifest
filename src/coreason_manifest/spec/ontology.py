@@ -2202,6 +2202,7 @@ class ContextualizedSourceState(CoreasonBaseState):
 
 
 class EpistemicUpsamplingTask(CoreasonBaseState):
+    topology_class: Literal["epistemic_upsampling_task"] = Field(default="epistemic_upsampling_task")
     r"""
     AGENT INSTRUCTION: Authorizes a connectionist agent to execute an abductive leap, reversing lossy compression via context.
 
@@ -2783,6 +2784,7 @@ class MultimodalTokenAnchorState(CoreasonBaseState):
 
 
 class RollbackIntent(CoreasonBaseState):
+    topology_class: Literal["rollback_intent"] = Field(default="rollback_intent")
     """
     AGENT INSTRUCTION: A kinetic execution trigger initiating a macroscopic Pearlian
     counterfactual reversal, mathematically rewinding the state vector to a pristine historical
@@ -2820,6 +2822,7 @@ class RollbackIntent(CoreasonBaseState):
 
 
 class StateMutationIntent(CoreasonBaseState):
+    topology_class: Literal["state_mutation_intent"] = Field(default="state_mutation_intent")
     """
     AGENT INSTRUCTION: Implements the formal RFC 6902 JSON Patch standard to execute atomic,
     deterministic state vector mutations across the swarm's N-dimensional blackboard. As an
@@ -3594,6 +3597,7 @@ class AmbientState(CoreasonBaseState):
 
 
 class AnalogicalMappingTask(CoreasonBaseState):
+    topology_class: Literal["analogical_mapping_task"] = Field(default="analogical_mapping_task")
     """
     AGENT INSTRUCTION: Formalizes Structure-Mapping Theory (Gentner) to execute
     systemic cross-domain lateral thinking. As a ...Task suffix, this represents an
@@ -3821,6 +3825,7 @@ class BoundedInterventionScopePolicy(CoreasonBaseState):
 
 
 class BoundedJSONRPCIntent(CoreasonBaseState):
+    topology_class: Literal["bounded_json_rpc_intent"] = Field(default="bounded_json_rpc_intent")
     """
     AGENT INSTRUCTION: Enforces the formal JSON-RPC 2.0 specification as a stateless,
     deterministic message-passing protocol, acting as the primary algorithmic firewall
@@ -5408,6 +5413,7 @@ class OpticalParsingSLA(CoreasonBaseState):
 
 
 class EpistemicTransmutationTask(CoreasonBaseState):
+    topology_class: Literal["epistemic_transmutation_task"] = Field(default="epistemic_transmutation_task")
     """
     AGENT INSTRUCTION: Orchestrates Cross-Modal Representation Alignment,
     deterministically transmuting unstructured artifacts into machine-readable
@@ -7458,7 +7464,16 @@ type AnyIntent = Annotated[
     | EpistemicPrologPremise
     | CausalPropagationIntent
     | RDFSerializationIntent
-    | SPARQLQueryIntent,
+    | SPARQLQueryIntent
+    | AnalogicalMappingTask
+    | BoundedJSONRPCIntent
+    | ChaosExperimentTask
+    | EpistemicTransmutationTask
+    | EpistemicUpsamplingTask
+    | InterventionalCausalTask
+    | MCPClientIntent
+    | RollbackIntent
+    | StateMutationIntent,
     Field(discriminator="topology_class"),
 ]
 
@@ -7598,6 +7613,7 @@ class InterventionIntent(CoreasonBaseState):
 
 
 class InterventionalCausalTask(CoreasonBaseState):
+    topology_class: Literal["interventional_causal_task"] = Field(default="interventional_causal_task")
     """
     AGENT INSTRUCTION: Represents a formal Pearlian Do-Operator (P(y|do(X=x))) intervention, forcefully severing a variable from its historical back-door causal mechanisms to prove direct causal influence.
 
@@ -8625,6 +8641,7 @@ class OntologicalSurfaceProjectionManifest(CoreasonBaseState):
 
 
 class MCPClientIntent(BoundedJSONRPCIntent):
+    topology_class: Literal["mcp_client_intent"] = Field(default="mcp_client_intent")
     """
     AGENT INSTRUCTION: An inherited JSON-RPC 2.0 substrate specifically binding Model Context Protocol (MCP) client intent emissions to the frontend UI. As an ...Intent suffix, this represents an authorized kinetic execution trigger.
     CAUSAL AFFORDANCE: Executes an exact semantic signal (Literal["mcp.ui.emit_intent"]) to bubble internal agent states (like drafting or adjudication) to the human operator.
@@ -10271,6 +10288,7 @@ class SteadyStateHypothesisState(CoreasonBaseState):
 
 
 class ChaosExperimentTask(CoreasonBaseState):
+    topology_class: Literal["chaos_experiment_task"] = Field(default="chaos_experiment_task")
     """
     AGENT INSTRUCTION: Orchestrates an automated steady-state hypothesis falsification loop
     via structured Chaos Engineering. As a ...Task suffix, this represents an authorized
