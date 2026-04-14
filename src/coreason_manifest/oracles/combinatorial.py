@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 # Copyright (c) 2026 CoReason, Inc
 #
 # This software is proprietary and dual-licensed
@@ -7,12 +9,13 @@
 # Commercial use beyond a 30-day trial requires a separate license
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
-
-import threading
+import multiprocessing
+import queue as pyqueue
 import time
+import typing
 
-import clingo  # type: ignore[import-not-found]
-from clingo.ast import (  # type: ignore[import-not-found]
+import clingo  # type: ignore[import-not-found, import-untyped, misc, unused-ignore]
+from clingo.ast import (  # type: ignore[import-not-found, import-untyped, misc, unused-ignore]
     ASTType,
     Function,
     Literal,
@@ -22,7 +25,7 @@ from clingo.ast import (  # type: ignore[import-not-found]
     Transformer,
     parse_string,
 )
-from clingo.control import Control  # type: ignore[import-not-found]
+from clingo.control import Control  # type: ignore[import-not-found, import-untyped, misc, unused-ignore]
 
 from coreason_manifest.spec.ontology import (
     CombinatorialCounterModel,
@@ -31,7 +34,7 @@ from coreason_manifest.spec.ontology import (
 )
 
 
-class AssumptionTransformer(Transformer):  # type: ignore[misc]
+class AssumptionTransformer(Transformer):  # type: ignore[import-not-found, import-untyped, misc, unused-ignore]
     def __init__(self, rule_map: dict[str, str]) -> None:
         self.rule_idx = 0
         self.rule_map = rule_map
@@ -52,33 +55,22 @@ class AssumptionTransformer(Transformer):  # type: ignore[misc]
         return rule.update(body=new_body)
 
 
-class CombinatorialSolverOracle:
-    """The combinatorial execution bridge between the Python ontology and the C-backed clingo engine."""
-
-    @staticmethod
-    def solve(
-        premise: EpistemicLogicPremise, event_cid: str, provenance_id: str, timeout_ms: int = 10000
-    ) -> FormalLogicProofReceipt:
+def _clingo_isolated_worker(
+    asp_program: str, event_cid: str, provenance_id: str, queue: multiprocessing.Queue[FormalLogicProofReceipt]
+) -> None:
+    try:
         ctl = Control(["0"])
+        parsed_rules = []
 
-        timeout_sec = timeout_ms / 1000.0
-
-        def interrupt() -> None:
-            ctl.interrupt()
-
-        timer = threading.Timer(timeout_sec, interrupt)
+        def on_statement(stm: clingo.ast.AST) -> None:
+            parsed_rules.append(stm)
 
         try:
-            parsed_rules = []
-
-            def on_statement(stm: clingo.ast.AST) -> None:
-                parsed_rules.append(stm)
-
-            try:
-                parse_string(premise.asp_program, on_statement)
-            except RuntimeError as e:
-                # Syntax hallucination handling
-                return FormalLogicProofReceipt(
+            parse_string(asp_program, on_statement)
+        except RuntimeError as e:
+            # Syntax hallucination handling
+            queue.put(
+                FormalLogicProofReceipt(
                     satisfiability="UNKNOWN",
                     event_cid=event_cid,
                     causal_provenance_id=provenance_id,
@@ -89,67 +81,71 @@ class CombinatorialSolverOracle:
                     ),
                     answer_sets=[],
                 )
+            )
+            return
 
-            rule_map: dict[str, str] = {}
-            transformer = AssumptionTransformer(rule_map)
+        rule_map: dict[str, str] = {}
+        transformer = AssumptionTransformer(rule_map)
 
-            with ProgramBuilder(ctl) as builder:
-                for stm in parsed_rules:
-                    if stm.ast_type == ASTType.Rule:
-                        new_stm = transformer(stm)
-                        builder.add(new_stm)
+        with ProgramBuilder(ctl) as builder:
+            for stm in parsed_rules:
+                if stm.ast_type == ASTType.Rule:
+                    new_stm = transformer(stm)
+                    builder.add(new_stm)
 
-                        parsed_choice: list[clingo.ast.AST] = []
+                    parsed_choice: list[clingo.ast.AST] = []
 
-                        def on_choice(s: clingo.ast.AST, pc: list[clingo.ast.AST] = parsed_choice) -> None:
-                            pc.append(s)
+                    def on_choice(s: clingo.ast.AST, pc: list[clingo.ast.AST] = parsed_choice) -> None:
+                        pc.append(s)
 
-                        parse_string(f"{{ __assume_{transformer.rule_idx - 1} }}.", on_choice)
-                        for cstm in parsed_choice:
-                            if cstm.ast_type == ASTType.Rule:
-                                builder.add(cstm)
-                    else:
-                        builder.add(stm)
+                    parse_string(f"{{ __assume_{transformer.rule_idx - 1} }}.", on_choice)
+                    for cstm in parsed_choice:
+                        if cstm.ast_type == ASTType.Rule:
+                            builder.add(cstm)
+                else:
+                    builder.add(stm)
 
-            ctl.ground([("base", [])])
+        ctl.ground([("base", [])])
 
-            timer.start()
+        models = []
 
-            models = []
+        def on_model(m: clingo.Model) -> None:
+            symbols = [str(sym) for sym in m.symbols(shown=True) if not sym.name.startswith("__assume_")]
+            models.append(symbols)
 
-            def on_model(m: clingo.Model) -> None:
-                symbols = [str(sym) for sym in m.symbols(shown=True) if not sym.name.startswith("__assume_")]
-                models.append(symbols)
+        assumptions = [(clingo.Function(k), True) for k in rule_map]
 
-            assumptions = [(clingo.Function(k), True) for k in rule_map]
+        current_timestamp = time.time()
 
-            current_timestamp = time.time()
+        with ctl.solve(yield_=True, assumptions=assumptions, on_model=on_model) as handle:
+            for _ in handle:
+                pass
+            result = handle.get()
 
-            with ctl.solve(yield_=True, assumptions=assumptions, on_model=on_model) as handle:
-                for _ in handle:
-                    pass
-                result = handle.get()
-
-                if result.satisfiable:
-                    return FormalLogicProofReceipt(
+            if result.satisfiable:
+                queue.put(
+                    FormalLogicProofReceipt(
                         satisfiability="SATISFIABLE",
                         event_cid=event_cid,
                         causal_provenance_id=provenance_id,
                         timestamp=current_timestamp,
                         answer_sets=models,
                     )
-                if result.unsatisfiable:
-                    core_symbols = handle.core()
-                    # Fallback to map from integers to symbols if handle.core() returns literal integers
-                    if len(core_symbols) > 0 and isinstance(core_symbols[0], int):
-                        core_syms_mapped: list[clingo.Symbol] = []
-                        for lit in core_symbols:
-                            core_syms_mapped.extend(sa.symbol for sa in ctl.symbolic_atoms if sa.literal == lit)
-                        core_symbols = core_syms_mapped
+                )
+                return
+            if result.unsatisfiable:
+                core_symbols = handle.core()
+                # Fallback to map from integers to symbols if handle.core() returns literal integers
+                if len(core_symbols) > 0 and isinstance(core_symbols[0], int):
+                    core_syms_mapped: list[clingo.Symbol] = []
+                    for lit in core_symbols:
+                        core_syms_mapped.extend(sa.symbol for sa in ctl.symbolic_atoms if sa.literal == lit)
+                    core_symbols = core_syms_mapped
 
-                    unsat_core_strings = [rule_map[sym.name] for sym in core_symbols if sym.name in rule_map]
+                unsat_core_strings = [rule_map[sym.name] for sym in core_symbols if sym.name in rule_map]
 
-                    return FormalLogicProofReceipt(
+                queue.put(
+                    FormalLogicProofReceipt(
                         satisfiability="UNSATISFIABLE",
                         event_cid=event_cid,
                         causal_provenance_id=provenance_id,
@@ -160,9 +156,12 @@ class CombinatorialSolverOracle:
                         ),
                         answer_sets=[],
                     )
+                )
+                return
 
-        except RuntimeError as e:
-            return FormalLogicProofReceipt(
+    except RuntimeError as e:
+        queue.put(
+            FormalLogicProofReceipt(
                 satisfiability="UNKNOWN",
                 event_cid=event_cid,
                 causal_provenance_id=provenance_id,
@@ -173,13 +172,58 @@ class CombinatorialSolverOracle:
                 ),
                 answer_sets=[],
             )
-        finally:
-            timer.cancel()
+        )
+        return
 
-        return FormalLogicProofReceipt(
+    queue.put(
+        FormalLogicProofReceipt(
             satisfiability="UNKNOWN",
             event_cid=event_cid,
             causal_provenance_id=provenance_id,
             timestamp=time.time(),
             answer_sets=[],
         )
+    )
+
+
+class CombinatorialSolverOracle:
+    """The combinatorial execution bridge between the Python ontology and the C-backed clingo engine."""
+
+    @staticmethod
+    def solve(
+        premise: EpistemicLogicPremise, event_cid: str, provenance_id: str, timeout_ms: int = 10000
+    ) -> FormalLogicProofReceipt:
+        timeout_sec = timeout_ms / 1000.0
+
+        ctx = multiprocessing.get_context("spawn")
+        mp_queue = ctx.Queue()
+
+        process = ctx.Process(
+            target=_clingo_isolated_worker, args=(premise.asp_program, event_cid, provenance_id, mp_queue)
+        )
+
+        process.start()
+
+        try:
+            # Await the queue payload directly, utilizing the timeout here.
+            # This prevents IPC pipe buffer deadlocks.
+            receipt = mp_queue.get(timeout=timeout_sec)
+            process.join()
+            return typing.cast("FormalLogicProofReceipt", receipt)
+        except pyqueue.Empty:
+            # Thermodynamic bound exceeded OR deadlock detected. Drop the guillotine.
+            if process.is_alive():
+                process.kill()
+                process.join()
+
+            return FormalLogicProofReceipt(
+                satisfiability="UNKNOWN",
+                event_cid=event_cid,
+                causal_provenance_id=provenance_id,
+                timestamp=time.time(),
+                counter_model=CombinatorialCounterModel(
+                    failed_premise_cid=provenance_id,
+                    unsat_core=["Execution terminated: Thermodynamic bound exceeded (SIGKILL applied)."],
+                ),
+                answer_sets=[],
+            )

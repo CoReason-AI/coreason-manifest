@@ -1,3 +1,6 @@
+import jsonschema  # type: ignore[import-not-found, import-untyped, misc, unused-ignore]
+import pytest
+
 from coreason_manifest.spec.mcp import MCPToolDefinition
 from coreason_manifest.utils.mcp_adapters import (
     generate_clingo_mcp_tool,
@@ -41,3 +44,17 @@ def test_generate_prolog_mcp_tool() -> None:
     assert tool.input_schema["required"] == ["prolog_query"]
     dump = tool.model_dump(by_alias=True)
     assert "inputSchema" in dump
+
+
+def test_clingo_mcp_tool_hallucination_rejection() -> None:
+    tool = generate_clingo_mcp_tool()
+    schema = tool.input_schema
+
+    payload = {"asp_program": "Sure, here is the rule: a :- b."}
+
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(instance=payload, schema=schema)
+
+    # STRICT ASSERTION: Valid multi-line ASP string MUST pass validation
+    valid_payload = {"asp_program": "node(1..3).\ncolor(r;g;b).\nassign(X, Y) :- node(X), color(Y)."}
+    jsonschema.validate(instance=valid_payload, schema=schema)

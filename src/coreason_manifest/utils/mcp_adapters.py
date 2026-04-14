@@ -15,11 +15,15 @@ from coreason_manifest.spec.ontology import (
 def generate_lean4_mcp_tool() -> MCPToolDefinition:
     return MCPToolDefinition(
         name="verify_lean4_theorem",
-        description="Use this tool to evaluate constructive mathematical proofs and universal invariants in Lean 4. Returns the verification status or the failing tactic state.",
+        description="Use this tool to evaluate constructive mathematical proofs and universal invariants in Lean 4. Returns the verification status or the failing tactic state. STRICT CONSTRAINT: Must begin exactly with a Lean 4 declaration keyword (e.g., 'theorem', 'lemma'). No markdown formatting.",
         input_schema={
             "type": "object",
             "properties": {
-                "formal_statement": {"type": "string", "maxLength": 100000},
+                "formal_statement": {
+                    "type": "string",
+                    "maxLength": 100000,
+                    "pattern": "^(theorem|lemma|def|example|axiom|inductive|structure|class|instance)\\s+[a-zA-Z0-9_]+[\\s\\S]*",
+                },
                 "tactic_proof": {"type": "string", "maxLength": 100000},
             },
             "required": ["formal_statement", "tactic_proof"],
@@ -30,11 +34,15 @@ def generate_lean4_mcp_tool() -> MCPToolDefinition:
 def generate_clingo_mcp_tool() -> MCPToolDefinition:
     return MCPToolDefinition(
         name="execute_clingo_falsification",
-        description="Use this tool to hunt for counter-models and evaluate NP-hard constraint satisfaction problems using Answer Set Programming (ASP).",
+        description="Use this tool to hunt for counter-models and evaluate NP-hard constraint satisfaction problems using Answer Set Programming (ASP). STRICT CONSTRAINT: Must contain ONLY valid ASP syntax. Conversational text will trigger an immediate rejection. Must terminate with a period.",
         input_schema={
             "type": "object",
             "properties": {
-                "asp_program": {"type": "string", "maxLength": 65536},
+                "asp_program": {
+                    "type": "string",
+                    "maxLength": 65536,
+                    "pattern": "^(?![\\s\\S]*([Hh][Ee][Rr][Ee] [Ii][Ss]|[Cc][Ee][Rr][Tt][Aa][Ii][Nn][Ll][Yy]|[Ss][Uu][Rr][Ee]|[Bb][Ee][Ll][Oo][Ww] [Ii][Ss]|[Ii] [Hh][Aa][Vv][Ee]))[\\s\\S]*\\.$",
+                },
                 "max_models": {"type": "integer", "default": 1},
             },
             "required": ["asp_program"],
@@ -45,10 +53,13 @@ def generate_clingo_mcp_tool() -> MCPToolDefinition:
 def generate_prolog_mcp_tool() -> MCPToolDefinition:
     return MCPToolDefinition(
         name="execute_prolog_deduction",
-        description="Use this tool for evidentiary grounding, exact subgraph isomorphism, and traversing hierarchical knowledge bases via backward-chaining resolution.",
+        description="Use this tool for evidentiary grounding, exact subgraph isomorphism, and traversing hierarchical knowledge bases via backward-chaining resolution. STRICT CONSTRAINT: Must be a valid Prolog query ending with a period (e.g., 'ancestor(john, X).').",
         input_schema={
             "type": "object",
-            "properties": {"prolog_query": {"type": "string"}, "ephemeral_facts": {"type": "string"}},
+            "properties": {
+                "prolog_query": {"type": "string", "pattern": "^[a-z][a-zA-Z0-9_]*\\([\\s\\S]*\\)\\.$"},
+                "ephemeral_facts": {"type": "string"},
+            },
             "required": ["prolog_query"],
         },
     )
