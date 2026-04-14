@@ -6954,28 +6954,25 @@ class EpistemicConstraintPolicy(CoreasonBaseState):
     def validate_ast_safety(cls, v: str) -> str:
         """
         AGENT INSTRUCTION: Automata Theory bounds for AST validation.
-        EPISTEMIC BOUNDS: Mechanically parses the string into a syntax tree and explicitly quarantines forbidden kinetic nodes (e.g., imports, assignments, function calls) to mathematically prevent Arbitrary Code Execution (ACE).
+        EPISTEMIC BOUNDS: Mechanically parses the string into a syntax tree and explicitly quarantines forbidden kinetic nodes via a Default-Deny whitelist to mathematically prevent Arbitrary Code Execution (ACE).
         """
+        allowlist = (
+            ast.Expression, ast.Constant, ast.Name, ast.Load, ast.Dict, ast.List, ast.Tuple, ast.Set,
+            ast.BinOp, ast.UnaryOp, ast.operator, ast.unaryop, ast.Subscript, ast.Slice,
+            ast.Compare, ast.cmpop, ast.Attribute, ast.Call, ast.keyword, ast.BoolOp, ast.boolop
+        )
         try:
             tree = ast.parse(v, mode="eval")
             for node in ast.walk(tree):
-                # Blacklist dangerous kinetic nodes
-                if isinstance(
-                    node,
-                    (
-                        ast.Assign,
-                        ast.AnnAssign,
-                        ast.AugAssign,
-                        ast.Delete,
-                        ast.Import,
-                        ast.ImportFrom,
-                        ast.Yield,
-                        ast.YieldFrom,
-                        ast.Await,
-                        ast.Call,
-                    ),
-                ):
+                if not isinstance(node, allowlist):
                     raise ValueError(f"Kinetic execution bleed detected: Forbidden AST node {type(node).__name__}")
+                if isinstance(node, ast.Pow):
+                    raise ValueError("Kinetic execution bleed detected: Forbidden AST node Pow")
+                if isinstance(node, ast.Attribute) and node.attr.startswith("__"):
+                    raise ValueError(f"Kinetic execution bleed detected: Forbidden attribute {node.attr}")
+                if isinstance(node, ast.Call):
+                    if not isinstance(node.func, ast.Name) or node.func.id not in {"len", "sum", "min", "max", "abs", "round", "all", "any"}:
+                        raise ValueError(f"Kinetic execution bleed detected: Forbidden function call")
         except SyntaxError as e:
             raise ValueError(f"Invalid syntax in constraint AST: {e}") from e
         return v
