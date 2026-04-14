@@ -48,6 +48,63 @@ type JsonPrimitiveState = (
 )
 
 
+# ---------------------------------------------------------------------------
+# Pure-Python DAG utilities (fallback when rustworkx is unavailable,
+# e.g. on free-threaded Python 3.14t where no C-extension wheels exist).
+# ---------------------------------------------------------------------------
+try:
+    import rustworkx as _rx  # type: ignore[import-untyped]
+
+    _HAS_RUSTWORKX: bool = True
+except ModuleNotFoundError:
+    _HAS_RUSTWORKX = False
+
+
+def _pure_python_is_dag(adjacency: dict[str, list[str]]) -> bool:
+    """Kahn's algorithm – returns True iff the graph is a DAG (no cycles)."""
+    in_degree: dict[str, int] = {n: 0 for n in adjacency}
+    for targets in adjacency.values():
+        for t in targets:
+            in_degree[t] = in_degree.get(t, 0) + 1
+
+    queue: list[str] = [n for n, d in in_degree.items() if d == 0]
+    visited = 0
+    while queue:
+        node = queue.pop()
+        visited += 1
+        for t in adjacency.get(node, []):
+            in_degree[t] -= 1
+            if in_degree[t] == 0:
+                queue.append(t)
+    return visited == len(in_degree)
+
+
+def _pure_python_longest_path_length(adjacency: dict[str, list[str]]) -> int:
+    """Longest path in a DAG via topological-order dynamic programming. Returns edge count."""
+    in_degree: dict[str, int] = {n: 0 for n in adjacency}
+    for targets in adjacency.values():
+        for t in targets:
+            in_degree[t] = in_degree.get(t, 0) + 1
+
+    topo: list[str] = []
+    queue: list[str] = [n for n, d in in_degree.items() if d == 0]
+    while queue:
+        node = queue.pop()
+        topo.append(node)
+        for t in adjacency.get(node, []):
+            in_degree[t] -= 1
+            if in_degree[t] == 0:
+                queue.append(t)
+
+    dist: dict[str, int] = {n: 0 for n in adjacency}
+    for node in topo:
+        for t in adjacency.get(node, []):
+            candidate = dist[node] + 1
+            if candidate > dist[t]:
+                dist[t] = candidate
+    return max(dist.values()) if dist else 0
+
+
 def _validate_payload_bounds(
     value: JsonPrimitiveState,
     current_depth: int = 0,
@@ -4734,25 +4791,32 @@ class DocumentLayoutManifest(CoreasonBaseState):
 
     @model_validator(mode="after")
     def verify_dag_and_integrity(self) -> Self:
-        import rustworkx as rx
-
-        graph = rx.PyDiGraph()
-        node_map = {}
-        for node_cid in self.blocks:
-            node_map[node_cid] = graph.add_node(node_cid)
-
         for source, target in self.chronological_flow_edges:
             if source not in self.blocks:
                 raise ValueError(f"Source block '{source}' does not exist.")
             if target not in self.blocks:
                 raise ValueError(f"Target block '{target}' does not exist.")
-            if source not in node_map:
-                node_map[source] = graph.add_node(source)
-            if target not in node_map:
-                node_map[target] = graph.add_node(target)
-            graph.add_edge(node_map[source], node_map[target], None)
 
-        if not rx.is_directed_acyclic_graph(graph):
+        if _HAS_RUSTWORKX:
+            graph = _rx.PyDiGraph()  # type: ignore[union-attr]
+            node_map: dict[str, int] = {}
+            for node_cid in self.blocks:
+                node_map[node_cid] = graph.add_node(node_cid)
+            for source, target in self.chronological_flow_edges:
+                if source not in node_map:
+                    node_map[source] = graph.add_node(source)
+                if target not in node_map:
+                    node_map[target] = graph.add_node(target)
+                graph.add_edge(node_map[source], node_map[target], None)
+            is_dag = _rx.is_directed_acyclic_graph(graph)  # type: ignore[union-attr]
+        else:
+            adjacency: dict[str, list[str]] = {n: [] for n in self.blocks}
+            for source, target in self.chronological_flow_edges:
+                adjacency.setdefault(source, []).append(target)
+                adjacency.setdefault(target, [])
+            is_dag = _pure_python_is_dag(adjacency)
+
+        if not is_dag:
             raise ValueError("Reading order contains a cyclical contradiction.")
 
         return self
@@ -10783,20 +10847,29 @@ class DiscourseTreeManifest(CoreasonBaseState):
         if self.root_node_cid not in self.discourse_nodes:
             raise ValueError("Topological Contradiction: root_node_cid not found in discourse_nodes.")
 
-        import rustworkx as rx
-
-        graph = rx.PyDiGraph()
-        node_map = {}
-        for node_id in self.discourse_nodes:
-            node_map[node_id] = graph.add_node(node_id)
-
+        # Validate ghost pointers before building graph
         for node_id, node_state in self.discourse_nodes.items():
             if node_state.parent_node_cid is not None:
                 if node_state.parent_node_cid not in self.discourse_nodes:
                     raise ValueError(f"Ghost pointer: Parent node {node_state.parent_node_cid} not found.")
-                graph.add_edge(node_map[node_state.parent_node_cid], node_map[node_id], None)
 
-        if not rx.is_directed_acyclic_graph(graph):
+        if _HAS_RUSTWORKX:
+            graph = _rx.PyDiGraph()  # type: ignore[union-attr]
+            node_map: dict[str, int] = {}
+            for node_id in self.discourse_nodes:
+                node_map[node_id] = graph.add_node(node_id)
+            for node_id, node_state in self.discourse_nodes.items():
+                if node_state.parent_node_cid is not None:
+                    graph.add_edge(node_map[node_state.parent_node_cid], node_map[node_id], None)
+            is_dag = _rx.is_directed_acyclic_graph(graph)  # type: ignore[union-attr]
+        else:
+            adjacency: dict[str, list[str]] = {n: [] for n in self.discourse_nodes}
+            for node_id, node_state in self.discourse_nodes.items():
+                if node_state.parent_node_cid is not None:
+                    adjacency[node_state.parent_node_cid].append(node_id)
+            is_dag = _pure_python_is_dag(adjacency)
+
+        if not is_dag:
             raise ValueError("Topological Contradiction: Discourse tree contains a cyclical reference.")
 
         return self
@@ -11796,19 +11869,25 @@ class HierarchicalDOMManifest(CoreasonBaseState):
         if self.root_block_cid not in self.blocks:
             raise ValueError("Topological Contradiction: root_block_cid not found in blocks.")
 
-        import rustworkx as rx
-
-        graph = rx.PyDiGraph()
-        node_map = {}
-        for node_id in self.blocks:
-            node_map[node_id] = graph.add_node(node_id)
-
         for source, target in self.containment_edges:
             if source not in self.blocks or target not in self.blocks:
                 raise ValueError("Ghost pointer: Containment edge references undefined block.")
-            graph.add_edge(node_map[source], node_map[target], None)
 
-        if not rx.is_directed_acyclic_graph(graph):
+        if _HAS_RUSTWORKX:
+            graph = _rx.PyDiGraph()  # type: ignore[union-attr]
+            node_map: dict[str, int] = {}
+            for node_id in self.blocks:
+                node_map[node_id] = graph.add_node(node_id)
+            for source, target in self.containment_edges:
+                graph.add_edge(node_map[source], node_map[target], None)
+            is_dag = _rx.is_directed_acyclic_graph(graph)  # type: ignore[union-attr]
+        else:
+            adjacency: dict[str, list[str]] = {n: [] for n in self.blocks}
+            for source, target in self.containment_edges:
+                adjacency[source].append(target)
+            is_dag = _pure_python_is_dag(adjacency)
+
+        if not is_dag:
             raise ValueError("Topological Contradiction: Hierarchical DOM tree contains a spatial cycle.")
 
         return self
@@ -12139,29 +12218,35 @@ class DAGTopologyManifest(CoreasonBaseState):
         if self.lifecycle_phase == "draft":
             return self
 
-        import rustworkx as rx
-
-        graph = rx.PyDiGraph()
-        node_map = {}
-        for node_cid in self.nodes:
-            node_map[node_cid] = graph.add_node(node_cid)
-
+        # Validate edge endpoints first (graph-library independent)
+        adjacency: dict[str, list[str]] = {n: [] for n in self.nodes}
         for source, target in self.edges:
             if source not in self.nodes:
                 raise ValueError(f"Edge source '{source}' does not exist in nodes registry.")
             if target not in self.nodes:
                 raise ValueError(f"Edge target '{target}' does not exist in nodes registry.")
-            graph.add_edge(node_map[source], node_map[target], None)
+            adjacency[source].append(target)
 
-        for node_id, node_idx in node_map.items():
-            if graph.out_degree(node_idx) > self.max_fan_out:
+        # Fan-out check (pure-Python, no graph library needed)
+        for node_id, targets in adjacency.items():
+            if len(targets) > self.max_fan_out:
                 raise ValueError(f"Topological Violation: Node '{node_id}' exceeds max_fan_out of {self.max_fan_out}.")
 
         if not self.allow_cycles:
-            if not rx.is_directed_acyclic_graph(graph):
-                raise TopologicalParadoxFalsification("Graph contains cycles")
-
-            max_calculated_depth = rx.dag_longest_path_length(graph) + 1 if len(self.nodes) > 0 else 0
+            if _HAS_RUSTWORKX:
+                graph = _rx.PyDiGraph()  # type: ignore[union-attr]
+                node_map: dict[str, int] = {}
+                for node_cid in self.nodes:
+                    node_map[node_cid] = graph.add_node(node_cid)
+                for source, target in self.edges:
+                    graph.add_edge(node_map[source], node_map[target], None)
+                if not _rx.is_directed_acyclic_graph(graph):  # type: ignore[union-attr]
+                    raise TopologicalParadoxFalsification("Graph contains cycles")
+                max_calculated_depth = (_rx.dag_longest_path_length(graph) + 1) if len(self.nodes) > 0 else 0  # type: ignore[union-attr]
+            else:
+                if not _pure_python_is_dag(adjacency):
+                    raise TopologicalParadoxFalsification("Graph contains cycles")
+                max_calculated_depth = (_pure_python_longest_path_length(adjacency) + 1) if len(self.nodes) > 0 else 0
 
             if max_calculated_depth > self.max_depth:
                 raise ValueError(
