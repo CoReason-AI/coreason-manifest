@@ -30,7 +30,6 @@
 [![License](https://img.shields.io/badge/License-Prosperity%203.0-blue?style=flat-square)](./LICENSE)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-green?style=flat-square)](./SECURITY.md)
 
-[![Codecov Sunburst](https://codecov.io/gh/CoReason-AI/coreason-manifest/graphs/sunburst.svg)](https://app.codecov.io/gh/CoReason-AI/coreason-manifest)
 
 > **"This package is the definitive source of truth. If it isn't in the manifest, it doesn't exist. If it violates the manifest, it doesn't run."**
 
