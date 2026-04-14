@@ -1,7 +1,7 @@
 # CoReason Manifest
 
-[![PyPI](https://img.shields.io/pypi/v/coreason_manifest?style=flat-square&logo=pypi&logoColor=white&label=PyPI)](https://pypi.org/project/coreason_manifest/)
-[![PyPI Downloads](https://img.shields.io/pypi/dm/coreason_manifest?style=flat-square)](https://pypi.org/project/coreason_manifest/)
+[![PyPI](https://img.shields.io/pypi/v/coreason-manifest?style=flat-square&logo=pypi&logoColor=white&label=PyPI)](https://pypi.org/project/coreason-manifest/)
+[![PyPI Downloads](https://img.shields.io/pypi/dm/coreason-manifest?style=flat-square)](https://pypi.org/project/coreason-manifest/)
 [![Crates.io](https://img.shields.io/crates/v/coreason-manifest?style=flat-square&logo=rust&label=Crates.io)](https://crates.io/crates/coreason-manifest)
 [![Crates Downloads](https://img.shields.io/crates/dv/coreason-manifest?style=flat-square&logo=rust)](https://crates.io/crates/coreason-manifest)
 [![npm](https://img.shields.io/npm/v/@coreason/coreason-manifest?style=flat-square&logo=npm&label=npm)](https://www.npmjs.com/package/@coreason/coreason-manifest)
@@ -24,9 +24,9 @@
 ![OSS-Fuzz](https://img.shields.io/badge/OSS--Fuzz-Pending-lightgray?style=flat-square)
 ![CII Best Practices](https://img.shields.io/badge/CII_Best_Practices-Pending-lightgray?style=flat-square)
 
-![Python Versions](https://img.shields.io/pypi/pyversions/coreason_manifest?style=flat-square&logo=python&logoColor=white)
-![Status](https://img.shields.io/pypi/status/coreason_manifest?style=flat-square)
-![Format](https://img.shields.io/pypi/format/coreason_manifest?style=flat-square)
+![Python Versions](https://img.shields.io/pypi/pyversions/coreason-manifest?style=flat-square&logo=python&logoColor=white)
+![Status](https://img.shields.io/pypi/status/coreason-manifest?style=flat-square)
+![Format](https://img.shields.io/pypi/format/coreason-manifest?style=flat-square)
 [![License](https://img.shields.io/badge/License-Prosperity%203.0-blue?style=flat-square)](./LICENSE)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-green?style=flat-square)](./SECURITY.md)
 
