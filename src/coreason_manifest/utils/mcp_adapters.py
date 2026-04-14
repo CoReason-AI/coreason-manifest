@@ -1,4 +1,4 @@
-from coreason_manifest.spec.mcp import MCPToolDefinition
+from coreason_manifest.spec.ontology import MCPToolDefinition
 
 
 def generate_lean4_mcp_tool() -> MCPToolDefinition:

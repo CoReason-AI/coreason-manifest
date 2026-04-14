@@ -1,4 +1,4 @@
-from coreason_manifest.spec.mcp import MCPToolDefinition
+from coreason_manifest.spec.ontology import MCPToolDefinition
 from coreason_manifest.utils.mcp_adapters import (
     generate_clingo_mcp_tool,
     generate_lean4_mcp_tool,
