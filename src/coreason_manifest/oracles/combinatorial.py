@@ -10,6 +10,7 @@ from __future__ import annotations
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 import multiprocessing
+import queue as pyqueue
 import time
 import typing
 
@@ -195,18 +196,26 @@ class CombinatorialSolverOracle:
         timeout_sec = timeout_ms / 1000.0
 
         ctx = multiprocessing.get_context("spawn")
-        queue = ctx.Queue()
+        mp_queue = ctx.Queue()
 
         process = ctx.Process(
-            target=_clingo_isolated_worker, args=(premise.asp_program, event_cid, provenance_id, queue)
+            target=_clingo_isolated_worker, args=(premise.asp_program, event_cid, provenance_id, mp_queue)
         )
 
         process.start()
-        process.join(timeout_sec)
 
-        if process.is_alive():
-            process.kill()
+        try:
+            # Await the queue payload directly, utilizing the timeout here.
+            # This prevents IPC pipe buffer deadlocks.
+            receipt = mp_queue.get(timeout=timeout_sec)
             process.join()
+            return typing.cast("FormalLogicProofReceipt", receipt)
+        except pyqueue.Empty:
+            # Thermodynamic bound exceeded OR deadlock detected. Drop the guillotine.
+            if process.is_alive():
+                process.kill()
+                process.join()
+
             return FormalLogicProofReceipt(
                 satisfiability="UNKNOWN",
                 event_cid=event_cid,
@@ -218,14 +227,3 @@ class CombinatorialSolverOracle:
                 ),
                 answer_sets=[],
             )
-
-        if not queue.empty():
-            return typing.cast("FormalLogicProofReceipt", queue.get())
-
-        return FormalLogicProofReceipt(
-            satisfiability="UNKNOWN",
-            event_cid=event_cid,
-            causal_provenance_id=provenance_id,
-            timestamp=time.time(),
-            answer_sets=[],
-        )

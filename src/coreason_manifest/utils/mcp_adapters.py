@@ -22,7 +22,7 @@ def generate_lean4_mcp_tool() -> MCPToolDefinition:
                 "formal_statement": {
                     "type": "string",
                     "maxLength": 100000,
-                    "pattern": "^(theorem|lemma|def|example|axiom|inductive|structure|class|instance)\\s+[a-zA-Z0-9_]+.*",
+                    "pattern": "^(theorem|lemma|def|example|axiom|inductive|structure|class|instance)\\s+[a-zA-Z0-9_]+[\\s\\S]*",
                 },
                 "tactic_proof": {"type": "string", "maxLength": 100000},
             },
@@ -41,7 +41,7 @@ def generate_clingo_mcp_tool() -> MCPToolDefinition:
                 "asp_program": {
                     "type": "string",
                     "maxLength": 65536,
-                    "pattern": "^(?!.*([Hh][Ee][Rr][Ee] [Ii][Ss]|[Cc][Ee][Rr][Tt][Aa][Ii][Nn][Ll][Yy]|[Ss][Uu][Rr][Ee]|[Bb][Ee][Ll][Oo][Ww] [Ii][Ss]|[Ii] [Hh][Aa][Vv][Ee])).*\\.$",
+                    "pattern": "^(?![\\s\\S]*([Hh][Ee][Rr][Ee] [Ii][Ss]|[Cc][Ee][Rr][Tt][Aa][Ii][Nn][Ll][Yy]|[Ss][Uu][Rr][Ee]|[Bb][Ee][Ll][Oo][Ww] [Ii][Ss]|[Ii] [Hh][Aa][Vv][Ee]))[\\s\\S]*\\.$",
                 },
                 "max_models": {"type": "integer", "default": 1},
             },
@@ -57,7 +57,7 @@ def generate_prolog_mcp_tool() -> MCPToolDefinition:
         input_schema={
             "type": "object",
             "properties": {
-                "prolog_query": {"type": "string", "pattern": "^[a-z][a-zA-Z0-9_]*\\(.*\\)\\.$"},
+                "prolog_query": {"type": "string", "pattern": "^[a-z][a-zA-Z0-9_]*\\([\\s\\S]*\\)\\.$"},
                 "ephemeral_facts": {"type": "string"},
             },
             "required": ["prolog_query"],

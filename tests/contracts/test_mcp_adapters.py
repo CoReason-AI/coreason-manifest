@@ -55,6 +55,6 @@ def test_clingo_mcp_tool_hallucination_rejection() -> None:
     with pytest.raises(jsonschema.ValidationError):
         jsonschema.validate(instance=payload, schema=schema)
 
-    # Valid ASP string should pass validation
-    valid_payload = {"asp_program": "a :- b."}
+    # STRICT ASSERTION: Valid multi-line ASP string MUST pass validation
+    valid_payload = {"asp_program": "node(1..3).\ncolor(r;g;b).\nassign(X, Y) :- node(X), color(Y)."}
     jsonschema.validate(instance=valid_payload, schema=schema)
