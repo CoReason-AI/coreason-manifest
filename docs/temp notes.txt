@@ -1,0 +1,56 @@
+**Subject: Release Notes — Epic 1: Thermodynamic Decoupling (Universal Architectural Bounds)** ---
+
+# 🚀 Release Notes: coreason-manifest (Epic 1 Update)
+
+## Executive Summary
+We have successfully merged **Epic 1: Thermodynamic Decoupling** into the `coreason-manifest` ontology. This release fundamentally shifts the architectural philosophy of the CoReason stack. 
+
+Historically, the manifest conflated **Topological Shape** (pure mathematics) with **Thermodynamic Limits** (ephemeral hardware/business constraints). By enforcing arbitrary limits—such as 24-hour execution timeouts or 24GB VRAM ceilings—at the AST level, we artificially constrained the generative capacity of the swarm and forced brittle schema updates. 
+
+With this release, the Manifest now acts as a purely mathematical Universal Unified Ontology. The responsibility for enforcing physical hardware limits ("The Hardware Guillotine") has been entirely decoupled from the AST and shifted downstream to the `coreason-runtime` and `coreason-ecosystem` admission controllers.
+
+---
+
+## 🏗️ Key Architectural Changes
+
+### 1. Implementation of Universal Architectural Bounds (UAB)
+**What Changed:**
+All arbitrary `le=` limits representing physical, temporal, or economic constraints have been stripped from `pydantic.Field` and `Annotated` declarations. 
+* **Temporal Limits:** Previous constraints of `86400000` ms (24 hours), `86400` s, and `3600` s have been lifted.
+* **Spatial/Memory Limits:** Previous constraints of `100000000000` bytes (100GB VRAM) and `65536` (LoRA ranks) have been lifted.
+* **Economic Limits:** Previous constraints of `1000000000` (token/budget limits) and `10000.0` (Carbon/ESG bounds) have been lifted.
+
+In their place, we have instituted the **Universal Architectural Bound of `18446744073709551615`** (the absolute maximum value of an unsigned 64-bit integer, `u64`). 
+
+**Architectural Justification:**
+While pure mathematics allows for infinite dimensions, our serialization substrate does not. If an LLM generated a budget of $10^{100}$, it would successfully validate in Python but trigger a fatal integer overflow panic (`serde_json`) when crossing the FFI/IPC boundary into our Rust runtime. Capping these dimensions at the `u64` maximum achieves near-infinity for semantic modeling while structurally guaranteeing type-safety and preventing memory corruption across language boundaries. *Note: Pure mathematical geometries (e.g., Shannon Entropy `le=1.0`, Cosine Similarity `ge=-1.0`) remain untouched to preserve Euclidean and probabilistic invariants.*
+
+### 2. Refactoring of Mathematical Clamps
+**What Changed:**
+Dynamic integer clamping inside structural validators has been updated to respect the new Universal Architectural Bounds. The `min(val, <limit>)` operations have been rewritten to `min(val, 18446744073709551615)` across the following core contracts:
+* `RoutingFrontierPolicy._clamp_frontier_bounds_before`
+* `EscrowPolicy._clamp_escrow_magnitude_before`
+* `TokenBurnReceipt._clamp_token_burn_before`
+* `ComputeProvisioningIntent._clamp_max_budget_before`
+* `MarketContract._clamp_economic_escrow_invariant`
+
+**Architectural Justification:**
+Pre-validation clamping is required to prevent downstream integer overflow. By updating these hooks, we ensure that an agent attempting to allocate "infinite" resources is gracefully clamped to the UAB rather than causing a schema validation failure, passing the immense (but safe) integer down to the runtime where the orchestrator can reject it based on actual wallet balances or hardware capacity.
+
+### 3. Deprecation of the AST "Hardware Guillotine"
+**What Changed:**
+The `@model_validator` named `enforce_deployment_physics` has been completely purged from the `CognitiveAgentNodeProfile`.
+
+**Architectural Justification:**
+This validator historically hardcoded rules such as "KINETIC tiers cannot exceed 24.0 GB VRAM" and "CONFIDENTIAL workloads cannot route to untrusted providers." This is a catastrophic architectural conflation. The AST should not be aware of Nvidia's current VRAM configurations or the physical IP addresses of our compute cluster. By deleting this, the Manifest is now hardware-agnostic. 
+
+---
+
+## ⚠️ Downstream Impact & Migration Guide
+
+**Attention: `coreason-runtime` and `coreason-ecosystem` Maintainers**
+
+This release **removes the AST safety net** for payload size and duration limits. If a user requests a 10-year execution span, the `coreason-manifest` will now validate it and hand it to your engines. 
+
+1. **Implement Dynamic Admission Controllers:** You must immediately implement load-shedding and admission control at your ingress boundaries. Your Rust/C++ engines must evaluate the inbound `18446744073709551615` bounds against *actual local server capabilities* and gracefully return a `413 Payload Too Large` or `400 Bad Request` if the requested topology exceeds your physical thermodynamic budget.
+2. **Security Subnets:** Ecosystem routers must now dynamically read the `EpistemicSecurityPolicy` field and map it against live VPC rules, rather than relying on Pydantic to crash on invalid IP routing.

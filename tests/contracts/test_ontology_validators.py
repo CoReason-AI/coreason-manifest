@@ -820,33 +820,6 @@ def test_agent_node_profile_success() -> None:
     assert agent.security.epistemic_security == EpistemicSecurityPolicy.STANDARD
 
 
-def test_agent_node_profile_thermodynamic_paradox() -> None:
-    """Test that KINETIC tier cannot exceed 24.0 GB VRAM."""
-    with pytest.raises(ValueError, match="Thermodynamic Constraint Violated"):
-        CognitiveAgentNodeProfile(
-            description="Test agent",
-            hardware=SpatialHardwareProfile(compute_tier=ComputeTierProfile.KINETIC, min_vram_gb=25.0),
-        )
-
-
-def test_agent_node_profile_sovereign_execution_paradox() -> None:
-    """Test that CONFIDENTIAL workloads must use trusted endpoints only."""
-    with pytest.raises(ValueError, match="Sovereign Execution Violated"):
-        CognitiveAgentNodeProfile(
-            description="Test agent",
-            hardware=SpatialHardwareProfile(provider_whitelist=["vast", "aws"]),
-            security=EpistemicSecurityProfile(epistemic_security=EpistemicSecurityPolicy.CONFIDENTIAL),
-        )
-
-    # Success case for CONFIDENTIAL
-    agent = CognitiveAgentNodeProfile(
-        description="Test agent",
-        hardware=SpatialHardwareProfile(provider_whitelist=["aws", "gcp"]),
-        security=EpistemicSecurityProfile(epistemic_security=EpistemicSecurityPolicy.CONFIDENTIAL),
-    )
-    assert agent.security.epistemic_security == EpistemicSecurityPolicy.CONFIDENTIAL
-
-
 def test_sovereign_execution_allows_localhost_and_bare_metal() -> None:
     """Ensure CONFIDENTIAL workloads can run on local/bare-metal without triggering the paradox."""
     profile = CognitiveAgentNodeProfile(
@@ -908,22 +881,6 @@ def test_deprecated_solver_sympy() -> None:
             verified_theorem_hash="a" * 64,
         )
     assert "Input should be 'lean4' or 'z3'" in str(exc_info.value)
-
-
-def test_agent_node_profile_network_topology_paradox() -> None:
-    """Test that Mixnet routing requires strict network isolation."""
-    with pytest.raises(ValueError, match="Topology Routing Violated"):
-        CognitiveAgentNodeProfile(
-            description="Test agent",
-            security=EpistemicSecurityProfile(egress_obfuscation=True, network_isolation=False),
-        )
-
-    # Success case for Mixnet routing
-    agent = CognitiveAgentNodeProfile(
-        description="Test agent", security=EpistemicSecurityProfile(egress_obfuscation=True, network_isolation=True)
-    )
-    assert agent.security.egress_obfuscation is True
-    assert agent.security.network_isolation is True
 
 
 def test_refusal_to_reason_enforcement() -> None:

@@ -352,7 +352,7 @@ def test_peft_adapter_rank_upper_bound() -> None:
             adapter_cid="test_adapter",
             safetensors_hash="a" * 64,
             base_model_hash="b" * 64,
-            adapter_rank=65537,
+            adapter_rank=18446744073709551616,
             target_modules=["q_proj"],
         )
 

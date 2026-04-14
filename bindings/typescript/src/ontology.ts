@@ -6380,7 +6380,7 @@ export interface ActivationSteeringContract {
  *
  * CAUSAL AFFORDANCE: Unlocks kinetic tool execution strictly for the purpose of empirical observation, routing compute to maximize epistemic certainty (Shannon Information Gain) regarding a specific hypothesis to collapse the probability wave.
  *
- * EPISTEMIC BOUNDS: Mathematically constrained by expected_information_gain (a continuous float bounded between ge=0.0 and le=1.0 representing Shannon entropy reduction) and an economic execution_cost_budget_magnitude cap (ge=0, le=1000000000) to prevent thermodynamic runaway.
+ * EPISTEMIC BOUNDS: Mathematically constrained by expected_information_gain (a continuous float bounded between ge=0.0 and le=1.0 representing Shannon entropy reduction) and an economic execution_cost_budget_magnitude cap (ge=0, le=18446744073709551615) to prevent thermodynamic runaway.
  *
  * MCP ROUTING TRIGGERS: Active Inference, Expected Free Energy, Epistemic Foraging, Fristonian Mechanics, Shannon Entropy Reduction
  */
@@ -6600,7 +6600,7 @@ export interface AdversarialEmulationProfile {
  * automaton locks generation to ["pink", "brownian", "gaussian"]. The
  * velocity_profile is locked to ["minimum_jerk", "constant",
  * "fractional_brownian"]. target_overshoot_radius_pixels is bounded (ge=0,
- * le=5000) and hick_hyman_dwell_time_ms is bounded (ge=0, le=86400000).
+ * le=5000) and hick_hyman_dwell_time_ms is bounded (ge=0, le=18446744073709551615).
  *
  * MCP ROUTING TRIGGERS: Stochastic Process, Pink Noise, Brownian Motion,
  * Motor Control Perturbation, Hick-Hyman Law, Fitts's Law
@@ -6742,7 +6742,7 @@ export interface AuthorizationClaims {
  *
  * CAUSAL AFFORDANCE: Injects a competitive trajectory into the AuctionState order book, seeking authorization from the orchestrator to execute a specific TaskAnnouncementIntent branch.
  *
- * EPISTEMIC BOUNDS: Geometrically bounded by `estimated_cost_magnitude` (`le=1000000000`), `estimated_latency_ms` (`le=86400000, ge=0`), `estimated_carbon_gco2eq` (`le=10000.0, ge=0.0`), and `confidence_score` (`ge=0.0, le=1.0`). `agent_cid` is a 128-char CID.
+ * EPISTEMIC BOUNDS: Geometrically bounded by `estimated_cost_magnitude` (`le=18446744073709551615`), `estimated_latency_ms` (`le=18446744073709551615, ge=0`), `estimated_carbon_gco2eq` (`le=18446744073709551615.0, ge=0.0`), and `confidence_score` (`ge=0.0, le=1.0`). `agent_cid` is a 128-char CID.
  *
  * MCP ROUTING TRIGGERS: Expected Utility Theory, Multi-Objective Optimization, Epistemic Certainty, Spot Market Bid, Cost Estimation
  */
@@ -6776,7 +6776,7 @@ export interface AlgebraicRefinementContract {
  *
  * CAUSAL AFFORDANCE: Emits an ephemeral, 1D representation of the active probability distribution and execution progress to the external UI plane without halting the underlying generative trajectory.
  *
- * EPISTEMIC BOUNDS: Semantic `status_message` structurally clamped to `max_length=2000`. The continuous `progress` metric bounded by float limits (`le=1000000000.0`) allowing it to represent 0.0-1.0 ratios or exact token counts. The `thermodynamic_burn_rate` is physically bounded (`ge=0.0`), and `epistemic_entropy_score` is normalized (`ge=0.0, le=1.0`).
+ * EPISTEMIC BOUNDS: Semantic `status_message` structurally clamped to `max_length=2000`. The continuous `progress` metric bounded by float limits (`le=18446744073709551615.0`) allowing it to represent 0.0-1.0 ratios or exact token counts. The `thermodynamic_burn_rate` is physically bounded (`ge=0.0`), and `epistemic_entropy_score` is normalized (`ge=0.0, le=1.0`).
  *
  * MCP ROUTING TRIGGERS: Markov Blanket, Ephemeral Projection, Continuous Observability, Kinetic Execution State, UI Telemetry
  */
@@ -6920,7 +6920,7 @@ export interface PermissionBoundaryPolicy {
  *
  * CAUSAL AFFORDANCE: Acts as the hardware guillotine. Instructs the orchestrator's C++/Rust runtime to physically sever the thread, drop the VRAM context, or kill the WASM container if an agent exceeds its footprint, preventing Denial of Service (DoS).
  *
- * EPISTEMIC BOUNDS: Absolute physical limits are clamped via intrinsic Pydantic limits: `max_execution_time_ms` (`le=86400000`, `gt=0`) and `max_compute_footprint_mb` (`le=1000000000`, `gt=0`).
+ * EPISTEMIC BOUNDS: Absolute physical limits are clamped via intrinsic Pydantic limits: `max_execution_time_ms` (`le=18446744073709551615`, `gt=0`) and `max_compute_footprint_mb` (`le=18446744073709551615`, `gt=0`).
  *
  * MCP ROUTING TRIGGERS: Hardware Guillotine, Halting Problem Bounding, VRAM Allocation, Process Termination, Resource Exhaustion
  */
@@ -7064,7 +7064,7 @@ export interface OpticalMappingContract {
  *
  * CAUSAL AFFORDANCE: Physically isolates kinetic execution from the host OS via `execution_runtime` Literal `["wasm32-wasi", "riscv32-zkvm", "bpf"]`, authorizing the orchestrator to instantiate a temporary virtual machine strictly conforming to bounded network egress and subprocess rules.
  *
- * EPISTEMIC BOUNDS: The Halting Problem is managed via `max_ttl_seconds` (`le=86400, gt=0`), and memory exhaustion is prevented via `max_vram_mb` (`le=1000000000, gt=0`). The `@model_validator` enforces SHA-256 regex on `authorized_bytecode_hashes` and sorts them deterministically.
+ * EPISTEMIC BOUNDS: The Halting Problem is managed via `max_ttl_seconds` (`le=18446744073709551615, gt=0`), and memory exhaustion is prevented via `max_vram_mb` (`le=18446744073709551615, gt=0`). The `@model_validator` enforces SHA-256 regex on `authorized_bytecode_hashes` and sorts them deterministically.
  *
  * MCP ROUTING TRIGGERS: WebAssembly System Interface, Zero-Knowledge Virtual Machine, eBPF, Execution Sandbox, Arbitrary Code Execution Mitigation
  */
@@ -7481,7 +7481,7 @@ export interface EpistemicProvenanceReceipt {
  * classification and visual_patch_hashes arrays.
  *
  * EPISTEMIC BOUNDS: Token sequences (token_span_start, token_span_end) are
- * mathematically bounded 1D limits (ge=0, le=1000000000) constrained by
+ * mathematically bounded 1D limits (ge=0, le=18446744073709551615) constrained by
  * @model_validator validate_token_spans to be monotonically increasing. Spatial
  * geometries (bounding_box) enforce normalized Cartesian invariants via
  * validate_spatial_geometry. Arrays are sorted via sort_arrays.
@@ -7505,7 +7505,7 @@ export interface MultimodalTokenAnchorState {
  *
  * CAUSAL AFFORDANCE: Enforces a zero-trust execution perimeter by forcing participating agents to append their deterministic execution signatures to the `hop_signatures` matrix, verifying non-repudiation before advancing the graph.
  *
- * EPISTEMIC BOUNDS: The mathematical sealing mechanism is strictly constrained by the `watermark_protocol` Literal automaton `["merkle_dag", "statistical_token", "homomorphic_mac"]`. The `hop_signatures` dictionary keys/values are physically bounded by StringConstraints (`max_length=255/2000`, dict `le=1000000000`) to prevent memory exhaustion during serialization.
+ * EPISTEMIC BOUNDS: The mathematical sealing mechanism is strictly constrained by the `watermark_protocol` Literal automaton `["merkle_dag", "statistical_token", "homomorphic_mac"]`. The `hop_signatures` dictionary keys/values are physically bounded by StringConstraints (`max_length=255/2000`, dict `le=18446744073709551615`) to prevent memory exhaustion during serialization.
  *
  * MCP ROUTING TRIGGERS: Cryptographic Watermarking, Homomorphic MAC, Byzantine Fault Detection, Zero-Trust Lineage, Chain of Custody
  */
@@ -7605,7 +7605,7 @@ export interface VectorEmbeddingState2 {
  * (Literal["causes", "confounds", "correlates_with", "undirected"]), mathematically
  * preventing epistemic drift and hallucination during deep multi-hop retrieval.
  *
- * EPISTEMIC BOUNDS: Bounded recursively by max_hop_depth (ge=1, le=1000000000). The
+ * EPISTEMIC BOUNDS: Bounded recursively by max_hop_depth (ge=1, le=18446744073709551615). The
  * @model_validator physically enforces deterministic sorting of
  * allowed_causal_relationships (min_length=1) to guarantee RFC 8785 canonical hashing.
  * Geometric distance preservation is toggled via enforce_isometry (default=True).
@@ -7630,10 +7630,10 @@ export interface TopologicalRetrievalContract {
  * windows via the selected expansion_paradigm (sliding_window, hierarchical_merge, or
  * document_summary).
  *
- * EPISTEMIC BOUNDS: Strictly capped by max_token_budget (gt=0, le=1000000000) to prevent
+ * EPISTEMIC BOUNDS: Strictly capped by max_token_budget (gt=0, le=18446744073709551615) to prevent
  * GPU VRAM exhaustion. Further bounded by the optional spatial geometry
  * parent_merge_threshold (ge=0.0, le=1.0) and the optional temporal window
- * surrounding_sentences_k (ge=1, le=1000000000).
+ * surrounding_sentences_k (ge=1, le=18446744073709551615).
  *
  * MCP ROUTING TRIGGERS: Hierarchical Navigable Small World, Context Hydration, Token Budget
  * Optimization, Semantic Merging
@@ -7742,7 +7742,7 @@ export interface SemanticMappingHeuristicIntent {
  *
  * CAUSAL AFFORDANCE: Authorizes a participant to kinetically drag, rotate, or scale a topological node. The orchestrator uses the provided Lamport clock to mathematically resolve Spherical Linear Interpolation (SLERP) and translation collisions between concurrent actors.
  *
- * EPISTEMIC BOUNDS: The mutation strictly targets a verified `NodeCIDState`. The `lamport_clock` (`ge=0, le=1000000000`) prevents temporal overflow during logical state reconciliation.
+ * EPISTEMIC BOUNDS: The mutation strictly targets a verified `NodeCIDState`. The `lamport_clock` (`ge=0, le=18446744073709551615`) prevents temporal overflow during logical state reconciliation.
  *
  * MCP ROUTING TRIGGERS: Optimistic Locking, Affine CRDT, Spherical Linear Interpolation, Continuous Reconciliation, Kinematic Drag
  */
@@ -7798,7 +7798,7 @@ export interface KinematicDerivativeProfile {
  *
  * CAUSAL AFFORDANCE: Emits a structural demand to the swarm orchestrator to negotiate, acquire, and cryptographically lock the requisite token escrow before allocating kinetic execution cycles to a sub-graph.
  *
- * EPISTEMIC BOUNDS: Economic velocity is strictly clamped by `max_budget` (`le=1000000000`), physically typed as an integer to prevent floating-point fractures during spot market bidding. The `required_capabilities` array is deterministically sorted by a `@model_validator`.
+ * EPISTEMIC BOUNDS: Economic velocity is strictly clamped by `max_budget` (`le=18446744073709551615`), physically typed as an integer to prevent floating-point fractures during spot market bidding. The `required_capabilities` array is deterministically sorted by a `@model_validator`.
  *
  * MCP ROUTING TRIGGERS: Knapsack Optimization, Semantic Load Shedding, Spot Compute Bidding, QoS Classification, Resource Provisioning
  */
@@ -7818,7 +7818,7 @@ export interface ComputeProvisioningIntent {
  *
  * CAUSAL AFFORDANCE: Triggers an active, non-monotonic bidding phase where eligible Swarm nodes evaluate their internal Q-K matrices to formulate competitive execution bids.
  *
- * EPISTEMIC BOUNDS: The economic payload is physically capped by `max_budget_magnitude` (`le=1000000000`). The topological routing is strictly constrained if `required_action_space_cid` is defined (optional, `max_length=128`, CID regex). Anchored by a mandatory `task_cid` CID.
+ * EPISTEMIC BOUNDS: The economic payload is physically capped by `max_budget_magnitude` (`le=18446744073709551615`). The topological routing is strictly constrained if `required_action_space_cid` is defined (optional, `max_length=128`, CID regex). Anchored by a mandatory `task_cid` CID.
  *
  * MCP ROUTING TRIGGERS: Decentralized Spot Market, Request for Proposal, Thermodynamic Compute Allocation, Algorithmic Mechanism Design, Kinetic Execution Trigger
  */
@@ -7922,7 +7922,7 @@ export interface JsonSchemaWhitelist {
  * escalation is selected, traffic routes to the optional escalation_target_node_cid.
  *
  * EPISTEMIC BOUNDS: The temporal envelope is physically capped by timeout_seconds (gt=0,
- * le=86400 — a strict 24-hour absolute maximum TTL). Escalation routing targets a valid
+ * le=18446744073709551615 — a strict 24-hour absolute maximum TTL). Escalation routing targets a valid
  * NodeCIDState (escalation_target_node_cid, default=None).
  *
  * MCP ROUTING TRIGGERS: Hard Real-Time Systems, Supervisory Control Theory, Execution
@@ -8081,7 +8081,7 @@ export interface ProposedPatch {
  *
  * CAUSAL AFFORDANCE: Authorizes the translation of latent spatial targets into OS-level actuation, utilizing bezier_control_points to construct continuous polynomial trajectories that simulate human motor control and bypass bot-evasive heuristics.
  *
- * EPISTEMIC BOUNDS: Spatial execution is clamped to SE3 dimensional boundaries via the nested SE3TransformProfile. Execution liveness is temporally guillotined by trajectory_duration_ms (le=86400000).
+ * EPISTEMIC BOUNDS: Spatial execution is clamped to SE3 dimensional boundaries via the nested SE3TransformProfile. Execution liveness is temporally guillotined by trajectory_duration_ms (le=18446744073709551615).
  *
  * MCP ROUTING TRIGGERS: Mathematical Kinematics, Bezier Geometry, Fitts's Law, OS-Level Actuation, Non-Linear Trajectory
  */
@@ -8512,7 +8512,7 @@ export interface SteadyStateHypothesisState {
  * specific fault_category (FaultCategoryProfile) manifold.
  *
  * EPISTEMIC BOUNDS: The severity of the perturbation is constrained above by the intensity
- * scalar (le=1000000000.0) but unbounded below, permitting negative fault magnitudes. The
+ * scalar (le=18446744073709551615.0) but unbounded below, permitting negative fault magnitudes. The
  * blast radius targets either the entire swarm (target_node_cid=None) or a specific node
  * bounded to a valid 128-char CID regex ^[a-zA-Z0-9_.:-]+$.
  *
@@ -8768,7 +8768,7 @@ export interface VisualEncodingProfile {
  *
  * CAUSAL AFFORDANCE: Physically distorts or linearly maps the input metric tensor into rendering space, dictating how the orchestrator processes logarithmic, temporal, or ordinal data vectors for UI projection.
  *
- * EPISTEMIC BOUNDS: The transformation algorithm is strictly constrained to a Literal automaton `["linear", "log", "time", "ordinal", "nominal"]`. Physical data boundaries (`domain_min`, `domain_max`) are upper-bounded by `le=1000000000.0` to prevent geometric projection overflow.
+ * EPISTEMIC BOUNDS: The transformation algorithm is strictly constrained to a Literal automaton `["linear", "log", "time", "ordinal", "nominal"]`. Physical data boundaries (`domain_min`, `domain_max`) are upper-bounded by `le=18446744073709551615.0` to prevent geometric projection overflow.
  *
  * MCP ROUTING TRIGGERS: Grammar of Graphics, Metric Tensor Distortion, Levels of Measurement, Scale Projection, FSM Literal
  */
@@ -9111,7 +9111,7 @@ export interface EpistemicSecurityProfile {
  *
  * CAUSAL AFFORDANCE: Physically manipulates the LLM's residual stream logit distribution just before the final softmax activation, embedding an undeniable, high-entropy Shannon information signature directly into the generated text without degrading model perplexity.
  *
- * EPISTEMIC BOUNDS: Injection is mathematically clamped by `watermark_strength_delta` (`gt=0.0, le=1.0`). Resistance to cropping attacks is geometrically enforced by `context_history_window` (`ge=0, le=1000000000`). Information density is bounded by `target_bits_per_token` (`gt=0.0, le=1000000000.0`). Locked by `prf_seed_hash` (SHA-256).
+ * EPISTEMIC BOUNDS: Injection is mathematically clamped by `watermark_strength_delta` (`gt=0.0, le=1.0`). Resistance to cropping attacks is geometrically enforced by `context_history_window` (`ge=0, le=18446744073709551615`). Information density is bounded by `target_bits_per_token` (`gt=0.0, le=18446744073709551615.0`). Locked by `prf_seed_hash` (SHA-256).
  *
  * MCP ROUTING TRIGGERS: Logit Steganography, Gumbel-Softmax Watermarking, Pseudo-Random Function, Shannon Entropy, Provenance Tracking
  */
@@ -9173,7 +9173,7 @@ export interface SE3TransformProfile2 {
  *
  * CAUSAL AFFORDANCE: Instructs the Spot-Market router on how to mechanically weigh competing inference engines. If a query requires extreme logic, it authorizes high cost; if it requires a UI reflex, it enforces strict latency bounds.
  *
- * EPISTEMIC BOUNDS: Strict physical, economic, and thermodynamic ceilings are mathematically enforced: `max_latency_ms` (`le=86400000`), `max_cost_magnitude_per_token` (`le=1000000000`), and an absolute ESG bound via `max_carbon_intensity_gco2eq_kwh` (`le=10000.0`).
+ * EPISTEMIC BOUNDS: Strict physical, economic, and thermodynamic ceilings are mathematically enforced: `max_latency_ms` (`le=18446744073709551615`), `max_cost_magnitude_per_token` (`le=18446744073709551615`), and an absolute ESG bound via `max_carbon_intensity_gco2eq_kwh` (`le=18446744073709551615.0`).
  *
  * MCP ROUTING TRIGGERS: Pareto Efficiency, Multi-Objective Optimization, Spot-Market Routing, Carbon Budget, Compute Allocation
  */
@@ -9191,7 +9191,7 @@ export interface RoutingFrontierPolicy {
  *
  * CAUSAL AFFORDANCE: Instructs the inference engine to dynamically hot-swap targeted attention modules via `target_modules`, altering the network's forward-pass physics without mutating the frozen foundation weights.
  *
- * EPISTEMIC BOUNDS: VRAM allocation strictly clamped by the intrinsic rank parameter `adapter_rank` (`gt=0, le=65536`), physically preventing petabyte-scale matrix instantiations and OOM faults. `target_modules` array deterministically sorted via `@model_validator`.
+ * EPISTEMIC BOUNDS: VRAM allocation strictly clamped by the intrinsic rank parameter `adapter_rank` (`gt=0, le=18446744073709551615`), physically preventing petabyte-scale matrix instantiations and OOM faults. `target_modules` array deterministically sorted via `@model_validator`.
  *
  * MCP ROUTING TRIGGERS: Low-Rank Adaptation, Matrix Factorization, LoRA, GPU VRAM Allocation, Attention Head Injection
  */
@@ -9210,7 +9210,7 @@ export interface PeftAdapterContract {
  *
  * CAUSAL AFFORDANCE: Authorizes a temporary, mathematically bounded partition where the agent can access unredacted enterprise vault keys without permanently leaking them into the global EpistemicLedgerState.
  *
- * EPISTEMIC BOUNDS: The temporal exposure window is physically clamped by `max_ttl_seconds` (`ge=1, le=3600`), enforcing an absolute maximum 1-hour session. Spatial access is geometrically restricted to `allowed_vault_keys` (`max_length=100`), deterministically sorted by `@model_validator` for RFC 8785 hashing.
+ * EPISTEMIC BOUNDS: The temporal exposure window is physically clamped by `max_ttl_seconds` (`ge=1, le=18446744073709551615`), enforcing an absolute maximum 1-hour session. Spatial access is geometrically restricted to `allowed_vault_keys` (`max_length=100`), deterministically sorted by `@model_validator` for RFC 8785 hashing.
  *
  * MCP ROUTING TRIGGERS: Principle of Least Privilege, Time-Based Access Control, Secret Vaulting, Ephemeral Partition, Cryptographic Isolation
  */
@@ -9255,7 +9255,7 @@ export interface CognitiveStateProfile {
  *
  * CAUSAL AFFORDANCE: Physically biases or mathematically masks out (-inf via `enforce_functional_isolation`) entire swaths of neural circuits, forcing continuous compute through highly specialized expert topological perimeters.
  *
- * EPISTEMIC BOUNDS: Limits structural instability by hard-bounding `dynamic_top_k` execution threads (`ge=1, le=1000000000`). The `expert_logit_biases` spatial dictionary is bounded by cardinality (`max_length=1000`) with tensor biases clamped to `[ge=-1000.0, le=1000.0]`.
+ * EPISTEMIC BOUNDS: Limits structural instability by hard-bounding `dynamic_top_k` execution threads (`ge=1, le=18446744073709551615`). The `expert_logit_biases` spatial dictionary is bounded by cardinality (`max_length=1000`) with tensor biases clamped to `[ge=-1000.0, le=1000.0]`.
  *
  * MCP ROUTING TRIGGERS: Sparse Mixture of Experts, Softmax Gating, Logit Biasing, Functional Expert Routing, FSM Masking
  */
@@ -9362,7 +9362,7 @@ export interface SelfCorrectionPolicy {
  *
  * EPISTEMIC BOUNDS: Mathematically bounded by uncertainty_escalation_threshold (ge=0.0,
  * le=1.0). The computation is physically capped by max_latent_tokens_budget (gt=0,
- * le=1000000000) and max_test_time_compute_ms (gt=0, le=86400000) to prevent infinite
+ * le=18446744073709551615) and max_test_time_compute_ms (gt=0, le=18446744073709551615) to prevent infinite
  * loops and VRAM exhaustion.
  *
  * MCP ROUTING TRIGGERS: Test-Time Compute, System 2 Thinking, Epistemic Uncertainty,
@@ -9380,7 +9380,7 @@ export interface EscalationContract {
  *
  * CAUSAL AFFORDANCE: Authorizes the orchestrator to physically prune hallucinating ThoughtBranchState vectors from the LatentScratchpadReceipt if their logit probabilities drop below the viable threshold, emulating rigorous Beam Search pruning.
  *
- * EPISTEMIC BOUNDS: Strictly bounds the search space geometry via `pruning_threshold` (`ge=0.0, le=1.0`) and mechanically caps State-Space Explosion through `max_backtracks_allowed` (`ge=0, le=1000000000`).
+ * EPISTEMIC BOUNDS: Strictly bounds the search space geometry via `pruning_threshold` (`ge=0.0, le=1.0`) and mechanically caps State-Space Explosion through `max_backtracks_allowed` (`ge=0, le=18446744073709551615`).
  *
  * MCP ROUTING TRIGGERS: Process Reward Model, Beam Search Pruning, Latent Trajectory, State-Space Explosion, A* Search
  */
@@ -9405,8 +9405,8 @@ export interface ProcessRewardContract {
  * halting unnecessary probability wave expansion and preserving VRAM.
  *
  * EPISTEMIC BOUNDS: Mathematically constrained by convergence_delta_epsilon (ge=0.0, le=1.0)
- * over a strictly positive lookback_window_steps (gt=0, le=1000000000). Physically mandates
- * a minimum_reasoning_steps burn-in period (gt=0, le=1000000000) to prevent premature
+ * over a strictly positive lookback_window_steps (gt=0, le=18446744073709551615). Physically mandates
+ * a minimum_reasoning_steps burn-in period (gt=0, le=18446744073709551615) to prevent premature
  * collapse before the latent space is adequately explored.
  *
  * MCP ROUTING TRIGGERS: Optimal Stopping Theory, MCTS, PRM Convergence, Circuit Breaker,
@@ -9424,7 +9424,7 @@ export interface DynamicConvergenceSLA {
  *
  * CAUSAL AFFORDANCE: Offloads non-monotonic probabilistic reasoning into a rigid, verifiable algebraic solver, returning the mathematically proven result to the swarm.
  *
- * EPISTEMIC BOUNDS: The solver target is restricted to the strict `solver_protocol` Literal automaton (`["z3", "lean4", "coq", "tla_plus", "sympy"]`). The Halting Problem is explicitly mitigated by clamping `timeout_ms` (`gt=0, le=86400000`), preventing infinite computational loops.
+ * EPISTEMIC BOUNDS: The solver target is restricted to the strict `solver_protocol` Literal automaton (`["z3", "lean4", "coq", "tla_plus", "sympy"]`). The Halting Problem is explicitly mitigated by clamping `timeout_ms` (`gt=0, le=18446744073709551615`), preventing infinite computational loops.
  *
  * MCP ROUTING TRIGGERS: Satisfiability Modulo Theories, Curry-Howard Correspondence, Theorem Proving, Symbolic Handoff, Halting Problem Mitigation
  */
@@ -9443,7 +9443,7 @@ export interface NeuroSymbolicHandoffContract {
  *
  * CAUSAL AFFORDANCE: Authorizes the orchestrator to halt token generation upon specific `trigger_conditions` to physically slice, quantify, and export the top-k SAE features from the designated `target_layers`.
  *
- * EPISTEMIC BOUNDS: GPU VRAM exhaustion is mathematically prevented by capping `max_features_per_layer` (`gt=0, le=1000000000`). The `@model_validator` deterministically sorts conditions and layers for RFC 8785 hashing. System integrity enforced via `require_zk_commitments`.
+ * EPISTEMIC BOUNDS: GPU VRAM exhaustion is mathematically prevented by capping `max_features_per_layer` (`gt=0, le=18446744073709551615`). The `@model_validator` deterministically sorts conditions and layers for RFC 8785 hashing. System integrity enforced via `require_zk_commitments`.
  *
  * MCP ROUTING TRIGGERS: Latent State Extraction, Mechanistic Interpretability, Sparse Autoencoder, Zero-Knowledge Commitments, VRAM Optimization
  */
@@ -9737,7 +9737,7 @@ export interface DAGTopologyManifest {
  *
  * CAUSAL AFFORDANCE: Authorizes the orchestrator to automatically sever downstream SemanticEdgeState vectors when an upstream axiom is falsified, halting epistemic contagion across the swarm topology. `cap_validity` forces the runtime to inject `valid_to` boundaries rather than executing destructive CRUD operations.
  *
- * EPISTEMIC BOUNDS: Physically restricts catastrophic unravelling via integer limits on `max_cascade_depth` (`le=1000000000, gt=0`) and `max_quarantine_blast_radius` (`le=1000000000, gt=0`). Modulates continuous entropy via `decay_propagation_rate` (`ge=0.0, le=1.0`).
+ * EPISTEMIC BOUNDS: Physically restricts catastrophic unravelling via integer limits on `max_cascade_depth` (`le=18446744073709551615, gt=0`) and `max_quarantine_blast_radius` (`le=18446744073709551615, gt=0`). Modulates continuous entropy via `decay_propagation_rate` (`ge=0.0, le=1.0`).
  *
  * MCP ROUTING TRIGGERS: Truth Maintenance System, Non-Monotonic Logic, Defeasible Reasoning, Belief Revision, Causal Graph Ablation
  */
@@ -9883,7 +9883,7 @@ export interface RedactionPolicy {
  * action_on_violation (Literal["drop", "quarantine", "redact"]).
  *
  * EPISTEMIC BOUNDS: VRAM exhaustion is mathematically prevented by capping max_input_tokens
- * (gt=0, le=1000000000). The forbidden_intents array is deterministically sorted by the
+ * (gt=0, le=18446744073709551615). The forbidden_intents array is deterministically sorted by the
  * @model_validator to preserve RFC 8785 canonical hashing.
  *
  * MCP ROUTING TRIGGERS: Semantic Firewall, Prompt Injection Defense, Adversarial Override,
@@ -9901,7 +9901,7 @@ export interface SemanticFirewallPolicy {
  *
  * CAUSAL AFFORDANCE: Executes real-time tensor remediation—clamping, halting, quarantining, or smoothly decaying residual stream activations—when specific features diverge toward adversarial or hallucinated geometries.
  *
- * EPISTEMIC BOUNDS: The `max_activation_threshold` (`ge=0.0, le=1000000000.0`) physically bounds the continuous Euclidean magnitude of the `target_feature_index`. Topologically locked to SAE matrix via `sae_dictionary_hash` (SHA-256). The `@model_validator` `validate_smooth_decay` mathematically enforces asymptotic bounds.
+ * EPISTEMIC BOUNDS: The `max_activation_threshold` (`ge=0.0, le=18446744073709551615.0`) physically bounds the continuous Euclidean magnitude of the `target_feature_index`. Topologically locked to SAE matrix via `sae_dictionary_hash` (SHA-256). The `@model_validator` `validate_smooth_decay` mathematically enforces asymptotic bounds.
  *
  * MCP ROUTING TRIGGERS: Mechanistic Interpretability, Sparse Autoencoders, Residual Stream Steering, Tensor Remediation, Monosemantic Features
  */
@@ -9924,7 +9924,7 @@ export interface SaeLatentPolicy {
  *
  * CAUSAL AFFORDANCE: Instructs the tensor execution engine to apply trigonometric or algebraic decay functions to specific latent circuits, smoothly steering the probability wave without causing logit collapse.
  *
- * EPISTEMIC BOUNDS: The decay geometry is strictly typed to the `decay_function` Literal `["linear", "exponential", "cosine_annealing"]`. The temporal horizon is physically bounded by `transition_window_tokens` (`gt=0, le=1000000000`). The optional `decay_rate_param` is bounded `le=1.0`.
+ * EPISTEMIC BOUNDS: The decay geometry is strictly typed to the `decay_function` Literal `["linear", "exponential", "cosine_annealing"]`. The temporal horizon is physically bounded by `transition_window_tokens` (`gt=0, le=18446744073709551615`). The optional `decay_rate_param` is bounded `le=1.0`.
  *
  * MCP ROUTING TRIGGERS: Mechanistic Interpretability, Tensor Attenuation, Cosine Annealing, Logit Collapse Prevention, Activation Smoothing
  */
@@ -9944,7 +9944,7 @@ export interface LatentSmoothingProfile {
  * into singular Hierarchical Level of Detail (HLOD) proxy meshes.
  *
  * EPISTEMIC BOUNDS: The vertex ceiling is rigidly bounded by max_rendered_vertices (gt=0,
- * le=1000000000) to physically prevent GPU VRAM exhaustion on the observer client. Binds the
+ * le=18446744073709551615) to physically prevent GPU VRAM exhaustion on the observer client. Binds the
  * TelemetryBackpressureContract to link graph scaling with network flow.
  *
  * MCP ROUTING TRIGGERS: Spectral Graph Coarsening, Hierarchical Level of Detail, HLOD, Topology Collapse, VRAM Optimization
@@ -9972,7 +9972,7 @@ export interface TelemetryBackpressureContract {
  *
  * CAUSAL AFFORDANCE: Allows a distributed client to mathematically define a spatial perimeter. The orchestrator restricts the egress of KinematicDeltaManifest streams exclusively to nodes residing within this specific volumetric boundary.
  *
- * EPISTEMIC BOUNDS: The temporal liveness is guillotined by `subscription_ttl_ms` (`ge=1, le=86400000`). The volume is physically restricted by the nested `VolumetricBoundingProfile`.
+ * EPISTEMIC BOUNDS: The temporal liveness is guillotined by `subscription_ttl_ms` (`ge=1, le=18446744073709551615`). The volume is physically restricted by the nested `VolumetricBoundingProfile`.
  *
  * MCP ROUTING TRIGGERS: Area of Interest Management, Hierarchical Spatial Hashing, Telemetry Isolation, Spatial Partitioning, Culling
  */
@@ -10027,7 +10027,7 @@ export interface SE3TransformProfile3 {
  *
  * CAUSAL AFFORDANCE: Authorizes the zero-trust orchestrator to accept and merge off-chain state mutations by verifying the `cryptographic_blob` against the `public_inputs_hash` and `verifier_key_cid`.
  *
- * EPISTEMIC BOUNDS: `proof_protocol` is strictly clamped to a Literal automaton `["zk-SNARK", "zk-STARK", "plonk", "bulletproofs"]`. `public_inputs_hash` guarantees linkage via SHA-256 regex `^[a-f0-9]{64}$`. `cryptographic_blob` is capped at `max_length=5000000`. `latent_state_commitments` restricts dictionary to `le=1000000000`.
+ * EPISTEMIC BOUNDS: `proof_protocol` is strictly clamped to a Literal automaton `["zk-SNARK", "zk-STARK", "plonk", "bulletproofs"]`. `public_inputs_hash` guarantees linkage via SHA-256 regex `^[a-f0-9]{64}$`. `cryptographic_blob` is capped at `max_length=5000000`. `latent_state_commitments` restricts dictionary to `le=18446744073709551615`.
  *
  * MCP ROUTING TRIGGERS: Computational Integrity, Verifiable Computing, Zero-Knowledge Proofs, zk-SNARK, State Attestation
  */
@@ -10061,10 +10061,10 @@ export interface LatentStateCommitments {
  * further constrain parallel execution.
  *
  * EPISTEMIC BOUNDS: Physical system limits are rigidly clamped by integer bounds
- * (le=1000000000) on max_queue_depth, token_budget_per_branch,
+ * (le=18446744073709551615) on max_queue_depth, token_budget_per_branch,
  * max_tokens_per_minute (gt=0), max_requests_per_minute (gt=0), and
  * max_concurrent_tool_invocations (gt=0). Temporal liveness is bounded by
- * max_uninterruptible_span_ms (le=86400000, gt=0). All rate fields are Optional
+ * max_uninterruptible_span_ms (le=18446744073709551615, gt=0). All rate fields are Optional
  * (default=None).
  *
  * MCP ROUTING TRIGGERS: Queueing Theory, Token Bucket, Backpressure, Load
@@ -10169,8 +10169,8 @@ export interface Nodes2 {
  * ("Devil's Advocate") roles to intentionally perturb the consensus gradient.
  *
  * EPISTEMIC BOUNDS: Physically bounds the lower limits of adversarial insertion via
- * min_adversaries (le=1000000000, no ge bound). Enforces continuous entropic variance via
- * the optional temperature_variance float (le=1000000000.0, default=None).
+ * min_adversaries (le=18446744073709551615, no ge bound). Enforces continuous entropic variance via
+ * the optional temperature_variance float (le=18446744073709551615.0, default=None).
  *
  * MCP ROUTING TRIGGERS: Cognitive Heterogeneity, Ensemble Variance, Groupthink
  * Mitigation, Red Teaming, Adversarial Perturbation
@@ -10192,7 +10192,7 @@ export interface DiversityPolicy {
  * optional prediction_market_rules: PredictionMarketPolicy) when agents deadlock,
  * forcefully collapsing the debate probability wave to maintain systemic liveness.
  *
- * EPISTEMIC BOUNDS: The max_debate_rounds (optional int) is clamped to le=1000000000 to
+ * EPISTEMIC BOUNDS: The max_debate_rounds (optional int) is clamped to le=18446744073709551615 to
  * computationally solve the Halting Problem for runaway arguments. The strategy Literal
  * ["unanimous", "majority", "debate_rounds", "prediction_market", "pbft"] constrains
  * the combinatorial space. The @model_validator requires quorum_rules if strategy is
@@ -10224,7 +10224,7 @@ export interface ConsensusPolicy {
  *
  * CAUSAL AFFORDANCE: Triggers quadratic staking functions to mathematically prevent Sybil attacks and dictates the exact `convergence_delta_threshold` required to halt trading and collapse the probability wave.
  *
- * EPISTEMIC BOUNDS: `min_liquidity_magnitude` is capped at an integer `le=1000000000, ge=0`, and `convergence_delta_threshold` is strictly clamped to a probability distribution `[ge=0.0, le=1.0]`. `staking_function` is a Literal.
+ * EPISTEMIC BOUNDS: `min_liquidity_magnitude` is capped at an integer `le=18446744073709551615, ge=0`, and `convergence_delta_threshold` is strictly clamped to a probability distribution `[ge=0.0, le=1.0]`. `staking_function` is a Literal.
  *
  * MCP ROUTING TRIGGERS: LMSR, Automated Market Maker, Quadratic Staking, Sybil Resistance, Convergence Delta
  */
@@ -10245,8 +10245,8 @@ export interface PredictionMarketPolicy1 {
  * executing the byzantine_action (Literal ["quarantine", "slash_escrow", "ignore"])
  * against nodes that violate the consensus.
  *
- * EPISTEMIC BOUNDS: Physically bounds max_tolerable_faults (ge=0, le=1000000000) and
- * min_quorum_size (gt=0, le=1000000000). The @model_validator enforce_bft_math enforces
+ * EPISTEMIC BOUNDS: Physically bounds max_tolerable_faults (ge=0, le=18446744073709551615) and
+ * min_quorum_size (gt=0, le=18446744073709551615). The @model_validator enforce_bft_math enforces
  * the strict invariant $N \ge 3f + 1$, guaranteeing Byzantine agreement.
  *
  * MCP ROUTING TRIGGERS: Byzantine Fault Tolerance, pBFT, Quorum Sensing, Sybil
@@ -10294,7 +10294,7 @@ export interface OntologicalAlignmentPolicy {
  *
  * CAUSAL AFFORDANCE: Authorizes the orchestrator's clearinghouse to automatically slash or refund the locked budget based on the deterministic evaluation of the `release_condition_metric`.
  *
- * EPISTEMIC BOUNDS: Collateral is rigidly bounded by `escrow_locked_magnitude` (`ge=0, le=1000000000`) to physically prevent integer overflow during thermodynamic tallying.
+ * EPISTEMIC BOUNDS: Collateral is rigidly bounded by `escrow_locked_magnitude` (`ge=0, le=18446744073709551615`) to physically prevent integer overflow during thermodynamic tallying.
  *
  * MCP ROUTING TRIGGERS: Algorithmic Mechanism Design, Proof-of-Stake, Nash Equilibrium, Sybil Resistance, Escrow Collateralization
  */
@@ -10358,7 +10358,7 @@ export interface Nodes3 {
  *
  * CAUSAL AFFORDANCE: Instructs the orchestrator's clearinghouse on how to mathematically resolve the AuctionState, applying the strict `tie_breaker` heuristic when bid vectors collide.
  *
- * EPISTEMIC BOUNDS: Market lifespan is strictly restricted by `max_bidding_window_ms` (`le=86400000`). Combinatorial space is locked to the `AuctionMechanismProfile` and `TieBreakerPolicy` Literal enums.
+ * EPISTEMIC BOUNDS: Market lifespan is strictly restricted by `max_bidding_window_ms` (`le=18446744073709551615`). Combinatorial space is locked to the `AuctionMechanismProfile` and `TieBreakerPolicy` Literal enums.
  *
  * MCP ROUTING TRIGGERS: Algorithmic Mechanism Design, Vickrey-Clarke-Groves, Strategyproofness, Market Clearing Heuristic
  */
@@ -10398,7 +10398,7 @@ export interface PredictionMarketState {
  *
  * CAUSAL AFFORDANCE: Projects the agent's internal `implied_probability` into the shared LMSR order book, injecting liquidity and actively shifting the global consensus gradient.
  *
- * EPISTEMIC BOUNDS: `agent_cid` and `target_hypothesis_cid` are strictly bounded to 128-char CIDs. `staked_magnitude` is constrained to a strictly positive integer `le=1000000000, gt=0`. `implied_probability` is bounded `ge=0.0, le=1.0`.
+ * EPISTEMIC BOUNDS: `agent_cid` and `target_hypothesis_cid` are strictly bounded to 128-char CIDs. `staked_magnitude` is constrained to a strictly positive integer `le=18446744073709551615, gt=0`. `implied_probability` is bounded `ge=0.0, le=1.0`.
  *
  * MCP ROUTING TRIGGERS: Epistemic Staking, Brier Score Input, Belief Freezing, Market Order
  */
@@ -10444,7 +10444,7 @@ export interface PayoutDistribution {
  *
  * CAUSAL AFFORDANCE: Orchestrates the iterative instantiation, evaluation, and culling of autonomous agents, actively applying stochastic perturbations (`MutationPolicy`) and chromosomal combinations (`CrossoverPolicy`) to maximize fitness.
  *
- * EPISTEMIC BOUNDS: The state space explosion is physically restricted by integer limits on `population_size` (`le=1000000000`) and `generations` (`le=1.0`). The `@model_validator` mathematically guarantees that `fitness_objectives` are deterministically sorted by `target_metric`.
+ * EPISTEMIC BOUNDS: The state space explosion is physically restricted by integer limits on `population_size` (`le=18446744073709551615`) and `generations` (`le=1.0`). The `@model_validator` mathematically guarantees that `fitness_objectives` are deterministically sorted by `target_metric`.
  *
  * MCP ROUTING TRIGGERS: Genetic Algorithm, Evolutionary Strategy, Gradient-Free Optimization, Population Dynamics, Multi-Objective Optimization
  */
@@ -10604,7 +10604,7 @@ export interface Nodes5 {
  *
  * CAUSAL AFFORDANCE: Executes a finite, adversarial generation-evaluation-revision loop, forcing the `generator_node_cid` to propose states and the `evaluator_node_cid` to strictly critique them.
  *
- * EPISTEMIC BOUNDS: State-Space Explosion is mathematically prevented by capping `max_revision_loops` (`ge=1, le=1000000000`). The `@model_validator` structurally guarantees both nodes exist in the topology's nodes registry AND are disjoint identities.
+ * EPISTEMIC BOUNDS: State-Space Explosion is mathematically prevented by capping `max_revision_loops` (`ge=1, le=18446744073709551615`). The `@model_validator` structurally guarantees both nodes exist in the topology's nodes registry AND are disjoint identities.
  *
  * MCP ROUTING TRIGGERS: Actor-Critic Architecture, Minimax Optimization, Adversarial Critique, Dual-Process Revision, Generative Adversarial Loop
  */
@@ -10729,8 +10729,8 @@ export interface ConsensusFederationTopologyManifest {
  * executing the byzantine_action (Literal ["quarantine", "slash_escrow", "ignore"])
  * against nodes that violate the consensus.
  *
- * EPISTEMIC BOUNDS: Physically bounds max_tolerable_faults (ge=0, le=1000000000) and
- * min_quorum_size (gt=0, le=1000000000). The @model_validator enforce_bft_math enforces
+ * EPISTEMIC BOUNDS: Physically bounds max_tolerable_faults (ge=0, le=18446744073709551615) and
+ * min_quorum_size (gt=0, le=18446744073709551615). The @model_validator enforce_bft_math enforces
  * the strict invariant $N \ge 3f + 1$, guaranteeing Byzantine agreement.
  *
  * MCP ROUTING TRIGGERS: Byzantine Fault Tolerance, pBFT, Quorum Sensing, Sybil
@@ -11390,7 +11390,7 @@ export interface TabularCellState {
  * classification and visual_patch_hashes arrays.
  *
  * EPISTEMIC BOUNDS: Token sequences (token_span_start, token_span_end) are
- * mathematically bounded 1D limits (ge=0, le=1000000000) constrained by
+ * mathematically bounded 1D limits (ge=0, le=18446744073709551615) constrained by
  * @model_validator validate_token_spans to be monotonically increasing. Spatial
  * geometries (bounding_box) enforce normalized Cartesian invariants via
  * validate_spatial_geometry. Arrays are sorted via sort_arrays.
@@ -11728,7 +11728,7 @@ export interface TerminalBufferState {
  *
  * CAUSAL AFFORDANCE: Emits a quantified sensory vector to the orchestrator, determining whether an exogenous signal contains enough information-theoretic value to cross the continuous-to-discrete gap and trigger a topological observation.
  *
- * EPISTEMIC BOUNDS: The bayesian_surprise_score is strictly clamped to a continuous float space (le=1.0), and physical presence is bounded by temporal_duration_ms (le=86400000).
+ * EPISTEMIC BOUNDS: The bayesian_surprise_score is strictly clamped to a continuous float space (le=1.0), and physical presence is bounded by temporal_duration_ms (le=18446744073709551615).
  *
  * MCP ROUTING TRIGGERS: Bayesian Surprise, Multimodal Sensor Fusion, Kullback-Leibler Divergence, Exteroceptive Vector, Proprioception
  */
@@ -11767,7 +11767,7 @@ export interface LayerActivations {
  *
  * CAUSAL AFFORDANCE: Surfaces hidden geometric concept vectors (e.g., 'sycophancy' or 'truth_retrieval') to the orchestrator, enabling real-time circuit-level inspection, feature clamping, and causal tracing.
  *
- * EPISTEMIC BOUNDS: The semantic abstraction is rigidly bounded to a specific `feature_index` (`ge=0, le=1000000000`). `activation_magnitude` physically measures Euclidean strength (`le=1000000000`). Optional `interpretability_label` restricts semantic descriptions (`max_length=2000`).
+ * EPISTEMIC BOUNDS: The semantic abstraction is rigidly bounded to a specific `feature_index` (`ge=0, le=18446744073709551615`). `activation_magnitude` physically measures Euclidean strength (`le=18446744073709551615`). Optional `interpretability_label` restricts semantic descriptions (`max_length=2000`).
  *
  * MCP ROUTING TRIGGERS: Sparse Autoencoder, Monosemantic Feature, Concept Vector, Mechanistic Interpretability, Euclidean Magnitude
  */
@@ -11806,7 +11806,7 @@ export interface TemporalDecayMatrix {
  *
  * CAUSAL AFFORDANCE: Triggers the orchestrator to excise or repair segments of the token stream when the `repair_marker_regex` matches, probabilistically governed by the `decay_threshold`.
  *
- * EPISTEMIC BOUNDS: `repair_marker_regex` is strictly capped at `max_length=2000` to prevent ReDoS CPU exhaustion. `decay_threshold` geometrically bounded (`ge=0.0, le=1.0`). Maximum temporal lookback clamped (`ge=0, le=1000000000`).
+ * EPISTEMIC BOUNDS: `repair_marker_regex` is strictly capped at `max_length=2000` to prevent ReDoS CPU exhaustion. `decay_threshold` geometrically bounded (`ge=0.0, le=1.0`). Maximum temporal lookback clamped (`ge=0, le=18446744073709551615`).
  *
  * MCP ROUTING TRIGGERS: Streaming Disfluency, Forget Gate, Token Excise, Sequence Repair, Temporal Lookback
  */
@@ -11918,7 +11918,7 @@ export interface CognitiveUncertaintyProfile1 {
  * integrity confirms resolution_branch_cid and all discarded_branches exist within
  * explored_branches; (2) sort_arrays deterministically sorts both explored_branches
  * (by branch_cid) and discarded_branches for RFC 8785 Canonical Hashing.
- * total_latent_tokens is hard-capped (ge=0, le=1000000000).
+ * total_latent_tokens is hard-capped (ge=0, le=18446744073709551615).
  *
  * MCP ROUTING TRIGGERS: Monte Carlo Tree Search, Beam Search, Epistemic Quarantine,
  * Probability Wave Collapse, State-Space Exploration
@@ -12112,7 +12112,7 @@ export interface BargeInInterruptEvent {
  *
  * CAUSAL AFFORDANCE: Commits a simulated causal divergence (intervention) into the ledger, mathematically quantifying the opportunity cost (regret) to backpropagate stateless adjustments to the routing policy.
  *
- * EPISTEMIC BOUNDS: Anchored to `historical_event_cid` (128-char CID). Expected utilities and `epistemic_regret` are physically capped at `le=1000000000.0`. `policy_mutation_gradients` restrict tensor adjustments.
+ * EPISTEMIC BOUNDS: Anchored to `historical_event_cid` (128-char CID). Expected utilities and `epistemic_regret` are physically capped at `le=18446744073709551615.0`. `policy_mutation_gradients` restrict tensor adjustments.
  *
  * MCP ROUTING TRIGGERS: Counterfactual Regret Minimization, Pearlian Do-Calculus, Opportunity Cost, Alternative Timeline, Policy Gradient Update
  */
@@ -12186,7 +12186,7 @@ export interface AgentAttestationReceipt1 {
  *
  * CAUSAL AFFORDANCE: Authorizes the zero-trust orchestrator to accept and merge off-chain state mutations by verifying the `cryptographic_blob` against the `public_inputs_hash` and `verifier_key_cid`.
  *
- * EPISTEMIC BOUNDS: `proof_protocol` is strictly clamped to a Literal automaton `["zk-SNARK", "zk-STARK", "plonk", "bulletproofs"]`. `public_inputs_hash` guarantees linkage via SHA-256 regex `^[a-f0-9]{64}$`. `cryptographic_blob` is capped at `max_length=5000000`. `latent_state_commitments` restricts dictionary to `le=1000000000`.
+ * EPISTEMIC BOUNDS: `proof_protocol` is strictly clamped to a Literal automaton `["zk-SNARK", "zk-STARK", "plonk", "bulletproofs"]`. `public_inputs_hash` guarantees linkage via SHA-256 regex `^[a-f0-9]{64}$`. `cryptographic_blob` is capped at `max_length=5000000`. `latent_state_commitments` restricts dictionary to `le=18446744073709551615`.
  *
  * MCP ROUTING TRIGGERS: Computational Integrity, Verifiable Computing, Zero-Knowledge Proofs, zk-SNARK, State Attestation
  */
@@ -12227,7 +12227,7 @@ export interface EpistemicPromotionEvent {
  *
  * CAUSAL AFFORDANCE: Emits a deterministic topological signal that the causal graph is experiencing logical friction against the `tripped_rule_cid`, unlocking the injection of a System2RemediationIntent constraint.
  *
- * EPISTEMIC BOUNDS: Mathematically bounded by `measured_semantic_drift` (`le=1000000000.0`) and cryptographically tied to `contradiction_proof_hash` (SHA-256 pattern `^[a-f0-9]{64}$`) proving the anomaly.
+ * EPISTEMIC BOUNDS: Mathematically bounded by `measured_semantic_drift` (`le=18446744073709551615.0`) and cryptographically tied to `contradiction_proof_hash` (SHA-256 pattern `^[a-f0-9]{64}$`) proving the anomaly.
  *
  * MCP ROUTING TRIGGERS: Kullback-Leibler Divergence, Normative Drift, Distributional Shift, Semantic Friction, Constitutional Alignment
  */
@@ -12267,7 +12267,7 @@ export interface PersistenceCommitReceipt {
  *
  * CAUSAL AFFORDANCE: Deducts exact computational magnitude from the agent's localized Proof-of-Stake (PoS) execution escrow, progressively narrowing its available search depth. Bound to causal origin via `tool_invocation_cid`.
  *
- * EPISTEMIC BOUNDS: Integer bounds (`ge=0, le=1000000000`) on `input_tokens`, `output_tokens`, and `burn_magnitude` mathematically prevent integer overflow and fractional bypasses during ledger tallying.
+ * EPISTEMIC BOUNDS: Integer bounds (`ge=0, le=18446744073709551615`) on `input_tokens`, `output_tokens`, and `burn_magnitude` mathematically prevent integer overflow and fractional bypasses during ledger tallying.
  *
  * MCP ROUTING TRIGGERS: Landauer's Principle, Thermodynamic Compute, Token Burn, Resource Exhaustion, Lock-Free Tallying
  */
@@ -12307,7 +12307,7 @@ export interface BudgetExhaustionEvent {
  *
  * CAUSAL AFFORDANCE: Emits passive structural telemetry to update retrieval gradients and Bayesian priors based on human spatial interaction, without halting the underlying execution DAG.
  *
- * EPISTEMIC BOUNDS: The human interaction is rigidly confined to the `interaction_modality` Literal automaton. Temporal liveness of attention is bounded by `dwell_duration_ms` (`ge=0, le=86400000`). Target is locked to `target_node_cid` CID.
+ * EPISTEMIC BOUNDS: The human interaction is rigidly confined to the `interaction_modality` Literal automaton. Temporal liveness of attention is bounded by `dwell_duration_ms` (`ge=0, le=18446744073709551615`). Target is locked to `target_node_cid` CID.
  *
  * MCP ROUTING TRIGGERS: Epistemic Regret, Supervisory Control Theory, Human-in-the-Loop, Dwell Time, Spatial Telemetry
  */
@@ -12429,7 +12429,7 @@ export interface EpistemicAxiomState {
  * successful reward decomposition.
  *
  * EPISTEMIC BOUNDS: Flow magnitude is geometrically bounded by estimated_flow_value
- * (ge=0.0, le=1000000000.0) to prevent exploding gradients during policy updates.
+ * (ge=0.0, le=18446744073709551615.0) to prevent exploding gradients during policy updates.
  * Cryptographically mapped to a rigid 128-char source_trajectory_cid CID.
  *
  * MCP ROUTING TRIGGERS: Trajectory Balance, Reward Factorization, Flow Network Receipt,
@@ -12495,7 +12495,7 @@ export interface CollectiveIntelligenceProfile {
  * EPISTEMIC BOUNDS: normalized_contribution_percentage is strictly clamped (ge=0.0,
  * le=1.0). The causal_attribution_score has only le=1.0 (no ge bound). The Monte Carlo
  * approximation confidence bounds (confidence_interval_lower/upper) are capped at
- * le=1000000000.0.
+ * le=18446744073709551615.0.
  *
  * MCP ROUTING TRIGGERS: Cooperative Game Theory, Shapley Value, Credit Assignment,
  * Marginal Contribution, Monte Carlo Approximation
@@ -12987,7 +12987,7 @@ export interface TerminalConditionContract {
  *
  * CAUSAL AFFORDANCE: Aggregates incoming AgentBidIntent vectors against the foundational TaskAnnouncementIntent, serving as the deterministic state space for the orchestrator's clearing function.
  *
- * EPISTEMIC BOUNDS: Market liveness is physically bounded by `clearing_timeout` (`le=1000000000, gt=0`). `minimum_tick_size` is clamped (`gt=0`). The `bids` array is deterministically sorted by `estimated_cost_magnitude` (price) then `agent_cid` for RFC 8785 Hashing.
+ * EPISTEMIC BOUNDS: Market liveness is physically bounded by `clearing_timeout` (`le=18446744073709551615, gt=0`). `minimum_tick_size` is clamped (`gt=0`). The `bids` array is deterministically sorted by `estimated_cost_magnitude` (price) then `agent_cid` for RFC 8785 Hashing.
  *
  * MCP ROUTING TRIGGERS: Order Book Snapshot, Market Convergence, RFC 8785 Canonicalization, Liquidity Aggregation, Declarative Coordinate
  */
@@ -13008,7 +13008,7 @@ export interface AuctionState {
  *
  * CAUSAL AFFORDANCE: Triggers an active, non-monotonic bidding phase where eligible Swarm nodes evaluate their internal Q-K matrices to formulate competitive execution bids.
  *
- * EPISTEMIC BOUNDS: The economic payload is physically capped by `max_budget_magnitude` (`le=1000000000`). The topological routing is strictly constrained if `required_action_space_cid` is defined (optional, `max_length=128`, CID regex). Anchored by a mandatory `task_cid` CID.
+ * EPISTEMIC BOUNDS: The economic payload is physically capped by `max_budget_magnitude` (`le=18446744073709551615`). The topological routing is strictly constrained if `required_action_space_cid` is defined (optional, `max_length=128`, CID regex). Anchored by a mandatory `task_cid` CID.
  *
  * MCP ROUTING TRIGGERS: Decentralized Spot Market, Request for Proposal, Thermodynamic Compute Allocation, Algorithmic Mechanism Design, Kinetic Execution Trigger
  */
@@ -13025,7 +13025,7 @@ export interface TaskAnnouncementIntent1 {
  *
  * CAUSAL AFFORDANCE: Definitively terminates the auction phase and authorizes the awarded syndicate to execute their task trajectory using the locked EscrowPolicy funds.
  *
- * EPISTEMIC BOUNDS: Two `@model_validators` execute physical invariants: (1) Conservation of Compute (sum of `awarded_syndicate` values must exactly equal `cleared_price_magnitude` `le=1000000000`); (2) Escrow Ceiling (`escrow_locked_magnitude` cannot exceed `cleared_price_magnitude`).
+ * EPISTEMIC BOUNDS: Two `@model_validators` execute physical invariants: (1) Conservation of Compute (sum of `awarded_syndicate` values must exactly equal `cleared_price_magnitude` `le=18446744073709551615`); (2) Escrow Ceiling (`escrow_locked_magnitude` cannot exceed `cleared_price_magnitude`).
  *
  * MCP ROUTING TRIGGERS: Market Clearing, Escrow Lock, Cryptographic Provenance, Syndicate Allocation, Thermodynamic Execution
  */
@@ -13201,7 +13201,7 @@ export interface CognitiveFormatContract1 {
  * formal EpistemicTopologicalProofManifest (source_proof_cid), injecting the internal
  * monologue into the verifiable DAG for downstream reward shaping (GRPO).
  *
- * EPISTEMIC BOUNDS: The token_length is restricted (ge=0, le=1000000000). The textual
+ * EPISTEMIC BOUNDS: The token_length is restricted (ge=0, le=18446744073709551615). The textual
  * reasoning is physically bounded to max_length=100000 to prevent context window
  * explosion. The trace_cid is locked to a 128-char CID.
  *
@@ -13221,7 +13221,7 @@ export interface CognitiveReasoningTraceState {
  *
  * CAUSAL AFFORDANCE: Physically regulates the search tree depth and dynamically prioritizes unexplored nodes, forcing the orchestrator to expand its epistemic search space before converging.
  *
- * EPISTEMIC BOUNDS: Graph traversal depth is rigidly cut off by max_complexity_hops (ge=1, le=1000000000). The mathematical exploration bonus is constrained by inverse_frequency_smoothing_epsilon (le=1.0), preventing exponential divergence in node prioritization.
+ * EPISTEMIC BOUNDS: Graph traversal depth is rigidly cut off by max_complexity_hops (ge=1, le=18446744073709551615). The mathematical exploration bonus is constrained by inverse_frequency_smoothing_epsilon (le=1.0), preventing exponential divergence in node prioritization.
  *
  * MCP ROUTING TRIGGERS: Monte Carlo Tree Search, Upper Confidence Bound, Inverse Frequency Smoothing, Heuristic Exploration, Graph Traversal
  */
@@ -13258,7 +13258,7 @@ export interface CognitiveSwarmDeploymentManifest {
  *
  * EPISTEMIC BOUNDS: coordination_score and information_integration are upper-clamped at
  * le=1.0 to represent normalized mutual information. synergy_index is capped at
- * le=1000000000.0 to prevent scalar explosion. Note: no lower ge bounds are enforced on
+ * le=18446744073709551615.0 to prevent scalar explosion. Note: no lower ge bounds are enforced on
  * these fields.
  *
  * MCP ROUTING TRIGGERS: Integrated Information Theory, Systemic Emergence, Conditional
@@ -13303,7 +13303,7 @@ export interface ComputationalThermodynamicsProfile {
  * manifold, allowing cost-aware topological planning.
  *
  * EPISTEMIC BOUNDS: The token working memory is mathematically bounded by
- * context_window_size (le=1000000000). To guarantee RFC 8785 canonical hashing across
+ * context_window_size (le=18446744073709551615). To guarantee RFC 8785 canonical hashing across
  * disparate nodes, the capabilities and supported_functional_experts arrays are strictly
  * sorted at instantiation via @model_validator.
  *
@@ -13333,7 +13333,7 @@ export interface ComputeRateContract {
  *
  * CAUSAL AFFORDANCE: Allows the swarm orchestrator to mathematically project the budget exhaustion of a specific Latent Scratchpad trace or MCTS rollout before committing to the execution graph.
  *
- * EPISTEMIC BOUNDS: Strict integer boundaries (`le=1000000000`) on `cost_per_million_input_tokens` and `cost_per_million_output_tokens` ensure economic execution vectors cannot overflow the Epistemic Ledger. Eliminates IEEE 754 precision loss.
+ * EPISTEMIC BOUNDS: Strict integer boundaries (`le=18446744073709551615`) on `cost_per_million_input_tokens` and `cost_per_million_output_tokens` ensure economic execution vectors cannot overflow the Epistemic Ledger. Eliminates IEEE 754 precision loss.
  *
  * MCP ROUTING TRIGGERS: Thermodynamic Cost, Monte Carlo Tree Search, Economic Escrow, Token Burn, Budget Calculation
  */
@@ -13396,10 +13396,10 @@ export interface ContextualizedSourceState3 {
  * Literal ["append_only", "merge_on_resolve"].
  *
  * EPISTEMIC BOUNDS: Physically prevents Out-Of-Memory (OOM) VRAM crashes by
- * mathematically enforcing max_uncommitted_edges (gt=0, le=1000000000). The
+ * mathematically enforcing max_uncommitted_edges (gt=0, le=18446744073709551615). The
  * @model_validator enforce_append_only_vram_bound further crushes this limit to
  * <= 10000 for append_only operations. The commit cycle is temporally guillotined
- * by micro_batch_interval_ms (gt=0, le=86400000).
+ * by micro_batch_interval_ms (gt=0, le=18446744073709551615).
  *
  * MCP ROUTING TRIGGERS: Queueing Theory, Stream Processing, Micro-Batching,
  * Backpressure, Buffer Memory Bounding
@@ -13633,7 +13633,7 @@ export interface DimensionalProjectionContract {
  * reward distributions during reinforcement learning.
  *
  * EPISTEMIC BOUNDS: The Euclidean limits are physically clamped by mean and variance
- * (le=1000000000.0). The @model_validator validate_confidence_interval mathematically
+ * (le=18446744073709551615.0). The @model_validator validate_confidence_interval mathematically
  * enforces the invariant that the 95% confidence lower bound must be strictly less than
  * the upper bound.
  *
@@ -13916,7 +13916,7 @@ export interface EpistemicTopologicalProofManifest {
  * formal EpistemicTopologicalProofManifest (source_proof_cid), injecting the internal
  * monologue into the verifiable DAG for downstream reward shaping (GRPO).
  *
- * EPISTEMIC BOUNDS: The token_length is restricted (ge=0, le=1000000000). The textual
+ * EPISTEMIC BOUNDS: The token_length is restricted (ge=0, le=18446744073709551615). The textual
  * reasoning is physically bounded to max_length=100000 to prevent context window
  * explosion. The trace_cid is locked to a 128-char CID.
  *
@@ -14055,7 +14055,7 @@ export interface DefeasibleClaims {
  *
  * EPISTEMIC BOUNDS: The state geometry is mathematically locked to the
  * state_hash via a strict RFC 8785 SHA-256 regex (^[a-f0-9]{64}$). The temporal
- * pointer ledger_index is physically clamped (le=1000000000) to prevent integer
+ * pointer ledger_index is physically clamped (le=18446744073709551615) to prevent integer
  * overflow during prolonged swarm execution.
  *
  * MCP ROUTING TRIGGERS: Distributed Snapshot, Chandy-Lamport, Merkle-DAG
@@ -14095,7 +14095,7 @@ export interface EvictionPolicy {
  *
  * CAUSAL AFFORDANCE: Authorizes the orchestrator to automatically sever downstream SemanticEdgeState vectors when an upstream axiom is falsified, halting epistemic contagion across the swarm topology. `cap_validity` forces the runtime to inject `valid_to` boundaries rather than executing destructive CRUD operations.
  *
- * EPISTEMIC BOUNDS: Physically restricts catastrophic unravelling via integer limits on `max_cascade_depth` (`le=1000000000, gt=0`) and `max_quarantine_blast_radius` (`le=1000000000, gt=0`). Modulates continuous entropy via `decay_propagation_rate` (`ge=0.0, le=1.0`).
+ * EPISTEMIC BOUNDS: Physically restricts catastrophic unravelling via integer limits on `max_cascade_depth` (`le=18446744073709551615, gt=0`) and `max_quarantine_blast_radius` (`le=18446744073709551615, gt=0`). Modulates continuous entropy via `decay_propagation_rate` (`ge=0.0, le=1.0`).
  *
  * MCP ROUTING TRIGGERS: Truth Maintenance System, Non-Monotonic Logic, Defeasible Reasoning, Belief Revision, Causal Graph Ablation
  */
@@ -14137,7 +14137,7 @@ export interface EpistemicProxyState {
  * affordance_projection and capability_attestations extend the discovery surface.
  *
  * EPISTEMIC BOUNDS: Physical memory is clamped by active_context (key
- * max_length=255, value max_length=100000, le=1000000000). The @model_validator
+ * max_length=255, value max_length=100000, le=18446744073709551615). The @model_validator
  * sort_arrays deterministically sorts theory_of_mind_matrices by target_agent_cid
  * and capability_attestations by attestation_cid for RFC 8785 hashing.
  *
@@ -14245,7 +14245,7 @@ export interface FederatedCapabilityAttestationReceipt {
  *
  * CAUSAL AFFORDANCE: Authorizes a temporary, mathematically bounded partition where the agent can access unredacted enterprise vault keys without permanently leaking them into the global EpistemicLedgerState.
  *
- * EPISTEMIC BOUNDS: The temporal exposure window is physically clamped by `max_ttl_seconds` (`ge=1, le=3600`), enforcing an absolute maximum 1-hour session. Spatial access is geometrically restricted to `allowed_vault_keys` (`max_length=100`), deterministically sorted by `@model_validator` for RFC 8785 hashing.
+ * EPISTEMIC BOUNDS: The temporal exposure window is physically clamped by `max_ttl_seconds` (`ge=1, le=18446744073709551615`), enforcing an absolute maximum 1-hour session. Spatial access is geometrically restricted to `allowed_vault_keys` (`max_length=100`), deterministically sorted by `@model_validator` for RFC 8785 hashing.
  *
  * MCP ROUTING TRIGGERS: Principle of Least Privilege, Time-Based Access Control, Secret Vaulting, Ephemeral Partition, Cryptographic Isolation
  */
@@ -14344,7 +14344,7 @@ export interface EpistemicSecurityProfile1 {
  * EPISTEMIC BOUNDS: The semantic proximity for neighborhood sampling is
  * mathematically clamped by similarity_threshold_alpha (ge=0.0, le=1.0). To
  * prevent topological density explosions (hub nodes), the
- * relation_diversity_bucket_size is bounded (gt=0, le=1000000000).
+ * relation_diversity_bucket_size is bounded (gt=0, le=18446744073709551615).
  *
  * MCP ROUTING TRIGGERS: Subgraph Injection, Graph Neural Networks, Neighborhood
  * Sampling, Topological Diversity, Semantic Seeding
@@ -14520,8 +14520,8 @@ export interface Attributes {
  * max_permitted_classification, and ESG carbon intensity limits.
  *
  * EPISTEMIC BOUNDS: Economically constrained by liability_limit_magnitude (ge=0,
- * le=1000000000). ESG limits physically bind the node grid to the optional
- * max_permitted_grid_carbon_intensity (ge=0.0, le=10000.0). The permitted_geographic_regions
+ * le=18446744073709551615). ESG limits physically bind the node grid to the optional
+ * max_permitted_grid_carbon_intensity (ge=0.0, le=18446744073709551615.0). The permitted_geographic_regions
  * array is deterministically sorted via @model_validator for RFC 8785 canonical hashing.
  *
  * MCP ROUTING TRIGGERS: Zero-Trust Architecture, Post-Quantum Cryptography, Federated
@@ -14570,7 +14570,7 @@ export interface FederatedDiscoveryManifest {
  *
  * CAUSAL AFFORDANCE: Instructs the tensor execution engine to hot-swap external safetensors weight matrices into active GPU memory, modifying the foundational activation circuits.
  *
- * EPISTEMIC BOUNDS: The spatial geometry is physically capped by `vram_footprint_bytes` (`gt=0, le=100000000000`). The temporal presence is mathematically guillotined by `ephemeral_ttl_ms` (`gt=0, le=86400000`). Supply-chain integrity is anchored by `adapter_merkle_root` (SHA-256).
+ * EPISTEMIC BOUNDS: The spatial geometry is physically capped by `vram_footprint_bytes` (`gt=0, le=18446744073709551615`). The temporal presence is mathematically guillotined by `ephemeral_ttl_ms` (`gt=0, le=18446744073709551615`). Supply-chain integrity is anchored by `adapter_merkle_root` (SHA-256).
  *
  * MCP ROUTING TRIGGERS: Low-Rank Adaptation, PEFT, LRU Cache Eviction, Tensor Hot-Swapping, GPU VRAM Management
  */
@@ -14662,8 +14662,8 @@ export interface FormalVerificationContract {
  * EPISTEMIC BOUNDS: Mathematically clamps geometric explosion via the
  * @model_validator enforce_geometric_bounds, guaranteeing
  * max_node_fanout ** max_topological_depth <= 1000. Both max_topological_depth
- * and max_node_fanout are strictly positive (ge=1, le=1000000000). Synthetic
- * token economy is capped by max_synthetic_tokens (ge=1, le=1000000000).
+ * and max_node_fanout are strictly positive (ge=1, le=18446744073709551615). Synthetic
+ * token economy is capped by max_synthetic_tokens (ge=1, le=18446744073709551615).
  *
  * MCP ROUTING TRIGGERS: Ergodic Theory, Branching Factor Analysis, State-Space
  * Explosion, Fractal Graph Bounding, Gas Limit
@@ -14713,9 +14713,9 @@ export interface GenerativeTaxonomyManifest1 {
  * severity="critical").
  *
  * EPISTEMIC BOUNDS: Enforces absolute physical ceilings: max_budget_magnitude
- * (le=1000000000), max_global_tokens (le=1000000000), global_timeout_seconds (ge=0,
- * le=86400 — a strict 24-hour TTL), and optional max_carbon_budget_gco2eq (ge=0.0,
- * le=10000.0). An optional FormalVerificationContract provides mathematical proofs of
+ * (le=18446744073709551615), max_global_tokens (le=18446744073709551615), global_timeout_seconds (ge=0,
+ * le=18446744073709551615 — a strict 24-hour TTL), and optional max_carbon_budget_gco2eq (ge=0.0,
+ * le=18446744073709551615.0). An optional FormalVerificationContract provides mathematical proofs of
  * structural correctness.
  *
  * MCP ROUTING TRIGGERS: Thermodynamic Compute Limits, Hardware Guillotine, Halting Problem
@@ -14803,7 +14803,7 @@ export interface OperationalPerimeters {
  *
  * CAUSAL AFFORDANCE: Authorizes the orchestrator to computationally evaluate overlapping or preceding topological events to govern temporal state transitions and eviction.
  *
- * EPISTEMIC BOUNDS: Both `valid_from` and `valid_to` are physically clamped (`le=1000000000.0`, `ge=0.0`). The `@model_validator` mathematically forbids inverted temporal geometry by guaranteeing `valid_to` is strictly greater than `valid_from`.
+ * EPISTEMIC BOUNDS: Both `valid_from` and `valid_to` are physically clamped (`le=18446744073709551615.0`, `ge=0.0`). The `@model_validator` mathematically forbids inverted temporal geometry by guaranteeing `valid_to` is strictly greater than `valid_from`.
  *
  * MCP ROUTING TRIGGERS: Allen's Interval Algebra, Temporal Geometry, Chronological Bounding, Topological Time, State Transition
  */
@@ -14825,7 +14825,7 @@ export interface TemporalBoundsProfile2 {
  *
  * CAUSAL AFFORDANCE: Authorizes the orchestrator's routing engine to allocate specific functional experts and reserve physical VRAM budgets without needing to parse the full artifact into the active context window.
  *
- * EPISTEMIC BOUNDS: Memory allocation limits are mathematically bounded by token_density (ge=0, le=1000000000). The @model_validator deterministically sorts the detected_modalities enum array, guaranteeing zero-variance RFC 8785 canonical hashing across distributed nodes.
+ * EPISTEMIC BOUNDS: Memory allocation limits are mathematically bounded by token_density (ge=0, le=18446744073709551615). The @model_validator deterministically sorts the detected_modalities enum array, guaranteeing zero-variance RFC 8785 canonical hashing across distributed nodes.
  *
  * MCP ROUTING TRIGGERS: Structural Indexing, VRAM Budgeting, Representation Engineering, Modality Detection, RFC 8785 Canonicalization
  */
@@ -14898,7 +14898,7 @@ export interface GraphFlatteningPolicy {
  * execution tree and apply necessary truth maintenance.
  *
  * EPISTEMIC BOUNDS: The jsonrpc field is a rigid Literal["2.0"] automaton. The id is
- * topologically locked to a 128-char CID regex or an integer (le=1000000000) or None.
+ * topologically locked to a 128-char CID regex or an integer (le=18446744073709551615) or None.
  *
  * MCP ROUTING TRIGGERS: Zero-Trust Architecture, Distributed RPC, Execution Severing,
  * Truth Maintenance, Fault Envelope
@@ -14933,7 +14933,7 @@ export interface JSONRPCErrorState {
  * EPISTEMIC BOUNDS: The `error_payload` is strictly routed through the volumetric
  * hardware guillotine (`enforce_payload_topology`) to mathematically prevent infinite
  * recursive depth from triggering C-stack overflows during fault serialization. The
- * code integer is rigidly capped (le=1000000000) and the semantic message is restricted
+ * code integer is rigidly capped (le=18446744073709551615) and the semantic message is restricted
  * to max_length=2000.
  *
  * MCP ROUTING TRIGGERS: Fault Projection, Buffer Overflow Prevention, Error Vector,
@@ -15058,7 +15058,7 @@ export interface MacroGridProfile {
  *
  * CAUSAL AFFORDANCE: Unlocks the ability for the orchestrator to computationally slash Byzantine or hallucinating nodes, ensuring a strict thermodynamic cost to semantic drift.
  *
- * EPISTEMIC BOUNDS: Physically restricts the mathematical invariant where `slashing_penalty <= minimum_collateral` via an `@model_validator`. Both bounds are strictly enforced as atomic integer magnitudes (`ge=0, le=1000000000`).
+ * EPISTEMIC BOUNDS: Physically restricts the mathematical invariant where `slashing_penalty <= minimum_collateral` via an `@model_validator`. Both bounds are strictly enforced as atomic integer magnitudes (`ge=0, le=18446744073709551615`).
  *
  * MCP ROUTING TRIGGERS: Proof-of-Stake, Slashing Condition, Byzantine Fault Tolerance, Economic Escrow
  */
@@ -15099,7 +15099,7 @@ export interface MultimodalArtifactReceipt {
  * forcing the exploration of novel manifolds in the fitness landscape.
  *
  * EPISTEMIC BOUNDS: The mutation_rate is clamped strictly to a probability distribution
- * (ge=0.0, le=1.0). The temperature_shift_variance is bounded (le=1000000000.0). To
+ * (ge=0.0, le=1.0). The temperature_shift_variance is bounded (le=18446744073709551615.0). To
  * prevent Byzantine Hash Poisoning, the variance can require a VerifiableEntropyReceipt
  * (VRF) via the optional verifiable_entropy field to prove stochastic fairness.
  *
@@ -15128,7 +15128,7 @@ export interface MutationPolicy1 {
  *
  * EPISTEMIC BOUNDS: The @model_validator _enforce_physics_engine mathematically proves
  * that the topological shape exactly matches the declared vram_footprint_bytes limit
- * (le=100000000000) based on the scalar structural_type byte density. Supply-chain
+ * (le=18446744073709551615) based on the scalar structural_type byte density. Supply-chain
  * tampering is physically prevented via the merkle_root SHA-256 requirement.
  *
  * MCP ROUTING TRIGGERS: Tensor Calculus, Differential Geometry, Merkle Tree Verification, Zero-Trust Computing, Memory Allocation
@@ -15309,7 +15309,7 @@ export interface SemanticEdgeState {
  *
  * CAUSAL AFFORDANCE: Authorizes the orchestrator to computationally evaluate overlapping or preceding topological events to govern temporal state transitions and eviction.
  *
- * EPISTEMIC BOUNDS: Both `valid_from` and `valid_to` are physically clamped (`le=1000000000.0`, `ge=0.0`). The `@model_validator` mathematically forbids inverted temporal geometry by guaranteeing `valid_to` is strictly greater than `valid_from`.
+ * EPISTEMIC BOUNDS: Both `valid_from` and `valid_to` are physically clamped (`le=18446744073709551615.0`, `ge=0.0`). The `@model_validator` mathematically forbids inverted temporal geometry by guaranteeing `valid_to` is strictly greater than `valid_from`.
  *
  * MCP ROUTING TRIGGERS: Allen's Interval Algebra, Temporal Geometry, Chronological Bounding, Topological Time, State Transition
  */
@@ -15351,7 +15351,7 @@ export interface SideEffectProfile1 {
  * unnecessary compute expansion.
  *
  * EPISTEMIC BOUNDS: Physically constrained by max_monte_carlo_rollouts (gt=0,
- * le=1000000000) to prevent infinite branching. Statistical confidence is mathematically
+ * le=18446744073709551615) to prevent infinite branching. Statistical confidence is mathematically
  * clamped by variance_tolerance to a probability distribution between [ge=0.0, le=1.0].
  *
  * MCP ROUTING TRIGGERS: Optimal Stopping Theory, Monte Carlo Tree Search, Variance
@@ -15373,7 +15373,7 @@ export interface SimulationConvergenceSLA1 {
  * upfront.
  *
  * EPISTEMIC BOUNDS: Physically bounded by locked_magnitude, which must be strictly positive
- * (gt=0, le=1000000000) to mathematically prevent zero-cost Sybil griefing attacks against
+ * (gt=0, le=18446744073709551615) to mathematically prevent zero-cost Sybil griefing attacks against
  * the swarm's compute resources.
  *
  * MCP ROUTING TRIGGERS: Proof-of-Stake, Economic Escrow, Sybil Resistance, Thermodynamic
@@ -15429,7 +15429,7 @@ export interface SpatialReferenceFrameManifest {
  *
  * EPISTEMIC BOUNDS: Cryptographically anchored by diff_cid and author_node_cid (both
  * strict 128-char CID regex). The synchronization math is clamped by lamport_timestamp
- * (ge=0, le=1000000000), physically preventing logical clock integer overflow during
+ * (ge=0, le=18446744073709551615), physically preventing logical clock integer overflow during
  * prolonged swarm execution cycles.
  *
  * MCP ROUTING TRIGGERS: Conflict-Free Replicated Data Types, Lamport Logical Clock,
@@ -15462,7 +15462,7 @@ export interface VectorClock1 {
  * pointers) bind to past immutable ledger blocks.
  *
  * EPISTEMIC BOUNDS: VRAM exhaustion is prevented by max_retained_tokens (gt=0,
- * le=1000000000). The @field_validator enforce_payload_topology calls
+ * le=18446744073709551615). The @field_validator enforce_payload_topology calls
  * _validate_payload_bounds to prevent Dictionary Bombing on working_context_variables.
  * The @model_validator sort_arrays deterministically sorts crystallized_ledger_cids for
  * RFC 8785 canonical hashing.
@@ -15515,8 +15515,8 @@ export interface StateVectorProfile1 {
  * and procedural expectations for standard execution loops.
  *
  * EPISTEMIC BOUNDS: Latency expectations are continuously bounded by
- * expected_max_latency (ge=0.0, le=1000000000.0). The max_loops_allowed
- * (le=1000000000) physically caps algorithmic cycles. The optional
+ * expected_max_latency (ge=0.0, le=18446744073709551615.0). The max_loops_allowed
+ * (le=18446744073709551615) physically caps algorithmic cycles. The optional
  * required_tool_usage (list[str] | None, default=None,
  * max_length=1000) is deterministically sorted via @model_validator
  * sort_arrays to preserve RFC 8785 canonical hashing.
@@ -15568,8 +15568,8 @@ export interface SyntheticGenerationProfile {
  * EPISTEMIC BOUNDS: Mathematically clamps geometric explosion via the
  * @model_validator enforce_geometric_bounds, guaranteeing
  * max_node_fanout ** max_topological_depth <= 1000. Both max_topological_depth
- * and max_node_fanout are strictly positive (ge=1, le=1000000000). Synthetic
- * token economy is capped by max_synthetic_tokens (ge=1, le=1000000000).
+ * and max_node_fanout are strictly positive (ge=1, le=18446744073709551615). Synthetic
+ * token economy is capped by max_synthetic_tokens (ge=1, le=18446744073709551615).
  *
  * MCP ROUTING TRIGGERS: Ergodic Theory, Branching Factor Analysis, State-Space
  * Explosion, Fractal Graph Bounding, Gas Limit
@@ -15688,7 +15688,7 @@ export interface TraceExportManifest {
  *
  * CAUSAL AFFORDANCE: Provides explicit mathematical justification for an agent's trajectory. If the variance of the utility distribution exceeds the threshold, it physically forces the orchestrator to deploy the embedded ensemble specification for deterministic resolution.
  *
- * EPISTEMIC BOUNDS: The `superposition_variance_threshold` is physically clamped strictly above zero (`gt=0.0`, `le=1000000000.0`), as a variance of absolute 0.0 represents mathematical certainty, which physically precludes superposition geometry. Vector dictionaries are bounded purely by spatial cardinality (`max_length=1000`).
+ * EPISTEMIC BOUNDS: The `superposition_variance_threshold` is physically clamped strictly above zero (`gt=0.0`, `le=18446744073709551615.0`), as a variance of absolute 0.0 represents mathematical certainty, which physically precludes superposition geometry. Vector dictionaries are bounded purely by spatial cardinality (`max_length=1000`).
  *
  * MCP ROUTING TRIGGERS: Multi-Attribute Utility Theory, Pareto Efficiency, Variance Reduction, Fallback Superposition, Utility Routing
  */

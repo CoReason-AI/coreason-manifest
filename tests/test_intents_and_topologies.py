@@ -35,10 +35,12 @@ def test_human_directive_intent_valid() -> None:
 def test_human_directive_intent_budget_exceeds() -> None:
     with pytest.raises(ValidationError) as exc_info:
         HumanDirectiveIntent(
-            natural_language_goal="Solve AGI.", allocated_budget_magnitude=1000000001, target_qos="interactive"
+            natural_language_goal="Solve AGI.",
+            allocated_budget_magnitude=18446744073709551616,
+            target_qos="interactive",
         )
     assert "allocated_budget_magnitude" in str(exc_info.value)
-    assert "Input should be less than or equal to 1000000000" in str(exc_info.value)
+    assert "Input should be less than or equal to 18446744073709551615" in str(exc_info.value)
 
 
 def get_dummy_deficit() -> SemanticDiscoveryIntent:
