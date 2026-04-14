@@ -1,5 +1,5 @@
 from coreason_manifest.spec.ontology import MCPToolDefinition
-from coreason_manifest.utils.mcp_adapters import (
+from coreason_manifest.spec.ontology import (
     generate_clingo_mcp_tool,
     generate_lean4_mcp_tool,
     generate_prolog_mcp_tool,

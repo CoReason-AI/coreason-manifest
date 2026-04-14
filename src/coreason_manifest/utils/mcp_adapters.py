@@ -12,49 +12,7 @@ from typing import Any, cast
 
 import msgspec
 
-from coreason_manifest.spec.ontology import ExecutionEnvelopeState, MCPToolDefinition
-
-
-def generate_lean4_mcp_tool() -> MCPToolDefinition:
-    return MCPToolDefinition(
-        name="verify_lean4_theorem",
-        description="Use this tool to evaluate constructive mathematical proofs and universal invariants in Lean 4. Returns the verification status or the failing tactic state.",
-        input_schema={
-            "type": "object",
-            "properties": {
-                "formal_statement": {"type": "string", "maxLength": 100000},
-                "tactic_proof": {"type": "string", "maxLength": 100000},
-            },
-            "required": ["formal_statement", "tactic_proof"],
-        },
-    )
-
-
-def generate_clingo_mcp_tool() -> MCPToolDefinition:
-    return MCPToolDefinition(
-        name="execute_clingo_falsification",
-        description="Use this tool to hunt for counter-models and evaluate NP-hard constraint satisfaction problems using Answer Set Programming (ASP).",
-        input_schema={
-            "type": "object",
-            "properties": {
-                "asp_program": {"type": "string", "maxLength": 65536},
-                "max_models": {"type": "integer", "default": 1},
-            },
-            "required": ["asp_program"],
-        },
-    )
-
-
-def generate_prolog_mcp_tool() -> MCPToolDefinition:
-    return MCPToolDefinition(
-        name="execute_prolog_deduction",
-        description="Use this tool for evidentiary grounding, exact subgraph isomorphism, and traversing hierarchical knowledge bases via backward-chaining resolution.",
-        input_schema={
-            "type": "object",
-            "properties": {"prolog_query": {"type": "string"}, "ephemeral_facts": {"type": "string"}},
-            "required": ["prolog_query"],
-        },
-    )
+from coreason_manifest.spec.ontology import ExecutionEnvelopeState, _canonicalize_payload
 
 
 class DeterministicTransportAdapter:
@@ -71,11 +29,12 @@ class DeterministicTransportAdapter:
     @staticmethod
     def serialize_envelope(envelope: ExecutionEnvelopeState[Any]) -> bytes:
         payload_dict = envelope.model_dump(mode="json", exclude_none=True, by_alias=True)
+        canonical_dict = _canonicalize_payload(payload_dict)
         # Note: External Protocol Exemption. (JSON-RPC 2.0)
         wrapped_payload = {
             "jsonrpc": "2.0",
             "method": "coreason_execute",
-            "params": payload_dict,
+            "params": canonical_dict,
             "id": payload_dict.get("envelope_cid", "unknown"),
         }
         encoder = msgspec.json.Encoder(sort_keys=True)  # type: ignore[call-arg]
