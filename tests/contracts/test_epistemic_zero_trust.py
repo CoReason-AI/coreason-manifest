@@ -9,19 +9,24 @@
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
 import pytest
+from authlib.jose import jwt
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    EpistemicSecurityProfile,
-    EpistemicSecurityPolicy,
+    CryptographicAttestationReceipt,
     EmpiricalFalsificationContract,
     EpistemicAxiomVerificationReceipt,
     EpistemicConstraintPolicy,
+    EpistemicSecurityPolicy,
+    EpistemicSecurityProfile,
     EpistemicZeroTrustContract,
     EpistemicZeroTrustReceipt,
     FalsificationContract,
+    FederatedHandshakeIntent,
     FormalVerificationContract,
+    PostQuantumSignatureReceipt,
 )
+from coreason_manifest.utils.mcp_adapters import DecentralizedIdentityGateway
 
 
 def test_epistemic_constraint_policy_valid() -> None:
@@ -135,16 +140,7 @@ def test_empirical_falsification_contract_instantiation() -> None:
     assert contract.falsifying_observation_signature == "error.*"
 
 
-from coreason_manifest.spec.ontology import (
-    EpistemicSecurityProfile,
-    EpistemicSecurityPolicy,
-    CryptographicAttestationReceipt,
-    FederatedHandshakeIntent,
-    ConnectionSeveranceEvent,
-    PostQuantumSignatureReceipt,
-)
-from coreason_manifest.utils.mcp_adapters import DecentralizedIdentityGateway
-from authlib.jose import jwt
+
 
 
 def test_volumetric_fuzzing_sd_jwt_payload_too_long():
@@ -296,4 +292,4 @@ def test_gateway_severance_pqc_signature_valid():
     )
 
     # Should not raise
-    assert gateway.process_handshake(intent) == True
+    assert gateway.process_handshake(intent)
