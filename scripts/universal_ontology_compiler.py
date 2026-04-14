@@ -20,7 +20,7 @@ import urllib.request
 from pathlib import Path
 from typing import Annotated, Any, ForwardRef, TypeAliasType, Union, cast, get_args, get_origin, get_type_hints
 
-import networkx as nx
+import rustworkx as rx
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT / "src"))
@@ -334,7 +334,7 @@ def evaluate_topological_reachability() -> None:
     }
     alias_registry = {name: obj.__value__ for name, obj in vars(onto).items() if isinstance(obj, TypeAliasType)}
 
-    graph: nx.DiGraph[Any] = nx.DiGraph()
+    graph: rx.PyDiGraph = rx.PyDiGraph()
     for cls_name in class_registry:
         graph.add_node(cls_name)
 
@@ -471,9 +471,9 @@ def evaluate_topological_reachability() -> None:
     ]
     reachable_nodes = set(root_nodes)
     for root in root_nodes:
-        if root in graph:
+        if root in name_to_index:
             reachable_nodes.update(nx.descendants(graph, root))
-    orphaned_nodes = set(graph.nodes) - reachable_nodes
+    orphaned_nodes = set(graph.node_indices()) - reachable_nodes
     if len(orphaned_nodes) > 0:
         print("CRITICAL FAULT: True Orphaned Nodes Detected")
         print("-" * 50)
@@ -482,7 +482,7 @@ def evaluate_topological_reachability() -> None:
         print("-" * 50)
         sys.exit(1)
     else:
-        print(f"Topological Reachability Confirmed: {len(graph.nodes)}/{len(graph.nodes)} Nodes")
+        print(f"Topological Reachability Confirmed: {len(graph.node_indices())}/{len(graph.node_indices())} Nodes")
         sys.exit(0)
 
 
