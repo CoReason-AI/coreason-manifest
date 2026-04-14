@@ -20,7 +20,7 @@ import urllib.request
 from pathlib import Path
 from typing import Annotated, Any, ForwardRef, TypeAliasType, Union, cast, get_args, get_origin, get_type_hints
 
-import networkx as nx
+import rustworkx as rx
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT / "src"))
@@ -334,9 +334,13 @@ def evaluate_topological_reachability() -> None:
     }
     alias_registry = {name: obj.__value__ for name, obj in vars(onto).items() if isinstance(obj, TypeAliasType)}
 
-    graph: nx.DiGraph[Any] = nx.DiGraph()
+    graph = rx.PyDiGraph()
+    name_to_idx = {}
+    idx_to_name = {}
     for cls_name in class_registry:
-        graph.add_node(cls_name)
+        idx = graph.add_node(cls_name)
+        name_to_idx[cls_name] = idx
+        idx_to_name[idx] = cls_name
 
     def extract_referenced_models(annotation: Any, seen: set[int | str] | None = None) -> list[type]:
         if seen is None:
@@ -385,7 +389,7 @@ def evaluate_topological_reachability() -> None:
                 for ref_model in extract_referenced_models(resolved_type):
                     ref_name = ref_model.__name__.split("[")[0]
                     if ref_name in class_registry:
-                        graph.add_edge(cls_name, ref_name)
+                        graph.add_edge(name_to_idx[cls_name], name_to_idx[ref_name], None)
         except Exception as e:
             print(f"Warning: Failed to resolve type hints for {cls_name}: {e}")
 
@@ -469,11 +473,13 @@ def evaluate_topological_reachability() -> None:
         "SyntheticGenerationProfile",
         "NDimensionalTensorManifest",
     ]
-    reachable_nodes = set(root_nodes)
+    reachable_indices = set()
     for root in root_nodes:
-        if root in graph:
-            reachable_nodes.update(nx.descendants(graph, root))
-    orphaned_nodes = set(graph.nodes) - reachable_nodes
+        if root in name_to_idx:
+            root_idx = name_to_idx[root]
+            reachable_indices.add(root_idx)
+            reachable_indices.update(rx.descendants(graph, root_idx))
+    orphaned_nodes = set(idx_to_name[idx] for idx in graph.node_indices() if idx not in reachable_indices)
     if len(orphaned_nodes) > 0:
         print("CRITICAL FAULT: True Orphaned Nodes Detected")
         print("-" * 50)
@@ -482,7 +488,8 @@ def evaluate_topological_reachability() -> None:
         print("-" * 50)
         sys.exit(1)
     else:
-        print(f"Topological Reachability Confirmed: {len(graph.nodes)}/{len(graph.nodes)} Nodes")
+        total_nodes = len(graph.node_indices())
+        print(f"Topological Reachability Confirmed: {total_nodes}/{total_nodes} Nodes")
         sys.exit(0)
 
 
