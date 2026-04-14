@@ -52,3 +52,29 @@ def test_schema_driven_extraction_sla_validation() -> None:
         ),
     )
     assert sla.linkml_governance is not None
+
+
+def test_combinatorial_counter_model_sorting() -> None:
+    """Proves the unsat_core array is automatically alphabetized to preserve RFC 8785 canonical hashing."""
+    from coreason_manifest.spec.ontology import CombinatorialCounterModel
+
+    model = CombinatorialCounterModel(
+        failed_premise_cid="did:coreason:test-123", unsat_core=["constraint_c", "constraint_a", "constraint_b"]
+    )
+    # Assert the array was intercepted and sorted by the @model_validator
+    assert model.unsat_core == ["constraint_a", "constraint_b", "constraint_c"]
+
+
+def test_formal_logic_proof_receipt_interlock() -> None:
+    """Proves the physical constraint that an UNSAT state MUST contain a counter-model."""
+    from coreason_manifest.spec.ontology import FormalLogicProofReceipt
+
+    with pytest.raises(ValueError, match="counter_model MUST be present when satisfiability is UNSATISFIABLE"):
+        FormalLogicProofReceipt(
+            causal_provenance_id="did:coreason:test-123",
+            event_cid="bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
+            timestamp=12345.0,
+            satisfiability="UNSATISFIABLE",
+            counter_model=None,
+            answer_sets=[],
+        )

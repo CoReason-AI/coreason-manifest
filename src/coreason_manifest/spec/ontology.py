@@ -2065,13 +2065,13 @@ class PostQuantumSignatureReceipt(CoreasonBaseState):
 
     """
 
-    pq_algorithm: Literal["ml-dsa", "slh-dsa", "falcon"] = Field(
+    pq_algorithm: Literal["ml-dsa-44", "ml-dsa-65", "slh-dsa-sha2-128s"] = Field(
         description="The NIST FIPS post-quantum cryptographic algorithm used."
     )
     public_key_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
         Field(description="The identifier of the post-quantum public evaluation key.")
     )
-    pq_signature_blob: Annotated[str, StringConstraints(max_length=100000)] = Field(
+    pq_signature_blob: Annotated[str, StringConstraints(max_length=10000)] = Field(
         description="The base64-encoded post-quantum signature. Bounded to 100KB to safely accommodate massive SPHINCS+ hash trees without OOM crashes."
     )
 
@@ -6978,6 +6978,9 @@ class System2RemediationIntent(CoreasonBaseState):
     violation_receipts: list[ManifestViolationReceipt] = Field(
         min_length=1, description="The deterministic array of exact structural faults the agent must correct."
     )
+    logic_counter_models: list[CombinatorialCounterModel] = Field(
+        default_factory=list, description="The mechanistic penalty (UNSAT core) from logical counter-models."
+    )
     ast_gradient: ASTGradientReceipt | None = Field(
         default=None, description="The structural loss vector guiding AST repair."
     )
@@ -6987,6 +6990,16 @@ class System2RemediationIntent(CoreasonBaseState):
         """Mathematically sort receipts to guarantee deterministic canonical hashing."""
         object.__setattr__(
             self, "violation_receipts", sorted(self.violation_receipts, key=operator.attrgetter("failing_pointer"))
+        )
+        return self
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort_logic_counter_models(self) -> Self:
+        """Mathematically sort counter models to guarantee deterministic canonical hashing."""
+        object.__setattr__(
+            self,
+            "logic_counter_models",
+            sorted(self.logic_counter_models, key=operator.attrgetter("failed_premise_cid")),
         )
         return self
 
@@ -7163,6 +7176,32 @@ class Lean4VerificationReceipt(CoreasonBaseState):
     topology_class: Literal["lean4_verification_receipt"] = Field(default="lean4_verification_receipt")
 
 
+class CombinatorialCounterModel(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: The deterministic mechanistic penalty envelope when the ASP solver detects an impossible constraint matrix.
+
+    CAUSAL AFFORDANCE: Acts as a mechanistic penalty that forces the LLM to perform defeasible reasoning strictly on conflicting axioms rather than stochastically hallucinating new ones.
+
+    EPISTEMIC BOUNDS: The `unsat_core` array is mathematically sorted by the `_enforce_canonical_sort` hook to guarantee zero-variance RFC 8785 canonical hashing across distributed nodes when the counter-model is recorded on the Merkle-DAG.
+
+    MCP ROUTING TRIGGERS: Mechanistic Penalty, Defeasible Reasoning, Answer Set Programming, Combinatorial Counter Model, UNSAT Core
+    """
+
+    topology_class: Literal["combinatorial_counter_model"] = Field(default="combinatorial_counter_model")
+    failed_premise_cid: NodeCIDState = Field(
+        description="Points to the specific EpistemicLogicPremise that collapsed.",
+    )
+    unsat_core: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
+        description="The exact subset of contradictory ASP rules/clauses extracted from clingo."
+    )
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        """Mathematically sort unsat_core to guarantee deterministic canonical hashing."""
+        object.__setattr__(self, "unsat_core", sorted(self.unsat_core))
+        return self
+
+
 class EpistemicLogicPremise(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Unlocks Answer Set Programming (Clingo) for NP-hard combinatorial constraint satisfaction.
@@ -7188,6 +7227,9 @@ class FormalLogicProofReceipt(CoreasonBaseState):
     timestamp: float
     prior_event_hash: str | None = Field(default=None)
     satisfiability: Literal["SATISFIABLE", "UNSATISFIABLE", "UNKNOWN", "OPTIMUM FOUND"]
+    counter_model: CombinatorialCounterModel | None = Field(
+        default=None, description="Populated when satisfiability is UNSATISFIABLE or UNKNOWN (syntax error)."
+    )
     answer_sets: list[list[Annotated[str, StringConstraints(max_length=1024)]]] = Field(
         default_factory=list,
         json_schema_extra={"coreason_topological_exemption": True},
@@ -7198,6 +7240,15 @@ class FormalLogicProofReceipt(CoreasonBaseState):
     def serialize_answer_sets(self, answer_sets: list[list[str]], _info: Any) -> list[list[str]]:
         # Topological Exemption: Explicitly freeze the exact list sequence.
         return answer_sets
+
+    @model_validator(mode="after")
+    def enforce_unsat_physics(self) -> Self:
+        """Mathematically enforce physics of counter models vs satisfiability."""
+        if self.satisfiability == "UNSATISFIABLE" and self.counter_model is None:
+            raise ValueError("Epistemic Violation: counter_model MUST be present when satisfiability is UNSATISFIABLE.")
+        if self.satisfiability == "SATISFIABLE" and self.counter_model is not None:
+            raise ValueError("Epistemic Violation: counter_model MUST be None when satisfiability is SATISFIABLE.")
+        return self
 
 
 class EpistemicPrologPremise(CoreasonBaseState):
@@ -7513,13 +7564,52 @@ class TemporalEdgeInvalidationIntent(CoreasonBaseState):
     )
 
 
+class CryptographicAttestationReceipt(CoreasonBaseState):
+    topology_class: Literal["cryptographic_attestation"] = "cryptographic_attestation"
+    issuer_did: NodeCIDState
+    subject_did: NodeCIDState
+    sd_jwt_payload: Annotated[
+        str,
+        StringConstraints(
+            max_length=500000, pattern=r"^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+(~[A-Za-z0-9_-]+)*$"
+        ),
+    ]
+    pqc_signature: PostQuantumSignatureReceipt | None
+
+
+class FederatedHandshakeIntent(CoreasonBaseState):
+    topology_class: Literal["federated_handshake"] = "federated_handshake"
+    initiator_node_cid: NodeCIDState
+    target_node_cid: NodeCIDState
+    attestation: CryptographicAttestationReceipt
+    requested_scopes: list[Annotated[str, StringConstraints(max_length=255)]]
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "requested_scopes", sorted(self.requested_scopes))
+        return self
+
+
+class ConnectionSeveranceEvent(CoreasonBaseState):
+    topology_class: Literal["connection_severance"] = "connection_severance"
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="A globally unique CID bounding string for the event."
+    )
+    prior_event_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(default=None)
+    timestamp: float = Field(ge=0.0, le=253402300799.0)
+    target_ip_or_did: Annotated[str, StringConstraints(max_length=1024)]
+    severance_reason: Literal["pqc_signature_invalid", "sd_jwt_tampered", "did_resolution_failed", "unauthorized_scope"]
+
+
 type AnyIntent = Annotated[
-    TemporalEdgeInvalidationIntent
+    FederatedHandshakeIntent
+    | TemporalEdgeInvalidationIntent
     | EpistemicZeroTrustContract
     | EmpiricalFalsificationContract
     | FalsificationContract
     | OntologicalCrosswalkIntent
-    | EpistemicZeroTrustContract
     | SemanticIntent
     | DraftingIntent
     | AdjudicationIntent
@@ -14809,7 +14899,8 @@ class MCPToolDefinition(CoreasonBaseState):
 
 
 type AnyStateEvent = Annotated[
-    TemporalGraphCRDTManifest
+    ConnectionSeveranceEvent
+    | TemporalGraphCRDTManifest
     | MCPToolDefinition
     | CrosswalkResolutionReceipt
     | EpistemicZeroTrustReceipt
@@ -15396,6 +15487,7 @@ EpistemicProxyState.model_rebuild()
 EpistemicLean4Premise.model_rebuild()
 Lean4VerificationReceipt.model_rebuild()
 EpistemicLogicPremise.model_rebuild()
+CombinatorialCounterModel.model_rebuild()
 FormalLogicProofReceipt.model_rebuild()
 EpistemicPrologPremise.model_rebuild()
 PrologDeductionReceipt.model_rebuild()
@@ -15435,3 +15527,6 @@ ContinuousManifoldMappingContract.model_rebuild()
 TopologicalSortIntent.model_rebuild()
 CycleDetectionReceipt.model_rebuild()
 TopologicalGuillotineEvent.model_rebuild()
+CryptographicAttestationReceipt.model_rebuild()
+FederatedHandshakeIntent.model_rebuild()
+ConnectionSeveranceEvent.model_rebuild()
