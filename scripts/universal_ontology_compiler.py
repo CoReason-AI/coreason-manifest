@@ -335,8 +335,9 @@ def evaluate_topological_reachability() -> None:
     alias_registry = {name: obj.__value__ for name, obj in vars(onto).items() if isinstance(obj, TypeAliasType)}
 
     graph: rx.PyDiGraph = rx.PyDiGraph()
+    mapping = {}
     for cls_name in class_registry:
-        graph.add_node(cls_name)
+        mapping[cls_name] = graph.add_node(cls_name)
 
     def extract_referenced_models(annotation: Any, seen: set[int | str] | None = None) -> list[type]:
         if seen is None:
@@ -385,7 +386,7 @@ def evaluate_topological_reachability() -> None:
                 for ref_model in extract_referenced_models(resolved_type):
                     ref_name = ref_model.__name__.split("[")[0]
                     if ref_name in class_registry:
-                        graph.add_edge(cls_name, ref_name)
+                        graph.add_edge(mapping[cls_name], mapping[ref_name], None)
         except Exception as e:
             print(f"Warning: Failed to resolve type hints for {cls_name}: {e}")
 
@@ -471,9 +472,13 @@ def evaluate_topological_reachability() -> None:
     ]
     reachable_nodes = set(root_nodes)
     for root in root_nodes:
-        if root in name_to_index:
-            reachable_nodes.update(nx.descendants(graph, root))
-    orphaned_nodes = set(graph.node_indices()) - reachable_nodes
+        if root in mapping:
+            idx = mapping[root]
+            for _node_idx, successors in rx.bfs_successors(graph, idx):
+                for s in successors:
+                    reachable_nodes.add(s)
+
+    orphaned_nodes = {graph.get_node_data(idx) for idx in graph.node_indices()} - reachable_nodes
     if len(orphaned_nodes) > 0:
         print("CRITICAL FAULT: True Orphaned Nodes Detected")
         print("-" * 50)
