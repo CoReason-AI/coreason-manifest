@@ -232,8 +232,11 @@ def test_gateway_severance_pqc_signature_invalid():
         epistemic_security=EpistemicSecurityPolicy.CONFIDENTIAL, network_isolation=True, egress_obfuscation=True
     )
 
+    import time
+
+    exp_time = int(time.time()) + 3600
     header = {"alg": "HS256"}
-    payload = {"sub": "did:coreason:subject-1", "exp": 1776128862}
+    payload = {"sub": "did:coreason:subject-1", "iss": "did:coreason:issuer-1", "exp": exp_time}
     valid_jwt = jwt.encode(header, payload, "secret-key").decode("utf-8")
 
     gateway = DecentralizedIdentityGateway(
@@ -263,8 +266,11 @@ def test_gateway_severance_pqc_signature_valid():
         epistemic_security=EpistemicSecurityPolicy.CONFIDENTIAL, network_isolation=True, egress_obfuscation=True
     )
 
+    import time
+
+    exp_time = int(time.time()) + 3600
     header = {"alg": "HS256"}
-    payload = {"sub": "did:coreason:subject-1", "exp": 1776128862}
+    payload = {"sub": "did:coreason:subject-1", "iss": "did:coreason:issuer-1", "exp": exp_time}
     valid_jwt = jwt.encode(header, payload, "secret-key").decode("utf-8")
 
     gateway = DecentralizedIdentityGateway(

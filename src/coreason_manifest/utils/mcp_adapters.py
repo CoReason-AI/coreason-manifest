@@ -79,7 +79,11 @@ class DecentralizedIdentityGateway:
 
         # Gate 2 (SD-JWT Verification)
         try:
-            claims = jwt.decode(intent.attestation.sd_jwt_payload, public_key)
+            claims_options = {
+                "iss": {"essential": True, "value": issuer_did},
+                "sub": {"essential": True, "value": intent.attestation.subject_did},
+            }
+            claims = jwt.decode(intent.attestation.sd_jwt_payload, public_key, claims_options=claims_options)
             claims.validate()
         except JoseError:
             self._trigger_instant_severance(issuer_did, "sd_jwt_tampered")

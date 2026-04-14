@@ -7447,6 +7447,9 @@ class ConnectionSeveranceEvent(CoreasonBaseState):
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         description="A globally unique CID bounding string for the event."
     )
+    prior_event_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(default=None)
     timestamp: float = Field(ge=0.0, le=253402300799.0)
     target_ip_or_did: Annotated[str, StringConstraints(max_length=1024)]
     severance_reason: Literal["pqc_signature_invalid", "sd_jwt_tampered", "did_resolution_failed", "unauthorized_scope"]
@@ -7459,7 +7462,6 @@ type AnyIntent = Annotated[
     | EmpiricalFalsificationContract
     | FalsificationContract
     | OntologicalCrosswalkIntent
-    | EpistemicZeroTrustContract
     | SemanticIntent
     | DraftingIntent
     | AdjudicationIntent
