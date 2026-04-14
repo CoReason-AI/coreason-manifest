@@ -16,7 +16,7 @@ valid_cid_strategy = st.from_regex(r"^did:[a-z0-9]+:[a-zA-Z0-9.\-_:]+$", fullmat
     tactics_script=st.text(max_size=100000),
     dependency_graph_cids=st.lists(valid_cid_strategy, max_size=10) | st.none(),
 )
-def test_epistemic_lean4_premise_sorting(target_theorem, tactics_script, dependency_graph_cids):
+def test_epistemic_lean4_premise_sorting(target_theorem: str, tactics_script: str, dependency_graph_cids: list[str] | None) -> None:
     premise = EpistemicLean4Premise(
         target_theorem=target_theorem,
         tactics_script=tactics_script,
@@ -33,7 +33,7 @@ def test_epistemic_lean4_premise_sorting(target_theorem, tactics_script, depende
     target_type=st.text(max_size=2000),
     complexity_score=st.floats(min_value=0.0, max_value=1.0) | st.none(),
 )
-def test_tactic_state_goal_sorting(hypothesis_context, target_type, complexity_score):
+def test_tactic_state_goal_sorting(hypothesis_context: list[str], target_type: str, complexity_score: float | None) -> None:
     goal = TacticStateGoal(
         hypothesis_context=hypothesis_context,
         target_type=target_type,
@@ -55,7 +55,7 @@ def test_tactic_state_goal_sorting(hypothesis_context, target_type, complexity_s
     )
     | st.none(),
 )
-def test_lean4_verification_receipt_sorting(is_proved, tactic_state_trees):
+def test_lean4_verification_receipt_sorting(is_proved: bool, tactic_state_trees: list[TacticStateGoal] | None) -> None:
     receipt = Lean4VerificationReceipt(
         is_proved=is_proved,
         tactic_state_tree=tactic_state_trees,

@@ -11,9 +11,9 @@
 import threading
 import time
 
-import clingo
-from clingo.ast import ASTType, Function, Literal, ProgramBuilder, Sign, SymbolicAtom, Transformer, parse_string
-from clingo.control import Control
+import clingo  # type: ignore[import-not-found]
+from clingo.ast import ASTType, Function, Literal, ProgramBuilder, Sign, SymbolicAtom, Transformer, parse_string  # type: ignore[import-not-found]
+from clingo.control import Control  # type: ignore[import-not-found]
 
 from coreason_manifest.spec.ontology import (
     CombinatorialCounterModel,
@@ -22,8 +22,8 @@ from coreason_manifest.spec.ontology import (
 )
 
 
-class AssumptionTransformer(Transformer):
-    def __init__(self, rule_map: dict[str, str]):
+class AssumptionTransformer(Transformer):  # type: ignore[misc]
+    def __init__(self, rule_map: dict[str, str]) -> None:
         self.rule_idx = 0
         self.rule_map = rule_map
 
