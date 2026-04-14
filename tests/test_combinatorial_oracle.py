@@ -70,3 +70,28 @@ node(1..3
     assert receipt.counter_model is not None
     assert len(receipt.counter_model.unsat_core) > 0
     assert "syntax error" in receipt.counter_model.unsat_core[0].lower()
+
+
+def test_combinatorial_oracle_thermodynamic_guillotine() -> None:
+    # A payload that creates a massive search space or infinite loop to trigger timeout
+    premise = EpistemicLogicPremise(
+        asp_program="a(1..1000). b(X,Y,Z) :- a(X), a(Y), a(Z).",
+    )
+    import time
+
+    t0 = time.time()
+    receipt = CombinatorialSolverOracle.solve(
+        premise=premise,
+        event_cid="bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
+        provenance_id="did:coreason:bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
+        timeout_ms=100,
+    )
+    t1 = time.time()
+
+    elapsed_ms = (t1 - t0) * 1000
+    # It should terminate near 100ms
+    assert elapsed_ms < 5000, f"Execution took too long: {elapsed_ms}ms"
+
+    assert receipt.satisfiability == "UNKNOWN"
+    assert receipt.counter_model is not None
+    assert "Execution terminated: Thermodynamic bound exceeded (SIGKILL applied)." in receipt.counter_model.unsat_core
