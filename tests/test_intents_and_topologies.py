@@ -83,7 +83,7 @@ def test_capability_forge_topology_manifest_with_human_supervisor() -> None:
     human_node = dag.nodes["did:coreason:human-1"]
     assert isinstance(human_node, CognitiveHumanNodeProfile)
     assert human_node.description == "Forge HITL Supervisor"
-    assert human_node.required_attestation == "fido2_webauthn"
+    assert human_node.required_attestation == "urn:coreason:attestation:fido2_webauthn"
 
 
 def test_intent_elicitation_macro_compilation() -> None:

@@ -21,7 +21,6 @@ from coreason_manifest.spec.ontology import (
     CognitiveUncertaintyProfile,
     ComputeEngineProfile,
     ComputeRateContract,
-    ComputeTierProfile,
     ConsensusPolicy,
     ConstrainedDecodingPolicy,
     ContextualizedSourceState,
@@ -815,7 +814,7 @@ def test_kinematic_delta_manifest_sorting() -> None:
 def test_agent_node_profile_success() -> None:
     """Test that default values instantiate cleanly without triggering traps."""
     agent = CognitiveAgentNodeProfile(description="Test agent")
-    assert agent.hardware.compute_tier == ComputeTierProfile.KINETIC
+    assert agent.hardware.compute_tier == "urn:coreason:compute:kinetic"
     assert agent.hardware.min_vram_gb == 8.0
     assert agent.security.epistemic_security == EpistemicSecurityPolicy.STANDARD
 

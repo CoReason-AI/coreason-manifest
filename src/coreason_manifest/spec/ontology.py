@@ -247,37 +247,6 @@ type CrossoverMechanismProfile = Literal["uniform_blend", "single_point", "heuri
 _CLEARANCE_MAPPING: dict[str, int] = {"public": 0, "internal": 1, "confidential": 2, "restricted": 3}
 
 
-class ComputeTierProfile(StrEnum):
-    """
-    AGENT INSTRUCTION: Categorizes the latency and reasoning depth of a given logical node, physically segregating cheap syntactic execution from heavy semantic computation.
-
-    CAUSAL AFFORDANCE: Instructs the scheduling orchestrator to route this node's computation to the appropriately tiered hardware cluster (e.g. fast cheap APIs vs heavy GPU inference).
-
-    EPISTEMIC BOUNDS: Bounded to strict enumeration values.
-
-    MCP ROUTING TRIGGERS: Hardware Scheduling, Tiered Compute, Orchestration Cost, Resource Allocation
-    """
-
-    KINETIC = "KINETIC"
-    ORACLE = "ORACLE"
-
-
-class AcceleratorProfile(StrEnum):
-    """
-    AGENT INSTRUCTION: Specifies the hardware acceleration architecture required to materialize this execution node in the physical thermodynamic cluster.
-
-    CAUSAL AFFORDANCE: Provides the orchestration layer with the exact topological constraints needed to schedule the container on appropriate silicon.
-
-    EPISTEMIC BOUNDS: Strictly bounded to the literal enumeration types representing supported silicon backends.
-
-    MCP ROUTING TRIGGERS: GPU Scheduling, Hardware Accelerator, Precision Topology, Thermodynamic Bindings
-    """
-
-    FP8_TENSOR = "FP8_TENSOR"
-    BF16_TENSOR = "BF16_TENSOR"
-    CUDA_FP32 = "CUDA_FP32"
-
-
 class EpistemicSecurityPolicy(StrEnum):
     """
     AGENT INSTRUCTION: Defines the minimum cryptographic isolation perimeter required for this node's thermodynamic execution.
@@ -3743,7 +3712,6 @@ class AnchoringPolicy(CoreasonBaseState):
 
 
 type AttackVectorProfile = Literal["rebuttal", "undercutter", "underminer"]
-type AttestationMechanismProfile = Literal["fido2_webauthn", "zk_snark_groth16", "pqc_ml_dsa"]
 
 
 class AuctionPolicy(CoreasonBaseState):
@@ -5226,9 +5194,8 @@ class EnvironmentalSpoofingProfile(CoreasonBaseState):
     Spoofing, JA3 TLS Fingerprint, Anti-Fingerprint Evasion
     """
 
-    tls_cipher_permutation: Literal["chrome_windows", "safari_macos", "firefox_macos", "android_webview"] = Field(
-        default="chrome_windows",
-        description="The JA3/JA4 TLS Client Hello fingerprint to project during handshake emulation.",
+    tls_cipher_permutation: Annotated[str, StringConstraints(pattern=r"^urn:coreason:.*$")] | None = Field(
+        default=None, description="The JA3/JA4 TLS Client Hello fingerprint URN to project during handshake emulation."
     )
     webgl_entropy_seed_hash: Annotated[
         str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
@@ -7434,27 +7401,6 @@ class RDFExportReceipt(CoreasonBaseState):
     sha256_graph_hash: Annotated[str, StringConstraints(pattern="^[a-f0-9]{64}$")]
 
 
-class SubstrateDialectProfile(StrEnum):
-    """
-    AGENT INSTRUCTION: Categorizes the specific computational physics engine or open-source library authorized to execute a node's logic.
-
-    CAUSAL AFFORDANCE: Provides the Functorial Semantics mapping the declarative syntax of the manifest to the active semantic environment of the orchestrator.
-
-    EPISTEMIC BOUNDS: Strictly clamped to the literal enumerations representing audited open-source frameworks.
-
-    MCP ROUTING TRIGGERS: Functorial Semantics, Engine Dialect, Execution Substrate, Framework Mapping
-    """
-
-    SYMBOLIC_AI_DBC = "SYMBOLIC_AI_DBC"
-    OPEN_SYMBOLIC_FIREWALL = "OPEN_SYMBOLIC_FIREWALL"
-    DOCLING_GRAPH_EXTRACTOR = "DOCLING_GRAPH_EXTRACTOR"
-    ONTOGPT_SPIRES = "ONTOGPT_SPIRES"
-    NATIVE_PYTHON = "NATIVE_PYTHON"
-    CURIOCAT_NLI = "CURIOCAT_NLI"
-    SEMANTIC_WEB_ARCHIVIST = "SEMANTIC_WEB_ARCHIVIST"
-    ZERO_KNOWLEDGE_PROVER = "ZERO_KNOWLEDGE_PROVER"
-
-
 class ExecutionSubstrateProfile(CoreasonBaseState):
     """
     AGENT INSTRUCTION: A declarative blueprint defining the hardware and software prerequisites to safely load an external compute engine.
@@ -7466,7 +7412,9 @@ class ExecutionSubstrateProfile(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Coalgebraic Thunking, Dependency Isomorphism, JIT Hydration, VRAM Allocation
     """
 
-    dialect: SubstrateDialectProfile = Field(description="The discrete open-source engine identifier.")
+    dialect: Annotated[str, StringConstraints(pattern=r"^urn:coreason:.*$")] = Field(
+        description="The discrete open-source engine URN identifier."
+    )
     required_package_signatures: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
         description="A whitelist of exact PEP 508 dependency specifiers or wheel hashes."
     )
@@ -7885,22 +7833,22 @@ class SpatialHardwareProfile(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Instructs the orchestrator's provisioning layer to allocate exact silicon resources (Compute Tier, VRAM, and Accelerator Type) before allowing the node to execute generative operations.
 
-    EPISTEMIC BOUNDS: VRAM allocation is physically bounded by min_vram_gb (gt=0.0). The literal enumerations ComputeTierProfile and AcceleratorProfile mathematically prevent the hallucination of non-existent silicon. The provider_whitelist is deterministically sorted for invariant RFC 8785 hashing.
+    EPISTEMIC BOUNDS: VRAM allocation is physically bounded by min_vram_gb (gt=0.0). The URN-patterned compute_tier and accelerator_type fields provide extensible silicon identification without ephemeral enumeration coupling. The provider_whitelist is deterministically sorted for invariant RFC 8785 hashing.
 
     MCP ROUTING TRIGGERS: Thermodynamic Bounding, VRAM Allocation, Spot Market Routing, Hardware Provisioning, Silicon Constraints
     """
 
-    compute_tier: ComputeTierProfile = Field(
-        default=ComputeTierProfile.KINETIC,
-        description="The discrete architectural boundary of the node (KINETIC for edge/consumer, ORACLE for datacenter).",
+    compute_tier: Annotated[str, StringConstraints(pattern=r"^urn:coreason:.*$")] = Field(
+        default="urn:coreason:compute:kinetic",
+        description="The discrete architectural boundary of the node.",
     )
     min_vram_gb: float = Field(
         gt=0.0,
         default=8.0,
         description="The absolute physical minimum Video RAM required to load this node's latent space.",
     )
-    accelerator_type: AcceleratorProfile = Field(
-        default=AcceleratorProfile.BF16_TENSOR,
+    accelerator_type: Annotated[str, StringConstraints(pattern=r"^urn:coreason:.*$")] = Field(
+        default="urn:coreason:accelerator:bf16_tensor",
         description="The rigid silicon precision format required to execute this node's neural circuits.",
     )
     provider_whitelist: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
@@ -7992,8 +7940,8 @@ class CognitiveHumanNodeProfile(CoreasonBaseState):
         return _validate_payload_bounds(v)
 
     topology_class: Literal["human"] = Field(default="human", description="Discriminator for a Human node.")
-    required_attestation: AttestationMechanismProfile = Field(
-        description="The mandatory cryptographic attestation required to verify the human operator's identity."
+    required_attestation: Annotated[str, StringConstraints(pattern=r"^urn:coreason:.*$")] = Field(
+        description="The mandatory cryptographic attestation URN required to verify the human operator's identity."
     )
     active_attention_ray: EpistemicAttentionState | None = Field(
         default=None,
@@ -12919,7 +12867,7 @@ class CapabilityForgeTopologyManifest(CoreasonBaseState):
 
         if self.human_supervisor_cid is not None:
             nodes[self.human_supervisor_cid] = CognitiveHumanNodeProfile(
-                description="Forge HITL Supervisor", required_attestation="fido2_webauthn"
+                description="Forge HITL Supervisor", required_attestation="urn:coreason:attestation:fido2_webauthn"
             )
             edges.append((self.fuzzing_engine_cid, self.human_supervisor_cid))
 
@@ -12996,7 +12944,7 @@ class IntentElicitationTopologyManifest(CoreasonBaseState):
                 ),
             ),
             self.human_oracle_cid: CognitiveHumanNodeProfile(
-                description="Elicitation Oracle", required_attestation="fido2_webauthn"
+                description="Elicitation Oracle", required_attestation="urn:coreason:attestation:fido2_webauthn"
             ),
         }
         edges = [
@@ -13205,7 +13153,7 @@ class WetwareAttestationContract(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Translates physical human entropy (e.g., a biometric tap or
     hardware key touch) into a definitive mathematical signature via mechanism
-    (AttestationMechanismProfile), authorizing the orchestrator to break a
+    (URN-patterned attestation mechanism), authorizing the orchestrator to break a
     Mixed-Initiative execution halt. The did_subject (DID pattern
     ^did:[a-z0-9]+:.*$) anchors the human identity.
 
@@ -13219,8 +13167,8 @@ class WetwareAttestationContract(CoreasonBaseState):
     Prevention, Wetware Entropy
     """
 
-    mechanism: AttestationMechanismProfile = Field(
-        ..., description="The SOTA cryptographic mechanism used to generate the proof."
+    mechanism: Annotated[str, StringConstraints(pattern=r"^urn:coreason:.*$")] = Field(
+        ..., description="The SOTA cryptographic mechanism URN used to generate the proof."
     )
     did_subject: Annotated[str, StringConstraints(max_length=1024)] = Field(
         ..., pattern="^did:[a-z0-9]+:.*$", description="The Decentralized Identifier (DID) of the human operator."

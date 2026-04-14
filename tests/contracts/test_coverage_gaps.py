@@ -123,7 +123,7 @@ def _discover_canonical_sort_validators() -> list[
     return results
 
 
-_CANONICAL_SORT_CASES = _discover_canonical_sort_validators()
+_CANONICAL_SORT_CASES = sorted(_discover_canonical_sort_validators(), key=lambda c: c[0])
 
 
 def _build_unsorted_field_data(
@@ -523,7 +523,7 @@ def _discover_payload_bounds_delegates() -> list[tuple[str, type[o.CoreasonBaseS
     return results
 
 
-_PAYLOAD_DELEGATE_CASES = _discover_payload_bounds_delegates()
+_PAYLOAD_DELEGATE_CASES = sorted(_discover_payload_bounds_delegates(), key=lambda c: c[0])
 
 
 @pytest.mark.parametrize(
@@ -697,7 +697,7 @@ def _falsification_registry() -> list[tuple[str, type[o.CoreasonBaseState], str,
                 "intervention_request_cid": "req-123",
                 "attestation": o.WetwareAttestationContract.model_construct(
                     dag_node_nonce="req-123",
-                    mechanism="fido2_webauthn",
+                    mechanism="urn:coreason:attestation:fido2_webauthn",
                     did_subject="did:coreason:human-1",
                     cryptographic_payload="payload",
                     liveness_challenge_hash="a" * 64,
@@ -707,7 +707,7 @@ def _falsification_registry() -> list[tuple[str, type[o.CoreasonBaseState], str,
                 "intervention_request_cid": "req-123",
                 "attestation": o.WetwareAttestationContract.model_construct(
                     dag_node_nonce="WRONG-NONCE",
-                    mechanism="fido2_webauthn",
+                    mechanism="urn:coreason:attestation:fido2_webauthn",
                     did_subject="did:coreason:human-1",
                     cryptographic_payload="payload",
                     liveness_challenge_hash="a" * 64,

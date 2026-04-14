@@ -49,16 +49,6 @@ export type TemporalDecayFunction = "exponential" | "cosine_annealing" | "polyno
  */
 export type TimeDerivativeVector = string | null;
 /**
- * AGENT INSTRUCTION: Specifies the hardware acceleration architecture required to materialize this execution node in the physical thermodynamic cluster.
- *
- * CAUSAL AFFORDANCE: Provides the orchestration layer with the exact topological constraints needed to schedule the container on appropriate silicon.
- *
- * EPISTEMIC BOUNDS: Strictly bounded to the literal enumeration types representing supported silicon backends.
- *
- * MCP ROUTING TRIGGERS: GPU Scheduling, Hardware Accelerator, Precision Topology, Thermodynamic Bindings
- */
-export type AcceleratorProfile = "FP8_TENSOR" | "BF16_TENSOR" | "CUDA_FP32";
-/**
  * The SHA-256 hash of the extracted RepE control tensor (e.g., the 'caution' vector).
  */
 export type SteeringVectorHash = string;
@@ -238,9 +228,9 @@ export type TargetOvershootRadiusPixels = number;
  */
 export type HickHymanDwellTimeMs = number;
 /**
- * The JA3/JA4 TLS Client Hello fingerprint to project during handshake emulation.
+ * The JA3/JA4 TLS Client Hello fingerprint URN to project during handshake emulation.
  */
-export type TlsCipherPermutation = "chrome_windows" | "safari_macos" | "firefox_macos" | "android_webview";
+export type TlsCipherPermutation = string | null;
 /**
  * The Content Identifier (CID) of the WebGL canvas entropy seed used to generate a deterministic spoofed fingerprint.
  */
@@ -1404,17 +1394,9 @@ export type ViolationCategory = string;
  */
 export type DiagnosticMessage = string;
 /**
- * The discrete open-source engine identifier.
+ * The discrete open-source engine URN identifier.
  */
-export type SubstrateDialectProfile =
-  | "SYMBOLIC_AI_DBC"
-  | "OPEN_SYMBOLIC_FIREWALL"
-  | "DOCLING_GRAPH_EXTRACTOR"
-  | "ONTOGPT_SPIRES"
-  | "NATIVE_PYTHON"
-  | "CURIOCAT_NLI"
-  | "SEMANTIC_WEB_ARCHIVIST"
-  | "ZERO_KNOWLEDGE_PROVER";
+export type Dialect = string;
 /**
  * A whitelist of exact PEP 508 dependency specifiers or wheel hashes.
  */
@@ -1980,23 +1962,17 @@ export type Description3 = string;
  */
 export type TopologyClass63 = "agent";
 /**
- * The discrete architectural boundary of the node (KINETIC for edge/consumer, ORACLE for datacenter).
+ * The discrete architectural boundary of the node.
  */
-export type ComputeTierProfile = "KINETIC" | "ORACLE";
+export type ComputeTier = string;
 /**
  * The absolute physical minimum Video RAM required to load this node's latent space.
  */
 export type MinVramGb = number;
 /**
- * AGENT INSTRUCTION: Specifies the hardware acceleration architecture required to materialize this execution node in the physical thermodynamic cluster.
- *
- * CAUSAL AFFORDANCE: Provides the orchestration layer with the exact topological constraints needed to schedule the container on appropriate silicon.
- *
- * EPISTEMIC BOUNDS: Strictly bounded to the literal enumeration types representing supported silicon backends.
- *
- * MCP ROUTING TRIGGERS: GPU Scheduling, Hardware Accelerator, Precision Topology, Thermodynamic Bindings
+ * The rigid silicon precision format required to execute this node's neural circuits.
  */
-export type AcceleratorProfile1 = "FP8_TENSOR" | "BF16_TENSOR" | "CUDA_FP32";
+export type AcceleratorType = string;
 /**
  * The explicit array of cloud infrastructure providers authorized to run this node.
  */
@@ -2378,6 +2354,10 @@ export type DomainExtensions1 = {
  * Discriminator for a Human node.
  */
 export type TopologyClass64 = "human";
+/**
+ * The mandatory cryptographic attestation URN required to verify the human operator's identity.
+ */
+export type RequiredAttestation = string;
 /**
  * The semantic boundary defining the objective function or computational perimeter of the execution node.
  */
@@ -4400,6 +4380,10 @@ export type Approved = boolean;
  */
 export type Feedback = string | null;
 /**
+ * The SOTA cryptographic mechanism URN used to generate the proof.
+ */
+export type Mechanism = string;
+/**
  * The Decentralized Identifier (DID) of the human operator.
  */
 export type DidSubject = string;
@@ -4651,7 +4635,6 @@ export type MaxCausalDepth = number | null;
  */
 export type MinimumBudgetMagnitude = number | null;
 export type AttackVectorProfile = "rebuttal" | "undercutter" | "underminer";
-export type AttestationMechanismProfile = "fido2_webauthn" | "zk_snark_groth16" | "pqc_ml_dsa";
 export type AuctionMechanismProfile = "sealed_bid" | "dutch" | "vickrey";
 /**
  * The array of received bids.
@@ -4802,16 +4785,6 @@ export type MagnitudeUnit = string;
  * The declarative array of specialized functional expert clusters (e.g., 'falsifier', 'synthesizer') physically present in this model's architecture.
  */
 export type SupportedFunctionalExperts = string[];
-/**
- * AGENT INSTRUCTION: Categorizes the latency and reasoning depth of a given logical node, physically segregating cheap syntactic execution from heavy semantic computation.
- *
- * CAUSAL AFFORDANCE: Instructs the scheduling orchestrator to route this node's computation to the appropriately tiered hardware cluster (e.g. fast cheap APIs vs heavy GPU inference).
- *
- * EPISTEMIC BOUNDS: Bounded to strict enumeration values.
- *
- * MCP ROUTING TRIGGERS: Hardware Scheduling, Tiered Compute, Orchestration Cost, Resource Allocation
- */
-export type ComputeTierProfile1 = "KINETIC" | "ORACLE";
 /**
  * Unique identifier for the constitutional rule.
  */
@@ -5771,24 +5744,6 @@ export type CrystallizedLedgerCids = string[];
  */
 export type MaxRetainedTokens1 = number;
 /**
- * AGENT INSTRUCTION: Categorizes the specific computational physics engine or open-source library authorized to execute a node's logic.
- *
- * CAUSAL AFFORDANCE: Provides the Functorial Semantics mapping the declarative syntax of the manifest to the active semantic environment of the orchestrator.
- *
- * EPISTEMIC BOUNDS: Strictly clamped to the literal enumerations representing audited open-source frameworks.
- *
- * MCP ROUTING TRIGGERS: Functorial Semantics, Engine Dialect, Execution Substrate, Framework Mapping
- */
-export type SubstrateDialectProfile1 =
-  | "SYMBOLIC_AI_DBC"
-  | "OPEN_SYMBOLIC_FIREWALL"
-  | "DOCLING_GRAPH_EXTRACTOR"
-  | "ONTOGPT_SPIRES"
-  | "NATIVE_PYTHON"
-  | "CURIOCAT_NLI"
-  | "SEMANTIC_WEB_ARCHIVIST"
-  | "ZERO_KNOWLEDGE_PROVER";
-/**
  * Unique identifier for this simulation profile.
  */
 export type ProfileCid = string;
@@ -5890,7 +5845,6 @@ export type AllowedSemanticClassifications = SemanticClassificationProfile[] | n
  */
 export interface CoReasonSharedKernelOntology {
   ASTGradientReceipt?: ASTGradientReceipt;
-  AcceleratorProfile?: AcceleratorProfile;
   ActivationSteeringContract?: ActivationSteeringContract;
   ActiveInferenceContract?: ActiveInferenceContract;
   ActiveInferenceEpochState?: ActiveInferenceEpochState;
@@ -5920,7 +5874,6 @@ export interface CoReasonSharedKernelOntology {
   AsymptoticComplexityReceipt?: AsymptoticComplexityReceipt;
   AtomicPropositionState?: AtomicPropositionState;
   AttackVectorProfile?: AttackVectorProfile;
-  AttestationMechanismProfile?: AttestationMechanismProfile;
   AuctionMechanismProfile?: AuctionMechanismProfile;
   AuctionPolicy?: AuctionPolicy;
   AuctionState?: AuctionState;
@@ -5965,7 +5918,6 @@ export interface CoReasonSharedKernelOntology {
   ComputeEngineProfile?: ComputeEngineProfile;
   ComputeProvisioningIntent?: ComputeProvisioningIntent;
   ComputeRateContract?: ComputeRateContract1;
-  ComputeTierProfile?: ComputeTierProfile1;
   ConsensusFederationTopologyManifest?: ConsensusFederationTopologyManifest;
   ConsensusPolicy?: ConsensusPolicy;
   ConstitutionalAmendmentIntent?: ConstitutionalAmendmentIntent;
@@ -6246,7 +6198,6 @@ export interface CoReasonSharedKernelOntology {
   StochasticTopologyManifest?: StochasticTopologyManifest;
   StreamingDisfluencyContract?: StreamingDisfluencyContract;
   StructuralCausalGraphProfile?: StructuralCausalGraphProfile;
-  SubstrateDialectProfile?: SubstrateDialectProfile1;
   SubstrateHydrationManifest?: SubstrateHydrationManifest;
   SwarmTopologyManifest?: SwarmTopologyManifest;
   SyntheticGenerationProfile?: SyntheticGenerationProfile;
@@ -8187,7 +8138,7 @@ export interface SubstrateHydrationManifest {
  * The exact blueprint geometry being loaded into VRAM.
  */
 export interface ExecutionSubstrateProfile {
-  dialect: SubstrateDialectProfile;
+  dialect: Dialect;
   required_package_signatures: RequiredPackageSignatures;
   vram_overhead_mb: VramOverheadMb;
   supports_lazy_hydration: SupportsLazyHydration;
@@ -9091,9 +9042,9 @@ export interface GaussianSplattingProfile {
  * The physical constraints binding this agent to a specific thermodynamic deployment topology.
  */
 export interface SpatialHardwareProfile {
-  compute_tier?: ComputeTierProfile;
+  compute_tier?: ComputeTier;
   min_vram_gb?: MinVramGb;
-  accelerator_type?: AcceleratorProfile1;
+  accelerator_type?: AcceleratorType;
   provider_whitelist?: ProviderWhitelist;
 }
 /**
@@ -9557,10 +9508,7 @@ export interface CognitiveHumanNodeProfile {
    */
   neural_optics?: GaussianSplattingProfile | null;
   topology_class?: TopologyClass64;
-  /**
-   * The mandatory cryptographic attestation required to verify the human operator's identity.
-   */
-  required_attestation: "fido2_webauthn" | "zk_snark_groth16" | "pqc_ml_dsa";
+  required_attestation: RequiredAttestation;
   /**
    * The continuous spatial vector representing the human operator's localized cognitive focus.
    */
@@ -9625,7 +9573,7 @@ export interface CognitiveSystemNodeProfile {
  * MCP ROUTING TRIGGERS: Coalgebraic Thunking, Dependency Isomorphism, JIT Hydration, VRAM Allocation
  */
 export interface ExecutionSubstrateProfile1 {
-  dialect: SubstrateDialectProfile;
+  dialect: Dialect;
   required_package_signatures: RequiredPackageSignatures;
   vram_overhead_mb: VramOverheadMb;
   supports_lazy_hydration: SupportsLazyHydration;
@@ -12715,7 +12663,7 @@ export interface InterventionReceipt {
  *
  * CAUSAL AFFORDANCE: Translates physical human entropy (e.g., a biometric tap or
  * hardware key touch) into a definitive mathematical signature via mechanism
- * (AttestationMechanismProfile), authorizing the orchestrator to break a
+ * (URN-patterned attestation mechanism), authorizing the orchestrator to break a
  * Mixed-Initiative execution halt. The did_subject (DID pattern
  * ^did:[a-z0-9]+:.*$) anchors the human identity.
  *
@@ -12729,10 +12677,7 @@ export interface InterventionReceipt {
  * Prevention, Wetware Entropy
  */
 export interface WetwareAttestationContract {
-  /**
-   * The SOTA cryptographic mechanism used to generate the proof.
-   */
-  mechanism: "fido2_webauthn" | "zk_snark_groth16" | "pqc_ml_dsa";
+  mechanism: Mechanism;
   did_subject: DidSubject;
   cryptographic_payload: CryptographicPayload;
   dag_node_nonce: DagNodeNonce;
@@ -15389,14 +15334,14 @@ export interface SimulationEscrowContract1 {
  *
  * CAUSAL AFFORDANCE: Instructs the orchestrator's provisioning layer to allocate exact silicon resources (Compute Tier, VRAM, and Accelerator Type) before allowing the node to execute generative operations.
  *
- * EPISTEMIC BOUNDS: VRAM allocation is physically bounded by min_vram_gb (gt=0.0). The literal enumerations ComputeTierProfile and AcceleratorProfile mathematically prevent the hallucination of non-existent silicon. The provider_whitelist is deterministically sorted for invariant RFC 8785 hashing.
+ * EPISTEMIC BOUNDS: VRAM allocation is physically bounded by min_vram_gb (gt=0.0). The URN-patterned compute_tier and accelerator_type fields provide extensible silicon identification without ephemeral enumeration coupling. The provider_whitelist is deterministically sorted for invariant RFC 8785 hashing.
  *
  * MCP ROUTING TRIGGERS: Thermodynamic Bounding, VRAM Allocation, Spot Market Routing, Hardware Provisioning, Silicon Constraints
  */
 export interface SpatialHardwareProfile1 {
-  compute_tier?: ComputeTierProfile;
+  compute_tier?: ComputeTier;
   min_vram_gb?: MinVramGb;
-  accelerator_type?: AcceleratorProfile1;
+  accelerator_type?: AcceleratorType;
   provider_whitelist?: ProviderWhitelist;
 }
 /**

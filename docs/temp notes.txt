@@ -54,3 +54,76 @@ This release **removes the AST safety net** for payload size and duration limits
 
 1. **Implement Dynamic Admission Controllers:** You must immediately implement load-shedding and admission control at your ingress boundaries. Your Rust/C++ engines must evaluate the inbound `18446744073709551615` bounds against *actual local server capabilities* and gracefully return a `413 Payload Too Large` or `400 Bad Request` if the requested topology exceeds your physical thermodynamic budget.
 2. **Security Subnets:** Ecosystem routers must now dynamically read the `EpistemicSecurityPolicy` field and map it against live VPC rules, rather than relying on Pydantic to crash on invalid IP routing.
+
+
+
+
+
+-----
+**Subject: Release Notes — Epic 2: The Silicon Purge (URN Extensibility Protocol)** ---
+
+# 🚀 Release Notes: coreason-manifest (Epic 2 Update)
+
+## Executive Summary
+We have successfully merged **Epic 2: The Silicon Purge (URN Extensibility Protocol)** into the `coreason-manifest` ontology. 
+
+Building upon the Universal Architectural Bounds established in Epic 1, this release further cements our core philosophy: *"The Manifest is Fundamental Math; The Orchestrator is Ephemeral Physics."* Previously, our schema was tightly coupled to 2026-era hardware and software technologies. Hardcoding enumerations for specific execution dialects (`sglang`, `outlines`), silicon profiles (`CUDA_FP32`), and attestation mechanisms (`fido2_webauthn`) created a brittle ecosystem where every new technological advancement required a bump in the foundational Pydantic schema. 
+
+This release completely purges those ephemeral enumerations from the Hollow Data Plane. We have replaced them with **Uniform Resource Names (URNs)**. The Manifest now simply mathematically proves that an execution pointer exists and adheres to the `urn:coreason:*` schema format, shifting the burden of technology resolution entirely onto the local orchestrator's capability registry.
+
+---
+
+## 🏗️ Key Architectural Changes
+
+### 1. Eradication of Transient Technological Enums
+**What Changed:**
+The following static classes and type aliases have been completely removed from the ontology (reducing total definitions from 415 to 411):
+* `ComputeTierProfile` (e.g., `KINETIC`, `ORACLE`)
+* `AcceleratorProfile` (e.g., `FP8_TENSOR`, `BF16_TENSOR`, `CUDA_FP32`)
+* `SubstrateDialectProfile` (e.g., `DOCLING_GRAPH_EXTRACTOR`, `SYMBOLIC_AI_DBC`)
+* `AttestationMechanismProfile` (e.g., `fido2_webauthn`, `zk_snark_groth16`)
+
+**Architectural Justification:**
+In a mathematically pure ontology, a Node does not know what an "Nvidia GPU" is, nor does it inherently know what a "ZK-SNARK" is. It only knows that it requires a specific computational geometry or security perimeter to resolve successfully. By deleting these literals, the Pydantic AST is no longer locked into a rapidly depreciating technology stack. 
+
+### 2. Introduction of URN Extensibility Patterns
+**What Changed:**
+Fields that previously relied on the deleted enums have been upgraded to accept extensible URN strings validated via Regex (`^urn:coreason:.*$`). 
+Affected schemas include:
+* `SpatialHardwareProfile`: `compute_tier` (default: `urn:coreason:compute:kinetic`) and `accelerator_type` (default: `urn:coreason:accelerator:bf16_tensor`)
+* `ExecutionSubstrateProfile`: `dialect`
+* `CognitiveHumanNodeProfile`: `required_attestation`
+* `WetwareAttestationContract`: `mechanism`
+* `EnvironmentalSpoofingProfile`: `tls_cipher_permutation` (changed from `Literal` to `URN | None`)
+
+**Architectural Justification:**
+URNs are infinitely extensible. If a new quantum accelerator or verification dialect is invented in 2028, the `coreason-manifest` will not need to be updated. An agent can simply request `urn:coreason:accelerator:quantum_qpu_v2`, and the AST will cleanly validate the topological request and pass it to the runtime.
+
+### 3. Macro Manifest Default Realignments
+**What Changed:**
+Macro topology generators that programmatically instantiate node profiles have had their internal factory methods updated.
+* `CapabilityForgeTopologyManifest`, `IntentElicitationTopologyManifest`, and `CognitiveSwarmDeploymentManifest` now dynamically mount their `CognitiveHumanNodeProfile` requirements using `required_attestation="urn:coreason:attestation:fido2_webauthn"`.
+
+**Architectural Justification:**
+Ensures that zero-cost macros remain syntactically valid and compliant with the newly instituted URN validation rules during DAG compilation.
+
+### 4. Test Suite Stabilization & CI Hardening
+**What Changed:**
+During the URN refactoring, a pre-existing race condition in our distributed testing framework (`pytest-xdist`) was identified and eradicated.
+* Fixed a legacy Python 2 syntax exception bug (`except TypeError, OSError:`) in `test_coverage_gaps.py` that was silently swallowing `OSError` exceptions and causing non-deterministic worker crashes.
+* Sorted dynamically-discovered parameterized test cases to guarantee deterministic test ID collection across concurrent workers.
+* Regenerated all cross-language bindings (Rust, TypeScript) and the universal JSON schema.
+
+**Architectural Justification:**
+A deterministic ontology requires a deterministic testing pipeline. Fixing the AST introspection logic ensures that our CI/CD pipeline reliably proves mathematical stability across all execution environments.
+
+---
+
+## ⚠️ Downstream Impact & Migration Guide
+
+**Attention: `coreason-runtime` and `coreason-vscode` Maintainers**
+
+This release **destroys static type checking for hardware and execution dialects** at the Python and TypeScript levels.
+
+1. **Dynamic Capability Registries (`coreason-runtime`):** Your execution orchestrators can no longer rely on Python `Enum` or `match` blocks to route workloads to engines like Docling or SGLang. You must implement a dynamic registry pattern that resolves inbound `urn:coreason:dialect:*` and `urn:coreason:accelerator:*` strings against the local host's actual installed dependencies and physical hardware.
+2. **LSP Autocomplete (`coreason-vscode`):** The generated JSON schema will no longer provide a convenient dropdown of valid hardware types. Your IDE extension must now implement a Language Server Protocol (LSP) fetcher to hydrate IntelliSense with valid URN strings dynamically from our `LEXICON.md` definitions.

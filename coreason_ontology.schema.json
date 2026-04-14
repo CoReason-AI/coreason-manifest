@@ -51,16 +51,6 @@
       "title": "ASTGradientReceipt",
       "type": "object"
     },
-    "AcceleratorProfile": {
-      "description": "AGENT INSTRUCTION: Specifies the hardware acceleration architecture required to materialize this execution node in the physical thermodynamic cluster.\n\nCAUSAL AFFORDANCE: Provides the orchestration layer with the exact topological constraints needed to schedule the container on appropriate silicon.\n\nEPISTEMIC BOUNDS: Strictly bounded to the literal enumeration types representing supported silicon backends.\n\nMCP ROUTING TRIGGERS: GPU Scheduling, Hardware Accelerator, Precision Topology, Thermodynamic Bindings",
-      "enum": [
-        "FP8_TENSOR",
-        "BF16_TENSOR",
-        "CUDA_FP32"
-      ],
-      "title": "AcceleratorProfile",
-      "type": "string"
-    },
     "ActivationSteeringContract": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes a hardware-level Representation Engineering (RepE) directive to mechanically manipulate latent dimensions via forward-pass tensor injection.\n\nCAUSAL AFFORDANCE: Physically forces an additive, ablation, or clamping operation onto the model's residual stream at specific `injection_layers`, steering the generator away from unstable hallucination geometries prior to token projection.\n\nEPISTEMIC BOUNDS: Cryptographically locked by `steering_vector_hash` (SHA-256 pattern `^[a-f0-9]{64}$`). `scaling_factor` is bounded above (`le=100.0`) but unbounded below, permitting negative magnitudes for ablation. The `@model_validator` deterministically sorts `injection_layers` (each `ge=0`).\n\nMCP ROUTING TRIGGERS: Representation Engineering, RepE, Activation Steering, Residual Stream Ablation, Concept Vectors",
@@ -1673,14 +1663,6 @@
         "rebuttal",
         "undercutter",
         "underminer"
-      ],
-      "type": "string"
-    },
-    "AttestationMechanismProfile": {
-      "enum": [
-        "fido2_webauthn",
-        "zk_snark_groth16",
-        "pqc_ml_dsa"
       ],
       "type": "string"
     },
@@ -3732,8 +3714,10 @@
           "type": "string"
         },
         "required_attestation": {
-          "$ref": "#/$defs/AttestationMechanismProfile",
-          "description": "The mandatory cryptographic attestation required to verify the human operator's identity."
+          "description": "The mandatory cryptographic attestation URN required to verify the human operator's identity.",
+          "pattern": "^urn:coreason:.*$",
+          "title": "Required Attestation",
+          "type": "string"
         },
         "active_attention_ray": {
           "anyOf": [
@@ -4715,15 +4699,6 @@
       ],
       "title": "ComputeRateContract",
       "type": "object"
-    },
-    "ComputeTierProfile": {
-      "description": "AGENT INSTRUCTION: Categorizes the latency and reasoning depth of a given logical node, physically segregating cheap syntactic execution from heavy semantic computation.\n\nCAUSAL AFFORDANCE: Instructs the scheduling orchestrator to route this node's computation to the appropriately tiered hardware cluster (e.g. fast cheap APIs vs heavy GPU inference).\n\nEPISTEMIC BOUNDS: Bounded to strict enumeration values.\n\nMCP ROUTING TRIGGERS: Hardware Scheduling, Tiered Compute, Orchestration Cost, Resource Allocation",
-      "enum": [
-        "KINETIC",
-        "ORACLE"
-      ],
-      "title": "ComputeTierProfile",
-      "type": "string"
     },
     "ConsensusFederationTopologyManifest": {
       "additionalProperties": false,
@@ -7447,16 +7422,18 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the deterministic Browser Fingerprint Entropy geometry\nfor spoofing environmental telemetry vectors (WebGL canvas hashes, User-Agent\nstrings, timezone offsets, TLS Client Hello fingerprints, and display resolution).\nAs a ...Profile suffix, this is a declarative, frozen snapshot of a spoofed\nenvironmental coordinate.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's Spatial Kinematics engine to\nproject a synthetic browser identity, masking the true computational substrate\nfrom exogenous anti-bot fingerprinting oracles including JA3/JA4 TLS analysis.\n\nEPISTEMIC BOUNDS: The webgl_entropy_seed_hash is constrained to a 128-char CID\npattern. The user_agent_template is clamped to max_length=2000. The\ntimezone_offset_minutes is mathematically bounded to the valid UTC range\n(ge=-720, le=840). Screen resolution components are bounded (ge=1, le=15360).\nThe tls_cipher_permutation is locked to a Literal automaton. The\nhardware_concurrency_mask is bounded (gt=0, le=256).\n\nMCP ROUTING TRIGGERS: Browser Fingerprinting, WebGL Canvas Entropy, User-Agent\nSpoofing, JA3 TLS Fingerprint, Anti-Fingerprint Evasion",
       "properties": {
         "tls_cipher_permutation": {
-          "default": "chrome_windows",
-          "description": "The JA3/JA4 TLS Client Hello fingerprint to project during handshake emulation.",
-          "enum": [
-            "chrome_windows",
-            "safari_macos",
-            "firefox_macos",
-            "android_webview"
+          "anyOf": [
+            {
+              "pattern": "^urn:coreason:.*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
           ],
-          "title": "Tls Cipher Permutation",
-          "type": "string"
+          "default": null,
+          "description": "The JA3/JA4 TLS Client Hello fingerprint URN to project during handshake emulation.",
+          "title": "Tls Cipher Permutation"
         },
         "webgl_entropy_seed_hash": {
           "description": "The Content Identifier (CID) of the WebGL canvas entropy seed used to generate a deterministic spoofed fingerprint.",
@@ -10410,8 +10387,10 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative blueprint defining the hardware and software prerequisites to safely load an external compute engine.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's JIT compiler to fetch and verify external packages before kinetic execution, ensuring Dependency Isomorphism.\n\nEPISTEMIC BOUNDS: VRAM constrained strictly above zero. Dependencies are deterministically sorted to preserve RFC 8785 canonical hashing.\n\nMCP ROUTING TRIGGERS: Coalgebraic Thunking, Dependency Isomorphism, JIT Hydration, VRAM Allocation",
       "properties": {
         "dialect": {
-          "$ref": "#/$defs/SubstrateDialectProfile",
-          "description": "The discrete open-source engine identifier."
+          "description": "The discrete open-source engine URN identifier.",
+          "pattern": "^urn:coreason:.*$",
+          "title": "Dialect",
+          "type": "string"
         },
         "required_package_signatures": {
           "description": "A whitelist of exact PEP 508 dependency specifiers or wheel hashes.",
@@ -18656,12 +18635,14 @@
     },
     "SpatialHardwareProfile": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative, frozen snapshot of the physical hardware boundaries and thermodynamic constraints required to instantiate this node. As a ...Profile suffix, this defines a rigid mathematical boundary.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's provisioning layer to allocate exact silicon resources (Compute Tier, VRAM, and Accelerator Type) before allowing the node to execute generative operations.\n\nEPISTEMIC BOUNDS: VRAM allocation is physically bounded by min_vram_gb (gt=0.0). The literal enumerations ComputeTierProfile and AcceleratorProfile mathematically prevent the hallucination of non-existent silicon. The provider_whitelist is deterministically sorted for invariant RFC 8785 hashing.\n\nMCP ROUTING TRIGGERS: Thermodynamic Bounding, VRAM Allocation, Spot Market Routing, Hardware Provisioning, Silicon Constraints",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative, frozen snapshot of the physical hardware boundaries and thermodynamic constraints required to instantiate this node. As a ...Profile suffix, this defines a rigid mathematical boundary.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's provisioning layer to allocate exact silicon resources (Compute Tier, VRAM, and Accelerator Type) before allowing the node to execute generative operations.\n\nEPISTEMIC BOUNDS: VRAM allocation is physically bounded by min_vram_gb (gt=0.0). The URN-patterned compute_tier and accelerator_type fields provide extensible silicon identification without ephemeral enumeration coupling. The provider_whitelist is deterministically sorted for invariant RFC 8785 hashing.\n\nMCP ROUTING TRIGGERS: Thermodynamic Bounding, VRAM Allocation, Spot Market Routing, Hardware Provisioning, Silicon Constraints",
       "properties": {
         "compute_tier": {
-          "$ref": "#/$defs/ComputeTierProfile",
-          "default": "KINETIC",
-          "description": "The discrete architectural boundary of the node (KINETIC for edge/consumer, ORACLE for datacenter)."
+          "default": "urn:coreason:compute:kinetic",
+          "description": "The discrete architectural boundary of the node.",
+          "pattern": "^urn:coreason:.*$",
+          "title": "Compute Tier",
+          "type": "string"
         },
         "min_vram_gb": {
           "default": 8.0,
@@ -18671,9 +18652,11 @@
           "type": "number"
         },
         "accelerator_type": {
-          "$ref": "#/$defs/AcceleratorProfile",
-          "default": "BF16_TENSOR",
-          "description": "The rigid silicon precision format required to execute this node's neural circuits."
+          "default": "urn:coreason:accelerator:bf16_tensor",
+          "description": "The rigid silicon precision format required to execute this node's neural circuits.",
+          "pattern": "^urn:coreason:.*$",
+          "title": "Accelerator Type",
+          "type": "string"
         },
         "provider_whitelist": {
           "description": "The explicit array of cloud infrastructure providers authorized to run this node.",
@@ -19551,21 +19534,6 @@
       ],
       "title": "StructuralCausalGraphProfile",
       "type": "object"
-    },
-    "SubstrateDialectProfile": {
-      "description": "AGENT INSTRUCTION: Categorizes the specific computational physics engine or open-source library authorized to execute a node's logic.\n\nCAUSAL AFFORDANCE: Provides the Functorial Semantics mapping the declarative syntax of the manifest to the active semantic environment of the orchestrator.\n\nEPISTEMIC BOUNDS: Strictly clamped to the literal enumerations representing audited open-source frameworks.\n\nMCP ROUTING TRIGGERS: Functorial Semantics, Engine Dialect, Execution Substrate, Framework Mapping",
-      "enum": [
-        "SYMBOLIC_AI_DBC",
-        "OPEN_SYMBOLIC_FIREWALL",
-        "DOCLING_GRAPH_EXTRACTOR",
-        "ONTOGPT_SPIRES",
-        "NATIVE_PYTHON",
-        "CURIOCAT_NLI",
-        "SEMANTIC_WEB_ARCHIVIST",
-        "ZERO_KNOWLEDGE_PROVER"
-      ],
-      "title": "SubstrateDialectProfile",
-      "type": "string"
     },
     "SubstrateHydrationManifest": {
       "additionalProperties": false,
@@ -21939,11 +21907,13 @@
     },
     "WetwareAttestationContract": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Hardware-Backed Human-in-the-Loop (HITL)\nauthentication, utilizing FIDO2/WebAuthn or Post-Quantum physical security\nkeys to verify human intent. As a ...Contract suffix, this enforces rigid\nmathematical boundaries globally.\n\nCAUSAL AFFORDANCE: Translates physical human entropy (e.g., a biometric tap or\nhardware key touch) into a definitive mathematical signature via mechanism\n(AttestationMechanismProfile), authorizing the orchestrator to break a\nMixed-Initiative execution halt. The did_subject (DID pattern\n^did:[a-z0-9]+:.*$) anchors the human identity.\n\nEPISTEMIC BOUNDS: Physically binds the signature to a specific Merkle-DAG\ncoordinate via dag_node_nonce (UUID), strictly preventing cryptographic Replay\nAttacks. The cryptographic_payload is restricted by regex\n(^[A-Za-z0-9+/=_-]+$) to prevent injection anomalies. The liveness_challenge_hash\nis tightly bounded to SHA-256 (^[a-f0-9]{64}$) to prove real-time human presence.\n\nMCP ROUTING TRIGGERS: WebAuthn, FIDO2, Cryptographic Nonce, Replay Attack\nPrevention, Wetware Entropy",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Hardware-Backed Human-in-the-Loop (HITL)\nauthentication, utilizing FIDO2/WebAuthn or Post-Quantum physical security\nkeys to verify human intent. As a ...Contract suffix, this enforces rigid\nmathematical boundaries globally.\n\nCAUSAL AFFORDANCE: Translates physical human entropy (e.g., a biometric tap or\nhardware key touch) into a definitive mathematical signature via mechanism\n(URN-patterned attestation mechanism), authorizing the orchestrator to break a\nMixed-Initiative execution halt. The did_subject (DID pattern\n^did:[a-z0-9]+:.*$) anchors the human identity.\n\nEPISTEMIC BOUNDS: Physically binds the signature to a specific Merkle-DAG\ncoordinate via dag_node_nonce (UUID), strictly preventing cryptographic Replay\nAttacks. The cryptographic_payload is restricted by regex\n(^[A-Za-z0-9+/=_-]+$) to prevent injection anomalies. The liveness_challenge_hash\nis tightly bounded to SHA-256 (^[a-f0-9]{64}$) to prove real-time human presence.\n\nMCP ROUTING TRIGGERS: WebAuthn, FIDO2, Cryptographic Nonce, Replay Attack\nPrevention, Wetware Entropy",
       "properties": {
         "mechanism": {
-          "$ref": "#/$defs/AttestationMechanismProfile",
-          "description": "The SOTA cryptographic mechanism used to generate the proof."
+          "description": "The SOTA cryptographic mechanism URN used to generate the proof.",
+          "pattern": "^urn:coreason:.*$",
+          "title": "Mechanism",
+          "type": "string"
         },
         "did_subject": {
           "description": "The Decentralized Identifier (DID) of the human operator.",
