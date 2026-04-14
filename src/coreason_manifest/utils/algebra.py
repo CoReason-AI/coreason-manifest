@@ -35,7 +35,6 @@ from pydantic import AnyUrl, BaseModel, ValidationError
 from pydantic.json_schema import models_json_schema
 
 import coreason_manifest.spec.ontology as ontology
-from coreason_manifest.spec.mcp import MCPToolDefinition
 from coreason_manifest.spec.ontology import (
     AnyTopologyManifest,
     CognitiveStateProfile,
@@ -45,6 +44,7 @@ from coreason_manifest.spec.ontology import (
     EpistemicTransmutationTask,
     ExecutionNodeReceipt,
     ManifestViolationReceipt,
+    MCPToolDefinition,
     OntologicalAlignmentPolicy,
     StateMutationIntent,
     System2RemediationIntent,
@@ -394,3 +394,24 @@ def transmute_state_differential(
         return cast("dict[str, Any]", jsonpatch.apply_patch(current_state, patch_list))
     except (jsonpatch.JsonPatchException, jsonpatch.JsonPointerException, TypeError) as e:
         raise ValueError(f"Patch operation failed: {e}") from e
+
+
+def transmute_to_pycrdt_doc(manifest: ontology.TemporalGraphCRDTManifest) -> Any:
+    """Projects the monotonic CRDT components into a pycrdt.Doc state vector."""
+    import pycrdt
+
+    doc: Any = pycrdt.Doc()
+    map_node: Any = pycrdt.Map()
+    doc["crdt_state"] = map_node
+
+    add_array: Any = pycrdt.Array()
+    map_node["add_set"] = add_array
+    for cid in manifest.add_set:
+        add_array.append(cid)
+
+    term_array: Any = pycrdt.Array()
+    map_node["terminate_set"] = term_array
+    for term in manifest.terminate_set:
+        term_array.append(term.target_edge_cid)
+
+    return doc

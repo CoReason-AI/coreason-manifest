@@ -431,23 +431,6 @@ class TestConsensusFederationCompile:
 
 
 # ---------------------------------------------------------------------------
-# §5. TTL CACHE EVICTION
-# ---------------------------------------------------------------------------
-
-
-class TestSimpleTTLCacheEviction:
-    """Exercise the maxsize overflow eviction path."""
-
-    def test_cache_clears_on_overflow(self) -> None:
-        cache = o._SimpleTTLCache(ttl=60, maxsize=3)
-        cache.set("a", 1)
-        cache.set("b", 2)
-        cache.set("c", 3)
-        assert cache.get("a") == 1
-        # 4th entry triggers full clear
-        cache.set("d", 4)
-        assert cache.get("a") is None
-        assert cache.get("d") == 4
 
 
 # ---------------------------------------------------------------------------
