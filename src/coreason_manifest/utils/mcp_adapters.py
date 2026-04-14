@@ -50,5 +50,5 @@ class DeterministicTransportAdapter:
             "params": canonical_dict,
             "id": request_id,
         }
-        encoder = msgspec.json.Encoder(sort_keys=True)  # type: ignore[call-arg]
+        encoder = msgspec.json.Encoder(order="deterministic")
         return cast("bytes", encoder.encode(wrapped_payload))
