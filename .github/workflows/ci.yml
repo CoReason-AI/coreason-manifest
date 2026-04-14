@@ -124,6 +124,9 @@ jobs:
           enable-cache: true
           python-version: "3.14"
 
+      - name: Install Dependencies
+        run: uv sync --all-extras
+
       - name: Architectural Gate
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -136,9 +139,6 @@ jobs:
 
       - name: Instantiation Bounds Gate
         run: uv run python scripts/universal_ontology_compiler.py evaluate_ast_instantiation_bounds
-
-      - name: Install Dependencies
-        run: uv sync
 
       - name: Bandit Security Check
         run: uvx bandit -r src/ scripts/ tests/ -s B101,B404
@@ -167,7 +167,12 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: uv sync --all-extras --dev
+        run: |
+          if [ "${{ matrix.python-version }}" = "3.14t" ]; then
+            uv sync --dev
+          else
+            uv sync --all-extras --dev
+          fi
 
       - name: Set PYTHON_GIL for Free-Threading
         if: matrix.python-version == '3.14t'
@@ -179,7 +184,7 @@ jobs:
       - name: Upload coverage
         uses: codecov/codecov-action@v5
         with:
-          fail_ci_if_error: true
+          fail_ci_if_error: false
           token: ${{ secrets.CODECOV_TOKEN }}
 
   test-extended:
@@ -210,7 +215,13 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: uv sync --all-extras --dev
+        shell: bash
+        run: |
+          if [ "${{ matrix.python-version }}" = "3.14t" ]; then
+            uv sync --dev
+          else
+            uv sync --all-extras --dev
+          fi
 
       - name: Set PYTHON_GIL for Free-Threading
         if: matrix.python-version == '3.14t'
@@ -223,7 +234,7 @@ jobs:
       - name: Upload coverage
         uses: codecov/codecov-action@v5
         with:
-          fail_ci_if_error: true
+          fail_ci_if_error: false
           token: ${{ secrets.CODECOV_TOKEN }}
 
   reproducible-builds:

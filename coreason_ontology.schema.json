@@ -764,8 +764,14 @@
     },
     "AnalogicalMappingTask": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Structure-Mapping Theory (Gentner) to execute\nsystemic cross-domain lateral thinking. As a ...Task suffix, this represents an\nauthorized kinetic execution trigger or test-time compute branch.\n\nCAUSAL AFFORDANCE: Forces the generative router to bridge the target_domain\n(max_length=2000) with an unrelated source_domain (max_length=2000) by finding\nrelational isomorphisms, actively injecting out-of-distribution abstractions. The\ntask_cid (128-char CID) anchors the task.\n\nEPISTEMIC BOUNDS: The cognitive leap is physically forced by the\ndivergence_temperature_override (ge=0.0, le=10.0), shifting the sampling\ndistribution. The structural rigor is bounded by required_isomorphisms (ge=1,\nle=86400000), demanding an exact count of valid mappings.\n\nMCP ROUTING TRIGGERS: Structure-Mapping Theory, Lateral Thinking, Relational\nIsomorphism, Cross-Domain Abstraction, High-Temperature Divergence",
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
+        "topology_class": {
+          "const": "analogical_mapping_task",
+          "default": "analogical_mapping_task",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "task_cid": {
           "description": "Unique identifier for this lateral thinking task.",
           "maxLength": 128,
@@ -884,7 +890,10 @@
       "discriminator": {
         "mapping": {
           "agent_bid": "#/$defs/AgentBidIntent",
+          "analogical_mapping_task": "#/$defs/AnalogicalMappingTask",
+          "bounded_json_rpc_intent": "#/$defs/BoundedJSONRPCIntent",
           "causal_propagation": "#/$defs/CausalPropagationIntent",
+          "chaos_experiment_task": "#/$defs/ChaosExperimentTask",
           "compute_provisioning": "#/$defs/ComputeProvisioningIntent",
           "constitutional_amendment": "#/$defs/ConstitutionalAmendmentIntent",
           "contextual_semantic_resolution": "#/$defs/ContextualSemanticResolutionIntent",
@@ -894,6 +903,8 @@
           "epistemic_lean4_premise": "#/$defs/EpistemicLean4Premise",
           "epistemic_logic_premise": "#/$defs/EpistemicLogicPremise",
           "epistemic_prolog_premise": "#/$defs/EpistemicPrologPremise",
+          "epistemic_transmutation_task": "#/$defs/EpistemicTransmutationTask",
+          "epistemic_upsampling_task": "#/$defs/EpistemicUpsamplingTask",
           "escalation": "#/$defs/EscalationIntent",
           "fallback_intent": "#/$defs/FallbackIntent",
           "falsification_contract": "#/$defs/FalsificationContract",
@@ -901,8 +912,10 @@
           "fyi": "#/$defs/FYIIntent",
           "human_directive": "#/$defs/HumanDirectiveIntent",
           "informational": "#/$defs/SemanticIntent",
+          "interventional_causal_task": "#/$defs/InterventionalCausalTask",
           "latent_projection": "#/$defs/LatentProjectionIntent",
           "latent_schema_inference": "#/$defs/LatentSchemaInferenceIntent",
+          "mcp_client_intent": "#/$defs/MCPClientIntent",
           "neurosymbolic_inference": "#/$defs/NeurosymbolicInferenceIntent",
           "ontological_crosswalk": "#/$defs/OntologicalCrosswalkIntent",
           "ontology_discovery": "#/$defs/OntologyDiscoveryIntent",
@@ -910,10 +923,12 @@
           "quarantine_intent": "#/$defs/QuarantineIntent",
           "rdf_serialization": "#/$defs/RDFSerializationIntent",
           "request": "#/$defs/InterventionIntent",
+          "rollback_intent": "#/$defs/RollbackIntent",
           "semantic_discovery": "#/$defs/SemanticDiscoveryIntent",
           "semantic_mapping_proposal": "#/$defs/SemanticMappingHeuristicIntent",
           "sparql_query": "#/$defs/SPARQLQueryIntent",
           "spatial_kinematic": "#/$defs/SpatialKinematicActionIntent",
+          "state_mutation_intent": "#/$defs/StateMutationIntent",
           "substrate_hydration": "#/$defs/SubstrateHydrationManifest",
           "system_2_remediation": "#/$defs/System2RemediationIntent",
           "task_announcement": "#/$defs/TaskAnnouncementIntent",
@@ -1038,6 +1053,33 @@
         },
         {
           "$ref": "#/$defs/SPARQLQueryIntent"
+        },
+        {
+          "$ref": "#/$defs/AnalogicalMappingTask"
+        },
+        {
+          "$ref": "#/$defs/BoundedJSONRPCIntent"
+        },
+        {
+          "$ref": "#/$defs/ChaosExperimentTask"
+        },
+        {
+          "$ref": "#/$defs/EpistemicTransmutationTask"
+        },
+        {
+          "$ref": "#/$defs/EpistemicUpsamplingTask"
+        },
+        {
+          "$ref": "#/$defs/InterventionalCausalTask"
+        },
+        {
+          "$ref": "#/$defs/MCPClientIntent"
+        },
+        {
+          "$ref": "#/$defs/RollbackIntent"
+        },
+        {
+          "$ref": "#/$defs/StateMutationIntent"
         }
       ]
     },
@@ -2196,8 +2238,14 @@
     },
     "BoundedJSONRPCIntent": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Enforces the formal JSON-RPC 2.0 specification as a stateless,\ndeterministic message-passing protocol, acting as the primary algorithmic firewall\nat the Zero-Trust network boundary. As an ...Intent suffix, this represents an\nauthorized kinetic execution trigger.\n\nCAUSAL AFFORDANCE: Unlocks remote procedure execution while preventing JSON Bombing\nand Algorithmic Complexity Attacks. The method field (max_length=1000) specifies the\nRPC target. The id field binds request-response correlation.\n\nEPISTEMIC BOUNDS: The `params` field is routed through the volumetric hardware guillotine\n(`enforce_payload_topology`), mathematically capping the payload to an absolute $O(N)$\nvolume of 10,000 nodes. This replaces the legacy 1D-depth constraints that permitted\ngeometric volume explosions. The `jsonrpc` field is a rigid Literal[\"2.0\"] automaton.\nThe `id` is topologically locked to a 128-char CID regex or an integer (le=1000000000) or None.\n\nMCP ROUTING TRIGGERS: JSON-RPC 2.0, Stateless RPC, Algorithmic Complexity Attack,\nJSON Bombing Prevention, Deterministic Finite Automaton",
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
+        "topology_class": {
+          "const": "bounded_json_rpc_intent",
+          "default": "bounded_json_rpc_intent",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "jsonrpc": {
           "const": "2.0",
           "description": "JSON-RPC version.",
@@ -2847,8 +2895,14 @@
     },
     "ChaosExperimentTask": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Orchestrates an automated steady-state hypothesis falsification loop\nvia structured Chaos Engineering. As a ...Task suffix, this represents an authorized\nkinetic execution trigger initiating active topological stress testing.\n\nCAUSAL AFFORDANCE: Deploys a deterministic matrix of faults and exogenous shocks against\na baseline SteadyStateHypothesisState to empirically discover latent fragility and\nevaluate the resilience of the DAG topology.\n\nEPISTEMIC BOUNDS: Cryptographic determinism is mathematically guaranteed by the\n@model_validator, which sorts the faults array by composite key (fault_category,\ntarget_node_cid) and the shocks array by shock_cid to preserve RFC 8785 canonical hashing.\n\nMCP ROUTING TRIGGERS: Steady State Falsification, Chaos Engineering, Automated Failure\nDiscovery, Resilience Orchestration, Systemic Perturbation",
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
+        "topology_class": {
+          "const": "chaos_experiment_task",
+          "default": "chaos_experiment_task",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "experiment_cid": {
           "description": "The unique identifier for the chaos experiment.",
           "maxLength": 128,
@@ -4801,7 +4855,9 @@
           "type": "string"
         },
         "proposed_patch": {
-          "additionalProperties": true,
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonPrimitiveState"
+          },
           "description": "A strict, structurally bounded JSON Patch (RFC 6902) proposed by the AI to mutate the GovernancePolicy.",
           "propertyNames": {
             "maxLength": 255
@@ -6092,7 +6148,7 @@
           "type": "integer"
         },
         "speculative_boundaries": {
-          "description": "The deterministic speculative boundaries executing within the DAG.",
+          "description": "Topological bounds for non-monotonic test-time compute branching.",
           "items": {
             "$ref": "#/$defs/SpeculativeExecutionPolicy"
           },
@@ -9213,8 +9269,14 @@
     },
     "EpistemicTransmutationTask": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Orchestrates Cross-Modal Representation Alignment,\ndeterministically transmuting unstructured artifacts into machine-readable\nN-dimensional tensors or discrete graphs. As a ...Task suffix, this represents\nan authorized kinetic execution trigger.\n\nCAUSAL AFFORDANCE: Forces the orchestrator's VLM or extraction engine to process\nthe artifact_event_cid (128-char CID) and project it into target_modalities\n(5-value Literal, min_length=1) while strictly adhering to the attached\noptical_governance (OpticalParsingSLA) and schema_governance (SchemaDrivenExtractionSLA).\n\nEPISTEMIC BOUNDS: The @model_validator validate_optical_governance_presence\nrejects extracting raster_image or tabular_grid without proper OpticalParsingSLA configuration. The @model_validator\nsort_arrays deterministically sorts target_modalities for RFC 8785 canonical\nhashing. The optional execution_cost_budget_magnitude (int | None,\nle=1000000000, ge=0, default=None) caps thermodynamic cost.\n\nMCP ROUTING TRIGGERS: Cross-Modal Alignment, Representation Engineering,\nMultimodal Extraction, VLM Transmutation, Deterministic Projection",
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
+        "topology_class": {
+          "const": "epistemic_transmutation_task",
+          "default": "epistemic_transmutation_task",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "task_cid": {
           "description": "Unique identifier for this specific multimodal extraction intervention.",
           "maxLength": 128,
@@ -9297,8 +9359,14 @@
     },
     "EpistemicUpsamplingTask": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Authorizes a connectionist agent to execute an abductive leap, reversing lossy compression via context.\n\n    CAUSAL AFFORDANCE: Unlocks generative projection mapping by allowing an agent to expand a generalized node into highly specific ontology dimensions based on contextual vectors.\n\n    EPISTEMIC BOUNDS: The confidence of the upsampling projection is clamped tightly between 0.0 and 1.0. Justification arrays enforce maximum structural lengths and explicitly declare Topological Exemptions against array sort.\n\n    MCP ROUTING TRIGGERS: Abductive Leap, Epistemic Upsampling, Lossy Compression Reversal, Vector Expansion, Connectionist Grounding",
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
+        "topology_class": {
+          "const": "epistemic_upsampling_task",
+          "default": "epistemic_upsampling_task",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "source_entity": {
           "$ref": "#/$defs/ContextualizedSourceState",
           "description": "The specific source contextualized entity subject to topological upsampling."
@@ -12589,8 +12657,14 @@
     },
     "InterventionalCausalTask": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents a formal Pearlian Do-Operator (P(y|do(X=x))) intervention, forcefully severing a variable from its historical back-door causal mechanisms to prove direct causal influence.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator to physically mutate the intervention_variable to the do_operator_state, breaking confounding structural edges in the directed acyclic graph.\n\nEPISTEMIC BOUNDS: The physical mutation is economically capped by execution_cost_budget_magnitude (le=1000000000), and its justification is strictly quantified by expected_causal_information_gain (bounded mathematically between 0.0 and 1.0).\n\nMCP ROUTING TRIGGERS: Pearlian Do-Calculus, Structural Causal Models, Causal Intervention, Confounder Ablation, Back-door Criterion",
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
+        "topology_class": {
+          "const": "interventional_causal_task",
+          "default": "interventional_causal_task",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "task_cid": {
           "description": "Unique identifier for this causal intervention.",
           "maxLength": 128,
@@ -13491,8 +13565,14 @@
     },
     "MCPClientIntent": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: An inherited JSON-RPC 2.0 substrate specifically binding Model Context Protocol (MCP) client intent emissions to the frontend UI. As an ...Intent suffix, this represents an authorized kinetic execution trigger.\nCAUSAL AFFORDANCE: Executes an exact semantic signal (Literal[\"mcp.ui.emit_intent\"]) to bubble internal agent states (like drafting or adjudication) to the human operator.\nEPISTEMIC BOUNDS: Inherits all recursive depth bounds from BoundedJSONRPCIntent and mathematically clamps the method space to a singular Literal[\"mcp.ui.emit_intent\"] to prevent execution drift.\nMCP ROUTING TRIGGERS: Model Context Protocol, Intent Bubbling, Human-in-the-Loop, Semantic Signaling, Method Clamping",
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
+        "topology_class": {
+          "const": "mcp_client_intent",
+          "default": "mcp_client_intent",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "jsonrpc": {
           "const": "2.0",
           "description": "JSON-RPC version.",
@@ -13791,7 +13871,9 @@
           "type": "string"
         },
         "inputSchema": {
-          "additionalProperties": true,
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonPrimitiveState"
+          },
           "description": "The JSON Schema payload mirroring our Pydantic limits.",
           "title": "Inputschema",
           "type": "object"
@@ -15530,6 +15612,13 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Authorizes a Semantic Watchdog Agent to perform strict, SSRF-protected out-of-band polling against external semantic registries to monitor for ontological deprecation or semantic drift.",
       "properties": {
+        "topology_class": {
+          "const": "ontology_discovery",
+          "default": "ontology_discovery",
+          "description": "Discriminator for external ontology polling.",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "jsonrpc": {
           "const": "2.0",
           "description": "JSON-RPC version.",
@@ -15581,13 +15670,6 @@
           "default": null,
           "description": "Unique request identifier.",
           "title": "Id"
-        },
-        "topology_class": {
-          "const": "ontology_discovery",
-          "default": "ontology_discovery",
-          "description": "Discriminator for external ontology polling.",
-          "title": "Topology Class",
-          "type": "string"
         },
         "target_registry_uri": {
           "description": "The standard ontology registry endpoint (e.g., EBI-OLS, BioPortal).",
@@ -16825,8 +16907,14 @@
     },
     "RollbackIntent": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A kinetic execution trigger initiating a macroscopic Pearlian\ncounterfactual reversal, mathematically rewinding the state vector to a pristine historical\nMerkle root. As an ...Intent suffix, the LLM may execute non-monotonic reasoning here.\n\nCAUSAL AFFORDANCE: Forces the orchestrator to execute a Pearlian do-operator intervention\n($do(X=x)$), flushing all invalidated_node_cids from the active context and restoring the\ntopology to the target_event_cid coordinate.\n\nEPISTEMIC BOUNDS: Deterministic execution is mathematically guaranteed by the\n@model_validator which strictly alphabetizes invalidated_node_cids via sorted() prior to\nRFC 8785 canonical hashing, preventing Byzantine replay divergence.\n\nMCP ROUTING TRIGGERS: Pearlian Counterfactual, Causal Reversal, State Vector Rollback,\nTemporal Negation, Topological Falsification",
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
+        "topology_class": {
+          "const": "rollback_intent",
+          "default": "rollback_intent",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "request_cid": {
           "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the causal rollback operation.",
           "maxLength": 128,
@@ -18483,7 +18571,9 @@
           "type": "integer"
         },
         "attributes": {
-          "additionalProperties": true,
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonPrimitiveState"
+          },
           "description": "Typed metadata bound to the event.",
           "maxProperties": 1000,
           "propertyNames": {
@@ -19085,8 +19175,14 @@
     },
     "StateMutationIntent": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements the formal RFC 6902 JSON Patch standard to execute atomic,\ndeterministic state vector mutations across the swarm's N-dimensional blackboard. As an\n...Intent suffix, this represents an authorized kinetic execution trigger.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's algebraic engine to surgically apply,\ntest, or ablate targeted JSON pointers without requiring full payload transmission.\n\nEPISTEMIC BOUNDS: The `value` (JsonPrimitiveState) mutation payload is volumetrically\nclamped by `enforce_payload_topology` to guarantee that the resulting state matrix $S'$\ndoes not expand beyond VRAM constraints. The operation geometry is rigidly restricted by\nthe op field to the PatchOperationProfile. Target topological coordinates (path and\nfrom_path) are physically bounded to max_length=2000. If the mutation introduces high-entropy external strings, the `zero_trust_receipt_cid` MUST be populated to satisfy Sheaf-theoretic consistency, proving the payload traversed the Symbolic Firewall.\n\nMCP ROUTING TRIGGERS: RFC 6902, JSON Patch, Atomic Mutation, State Vector Projection,\nDeterministic Operator",
+      "description": "CoReason Shared Kernel Ontology",
       "properties": {
+        "topology_class": {
+          "const": "state_mutation_intent",
+          "default": "state_mutation_intent",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "op": {
           "$ref": "#/$defs/PatchOperationProfile",
           "description": "The strict RFC 6902 JSON Patch operation, acting as a deterministic state vector mutation."

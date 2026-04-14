@@ -184,8 +184,13 @@ def main() -> None:
     ts_out = "bindings/typescript/src/ontology.ts"
     rust_out = "bindings/rust/src/ontology.rs"
 
+    print("Projecting fresh ontology manifold...")
+    from universal_ontology_compiler import project_ontology_manifold
+
+    project_ontology_manifold()
+
     if not os.path.exists(schema_file):
-        print(f"Error: Schema file {schema_file} not found. Please generate it first.")
+        print(f"Error: Schema file {schema_file} failed to generate.")
         sys.exit(1)
 
     # Build the rooted wrapper schema (the raw schema is $defs-only)

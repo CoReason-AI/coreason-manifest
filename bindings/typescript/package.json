@@ -10,16 +10,29 @@
     "directory": "bindings/typescript"
   },
   "homepage": "https://github.com/CoReason-AI/coreason-manifest",
-  "keywords": ["coreason", "ontology", "manifest", "schema", "types"],
-  "main": "dist/ontology.js",
-  "types": "dist/ontology.d.ts",
-  "files": ["dist", "README.md"],
+  "keywords": [
+    "coreason",
+    "ontology",
+    "manifest",
+    "schema",
+    "types"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc",
     "format": "prettier --write src/"
   },
   "devDependencies": {
-    "typescript": "^5.0.0",
-    "prettier": "^3.0.0"
+    "@types/fast-json-stable-stringify": "^2.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "fast-json-stable-stringify": "^2.1.0"
   }
 }

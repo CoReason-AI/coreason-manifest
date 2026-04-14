@@ -135,7 +135,7 @@ def test_apply_state_differential(
             author_node_cid="test",
             lamport_timestamp=0,
             vector_clock={"test": 0},
-            patches=[StateMutationIntent(op=op, path=path, value=value, **({"from": from_path} if from_path else {}))],
+            patches=[StateMutationIntent(op=op, path=path, value=value, from_path=from_path or None)],
         )
     except ValidationError:
         return  # invalid manifest built

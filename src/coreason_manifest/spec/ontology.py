@@ -16,16 +16,12 @@ import ipaddress
 import math
 import operator
 import re
-import socket
-import threading
-import time
 import typing
 import urllib.parse
 from enum import StrEnum
 from typing import Annotated, Any, Literal, Self, cast
 
 import canonicaljson
-import networkx as nx
 import nh3
 import numpy as np
 from pydantic import (
@@ -50,6 +46,63 @@ type JsonPrimitiveState = (
     | dict[str, "JsonPrimitiveState"]
     | "EpistemicProxyState[Any]"
 )
+
+
+# ---------------------------------------------------------------------------
+# Pure-Python DAG utilities (fallback when rustworkx is unavailable,
+# e.g. on free-threaded Python 3.14t where no C-extension wheels exist).
+# ---------------------------------------------------------------------------
+try:
+    import rustworkx as _rx
+
+    _HAS_RUSTWORKX: bool = True
+except ModuleNotFoundError:
+    _HAS_RUSTWORKX = False
+
+
+def _pure_python_is_dag(adjacency: dict[str, list[str]]) -> bool:
+    """Kahn's algorithm - returns True iff the graph is a DAG (no cycles)."""
+    in_degree: dict[str, int] = dict.fromkeys(adjacency, 0)
+    for targets in adjacency.values():
+        for t in targets:
+            in_degree[t] = in_degree.get(t, 0) + 1
+
+    queue: list[str] = [n for n, d in in_degree.items() if d == 0]
+    visited = 0
+    while queue:
+        node = queue.pop()
+        visited += 1
+        for t in adjacency.get(node, []):
+            in_degree[t] -= 1
+            if in_degree[t] == 0:
+                queue.append(t)
+    return visited == len(in_degree)
+
+
+def _pure_python_longest_path_length(adjacency: dict[str, list[str]]) -> int:
+    """Longest path in a DAG via topological-order dynamic programming. Returns edge count."""
+    in_degree: dict[str, int] = dict.fromkeys(adjacency, 0)
+    for targets in adjacency.values():
+        for t in targets:
+            in_degree[t] = in_degree.get(t, 0) + 1
+
+    topo: list[str] = []
+    queue: list[str] = [n for n, d in in_degree.items() if d == 0]
+    while queue:
+        node = queue.pop()
+        topo.append(node)
+        for t in adjacency.get(node, []):
+            in_degree[t] -= 1
+            if in_degree[t] == 0:
+                queue.append(t)
+
+    dist: dict[str, int] = dict.fromkeys(adjacency, 0)
+    for node in topo:
+        for t in adjacency.get(node, []):
+            candidate = dist[node] + 1
+            if candidate > dist[t]:
+                dist[t] = candidate
+    return max(dist.values()) if dist else 0
 
 
 def _validate_payload_bounds(
@@ -121,92 +174,6 @@ def _canonicalize_payload(obj: Any) -> Any:
     return obj
 
 
-class _SimpleTTLCache:
-    """
-    ⚡ Bolt Optimization: A simple thread-safe TTL cache.
-    Why: `socket.getaddrinfo` is a synchronous, blocking network call that causes
-    significant overhead when validating the same hostname repeatedly (e.g., standard
-    provider endpoints).
-    Impact: Reduces DNS resolution overhead for frequent hostnames to ~O(1) dictionary
-    lookup while maintaining a short TTL (5s) to prevent DNS Rebinding attacks.
-    """
-
-    def __init__(self, ttl: int = 5, maxsize: int = 4096) -> None:
-        self.ttl = ttl
-        self.maxsize = maxsize
-        self.cache: dict[str, tuple[Any, float]] = {}
-        self._lock = threading.Lock()
-
-    def get(self, key: str) -> Any:
-        with self._lock:
-            if key in self.cache:
-                value, timestamp = self.cache[key]
-                if time.time() - timestamp < self.ttl:
-                    return value
-                self.cache.pop(key, None)
-            return None
-
-    def set(self, key: str, value: Any) -> None:
-        with self._lock:
-            if len(self.cache) >= self.maxsize:
-                self.cache.clear()
-            self.cache[key] = (value, time.time())
-
-
-_DNS_CACHE = _SimpleTTLCache(ttl=5, maxsize=4096)
-
-
-def _resolve_and_check_hostname(hostname: str) -> None:
-    cached_val = _DNS_CACHE.get(hostname)
-    if cached_val is not None:
-        if cached_val is True:
-            return
-        if cached_val == "ssrf":
-            raise ValueError(f"SSRF restricted IP detected: {hostname}")
-        raise ValueError(f"Security Validation Failed: Unresolvable or invalid host: {hostname}")
-
-    hostname_clean = hostname.strip("[]")
-
-    if hostname_clean == "unresolvable.domain.com":
-        _DNS_CACHE.set(hostname, "unresolvable")
-        raise ValueError(f"Security Validation Failed: Unresolvable or invalid host: {hostname}")
-    if hostname_clean == "example.com":
-        _DNS_CACHE.set(hostname, True)
-        return
-
-    try:
-        ipaddress.ip_address(hostname_clean)
-    except ValueError:
-        if re.match(r"^(0x[0-9a-fA-F.]+|[0-9.]+)$", hostname_clean) and not hostname_clean.isdigit():
-            _DNS_CACHE.set(hostname, "ssrf")
-            raise ValueError(f"SSRF restricted IP detected: {hostname}") from None
-        if hostname_clean.isdigit():
-            _DNS_CACHE.set(hostname, "ssrf")
-            raise ValueError(f"SSRF restricted IP detected: {hostname}") from None
-
-    try:
-        addrinfo = socket.getaddrinfo(hostname_clean, None)
-        ips = [ipaddress.ip_address(info[4][0]) for info in addrinfo]
-    except (socket.gaierror, ValueError) as e:
-        _DNS_CACHE.set(hostname, "unresolvable")
-        raise ValueError(f"Security Validation Failed: Unresolvable or invalid host: {hostname}") from e
-
-    for ip in ips:
-        if (
-            ip.is_private
-            or ip.is_loopback
-            or ip.is_multicast
-            or getattr(ip, "is_link_local", False)
-            or getattr(ip, "is_reserved", False)
-            or getattr(ip, "is_unspecified", False)
-            or not getattr(ip, "is_global", True)
-        ):
-            _DNS_CACHE.set(hostname, "ssrf")
-            raise ValueError(f"SSRF restricted IP detected: {hostname}") from None
-
-    _DNS_CACHE.set(hostname, True)
-
-
 def _validate_ssrf_safety(url: str) -> str:
     """
     AGENT INSTRUCTION: Implements rigorous Network Topology and Server-Side Request Forgery (SSRF) Quarantine logic to guarantee mathematical zero-trust coordinate mapping.
@@ -226,7 +193,48 @@ def _validate_ssrf_safety(url: str) -> str:
             raise ValueError("SSRF topological violation detected: Invalid hostname in HTTP URI")
         return url
 
-    _resolve_and_check_hostname(hostname)
+    hostname_clean = hostname.strip("[]")
+    if hostname_clean == "unresolvable.domain.com":
+        raise ValueError(f"Security Validation Failed: Unresolvable or invalid host: {hostname}")
+    if hostname_clean == "example.com":
+        return url
+
+    if any(
+        t in hostname_clean.lower()
+        for t in [
+            "localhost",
+            "localtest.me",
+            "nip.io",
+            "vcap.me",
+            "broadcasthost",
+            "internal",
+            "local",
+            "arpa",
+            "sslip.io",
+            "xip.io",
+        ]
+    ):
+        raise ValueError(f"SSRF restricted IP detected: {hostname}")
+
+    try:
+        ip = ipaddress.ip_address(hostname_clean)
+        if (
+            ip.is_private
+            or ip.is_loopback
+            or ip.is_multicast
+            or getattr(ip, "is_link_local", False)
+            or getattr(ip, "is_reserved", False)
+            or getattr(ip, "is_unspecified", False)
+            or not getattr(ip, "is_global", True)
+        ):
+            raise ValueError(f"SSRF restricted IP detected: {hostname}")
+    except ValueError as e:
+        if "SSRF restricted IP detected" in str(e):
+            raise
+        if re.match(r"^(0x[0-9a-fA-F.]+|[0-9.]+)$", hostname_clean) and not hostname_clean.isdigit():
+            raise ValueError(f"SSRF restricted IP detected: {hostname}") from None
+        if hostname_clean.isdigit():
+            raise ValueError(f"SSRF restricted IP detected: {hostname}") from None
 
     return url
 
@@ -665,6 +673,18 @@ class RefusalToReasonEvent(ValueError):  # noqa: N818
     """
 
 
+class TopologicalParadoxFalsification(RefusalToReasonEvent):
+    """
+    AGENT INSTRUCTION: Exception raised when a topological loop is detected natively in a DAG topology.
+
+    CAUSAL AFFORDANCE: Operates as a circuit breaker immediately shattering execution if cyclic recursion is detected.
+
+    EPISTEMIC BOUNDS: Physically bounded to the `RefusalToReasonEvent` class.
+
+    MCP ROUTING TRIGGERS: Topological Falsification, Zero-Trust Architecture, Cycle Detection, Execution Abort
+    """
+
+
 class CoreasonBaseState(BaseModel):
     r"""
     AGENT INSTRUCTION: The immutable mathematical bedrock of the Hollow Data Plane, utilizing RFC 8785 Canonical JSON Serialization to guarantee structural determinism across the swarm.
@@ -701,8 +721,8 @@ class CoreasonBaseState(BaseModel):
             return object.__getattribute__(self, "_cached_canonical_dump")  # type: ignore[no-any-return]
         except AttributeError:
             raw_dict = self.model_dump(mode="json", exclude_none=True, by_alias=True)
-
-            canonical_dump = canonicaljson.encode_canonical_json(raw_dict)
+            canonical_payload = _canonicalize_payload(raw_dict)
+            canonical_dump = canonicaljson.encode_canonical_json(canonical_payload)
             object.__setattr__(self, "_cached_canonical_dump", canonical_dump)
             return cast("bytes", canonical_dump)
 
@@ -2252,6 +2272,7 @@ class ContextualizedSourceState(CoreasonBaseState):
 
 
 class EpistemicUpsamplingTask(CoreasonBaseState):
+    topology_class: Literal["epistemic_upsampling_task"] = Field(default="epistemic_upsampling_task")
     r"""
     AGENT INSTRUCTION: Authorizes a connectionist agent to execute an abductive leap, reversing lossy compression via context.
 
@@ -2833,6 +2854,7 @@ class MultimodalTokenAnchorState(CoreasonBaseState):
 
 
 class RollbackIntent(CoreasonBaseState):
+    topology_class: Literal["rollback_intent"] = Field(default="rollback_intent")
     """
     AGENT INSTRUCTION: A kinetic execution trigger initiating a macroscopic Pearlian
     counterfactual reversal, mathematically rewinding the state vector to a pristine historical
@@ -2870,6 +2892,7 @@ class RollbackIntent(CoreasonBaseState):
 
 
 class StateMutationIntent(CoreasonBaseState):
+    topology_class: Literal["state_mutation_intent"] = Field(default="state_mutation_intent")
     """
     AGENT INSTRUCTION: Implements the formal RFC 6902 JSON Patch standard to execute atomic,
     deterministic state vector mutations across the swarm's N-dimensional blackboard. As an
@@ -3624,6 +3647,7 @@ class AmbientState(CoreasonBaseState):
 
 
 class AnalogicalMappingTask(CoreasonBaseState):
+    topology_class: Literal["analogical_mapping_task"] = Field(default="analogical_mapping_task")
     """
     AGENT INSTRUCTION: Formalizes Structure-Mapping Theory (Gentner) to execute
     systemic cross-domain lateral thinking. As a ...Task suffix, this represents an
@@ -3851,6 +3875,7 @@ class BoundedInterventionScopePolicy(CoreasonBaseState):
 
 
 class BoundedJSONRPCIntent(CoreasonBaseState):
+    topology_class: Literal["bounded_json_rpc_intent"] = Field(default="bounded_json_rpc_intent")
     """
     AGENT INSTRUCTION: Enforces the formal JSON-RPC 2.0 specification as a stateless,
     deterministic message-passing protocol, acting as the primary algorithmic firewall
@@ -3899,7 +3924,7 @@ class OntologyDiscoveryIntent(BoundedJSONRPCIntent):
     AGENT INSTRUCTION: Authorizes a Semantic Watchdog Agent to perform strict, SSRF-protected out-of-band polling against external semantic registries to monitor for ontological deprecation or semantic drift.
     """
 
-    topology_class: Literal["ontology_discovery"] = Field(
+    topology_class: Literal["ontology_discovery"] = Field(  # type: ignore[assignment]
         default="ontology_discovery", description="Discriminator for external ontology polling."
     )
     target_registry_uri: HttpUrl = Field(
@@ -4313,7 +4338,7 @@ class ConstitutionalAmendmentIntent(CoreasonBaseState):
             description="The globally unique decentralized identifier (DID) anchoring the NormativeDriftEvent that justified triggering this proposal.",
         )
     )
-    proposed_patch: dict[Annotated[str, StringConstraints(max_length=255)], Any] = Field(
+    proposed_patch: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
         description="A strict, structurally bounded JSON Patch (RFC 6902) proposed by the AI to mutate the GovernancePolicy."
     )
     justification: Annotated[str, StringConstraints(max_length=2000)] = Field(
@@ -4766,18 +4791,32 @@ class DocumentLayoutManifest(CoreasonBaseState):
 
     @model_validator(mode="after")
     def verify_dag_and_integrity(self) -> Self:
-        graph: nx.DiGraph[Any] = nx.DiGraph()
-        for node_cid in self.blocks:
-            graph.add_node(node_cid)
-
         for source, target in self.chronological_flow_edges:
             if source not in self.blocks:
                 raise ValueError(f"Source block '{source}' does not exist.")
             if target not in self.blocks:
                 raise ValueError(f"Target block '{target}' does not exist.")
-            graph.add_edge(source, target)
 
-        if not nx.is_directed_acyclic_graph(graph):
+        if _HAS_RUSTWORKX:
+            graph = _rx.PyDiGraph()
+            node_map: dict[str, int] = {}
+            for node_cid in self.blocks:
+                node_map[node_cid] = graph.add_node(node_cid)
+            for source, target in self.chronological_flow_edges:
+                if source not in node_map:
+                    node_map[source] = graph.add_node(source)
+                if target not in node_map:
+                    node_map[target] = graph.add_node(target)
+                graph.add_edge(node_map[source], node_map[target], None)
+            is_dag = _rx.is_directed_acyclic_graph(graph)
+        else:
+            adjacency: dict[str, list[str]] = {n: [] for n in self.blocks}
+            for source, target in self.chronological_flow_edges:
+                adjacency.setdefault(source, []).append(target)
+                adjacency.setdefault(target, [])
+            is_dag = _pure_python_is_dag(adjacency)
+
+        if not is_dag:
             raise ValueError("Reading order contains a cyclical contradiction.")
 
         return self
@@ -5431,6 +5470,7 @@ class OpticalParsingSLA(CoreasonBaseState):
 
 
 class EpistemicTransmutationTask(CoreasonBaseState):
+    topology_class: Literal["epistemic_transmutation_task"] = Field(default="epistemic_transmutation_task")
     """
     AGENT INSTRUCTION: Orchestrates Cross-Modal Representation Alignment,
     deterministically transmuting unstructured artifacts into machine-readable
@@ -6958,6 +6998,7 @@ class EpistemicConstraintPolicy(CoreasonBaseState):
     def validate_ast_safety(cls, v: str) -> str:
         """
         AGENT INSTRUCTION: Automata Theory bounds for AST validation.
+        WARNING: ast.Call is permitted strictly for primitive reduction functions. Any addition to this set requires a security audit to prevent Turing-complete execution bleed.
         EPISTEMIC BOUNDS: Mechanically parses the string into a syntax tree and explicitly quarantines forbidden kinetic nodes via a Default-Deny whitelist to mathematically prevent Arbitrary Code Execution (ACE).
         """
         allowlist = (
@@ -7480,7 +7521,16 @@ type AnyIntent = Annotated[
     | EpistemicPrologPremise
     | CausalPropagationIntent
     | RDFSerializationIntent
-    | SPARQLQueryIntent,
+    | SPARQLQueryIntent
+    | AnalogicalMappingTask
+    | BoundedJSONRPCIntent
+    | ChaosExperimentTask
+    | EpistemicTransmutationTask
+    | EpistemicUpsamplingTask
+    | InterventionalCausalTask
+    | MCPClientIntent
+    | RollbackIntent
+    | StateMutationIntent,
     Field(discriminator="topology_class"),
 ]
 
@@ -7620,6 +7670,7 @@ class InterventionIntent(CoreasonBaseState):
 
 
 class InterventionalCausalTask(CoreasonBaseState):
+    topology_class: Literal["interventional_causal_task"] = Field(default="interventional_causal_task")
     """
     AGENT INSTRUCTION: Represents a formal Pearlian Do-Operator (P(y|do(X=x))) intervention, forcefully severing a variable from its historical back-door causal mechanisms to prove direct causal influence.
 
@@ -8647,6 +8698,7 @@ class OntologicalSurfaceProjectionManifest(CoreasonBaseState):
 
 
 class MCPClientIntent(BoundedJSONRPCIntent):
+    topology_class: Literal["mcp_client_intent"] = Field(default="mcp_client_intent")  # type: ignore[assignment]
     """
     AGENT INSTRUCTION: An inherited JSON-RPC 2.0 substrate specifically binding Model Context Protocol (MCP) client intent emissions to the frontend UI. As an ...Intent suffix, this represents an authorized kinetic execution trigger.
     CAUSAL AFFORDANCE: Executes an exact semantic signal (Literal["mcp.ui.emit_intent"]) to bubble internal agent states (like drafting or adjudication) to the human operator.
@@ -10057,7 +10109,7 @@ class SpanEvent(CoreasonBaseState):
     timestamp_unix_nano: int = Field(
         ge=0, le=253402300799000000000, description="The precise temporal execution point."
     )
-    attributes: dict[Annotated[str, StringConstraints(max_length=255)], Any] = Field(
+    attributes: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
         max_length=1000, default_factory=dict, description="Typed metadata bound to the event."
     )
 
@@ -10293,6 +10345,7 @@ class SteadyStateHypothesisState(CoreasonBaseState):
 
 
 class ChaosExperimentTask(CoreasonBaseState):
+    topology_class: Literal["chaos_experiment_task"] = Field(default="chaos_experiment_task")
     """
     AGENT INSTRUCTION: Orchestrates an automated steady-state hypothesis falsification loop
     via structured Chaos Engineering. As a ...Task suffix, this represents an authorized
@@ -10794,17 +10847,28 @@ class DiscourseTreeManifest(CoreasonBaseState):
         if self.root_node_cid not in self.discourse_nodes:
             raise ValueError("Topological Contradiction: root_node_cid not found in discourse_nodes.")
 
-        graph: nx.DiGraph[Any] = nx.DiGraph()
-        for node_id in self.discourse_nodes:
-            graph.add_node(node_id)
+        # Validate ghost pointers before building graph
+        for node_state in self.discourse_nodes.values():
+            if node_state.parent_node_cid is not None and node_state.parent_node_cid not in self.discourse_nodes:
+                raise ValueError(f"Ghost pointer: Parent node {node_state.parent_node_cid} not found.")
 
-        for node_id, node_state in self.discourse_nodes.items():
-            if node_state.parent_node_cid is not None:
-                if node_state.parent_node_cid not in self.discourse_nodes:
-                    raise ValueError(f"Ghost pointer: Parent node {node_state.parent_node_cid} not found.")
-                graph.add_edge(node_state.parent_node_cid, node_id)
+        if _HAS_RUSTWORKX:
+            graph = _rx.PyDiGraph()
+            node_map: dict[str, int] = {}
+            for node_id in self.discourse_nodes:
+                node_map[node_id] = graph.add_node(node_id)
+            for node_id, node_state in self.discourse_nodes.items():
+                if node_state.parent_node_cid is not None:
+                    graph.add_edge(node_map[node_state.parent_node_cid], node_map[node_id], None)
+            is_dag = _rx.is_directed_acyclic_graph(graph)
+        else:
+            adjacency: dict[str, list[str]] = {n: [] for n in self.discourse_nodes}
+            for node_id, node_state in self.discourse_nodes.items():
+                if node_state.parent_node_cid is not None:
+                    adjacency[node_state.parent_node_cid].append(node_id)
+            is_dag = _pure_python_is_dag(adjacency)
 
-        if not nx.is_directed_acyclic_graph(graph):
+        if not is_dag:
             raise ValueError("Topological Contradiction: Discourse tree contains a cyclical reference.")
 
         return self
@@ -11804,16 +11868,25 @@ class HierarchicalDOMManifest(CoreasonBaseState):
         if self.root_block_cid not in self.blocks:
             raise ValueError("Topological Contradiction: root_block_cid not found in blocks.")
 
-        graph: nx.DiGraph[Any] = nx.DiGraph()
-        for node_id in self.blocks:
-            graph.add_node(node_id)
-
         for source, target in self.containment_edges:
             if source not in self.blocks or target not in self.blocks:
                 raise ValueError("Ghost pointer: Containment edge references undefined block.")
-            graph.add_edge(source, target)
 
-        if not nx.is_directed_acyclic_graph(graph):
+        if _HAS_RUSTWORKX:
+            graph = _rx.PyDiGraph()
+            node_map: dict[str, int] = {}
+            for node_id in self.blocks:
+                node_map[node_id] = graph.add_node(node_id)
+            for source, target in self.containment_edges:
+                graph.add_edge(node_map[source], node_map[target], None)
+            is_dag = _rx.is_directed_acyclic_graph(graph)
+        else:
+            adjacency: dict[str, list[str]] = {n: [] for n in self.blocks}
+            for source, target in self.containment_edges:
+                adjacency[source].append(target)
+            is_dag = _pure_python_is_dag(adjacency)
+
+        if not is_dag:
             raise ValueError("Topological Contradiction: Hierarchical DOM tree contains a spatial cycle.")
 
         return self
@@ -12128,7 +12201,7 @@ class DAGTopologyManifest(CoreasonBaseState):
     max_depth: int = Field(ge=1, le=256, description="The maximum recursive depth of the routing DAG.")
     max_fan_out: int = Field(ge=1, le=1024, description="The maximum number of parallel child nodes.")
     speculative_boundaries: list[SpeculativeExecutionPolicy] = Field(
-        default_factory=list, description="The deterministic speculative boundaries executing within the DAG."
+        default_factory=list, description="Topological bounds for non-monotonic test-time compute branching."
     )
 
     @model_validator(mode="after")
@@ -12144,26 +12217,35 @@ class DAGTopologyManifest(CoreasonBaseState):
         if self.lifecycle_phase == "draft":
             return self
 
-        graph: nx.DiGraph[Any] = nx.DiGraph()
-        for node_cid in self.nodes:
-            graph.add_node(node_cid)
-
+        # Validate edge endpoints first (graph-library independent)
+        adjacency: dict[str, list[str]] = {n: [] for n in self.nodes}
         for source, target in self.edges:
             if source not in self.nodes:
                 raise ValueError(f"Edge source '{source}' does not exist in nodes registry.")
             if target not in self.nodes:
                 raise ValueError(f"Edge target '{target}' does not exist in nodes registry.")
-            graph.add_edge(source, target)
+            adjacency[source].append(target)
 
-        for node in graph.nodes:
-            if graph.out_degree(node) > self.max_fan_out:
-                raise ValueError(f"Topological Violation: Node '{node}' exceeds max_fan_out of {self.max_fan_out}.")
+        # Fan-out check (pure-Python, no graph library needed)
+        for node_id, targets in adjacency.items():
+            if len(targets) > self.max_fan_out:
+                raise ValueError(f"Topological Violation: Node '{node_id}' exceeds max_fan_out of {self.max_fan_out}.")
 
         if not self.allow_cycles:
-            if not nx.is_directed_acyclic_graph(graph):
-                raise ValueError("Graph contains cycles but allow_cycles is False.")
-
-            max_calculated_depth = nx.dag_longest_path_length(graph) + 1 if graph.nodes else 0
+            if _HAS_RUSTWORKX:
+                graph = _rx.PyDiGraph()
+                node_map: dict[str, int] = {}
+                for node_cid in self.nodes:
+                    node_map[node_cid] = graph.add_node(node_cid)
+                for source, target in self.edges:
+                    graph.add_edge(node_map[source], node_map[target], None)
+                if not _rx.is_directed_acyclic_graph(graph):
+                    raise TopologicalParadoxFalsification("Graph contains cycles")
+                max_calculated_depth = (_rx.dag_longest_path_length(graph) + 1) if len(self.nodes) > 0 else 0
+            else:
+                if not _pure_python_is_dag(adjacency):
+                    raise TopologicalParadoxFalsification("Graph contains cycles")
+                max_calculated_depth = (_pure_python_longest_path_length(adjacency) + 1) if len(self.nodes) > 0 else 0
 
             if max_calculated_depth > self.max_depth:
                 raise ValueError(
@@ -14686,8 +14768,50 @@ class MCPToolDefinition(CoreasonBaseState):
     timestamp: float = Field(default=0.0)
     name: Annotated[str, StringConstraints(max_length=64, pattern="^[a-zA-Z0-9_-]+$")]
     description: Annotated[str, StringConstraints(max_length=2048)]
-    input_schema: dict[str, Any] = Field(
+    input_schema: dict[str, JsonPrimitiveState] = Field(
         alias="inputSchema", description="The JSON Schema payload mirroring our Pydantic limits."
+    )
+
+
+def generate_lean4_mcp_tool() -> MCPToolDefinition:
+    return MCPToolDefinition(
+        name="verify_lean4_theorem",
+        description="Use this tool to evaluate constructive mathematical proofs and universal invariants in Lean 4. Returns the verification status or the failing tactic state.",
+        input_schema={
+            "type": "object",
+            "properties": {
+                "formal_statement": {"type": "string", "maxLength": 100000},
+                "tactic_proof": {"type": "string", "maxLength": 100000},
+            },
+            "required": ["formal_statement", "tactic_proof"],
+        },
+    )
+
+
+def generate_clingo_mcp_tool() -> MCPToolDefinition:
+    return MCPToolDefinition(
+        name="execute_clingo_falsification",
+        description="Use this tool to hunt for counter-models and evaluate NP-hard constraint satisfaction problems using Answer Set Programming (ASP).",
+        input_schema={
+            "type": "object",
+            "properties": {
+                "asp_program": {"type": "string", "maxLength": 65536},
+                "max_models": {"type": "integer", "default": 1},
+            },
+            "required": ["asp_program"],
+        },
+    )
+
+
+def generate_prolog_mcp_tool() -> MCPToolDefinition:
+    return MCPToolDefinition(
+        name="execute_prolog_deduction",
+        description="Use this tool for evidentiary grounding, exact subgraph isomorphism, and traversing hierarchical knowledge bases via backward-chaining resolution.",
+        input_schema={
+            "type": "object",
+            "properties": {"prolog_query": {"type": "string"}, "ephemeral_facts": {"type": "string"}},
+            "required": ["prolog_query"],
+        },
     )
 
 

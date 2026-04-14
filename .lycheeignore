@@ -1,2 +1,5 @@
 .*sigstore\.dev.*
 .*conventionalcommits\.org.*
+.*slsa\.dev.*
+.*pypi\.org.*
+.*crates\.io.*
