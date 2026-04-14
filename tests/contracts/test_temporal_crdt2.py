@@ -43,9 +43,6 @@ def test_temporal_crdt_manifest_sorts_correctly2() -> None:
     assert manifest.terminate_set[1].target_edge_cid == "did:coreason:edge-B"
 
 
-
-
-
 def test_temporal_conflict_resolution() -> None:
     policy = TemporalConflictResolutionPolicy(merge_algebra="lamport_dominance")
     assert policy.merge_algebra == "lamport_dominance"

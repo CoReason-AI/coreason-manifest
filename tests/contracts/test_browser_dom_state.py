@@ -112,6 +112,3 @@ def test_browser_dom_state_fuzz_ipv4_space(ip: ipaddress.IPv4Address) -> None:
             current_url=url, viewport_size=(1024, 768), dom_hash="a" * 64, accessibility_tree_hash="b" * 64
         )
         assert state.current_url == url
-
-
-

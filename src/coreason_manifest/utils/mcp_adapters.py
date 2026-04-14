@@ -20,11 +20,7 @@ def _canonicalize_payload(payload: Any) -> Any:
     Recursively strips all `None` values from dictionaries and lists to mathematically prevent Null Contagion.
     """
     if isinstance(payload, dict):
-        return {
-            k: _canonicalize_payload(v)
-            for k, v in payload.items()
-            if v is not None
-        }
+        return {k: _canonicalize_payload(v) for k, v in payload.items() if v is not None}
     if isinstance(payload, list):
         return [_canonicalize_payload(v) for v in payload if v is not None]
     return payload
@@ -47,7 +43,7 @@ class DeterministicTransportAdapter:
         canonical_dict = _canonicalize_payload(payload_dict)
         trace_context = payload_dict.get("trace_context", {})
         request_id = trace_context.get("trace_cid", "unknown")
-        
+
         wrapped_payload = {
             "jsonrpc": "2.0",
             "method": "coreason_execute",

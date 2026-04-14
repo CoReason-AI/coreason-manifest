@@ -142,7 +142,21 @@ def _validate_ssrf_safety(url: str) -> str:
     if hostname_clean == "example.com":
         return url
 
-    if any(t in hostname_clean.lower() for t in ["localhost", "localtest.me", "nip.io", "vcap.me", "broadcasthost", "internal", "local", "arpa", "sslip.io", "xip.io"]):
+    if any(
+        t in hostname_clean.lower()
+        for t in [
+            "localhost",
+            "localtest.me",
+            "nip.io",
+            "vcap.me",
+            "broadcasthost",
+            "internal",
+            "local",
+            "arpa",
+            "sslip.io",
+            "xip.io",
+        ]
+    ):
         raise ValueError(f"SSRF restricted IP detected: {hostname}")
 
     try:
@@ -612,7 +626,6 @@ class TopologicalParadoxFalsification(RefusalToReasonEvent):
 
     MCP ROUTING TRIGGERS: Topological Falsification, Zero-Trust Architecture, Cycle Detection, Execution Abort
     """
-
 
 
 class CoreasonBaseState(BaseModel):
@@ -3874,7 +3887,7 @@ class OntologyDiscoveryIntent(BoundedJSONRPCIntent):
     AGENT INSTRUCTION: Authorizes a Semantic Watchdog Agent to perform strict, SSRF-protected out-of-band polling against external semantic registries to monitor for ontological deprecation or semantic drift.
     """
 
-    topology_class: Literal["ontology_discovery"] = Field(
+    topology_class: Literal["ontology_discovery"] = Field(  # type: ignore[assignment]
         default="ontology_discovery", description="Discriminator for external ontology polling."
     )
     target_registry_uri: HttpUrl = Field(
@@ -8641,7 +8654,7 @@ class OntologicalSurfaceProjectionManifest(CoreasonBaseState):
 
 
 class MCPClientIntent(BoundedJSONRPCIntent):
-    topology_class: Literal["mcp_client_intent"] = Field(default="mcp_client_intent")
+    topology_class: Literal["mcp_client_intent"] = Field(default="mcp_client_intent")  # type: ignore[assignment]
     """
     AGENT INSTRUCTION: An inherited JSON-RPC 2.0 substrate specifically binding Model Context Protocol (MCP) client intent emissions to the frontend UI. As an ...Intent suffix, this represents an authorized kinetic execution trigger.
     CAUSAL AFFORDANCE: Executes an exact semantic signal (Literal["mcp.ui.emit_intent"]) to bubble internal agent states (like drafting or adjudication) to the human operator.
