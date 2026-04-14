@@ -7091,7 +7091,7 @@ class TacticStateGoal(CoreasonBaseState):
     """
 
     hypothesis_context: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
-        description="List of active assumptions/variables"
+        default_factory=list, description="List of active assumptions/variables"
     )
     target_type: Annotated[str, StringConstraints(max_length=2000)] = Field(
         description="The mathematical target needing proof"

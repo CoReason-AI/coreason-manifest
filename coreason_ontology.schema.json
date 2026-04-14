@@ -13318,19 +13318,6 @@
           "title": "Is Proved",
           "type": "boolean"
         },
-        "failing_tactic_state": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Deprecated/Legacy flat error string. Replaced by tactic_state_tree.",
-          "title": "Failing Tactic State"
-        },
         "tactic_state_tree": {
           "anyOf": [
             {
@@ -20083,7 +20070,6 @@
         }
       },
       "required": [
-        "hypothesis_context",
         "target_type"
       ],
       "title": "TacticStateGoal",

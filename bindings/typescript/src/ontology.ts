@@ -4329,10 +4329,6 @@ export type SourceClaimCid = string;
 export type TargetClaimCid = string;
 export type IsProved = boolean;
 /**
- * Deprecated/Legacy flat error string. Replaced by tactic_state_tree.
- */
-export type FailingTacticState = string | null;
-/**
  * The hierarchical breakdown of unresolved goals required for MCTS reward shaping.
  */
 export type TacticStateTree = TacticStateGoal[] | null;
@@ -12644,7 +12640,6 @@ export interface DefeasibleAttackEvent {
  */
 export interface Lean4VerificationReceipt {
   is_proved: IsProved;
-  failing_tactic_state?: FailingTacticState;
   tactic_state_tree?: TacticStateTree;
   topology_class?: TopologyClass110;
 }
@@ -12660,7 +12655,7 @@ export interface Lean4VerificationReceipt {
  * MCP ROUTING TRIGGERS: Tactic State, Process-Supervised Verification, Sub-Goal Tree, Reward Shaping
  */
 export interface TacticStateGoal {
-  hypothesis_context: HypothesisContext;
+  hypothesis_context?: HypothesisContext;
   target_type: TargetType;
   complexity_score?: ComplexityScore;
 }
