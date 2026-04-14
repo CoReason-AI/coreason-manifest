@@ -14,8 +14,8 @@ import queue as pyqueue
 import time
 import typing
 
-import clingo
-from clingo.ast import (
+import clingo  # type: ignore[import-not-found, import-untyped, misc, unused-ignore]
+from clingo.ast import (  # type: ignore[import-not-found, import-untyped, misc, unused-ignore]
     ASTType,
     Function,
     Literal,
@@ -25,7 +25,7 @@ from clingo.ast import (
     Transformer,
     parse_string,
 )
-from clingo.control import Control
+from clingo.control import Control  # type: ignore[import-not-found, import-untyped, misc, unused-ignore]
 
 from coreason_manifest.spec.ontology import (
     CombinatorialCounterModel,
@@ -34,7 +34,7 @@ from coreason_manifest.spec.ontology import (
 )
 
 
-class AssumptionTransformer(Transformer):
+class AssumptionTransformer(Transformer):  # type: ignore[import-not-found, import-untyped, misc, unused-ignore]
     def __init__(self, rule_map: dict[str, str]) -> None:
         self.rule_idx = 0
         self.rule_map = rule_map

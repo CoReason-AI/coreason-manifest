@@ -1,4 +1,4 @@
-import jsonschema
+import jsonschema  # type: ignore[import-not-found, import-untyped, misc, unused-ignore]
 import pytest
 
 from coreason_manifest.spec.mcp import MCPToolDefinition
