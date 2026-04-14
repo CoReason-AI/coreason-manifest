@@ -2969,25 +2969,6 @@ class TemporalGraphCRDTManifest(CoreasonBaseState):
         )
         return self
 
-    def to_pycrdt_doc(self) -> Any:
-        """Projects the monotonic CRDT components into a pycrdt.Doc state vector."""
-        import pycrdt
-
-        doc: Any = pycrdt.Doc()
-        map_node: Any = pycrdt.Map()
-        doc["crdt_state"] = map_node
-
-        add_array: Any = pycrdt.Array()
-        map_node["add_set"] = add_array
-        for cid in self.add_set:
-            add_array.append(cid)
-
-        term_array: Any = pycrdt.Array()
-        map_node["terminate_set"] = term_array
-        for term in self.terminate_set:
-            term_array.append(term.target_edge_cid)
-
-        return doc
 
 
 class EpistemicHydrationPolicy(CoreasonBaseState):
