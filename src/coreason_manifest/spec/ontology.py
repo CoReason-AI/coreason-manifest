@@ -7427,20 +7427,35 @@ class InterventionalTaskIntent(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Pearlian Do-Calculus, Structural Causal Models, Causal Inference, Directed Acyclic Graph, Counterfactual Engine
     """
 
-    topology_class: Literal["interventional_task"] = Field(default="interventional_task")
-    task_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field()
+    topology_class: Literal["interventional_task"] = Field(
+        default="interventional_task",
+        description="Discriminator for an interventional task intent.",
+    )
+    task_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="Unique identifier for this specific Do-Calculus intervention."
+    )
     target_hypothesis_cid: Annotated[
         str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
-    ] = Field()
-    structural_causal_model: StructuralCausalGraphProfile = Field()
-    treatment_variables: list[Annotated[str, StringConstraints(max_length=255)]] = Field(min_length=1)
-    outcome_variables: list[Annotated[str, StringConstraints(max_length=255)]] = Field(min_length=1)
+    ] = Field(description="The cryptographic pointer to the HypothesisGenerationEvent being tested.")
+    structural_causal_model: StructuralCausalGraphProfile = Field(
+        description="The explicit formal DAG (StructuralCausalGraphProfile) proposed by the LLM."
+    )
+    treatment_variables: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
+        min_length=1, description="The strictly bounded array of causal intervention variables (X)."
+    )
+    outcome_variables: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
+        min_length=1, description="The strictly bounded array of target effect variables (Y)."
+    )
     refutation_tests: list[
         Literal[
             "random_common_cause", "placebo_treatment", "data_subset", "dummy_outcome", "add_unobserved_common_cause"
         ]
-    ] = Field(min_length=1)
-    empirical_data_uri: HttpUrl = Field()
+    ] = Field(
+        min_length=1, description="The strict array of mathematical stress tests to execute against the empirical data."
+    )
+    empirical_data_uri: HttpUrl = Field(
+        description="The pointer to the exogenous empirical dataset anchored in physical reality."
+    )
 
     @field_validator("empirical_data_uri", mode="after")
     @classmethod
@@ -14732,15 +14747,28 @@ class CounterfactualReceipt(CoreasonBaseState):
         le=253402300799.0,
         description="Causal Ancestry markers required to resolve decentralized event ordering.",
     )
-    swarm_node_id: Annotated[str, StringConstraints(min_length=1, max_length=64)] = Field()
-    cryptographic_signature: Annotated[str, StringConstraints(min_length=64, max_length=512)] = Field()
-    topology_class: Literal["counterfactual_receipt"] = Field(default="counterfactual_receipt")
-    receipt_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field()
-    task_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field()
-    causal_estimate_value: float = Field()
-    refutation_passed: bool = Field()
-    p_values: dict[Annotated[str, StringConstraints(max_length=255)], float] = Field()
-    cascade_event: DefeasibleCascadeEvent | None = Field(default=None)
+    topology_class: Literal["counterfactual_receipt"] = Field(
+        default="counterfactual_receipt", description="Discriminator for the counterfactual receipt."
+    )
+    receipt_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="The unique coordinate tracking this verified counterfactual outcome."
+    )
+    task_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="The 128-char CID pointer linking back to the originating InterventionalTaskIntent."
+    )
+    causal_estimate_value: float = Field(
+        description="The mathematical magnitude of the computed causal effect (e.g. Average Treatment Effect)."
+    )
+    refutation_passed: bool = Field(
+        description="The definitive Boolean gate indicating if the SCM survived all requested stress tests."
+    )
+    p_values: dict[Annotated[str, StringConstraints(max_length=255)], float] = Field(
+        description="A deterministic mapping of executed refutation tests to their computed p-values."
+    )
+    cascade_event: DefeasibleCascadeEvent | None = Field(
+        default=None,
+        description="The Truth Maintenance payload physically severing falsified causal edges upon refutation failure.",
+    )
 
     @model_validator(mode="after")
     def enforce_cascade_on_refutation(self) -> "Self":

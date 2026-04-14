@@ -5444,25 +5444,15 @@
           "title": "Timestamp",
           "type": "number"
         },
-        "swarm_node_id": {
-          "maxLength": 64,
-          "minLength": 1,
-          "title": "Swarm Node Id",
-          "type": "string"
-        },
-        "cryptographic_signature": {
-          "maxLength": 512,
-          "minLength": 64,
-          "title": "Cryptographic Signature",
-          "type": "string"
-        },
         "topology_class": {
           "const": "counterfactual_receipt",
           "default": "counterfactual_receipt",
+          "description": "Discriminator for the counterfactual receipt.",
           "title": "Topology Class",
           "type": "string"
         },
         "receipt_cid": {
+          "description": "The unique coordinate tracking this verified counterfactual outcome.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
@@ -5470,6 +5460,7 @@
           "type": "string"
         },
         "task_cid": {
+          "description": "The 128-char CID pointer linking back to the originating InterventionalTaskIntent.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
@@ -5477,10 +5468,12 @@
           "type": "string"
         },
         "causal_estimate_value": {
+          "description": "The mathematical magnitude of the computed causal effect (e.g. Average Treatment Effect).",
           "title": "Causal Estimate Value",
           "type": "number"
         },
         "refutation_passed": {
+          "description": "The definitive Boolean gate indicating if the SCM survived all requested stress tests.",
           "title": "Refutation Passed",
           "type": "boolean"
         },
@@ -5488,6 +5481,7 @@
           "additionalProperties": {
             "type": "number"
           },
+          "description": "A deterministic mapping of executed refutation tests to their computed p-values.",
           "propertyNames": {
             "maxLength": 255
           },
@@ -5503,14 +5497,13 @@
               "type": "null"
             }
           ],
-          "default": null
+          "default": null,
+          "description": "The Truth Maintenance payload physically severing falsified causal edges upon refutation failure."
         }
       },
       "required": [
         "event_cid",
         "timestamp",
-        "swarm_node_id",
-        "cryptographic_signature",
         "receipt_cid",
         "task_cid",
         "causal_estimate_value",
@@ -12771,10 +12764,12 @@
         "topology_class": {
           "const": "interventional_task",
           "default": "interventional_task",
+          "description": "Discriminator for an interventional task intent.",
           "title": "Topology Class",
           "type": "string"
         },
         "task_cid": {
+          "description": "Unique identifier for this specific Do-Calculus intervention.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
@@ -12782,6 +12777,7 @@
           "type": "string"
         },
         "target_hypothesis_cid": {
+          "description": "The cryptographic pointer to the HypothesisGenerationEvent being tested.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
@@ -12789,9 +12785,11 @@
           "type": "string"
         },
         "structural_causal_model": {
-          "$ref": "#/$defs/StructuralCausalGraphProfile"
+          "$ref": "#/$defs/StructuralCausalGraphProfile",
+          "description": "The explicit formal DAG (StructuralCausalGraphProfile) proposed by the LLM."
         },
         "treatment_variables": {
+          "description": "The strictly bounded array of causal intervention variables (X).",
           "items": {
             "maxLength": 255,
             "type": "string"
@@ -12801,6 +12799,7 @@
           "type": "array"
         },
         "outcome_variables": {
+          "description": "The strictly bounded array of target effect variables (Y).",
           "items": {
             "maxLength": 255,
             "type": "string"
@@ -12810,6 +12809,7 @@
           "type": "array"
         },
         "refutation_tests": {
+          "description": "The strict array of mathematical stress tests to execute against the empirical data.",
           "items": {
             "enum": [
               "random_common_cause",
@@ -12825,6 +12825,7 @@
           "type": "array"
         },
         "empirical_data_uri": {
+          "description": "The pointer to the exogenous empirical dataset anchored in physical reality.",
           "format": "uri",
           "maxLength": 2083,
           "minLength": 1,
