@@ -57,6 +57,7 @@ dev = [
     "hypothesis-jsonschema>=0.23.1",
     "syrupy>=5.1.0",
     "types-defusedxml>=0.7.0.20260408",
+    "rustworkx>=0.17.1",
 ]
 
 [tool.hatch.build.targets.wheel]
