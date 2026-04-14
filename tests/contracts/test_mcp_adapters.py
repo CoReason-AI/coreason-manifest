@@ -42,10 +42,9 @@ def test_serialize_envelope_deterministic() -> None:
     """Two identical envelopes must produce byte-identical output."""
     envelope_a = _make_minimal_envelope()
     envelope_b = _make_minimal_envelope()
-    assert (
-        DeterministicTransportAdapter.serialize_envelope(envelope_a)
-        == DeterministicTransportAdapter.serialize_envelope(envelope_b)
-    )
+    assert DeterministicTransportAdapter.serialize_envelope(
+        envelope_a
+    ) == DeterministicTransportAdapter.serialize_envelope(envelope_b)
 
 
 def test_serialize_envelope_excludes_none_values() -> None:
