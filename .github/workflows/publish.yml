@@ -115,7 +115,7 @@ jobs:
           enable-cache: true
           python-version: "3.14"
       - name: Install dependencies
-        run: uv sync
+        run: uv sync --all-extras
       - name: Export JSON Schema
         run: uv run python -c "import json; from coreason_manifest.utils.algebra import get_ontology_schema; schema = get_ontology_schema(); open('coreason_ontology.schema.json', 'w', encoding='utf-8').write(json.dumps(schema, indent=2, ensure_ascii=False) + '\n')"
       - name: Generate TypeScript Bindings from Schema
@@ -154,7 +154,7 @@ jobs:
           enable-cache: true
           python-version: "3.14"
       - name: Install dependencies
-        run: uv sync
+        run: uv sync --all-extras
       - name: Install cargo-typify
         run: cargo install cargo-typify
       - name: Export JSON Schema

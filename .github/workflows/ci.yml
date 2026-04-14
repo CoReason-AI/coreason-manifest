@@ -99,7 +99,7 @@ jobs:
           python-version: "3.14"
 
       - name: Install Dependencies
-        run: uv sync
+        run: uv sync --all-extras
 
       - name: Generate Schema
         run: uv run python -c "import json; from coreason_manifest.utils.algebra import get_ontology_schema; schema = get_ontology_schema(); open('coreason_ontology.schema.json', 'w', encoding='utf-8').write(json.dumps(schema, indent=2, ensure_ascii=False) + '\n')"
