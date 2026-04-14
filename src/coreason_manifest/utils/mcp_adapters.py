@@ -41,3 +41,41 @@ def generate_prolog_mcp_tool() -> MCPToolDefinition:
             "required": ["prolog_query"],
         },
     )
+
+
+def generate_dowhy_mcp_tool() -> MCPToolDefinition:
+    return MCPToolDefinition(
+        name="execute_dowhy_causal_inference",
+        description="Use this tool to eliminate blind causal inference, evaluate Structural Causal Models, execute Do-Calculus, and run mathematical refutation tests against empirical data.",
+        input_schema={
+            "type": "object",
+            "properties": {
+                "task_cid": {"type": "string"},
+                "causal_graph_dot": {"type": "string", "maxLength": 100000},
+                "treatment_variables": {"type": "array", "items": {"type": "string"}},
+                "outcome_variables": {"type": "array", "items": {"type": "string"}},
+                "dataframe_uri": {"type": "string"},
+                "refutation_methods": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "enum": [
+                            "random_common_cause",
+                            "placebo_treatment",
+                            "data_subset",
+                            "dummy_outcome",
+                            "add_unobserved_common_cause",
+                        ],
+                    },
+                },
+            },
+            "required": [
+                "task_cid",
+                "causal_graph_dot",
+                "treatment_variables",
+                "outcome_variables",
+                "dataframe_uri",
+                "refutation_methods",
+            ],
+        },
+    )

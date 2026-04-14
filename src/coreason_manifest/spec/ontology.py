@@ -7416,8 +7416,49 @@ class TemporalEdgeInvalidationIntent(CoreasonBaseState):
     )
 
 
+class InterventionalTaskIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: This schema represents the kinetic execution trigger emitted by an agent when it needs to verify a hypothesized causal DAG using Structural Causal Models (SCMs) and Do-Calculus.
+
+    CAUSAL AFFORDANCE: Instructs the orchestrator to route the payload to a determinist mathematical solver (PyWhy/DoWhy) to eliminate blind causal inference.
+
+    EPISTEMIC BOUNDS: Bounded structurally. The `empirical_data_uri` is physically routed through SSRF quarantine to block Bogon space/loopback resolution.
+
+    MCP ROUTING TRIGGERS: Pearlian Do-Calculus, Structural Causal Models, Causal Inference, Directed Acyclic Graph, Counterfactual Engine
+    """
+
+    topology_class: Literal["interventional_task"] = Field(default="interventional_task")
+    task_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field()
+    target_hypothesis_cid: Annotated[
+        str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
+    ] = Field()
+    structural_causal_model: StructuralCausalGraphProfile = Field()
+    treatment_variables: list[Annotated[str, StringConstraints(max_length=255)]] = Field(min_length=1)
+    outcome_variables: list[Annotated[str, StringConstraints(max_length=255)]] = Field(min_length=1)
+    refutation_tests: list[
+        Literal[
+            "random_common_cause", "placebo_treatment", "data_subset", "dummy_outcome", "add_unobserved_common_cause"
+        ]
+    ] = Field(min_length=1)
+    empirical_data_uri: HttpUrl = Field()
+
+    @field_validator("empirical_data_uri", mode="after")
+    @classmethod
+    def enforce_ssrf_quarantine(cls, url: HttpUrl) -> HttpUrl:
+        _validate_ssrf_safety(str(url))
+        return url
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> "Self":
+        object.__setattr__(self, "treatment_variables", sorted(self.treatment_variables))
+        object.__setattr__(self, "outcome_variables", sorted(self.outcome_variables))
+        object.__setattr__(self, "refutation_tests", sorted(self.refutation_tests))
+        return self
+
+
 type AnyIntent = Annotated[
-    TemporalEdgeInvalidationIntent
+    InterventionalTaskIntent
+    | TemporalEdgeInvalidationIntent
     | EpistemicZeroTrustContract
     | EmpiricalFalsificationContract
     | FalsificationContract
@@ -14666,8 +14707,53 @@ class MCPToolDefinition(CoreasonBaseState):
     )
 
 
+class CounterfactualReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: This schema is the immutable, append-only Merkle-DAG coordinate recording the output of the PyWhy substrate verification of a Structural Causal Model.
+
+    CAUSAL AFFORDANCE: Validates or falsifies a hypothesized DAG. If falsified, it physically triggers a `DefeasibleCascadeEvent` to sever the hallucinated causal edge.
+
+    EPISTEMIC BOUNDS: Bounded structurally. The `enforce_cascade_on_refutation` validator mechanically mandates that a falsified causal model (refutation_passed=False) MUST contain a cascade_event, and vice versa.
+
+    MCP ROUTING TRIGGERS: Pearlian Do-Calculus, Causal Estimate, Refutation Tests, Defeasible Logic, Truth Maintenance System
+    """
+
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG."
+    )
+    prior_event_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(
+        default=None,
+        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+    )
+    timestamp: float = Field(
+        ge=0.0,
+        le=253402300799.0,
+        description="Causal Ancestry markers required to resolve decentralized event ordering.",
+    )
+    swarm_node_id: Annotated[str, StringConstraints(min_length=1, max_length=64)] = Field()
+    cryptographic_signature: Annotated[str, StringConstraints(min_length=64, max_length=512)] = Field()
+    topology_class: Literal["counterfactual_receipt"] = Field(default="counterfactual_receipt")
+    receipt_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field()
+    task_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field()
+    causal_estimate_value: float = Field()
+    refutation_passed: bool = Field()
+    p_values: dict[Annotated[str, StringConstraints(max_length=255)], float] = Field()
+    cascade_event: DefeasibleCascadeEvent | None = Field(default=None)
+
+    @model_validator(mode="after")
+    def enforce_cascade_on_refutation(self) -> "Self":
+        if self.refutation_passed is False and self.cascade_event is None:
+            raise ValueError("Mathematical Contradiction: A falsified SCM must trigger a cascade event.")
+        if self.refutation_passed is True and self.cascade_event is not None:
+            raise ValueError("Mathematical Contradiction: A verified SCM cannot trigger a cascade event.")
+        return self
+
+
 type AnyStateEvent = Annotated[
-    TemporalGraphCRDTManifest
+    CounterfactualReceipt
+    | TemporalGraphCRDTManifest
     | MCPToolDefinition
     | CrosswalkResolutionReceipt
     | EpistemicZeroTrustReceipt
@@ -15287,3 +15373,5 @@ TemporalEdgeInvalidationIntent.model_rebuild()
 TemporalGraphCRDTManifest.model_rebuild()
 MCPToolDefinition.model_rebuild()
 ContinuousManifoldMappingContract.model_rebuild()
+InterventionalTaskIntent.model_rebuild()
+CounterfactualReceipt.model_rebuild()
