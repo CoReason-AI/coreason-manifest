@@ -920,6 +920,7 @@
           "taxonomic_restructure": "#/$defs/TaxonomicRestructureIntent",
           "temporal_invalidation": "#/$defs/TemporalEdgeInvalidationIntent",
           "topological_projection": "#/$defs/TopologicalProjectionIntent",
+          "topological_sort": "#/$defs/TopologicalSortIntent",
           "zero_trust_contract": "#/$defs/EpistemicZeroTrustContract"
         },
         "propertyName": "topology_class"
@@ -978,6 +979,9 @@
         },
         {
           "$ref": "#/$defs/ContinuousSpatialMutationIntent"
+        },
+        {
+          "$ref": "#/$defs/TopologicalSortIntent"
         },
         {
           "$ref": "#/$defs/AgentBidIntent"
@@ -1132,6 +1136,7 @@
           "counterfactual_regret": "#/$defs/CounterfactualRegretEvent",
           "crosswalk_resolution": "#/$defs/CrosswalkResolutionReceipt",
           "custody_receipt": "#/$defs/CustodyReceipt",
+          "cycle_detection_receipt": "#/$defs/CycleDetectionReceipt",
           "defeasible_attack": "#/$defs/DefeasibleAttackEvent",
           "epistemic_axiom_verification": "#/$defs/EpistemicAxiomVerificationReceipt",
           "epistemic_flow_state": "#/$defs/EpistemicFlowStateReceipt",
@@ -1159,6 +1164,7 @@
           "temporal_graph_crdt": "#/$defs/TemporalGraphCRDTManifest",
           "token_burn": "#/$defs/TokenBurnReceipt",
           "tool_invocation": "#/$defs/ToolInvocationEvent",
+          "topological_guillotine": "#/$defs/TopologicalGuillotineEvent",
           "verdict": "#/$defs/InterventionReceipt",
           "zero_trust_receipt": "#/$defs/EpistemicZeroTrustReceipt"
         },
@@ -1290,6 +1296,12 @@
         },
         {
           "$ref": "#/$defs/EpistemicStarvationEvent"
+        },
+        {
+          "$ref": "#/$defs/CycleDetectionReceipt"
+        },
+        {
+          "$ref": "#/$defs/TopologicalGuillotineEvent"
         },
         {
           "$ref": "#/$defs/SPARQLQueryResultReceipt"
@@ -5842,6 +5854,77 @@
         "redaction_timestamp_unix_nano"
       ],
       "title": "CustodyReceipt",
+      "type": "object"
+    },
+    "CycleDetectionReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Provides receipt of a detected cycle within a structural topology.\n\nCAUSAL AFFORDANCE: Physically documents an epistemic violation (a graph cycle).\n\nEPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.\n\nMCP ROUTING TRIGGERS: Cycle Detection, Epistemic Violation, Topological Guillotine",
+      "properties": {
+        "event_cid": {
+          "description": "The unique CID for this event.",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic hash of the prior event.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "description": "The logical timestamp of the event.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "topology_class": {
+          "const": "cycle_detection_receipt",
+          "default": "cycle_detection_receipt",
+          "description": "Receipt for detected cycles.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "target_graph_cid": {
+          "$ref": "#/$defs/NodeCIDState",
+          "description": "The graph where cycles were evaluated."
+        },
+        "has_cycles": {
+          "description": "Indicates whether the graph has cycles.",
+          "title": "Has Cycles",
+          "type": "boolean"
+        },
+        "shortest_pathological_path": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/NodeCIDState"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "coreason_topological_exemption": true,
+          "default": null,
+          "description": "The chronologically exact pathological path causing the cycle.",
+          "title": "Shortest Pathological Path"
+        }
+      },
+      "required": [
+        "timestamp",
+        "target_graph_cid",
+        "has_cycles"
+      ],
+      "title": "CycleDetectionReceipt",
       "type": "object"
     },
     "CyclicEdgeProfile": {
@@ -21037,6 +21120,99 @@
       "title": "TopologicalFidelityReceipt",
       "type": "object"
     },
+    "TopologicalGuillotineEvent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Triggers the execution of the topological guillotine on an offending subgraph.\n\nCAUSAL AFFORDANCE: Mathematically severs invalid topological subgraphs to maintain system integrity.\n\nEPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.\n\nMCP ROUTING TRIGGERS: Topological Guillotine, State Amputation, Epistemic Violation",
+      "properties": {
+        "event_cid": {
+          "description": "The unique CID for this event.",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cryptographic hash of the prior event.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "description": "The logical timestamp of the event.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "topology_class": {
+          "const": "topological_guillotine",
+          "default": "topological_guillotine",
+          "description": "Event severing invalid topology.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "offending_intent_cid": {
+          "$ref": "#/$defs/NodeCIDState",
+          "description": "The intent causing the invalid topology."
+        },
+        "violation_type": {
+          "description": "The category of the invariant violation.",
+          "enum": [
+            "illegal_cycle",
+            "orphan_node_detected"
+          ],
+          "title": "Violation Type",
+          "type": "string"
+        },
+        "pathological_path": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/NodeCIDState"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "coreason_topological_exemption": true,
+          "default": null,
+          "description": "The chronologically exact pathological path causing the cycle.",
+          "title": "Pathological Path"
+        },
+        "severed_edges": {
+          "description": "Edges mathematically severed from the graph to restore invariance.",
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "$ref": "#/$defs/NodeCIDState"
+              },
+              {
+                "$ref": "#/$defs/NodeCIDState"
+              }
+            ],
+            "type": "array"
+          },
+          "title": "Severed Edges",
+          "type": "array"
+        }
+      },
+      "required": [
+        "timestamp",
+        "offending_intent_cid",
+        "violation_type"
+      ],
+      "title": "TopologicalGuillotineEvent",
+      "type": "object"
+    },
     "TopologicalProjectionIntent": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The transitional mathematical contract that calculates the Gromov-Wasserstein distance and authorizes or denies the collapse of a stochastic manifold into a deterministic structure.\n\nCAUSAL AFFORDANCE: Calculates optimal transport mapping and either authorizes downstream kinetic execution or rejects the transition due to topology tears.\n\nEPISTEMIC BOUNDS: Enforces a strict isomorphism confidence interval [0.0, 1.0], acting as a hardware-level guillotine that mandates a minimum 0.85 threshold.\n\nMCP ROUTING TRIGGERS: Gromov-Wasserstein Distance, Topological Compiler, Optimal Transport Mapping, Manifold Collapse, Deterministic Projection",
@@ -21177,6 +21353,54 @@
         "aggregation_method"
       ],
       "title": "TopologicalRewardContract",
+      "type": "object"
+    },
+    "TopologicalSortIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Authorizes topological sorting operations.\n\nCAUSAL AFFORDANCE: Reorders nodes deterministically based on topological constraints.\n\nEPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.\n\nMCP ROUTING TRIGGERS: Topological Sort, Graph Theory, Deterministic Order",
+      "properties": {
+        "topology_class": {
+          "const": "topological_sort",
+          "default": "topological_sort",
+          "description": "Topological Sort Intent",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "target_graph_cid": {
+          "$ref": "#/$defs/NodeCIDState",
+          "description": "The target graph CID."
+        },
+        "nodes": {
+          "description": "Nodes to sort",
+          "items": {
+            "$ref": "#/$defs/NodeCIDState"
+          },
+          "title": "Nodes",
+          "type": "array"
+        },
+        "edges": {
+          "description": "Edges to sort",
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "$ref": "#/$defs/NodeCIDState"
+              },
+              {
+                "$ref": "#/$defs/NodeCIDState"
+              }
+            ],
+            "type": "array"
+          },
+          "title": "Edges",
+          "type": "array"
+        }
+      },
+      "required": [
+        "target_graph_cid"
+      ],
+      "title": "TopologicalSortIntent",
       "type": "object"
     },
     "TopologyHashReceipt": {
