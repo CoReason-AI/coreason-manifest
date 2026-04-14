@@ -1971,13 +1971,13 @@ class PostQuantumSignatureReceipt(CoreasonBaseState):
 
     """
 
-    pq_algorithm: Literal["ml-dsa", "slh-dsa", "falcon"] = Field(
+    pq_algorithm: Literal["ml-dsa-44", "ml-dsa-65", "slh-dsa-sha2-128s"] = Field(
         description="The NIST FIPS post-quantum cryptographic algorithm used."
     )
     public_key_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
         Field(description="The identifier of the post-quantum public evaluation key.")
     )
-    pq_signature_blob: Annotated[str, StringConstraints(max_length=100000)] = Field(
+    pq_signature_blob: Annotated[str, StringConstraints(max_length=10000)] = Field(
         description="The base64-encoded post-quantum signature. Bounded to 100KB to safely accommodate massive SPHINCS+ hash trees without OOM crashes."
     )
 
@@ -7444,7 +7444,7 @@ class FederatedHandshakeIntent(CoreasonBaseState):
 
 class ConnectionSeveranceEvent(CoreasonBaseState):
     topology_class: Literal["connection_severance"] = "connection_severance"
-    event_cid: Annotated[str, StringConstraints(pattern=r"^[a-zA-Z0-9_-]{1,128}$")] = Field(
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         description="A globally unique CID bounding string for the event."
     )
     timestamp: float = Field(ge=0.0, le=253402300799.0)

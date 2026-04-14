@@ -1,3 +1,6 @@
+import time
+import uuid
+
 from authlib.jose import JoseError, jwt
 
 from coreason_manifest.spec.mcp import MCPToolDefinition
@@ -57,9 +60,6 @@ class DecentralizedIdentityGateway:
 
     def _trigger_instant_severance(self, target_id: str, reason: str):
         # We need event_cid and timestamp for ConnectionSeveranceEvent
-        import time
-        import uuid
-
         event = ConnectionSeveranceEvent(
             event_cid=str(uuid.uuid4()),
             timestamp=time.time(),
@@ -79,7 +79,8 @@ class DecentralizedIdentityGateway:
 
         # Gate 2 (SD-JWT Verification)
         try:
-            jwt.decode(intent.attestation.sd_jwt_payload, public_key)
+            claims = jwt.decode(intent.attestation.sd_jwt_payload, public_key)
+            claims.validate()
         except JoseError:
             self._trigger_instant_severance(issuer_did, "sd_jwt_tampered")
 

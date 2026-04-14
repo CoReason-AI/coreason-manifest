@@ -233,7 +233,7 @@ def test_gateway_severance_pqc_signature_invalid():
     )
 
     header = {"alg": "HS256"}
-    payload = {"sub": "did:coreason:subject-1"}
+    payload = {"sub": "did:coreason:subject-1", "exp": 1776128862}
     valid_jwt = jwt.encode(header, payload, "secret-key").decode("utf-8")
 
     gateway = DecentralizedIdentityGateway(
@@ -264,7 +264,7 @@ def test_gateway_severance_pqc_signature_valid():
     )
 
     header = {"alg": "HS256"}
-    payload = {"sub": "did:coreason:subject-1"}
+    payload = {"sub": "did:coreason:subject-1", "exp": 1776128862}
     valid_jwt = jwt.encode(header, payload, "secret-key").decode("utf-8")
 
     gateway = DecentralizedIdentityGateway(
@@ -272,7 +272,7 @@ def test_gateway_severance_pqc_signature_valid():
     )
 
     pqc = PostQuantumSignatureReceipt(
-        pq_algorithm="ml-dsa", pq_signature_blob="a" * 100, public_key_cid="did:coreason:issuer-1"
+        pq_algorithm="ml-dsa-44", pq_signature_blob="a" * 100, public_key_cid="did:coreason:issuer-1"
     )
 
     attestation = CryptographicAttestationReceipt(
