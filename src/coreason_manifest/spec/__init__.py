@@ -12,6 +12,23 @@
 
 from .ontology import *
 from .ontology import (
+    AnyIntent,
+    AnyInterventionState,
+    AnyNodeProfile,
+    AnyPanelProfile,
+    AnyPresentationIntent,
+    AnyResilienceIntent,
+    AnyStateEvent,
+    AnyToolchainState,
+    AnyTopologyManifest,
+    AttackVectorProfile,
+    AttestationMechanismProfile,
+    AuctionMechanismProfile,
+    CapabilityPointerState,
+    CausalIntervalProfile,
+    CognitiveTierProfile,
+    CrossoverMechanismProfile,
+    DistributionShapeProfile,
     FaultCategoryProfile,
     LifecycleTriggerEvent,
     MCPTransportProfile,
@@ -21,6 +38,14 @@ from .ontology import (
     PatchOperationProfile,
     ProfileCIDState,
     QoSClassificationProfile,
+    SanitizationActionIntent,
+    SemanticVersionState,
+    SpanKindProfile,
+    SpanStatusCodeProfile,
+    TelemetryContextProfile,
+    TelemetryScalarState,
+    TieBreakerPolicy,
+    TopologyHashReceipt,
 )
 
 __all__ = [

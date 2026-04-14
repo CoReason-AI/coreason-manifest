@@ -125,3 +125,8 @@ exclude_lines = [
     "if os.name == \"posix\":",
     "\\.\\.\\.",
 ]
+
+[[tool.mypy.overrides]]
+module = ["rustworkx", "rustworkx.*"]
+ignore_missing_imports = true
+
