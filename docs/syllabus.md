@@ -45,4 +45,3 @@
 * 7.1. The Prosperity Public License 3.0 for Academics
 * 7.2. Cross-Language Integration (Polyglot Bindings)
 * 7.3. Mandatory Local Verification (Passing the CI Gates)
-

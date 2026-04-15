@@ -983,4 +983,3 @@ def test_calculate_latent_alignment_edge_cases() -> None:
                 vector_base64=base64.b64encode(v2_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
             )
             assert calculate_latent_alignment(v1, v2, policy) == 0.0
-
