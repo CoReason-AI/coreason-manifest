@@ -18,7 +18,6 @@ This repository strictly implements Judea Pearl's Structural Causal Models. Lega
 | **Log** | `EpistemicTelemetryEvent` / `ObservationEvent` | Passive and deterministic record generation reflecting systemic state evolution, stripped of imperative execution. |
 | **ID** | `ContentIdentifier (CID)` / `MerkleRoot` | Enforces cryptographic immutability rather than sequentially guessed database identities. |
 
----
 
 ## Developer Bridge — Ontology ↔ Standard Terms
 
