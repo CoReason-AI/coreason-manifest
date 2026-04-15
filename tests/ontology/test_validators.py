@@ -46,7 +46,9 @@ from coreason_manifest.spec.ontology import (
     SecureSubSessionState,
     SemanticClassificationProfile,
     SpatialHardwareProfile,
+    TargetTopologyProfile,
     TopologicalFidelityReceipt,
+    TopologicalProjectionIntent,
     ViewportProjectionContract,
     VolumetricBoundingProfile,
 )
@@ -1101,3 +1103,76 @@ def test_temporal_bounds_profile_validation() -> None:
     # valid_to not in end interval
     with pytest.raises(ValidationError, match="valid_to must fall within probabilistic_end_interval"):
         TemporalBoundsProfile(valid_from=5.0, valid_to=20.0, probabilistic_end_interval=(5.0, 15.0))
+
+
+
+
+@given(
+    st.floats(min_value=0.0, max_value=0.84999),
+    st.uuids().map(str),
+    st.uuids().map(str),
+    st.sampled_from(TargetTopologyProfile),
+)
+def test_isomorphism_guillotine(
+    confidence: float, projection_cid: str, source_cid: str, topology: TargetTopologyProfile
+) -> None:
+    with pytest.raises(ValidationError) as exc_info:
+        TopologicalProjectionIntent(
+            projection_cid=projection_cid,
+            source_superposition_cid=source_cid,
+            target_topology=topology,
+            isomorphism_confidence=confidence,
+            lossy_translation_divergence=["semantic loss 1"],
+        )
+    assert "Isomorphism Guillotine triggered" in str(exc_info.value)
+
+
+@given(
+    st.floats(min_value=0.85, max_value=1.0),
+    st.uuids().map(str),
+    st.uuids().map(str),
+    st.sampled_from(TargetTopologyProfile),
+)
+def test_valid_projection_space(
+    confidence: float, projection_cid: str, source_cid: str, topology: TargetTopologyProfile
+) -> None:
+    intent = TopologicalProjectionIntent(
+        projection_cid=projection_cid,
+        source_superposition_cid=source_cid,
+        target_topology=topology,
+        isomorphism_confidence=confidence,
+        lossy_translation_divergence=["minor nuance dropped"],
+    )
+    assert intent.isomorphism_confidence == confidence
+    assert intent.source_superposition_cid == source_cid
+    assert intent.target_topology == topology
+
+
+@given(
+    st.floats(min_value=0.85, max_value=1.0),
+    st.uuids().map(str),
+    st.uuids().map(str),
+    st.sampled_from(TargetTopologyProfile),
+    st.sampled_from(["executed", "collapsed"]),
+)
+def test_immutability_of_status(
+    confidence: float, projection_cid: str, source_cid: str, topology: TargetTopologyProfile, invalid_status: str
+) -> None:
+    intent = TopologicalProjectionIntent(
+        projection_cid=projection_cid,
+        source_superposition_cid=source_cid,
+        target_topology=topology,
+        isomorphism_confidence=confidence,
+        lossy_translation_divergence=[],
+    )
+    with pytest.raises(ValidationError):
+        TopologicalProjectionIntent(
+            projection_cid=projection_cid,
+            source_superposition_cid=source_cid,
+            target_topology=topology,
+            isomorphism_confidence=confidence,
+            lossy_translation_divergence=[],
+            epistemic_status=invalid_status,  # type: ignore
+        )
+    with pytest.raises(ValidationError):
+        intent.epistemic_status = invalid_status  # type: ignore
