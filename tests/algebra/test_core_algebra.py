@@ -13,6 +13,7 @@ import contextlib
 import copy
 import math
 import struct
+import unittest.mock
 from typing import Any, cast
 from unittest.mock import Mock, patch
 
@@ -21,15 +22,32 @@ from hypothesis import given, settings
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
+import coreason_manifest.utils.algebra as algebra
 from coreason_manifest.spec.ontology import (
+    BeliefModulationReceipt,
     BypassReceipt,
+    CausalDirectedEdgeState,
+    CausalPropagationIntent,
     DAGTopologyManifest,
+    DerivationModeProfile,
+    DocumentKnowledgeGraphManifest,
+    DocumentLayoutRegionState,
     DynamicRoutingManifest,
+    EpistemicProvenanceReceipt,
+    EpistemicTransmutationTask,
+    EvidentiaryGroundingSLA,
     GlobalSemanticProfile,
+    HierarchicalDOMManifest,
+    MultimodalTokenAnchorState,
     OntologicalAlignmentPolicy,
+    SemanticEdgeState,
+    SemanticNodeState,
     StateDifferentialManifest,
     StateMutationIntent,
+    TabularCellState,
+    TabularMatrixProfile,
     TamperFaultEvent,
+    TemporalBoundsProfile,
     VectorEmbeddingState,
     WorkflowManifest,
 )
@@ -47,169 +65,6 @@ from coreason_manifest.utils.algebra import (
     verify_manifold_bounds,
     verify_merkle_proof,
 )
-
-
-@st.composite
-def json_path_st(draw: st.DrawFn) -> str:
-    parts = draw(st.lists(st.text(alphabet=st.characters(blacklist_categories=["Cs"])), min_size=0, max_size=5))
-    if not parts:
-        return ""
-    escaped = [p.replace("~", "~0").replace("/", "~1") for p in parts]
-    return "/" + "/".join(escaped)
-
-
-@st.composite
-def state_mutation_intent_st(draw: st.DrawFn) -> StateMutationIntent:
-    op = draw(st.sampled_from(["add", "remove", "replace", "copy", "move", "test"]))
-    path = draw(json_path_st())
-    from_path = draw(json_path_st()) if op in ("copy", "move") else None
-
-    value = None
-    if op in ("add", "replace", "test"):
-        value = draw(
-            st.one_of(
-                st.integers(),
-                st.floats(allow_nan=False, allow_infinity=False),
-                st.text(alphabet=st.characters(blacklist_categories=["Cs"])),
-                st.booleans(),
-                st.none(),
-            )
-        )
-
-    if from_path is not None:
-        return StateMutationIntent.model_construct(
-            op=cast("Any", op),
-            path=path,
-            value=value,
-            from_path=from_path,
-        )
-    return StateMutationIntent.model_construct(
-        op=cast("Any", op),
-        path=path,
-        value=value,
-    )
-
-
-@given(
-    st.dictionaries(
-        st.text(alphabet=st.characters(blacklist_categories=["Cs"])),
-        st.one_of(st.integers(), st.text(alphabet=st.characters(blacklist_categories=["Cs"])), st.booleans()),
-    ),
-    st.lists(state_mutation_intent_st(), min_size=1, max_size=50),
-)
-@settings(max_examples=1000, deadline=None)
-def test_apply_state_differential_fuzz(base_state: dict[str, Any], patches: list[StateMutationIntent]) -> None:
-    manifest = StateDifferentialManifest(
-        diff_cid="a" * 128, author_node_cid="a" * 128, lamport_timestamp=1, vector_clock={}, patches=patches
-    )
-
-    original_state = copy.deepcopy(base_state)
-    try:
-        _ = transmute_state_differential(base_state, manifest)
-        assert base_state == original_state
-    except ValueError:
-        assert base_state == original_state
-
-
-@given(
-    st.lists(st.floats(allow_nan=True, allow_infinity=True, width=32), min_size=1, max_size=1000),
-    st.lists(st.floats(allow_nan=True, allow_infinity=True, width=32), min_size=1, max_size=1000),
-)
-@settings(max_examples=1000, deadline=None)
-def test_calculate_latent_alignment_fuzz(v1_floats: list[float], v2_floats: list[float]) -> None:
-    dim = len(v1_floats)
-    if len(v2_floats) > dim:
-        v2_floats = v2_floats[:dim]
-    elif len(v2_floats) < dim:
-        v2_floats = v2_floats + [0.0] * (dim - len(v2_floats))
-
-    v1_packed = struct.pack(f"<{dim}f", *v1_floats)
-    v2_packed = struct.pack(f"<{dim}f", *v2_floats)
-
-    v1 = VectorEmbeddingState(
-        vector_base64=base64.b64encode(v1_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
-    )
-    v2 = VectorEmbeddingState(
-        vector_base64=base64.b64encode(v2_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
-    )
-
-    policy = OntologicalAlignmentPolicy.model_construct(
-        min_cosine_similarity=-1.0,
-        require_isometry_proof=True,
-    )
-
-    try:
-        sim = calculate_latent_alignment(v1, v2, policy)
-        assert not math.isnan(sim), "Similarity should never be NaN"
-        assert -1.0001 <= sim <= 1.0001, f"Cosine similarity out of bounds: {sim}"
-    except ValueError:
-        pass
-    except TamperFaultEvent:
-        pass
-
-
-def test_calculate_latent_alignment_edge_cases() -> None:
-    dim = 2
-    policy = OntologicalAlignmentPolicy.model_construct(
-        min_cosine_similarity=-1.0,
-        require_isometry_proof=True,
-    )
-
-    # Clamping tests for precision drift
-    # Force dot product to be very large via mocking or edge case values
-
-    import unittest.mock
-
-    with unittest.mock.patch("numpy.dot") as mock_dot:
-        # Force dot_product > mag1 * mag2 (so similarity > 1.0)
-        mock_dot.return_value = 1.1
-        with unittest.mock.patch("numpy.linalg.norm", return_value=1.0):
-            v1_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
-            v2_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
-            v1 = VectorEmbeddingState(
-                vector_base64=base64.b64encode(v1_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
-            )
-            v2 = VectorEmbeddingState(
-                vector_base64=base64.b64encode(v2_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
-            )
-            assert calculate_latent_alignment(v1, v2, policy) == 1.0
-
-    with unittest.mock.patch("numpy.dot") as mock_dot:
-        # Force dot_product < -mag1 * mag2 (so similarity < -1.0)
-        mock_dot.return_value = -1.1
-        with unittest.mock.patch("numpy.linalg.norm", return_value=1.0):
-            v1_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
-            v2_packed = struct.pack(f"<{dim}f", -1.0, 0.0)
-            v1 = VectorEmbeddingState(
-                vector_base64=base64.b64encode(v1_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
-            )
-            v2 = VectorEmbeddingState(
-                vector_base64=base64.b64encode(v2_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
-            )
-            assert calculate_latent_alignment(v1, v2, policy) == -1.0
-
-    with unittest.mock.patch("numpy.dot") as mock_dot:
-        # Force similarity to be NaN by returning float('nan') for dot_product
-        mock_dot.return_value = float("nan")
-        with unittest.mock.patch("numpy.linalg.norm", return_value=1.0):
-            v1_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
-            v2_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
-            v1 = VectorEmbeddingState(
-                vector_base64=base64.b64encode(v1_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
-            )
-            v2 = VectorEmbeddingState(
-                vector_base64=base64.b64encode(v2_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
-            )
-            assert calculate_latent_alignment(v1, v2, policy) == 0.0
-
-    # Also force the return from similarity division to be exactly NaN without failing the early check
-    # e.g., if mag1=0 or mag2=0 is bypassed but similarity calculates to nan. This is impossible without mock,
-    # since we check for mag1 == 0.0 and mag2 == 0.0 explicitly. We will test the math.isnan branch in code
-    # by ensuring we execute it.
-
-    # 4. Try sending something that bypasses magnitude checks but gives dot product NaN
-    # We already did this via ValueError in our patch. Let's adjust the ValueError check
-    # to only check mag1_sq and mag2_sq for NaN, and allow dot_product to be NaN for division.
 
 
 @given(
@@ -276,14 +131,13 @@ def test_project_markdown_optional_fields(intent: str, justification: str, linea
 
 def test_generate_correction_prompt_missing_and_invalid() -> None:
     # Trigger a missing error
-    try:
+    with pytest.raises(ValidationError) as exc_info:
         WorkflowManifest(manifest_version="1.0.0")  # type: ignore[call-arg]
-    except ValidationError as e:
-        prompt = synthesize_remediation_intent(e, "did:node:faulty1", "fault1")
-        assert any("completely missing" in r.diagnostic_message for r in prompt.violation_receipts)
+    prompt = synthesize_remediation_intent(exc_info.value, "did:node:faulty1", "fault1")
+    assert any("completely missing" in r.diagnostic_message for r in prompt.violation_receipts)
 
     # Trigger an invalid error
-    try:
+    with pytest.raises(ValidationError) as exc_info:
         WorkflowManifest(
             manifest_version="invalid",
             tenant_cid="t1",
@@ -291,9 +145,8 @@ def test_generate_correction_prompt_missing_and_invalid() -> None:
             genesis_provenance={"author_identity": "did:node:n1"},  # type: ignore[arg-type]
             topology=DAGTopologyManifest(topology_class="dag", nodes={}, edges=[], max_depth=1, max_fan_out=1),
         )
-    except ValidationError as e:
-        prompt = synthesize_remediation_intent(e, "did:node:faulty1", "fault1")
-        assert any("String should match pattern" in r.diagnostic_message for r in prompt.violation_receipts)
+    prompt = synthesize_remediation_intent(exc_info.value, "did:node:faulty1", "fault1")
+    assert any("String should match pattern" in r.diagnostic_message for r in prompt.violation_receipts)
 
 
 @given(source=st.lists(st.sampled_from(["text", "raster_image", "vector_graphics"]), min_size=2, unique=True))
@@ -579,22 +432,22 @@ def test_apply_state_differential_exceptions() -> None:
             {"a": {"b": 1}}, manifest_base([StateMutationIntent(op="add", path="/a/b/c/d", value=1)])
         )
 
-    # Hit 369: valid list navigation
+    # valid list navigation
     transmute_state_differential(
         {"a": [{"b": 1}]}, manifest_base([StateMutationIntent(op="test", path="/a/0/b", value=1)])
     )
 
-    # Hit 371: invalid list navigation
+    # invalid list navigation
     with pytest.raises(ValueError, match="Patch operation failed"):
         transmute_state_differential(
             {"a": []}, manifest_base([StateMutationIntent(op="add", path="/a/foo/b", value=1)])
         )
 
-    # Hit 391: valid from_path list navigation
+    # valid from_path list navigation
     p_valid = StateMutationIntent(**{"op": "copy", "path": "/c", "from": "/a/0/b"})  # type: ignore[arg-type]
     transmute_state_differential({"a": [{"b": 1}], "c": 0}, manifest_base([p_valid]))
 
-    # Hit 386: from_path missing parent dict key
+    # from_path missing parent dict key
     p_invalid_key = StateMutationIntent(**{"op": "copy", "path": "/c", "from": "/a/foo/bar"})  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="Patch operation failed"):
         transmute_state_differential({"a": {}}, manifest_base([p_invalid_key]))
@@ -788,19 +641,13 @@ def test_calculate_latent_alignment_errors() -> None:
 
 
 def test_get_ontology_schema_empty() -> None:
-    import coreason_manifest.utils.algebra as algebra
 
-    # Temporarily clear the cache so the mock logic executes
-    original_cache = algebra._CACHED_ONTOLOGY_SCHEMA
-    algebra._CACHED_ONTOLOGY_SCHEMA = None
-
-    try:
+    with (
+        unittest.mock.patch.object(algebra, "_CACHED_ONTOLOGY_SCHEMA", None),
+        patch("coreason_manifest.utils.algebra.dir", return_value=[]),
+    ):
         # Temporarily clear models_to_export condition by mocking the return directly if empty
-        with patch("coreason_manifest.utils.algebra.dir", return_value=[]):
-            assert get_ontology_schema() == {}
-    finally:
-        # Restore the cache
-        algebra._CACHED_ONTOLOGY_SCHEMA = original_cache
+        assert get_ontology_schema() == {}
 
 
 def test_calculate_latent_alignment_invalid_base64() -> None:
@@ -820,10 +667,6 @@ def test_calculate_latent_alignment_invalid_base64() -> None:
 
 
 def test_epistemic_transmutation_schema_presence() -> None:
-    import pytest
-    from pydantic import ValidationError
-
-    from coreason_manifest.spec.ontology import EpistemicTransmutationTask
 
     with pytest.raises(
         ValidationError,
@@ -835,9 +678,6 @@ def test_epistemic_transmutation_schema_presence() -> None:
 
 
 def test_transmutation_optical_sla_required() -> None:
-    from pydantic import ValidationError
-
-    from coreason_manifest.spec.ontology import EpistemicTransmutationTask
 
     with pytest.raises(
         ValidationError,
@@ -847,10 +687,6 @@ def test_transmutation_optical_sla_required() -> None:
 
 
 def test_edge_evidence_or_sla() -> None:
-    import pytest
-    from pydantic import ValidationError
-
-    from coreason_manifest.spec.ontology import CausalDirectedEdgeState, SemanticEdgeState, TemporalBoundsProfile
 
     with pytest.raises(
         ValidationError,
@@ -882,17 +718,6 @@ def test_edge_evidence_or_sla() -> None:
 
 def test_canonical_sorts() -> None:
     # DocumentKnowledgeGraphManifest
-    from coreason_manifest.spec.ontology import (
-        BeliefModulationReceipt,
-        CausalDirectedEdgeState,
-        CausalPropagationIntent,
-        DerivationModeProfile,
-        DocumentKnowledgeGraphManifest,
-        EpistemicProvenanceReceipt,
-        EvidentiaryGroundingSLA,
-        SemanticNodeState,
-        TemporalBoundsProfile,
-    )
 
     prov = EpistemicProvenanceReceipt(
         extracted_by="did:coreason:abc:123",
@@ -959,15 +784,6 @@ def test_canonical_sorts() -> None:
 
 
 def test_tabular_matrix_profile_coverage() -> None:
-    from pydantic import ValidationError
-
-    from coreason_manifest.spec.ontology import (
-        DocumentLayoutRegionState,
-        HierarchicalDOMManifest,
-        MultimodalTokenAnchorState,
-        TabularCellState,
-        TabularMatrixProfile,
-    )
 
     cell_ok = TabularCellState(cell_cid="c1", row_index=0, column_index=0, text_payload="hi")
     cell_bad = TabularCellState(cell_cid="c2", row_index=2, column_index=0, text_payload="hi")
@@ -1015,3 +831,156 @@ def test_tabular_matrix_profile_coverage() -> None:
     HierarchicalDOMManifest(
         dom_cid="d1", root_block_cid="b1", blocks={"b1": r_ok, "b2": r_other}, containment_edges=[("b1", "b2")]
     )
+
+
+@st.composite
+def json_path_st(draw: st.DrawFn) -> str:
+    parts = draw(st.lists(st.text(alphabet=st.characters(blacklist_categories=["Cs"])), min_size=0, max_size=5))
+    if not parts:
+        return ""
+    escaped = [p.replace("~", "~0").replace("/", "~1") for p in parts]
+    return "/" + "/".join(escaped)
+
+
+@st.composite
+def state_mutation_intent_st(draw: st.DrawFn) -> StateMutationIntent:
+    op = draw(st.sampled_from(["add", "remove", "replace", "copy", "move", "test"]))
+    path = draw(json_path_st())
+    from_path = draw(json_path_st()) if op in ("copy", "move") else None
+
+    value = None
+    if op in ("add", "replace", "test"):
+        value = draw(
+            st.one_of(
+                st.integers(),
+                st.floats(allow_nan=False, allow_infinity=False),
+                st.text(alphabet=st.characters(blacklist_categories=["Cs"])),
+                st.booleans(),
+                st.none(),
+            )
+        )
+
+    if from_path is not None:
+        return StateMutationIntent.model_construct(
+            op=cast("Any", op),
+            path=path,
+            value=value,
+            from_path=from_path,
+        )
+    return StateMutationIntent.model_construct(
+        op=cast("Any", op),
+        path=path,
+        value=value,
+    )
+
+
+@given(
+    st.dictionaries(
+        st.text(alphabet=st.characters(blacklist_categories=["Cs"])),
+        st.one_of(st.integers(), st.text(alphabet=st.characters(blacklist_categories=["Cs"])), st.booleans()),
+    ),
+    st.lists(state_mutation_intent_st(), min_size=1, max_size=50),
+)
+@settings(max_examples=1000, deadline=500)
+def test_apply_state_differential_fuzz(base_state: dict[str, Any], patches: list[StateMutationIntent]) -> None:
+    manifest = StateDifferentialManifest(
+        diff_cid="a" * 128, author_node_cid="a" * 128, lamport_timestamp=1, vector_clock={}, patches=patches
+    )
+
+    original_state = copy.deepcopy(base_state)
+    try:
+        _ = transmute_state_differential(base_state, manifest)
+        assert base_state == original_state
+    except ValueError:
+        assert base_state == original_state
+
+
+@given(
+    st.lists(st.floats(allow_nan=True, allow_infinity=True, width=32), min_size=1, max_size=1000),
+    st.lists(st.floats(allow_nan=True, allow_infinity=True, width=32), min_size=1, max_size=1000),
+)
+@settings(max_examples=1000, deadline=500)
+def test_calculate_latent_alignment_fuzz(v1_floats: list[float], v2_floats: list[float]) -> None:
+    dim = len(v1_floats)
+    if len(v2_floats) > dim:
+        v2_floats = v2_floats[:dim]
+    elif len(v2_floats) < dim:
+        v2_floats = v2_floats + [0.0] * (dim - len(v2_floats))
+
+    v1_packed = struct.pack(f"<{dim}f", *v1_floats)
+    v2_packed = struct.pack(f"<{dim}f", *v2_floats)
+
+    v1 = VectorEmbeddingState(
+        vector_base64=base64.b64encode(v1_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
+    )
+    v2 = VectorEmbeddingState(
+        vector_base64=base64.b64encode(v2_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
+    )
+
+    policy = OntologicalAlignmentPolicy.model_construct(
+        min_cosine_similarity=-1.0,
+        require_isometry_proof=True,
+    )
+
+    try:
+        sim = calculate_latent_alignment(v1, v2, policy)
+        assert not math.isnan(sim), "Similarity should never be NaN"
+        assert -1.0001 <= sim <= 1.0001, f"Cosine similarity out of bounds: {sim}"
+    except ValueError:
+        pass
+    except TamperFaultEvent:
+        pass
+
+
+def test_calculate_latent_alignment_edge_cases() -> None:
+    dim = 2
+    policy = OntologicalAlignmentPolicy.model_construct(
+        min_cosine_similarity=-1.0,
+        require_isometry_proof=True,
+    )
+
+    # Clamping tests for precision drift
+    # Force dot product to be very large via mocking or edge case values
+
+    with unittest.mock.patch("numpy.dot") as mock_dot:
+        # Force dot_product > mag1 * mag2 (so similarity > 1.0)
+        mock_dot.return_value = 1.1
+        with unittest.mock.patch("numpy.linalg.norm", return_value=1.0):
+            v1_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
+            v2_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
+            v1 = VectorEmbeddingState(
+                vector_base64=base64.b64encode(v1_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
+            )
+            v2 = VectorEmbeddingState(
+                vector_base64=base64.b64encode(v2_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
+            )
+            assert calculate_latent_alignment(v1, v2, policy) == 1.0
+
+    with unittest.mock.patch("numpy.dot") as mock_dot:
+        # Force dot_product < -mag1 * mag2 (so similarity < -1.0)
+        mock_dot.return_value = -1.1
+        with unittest.mock.patch("numpy.linalg.norm", return_value=1.0):
+            v1_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
+            v2_packed = struct.pack(f"<{dim}f", -1.0, 0.0)
+            v1 = VectorEmbeddingState(
+                vector_base64=base64.b64encode(v1_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
+            )
+            v2 = VectorEmbeddingState(
+                vector_base64=base64.b64encode(v2_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
+            )
+            assert calculate_latent_alignment(v1, v2, policy) == -1.0
+
+    with unittest.mock.patch("numpy.dot") as mock_dot:
+        # Force similarity to be NaN by returning float('nan') for dot_product
+        mock_dot.return_value = float("nan")
+        with unittest.mock.patch("numpy.linalg.norm", return_value=1.0):
+            v1_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
+            v2_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
+            v1 = VectorEmbeddingState(
+                vector_base64=base64.b64encode(v1_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
+            )
+            v2 = VectorEmbeddingState(
+                vector_base64=base64.b64encode(v2_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
+            )
+            assert calculate_latent_alignment(v1, v2, policy) == 0.0
+

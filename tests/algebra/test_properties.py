@@ -9,9 +9,12 @@
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
 import base64
+import copy
+import math
 import struct
 from typing import Any, Literal
 
+import hypothesis
 import pytest
 from hypothesis import given
 from hypothesis import strategies as st
@@ -76,8 +79,6 @@ def test_calculate_latent_alignment(vec1_list: list[float], vec2_list: list[floa
     v2 = VectorEmbeddingState(vector_base64=b2, dimensionality=dim, foundation_matrix_name="model1")
     policy = OntologicalAlignmentPolicy(min_cosine_similarity=min_similarity, require_isometry_proof=False)
 
-    import math
-
     mag1 = math.sqrt(sum(x * x for x in vec1_list))
     mag2 = math.sqrt(sum(x * x for x in vec2_list))
 
@@ -128,6 +129,8 @@ def test_apply_state_differential(
     # Validations are mostly strict, we expect many to fail on invalid paths or types
     # But it covers the conditionals
 
+    original_state = copy.deepcopy(base_state)
+
     # We will use st.builds to make a manifest
     try:
         manifest = StateDifferentialManifest(
@@ -138,9 +141,10 @@ def test_apply_state_differential(
             patches=[StateMutationIntent(op=op, path=path, value=value, from_path=from_path or None)],
         )
     except ValidationError:
-        return  # invalid manifest built
+        hypothesis.assume(False)
 
-    import contextlib
-
-    with contextlib.suppress(ValueError):
+    try:
         transmute_state_differential(base_state, manifest)
+        assert base_state == original_state
+    except ValueError:
+        assert base_state == original_state
