@@ -129,7 +129,7 @@ jobs:
           cd bindings/typescript
           npm ci
           npm run build
-          npm publish --provenance --access public
+          npm publish --provenance --access public --verbose
 
   publish-crate:
     needs: release
