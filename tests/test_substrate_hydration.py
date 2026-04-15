@@ -10,14 +10,13 @@
 
 from coreason_manifest.spec.ontology import (
     ExecutionSubstrateProfile,
-    SubstrateDialectProfile,
     SubstrateHydrationManifest,
 )
 
 
 def test_execution_substrate_profile_canonical_sort() -> None:
     profile = ExecutionSubstrateProfile(
-        dialect=SubstrateDialectProfile.SYMBOLIC_AI_DBC,
+        dialect="urn:coreason:substrate:symbolic_ai_dbc",
         required_package_signatures=["b==2.0", "a==1.0", "c==3.0"],
         vram_overhead_mb=100,
         supports_lazy_hydration=True,
@@ -28,7 +27,7 @@ def test_execution_substrate_profile_canonical_sort() -> None:
 
 def test_substrate_hydration_manifest_creation() -> None:
     profile = ExecutionSubstrateProfile(
-        dialect=SubstrateDialectProfile.NATIVE_PYTHON,
+        dialect="urn:coreason:substrate:native_python",
         required_package_signatures=["xyz==1.0"],
         vram_overhead_mb=50,
         supports_lazy_hydration=False,

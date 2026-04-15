@@ -14,32 +14,28 @@ from hypothesis import strategies as st
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    GaussianSplattingProfile,
     SpatialBillboardContract,
+    SpatialRenderMaterial,
     VolumetricEdgeProfile,
 )
 
 
-@given(
-    spherical_harmonics_degree=st.integers(max_value=-1) | st.integers(min_value=4),
-    covariance_scale_x=st.floats(),
-    covariance_scale_y=st.floats(),
-    covariance_scale_z=st.floats(),
-    opacity_alpha=st.floats(min_value=0.0, max_value=1.0),
-)
-def test_gaussian_splatting_vram_bounds(
-    spherical_harmonics_degree: int,
-    covariance_scale_x: float,
-    covariance_scale_y: float,
-    covariance_scale_z: float,
-    opacity_alpha: float,
-) -> None:
-    with pytest.raises(ValidationError):
-        GaussianSplattingProfile(
-            spherical_harmonics_degree=spherical_harmonics_degree,
-            covariance_scale=(covariance_scale_x, covariance_scale_y, covariance_scale_z),
-            opacity_alpha=opacity_alpha,
-        )
+def test_spatial_render_material_requires_at_least_one_field() -> None:
+    """Prove SpatialRenderMaterial rejects construction with neither material_urn nor compiled_shader_cid."""
+    with pytest.raises(ValidationError, match="material_urn or a compiled_shader_cid"):
+        SpatialRenderMaterial()
+
+
+def test_spatial_render_material_accepts_urn() -> None:
+    """Prove SpatialRenderMaterial accepts a valid material URN."""
+    mat = SpatialRenderMaterial(material_urn="urn:coreason:material:glass_refractive")
+    assert mat.material_urn == "urn:coreason:material:glass_refractive"
+
+
+def test_spatial_render_material_accepts_shader_cid() -> None:
+    """Prove SpatialRenderMaterial accepts a valid compiled shader CID."""
+    mat = SpatialRenderMaterial(compiled_shader_cid="shader-abc-123")
+    assert mat.compiled_shader_cid == "shader-abc-123"
 
 
 @given(

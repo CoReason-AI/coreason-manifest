@@ -9,12 +9,11 @@
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
 import pytest
-from hypothesis import HealthCheck, given, settings
+from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    BrowserDOMState,
     CognitiveSystemNodeProfile,
     CrossoverPolicy,
     DAGTopologyManifest,
@@ -70,76 +69,6 @@ def test_risk_level_policy_comparisons(risk1: RiskLevelPolicy, risk2: RiskLevelP
     # Test __ge__
     assert (risk1 >= risk2) == (risk1.weight >= risk2.weight)
     assert risk1.__ge__("invalid") is NotImplemented
-
-
-@settings(max_examples=25, suppress_health_check=[HealthCheck.too_slow], deadline=None)
-@given(st.text(min_size=1, max_size=2000))
-def test_browser_dom_state_ssrf_quarantine_hypothesis(url_str: str) -> None:
-    import contextlib
-
-    with contextlib.suppress(ValidationError):
-        BrowserDOMState(
-            current_url=url_str,
-            viewport_size=(1024, 768),
-            dom_hash="a" * 64,
-            accessibility_tree_hash="b" * 64,
-        )
-
-
-@given(
-    st.sampled_from(
-        [
-            "file:///etc/passwd",
-            "file://localhost/C$/Windows/System32",
-            "http://localhost",
-            "https://127.0.0.1",
-            "http://10.0.0.1",
-            "http://[::1]",
-            "http://broadcasthost",
-            "http://something.local",
-            "http://internal",
-            "http://my.internal",
-            "http://192.168.1.1",
-            "http://169.254.169.254",
-            "http://0x7f000001",
-            "http://0177.0.0.1",
-        ]
-    )
-)
-@settings(max_examples=25, suppress_health_check=[HealthCheck.too_slow], deadline=None)
-def test_browser_dom_state_bogon_ssrf_strict(url_str: str) -> None:
-    with pytest.raises(ValidationError) as exc_info:
-        BrowserDOMState(
-            current_url=url_str,
-            viewport_size=(1024, 768),
-            dom_hash="a" * 64,
-            accessibility_tree_hash="b" * 64,
-        )
-    assert (
-        "SSRF topological violation detected" in str(exc_info.value)
-        or "restricted IP detected" in str(exc_info.value)
-        or "Security Validation Failed: Unresolvable or invalid host" in str(exc_info.value)
-    )
-
-
-@given(
-    st.sampled_from(
-        [
-            "http://",
-            "https://",
-        ]
-    )
-)
-@settings(max_examples=25, suppress_health_check=[HealthCheck.too_slow], deadline=None)
-def test_browser_dom_state_invalid_hostname_ssrf(url_str: str) -> None:
-    with pytest.raises(ValidationError) as exc_info:
-        BrowserDOMState(
-            current_url=url_str,
-            viewport_size=(1024, 768),
-            dom_hash="a" * 64,
-            accessibility_tree_hash="b" * 64,
-        )
-    assert "Invalid hostname in HTTP URI" in str(exc_info.value) or "restricted IP detected" in str(exc_info.value)
 
 
 @given(

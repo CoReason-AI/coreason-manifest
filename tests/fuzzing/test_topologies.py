@@ -91,15 +91,12 @@ def test_council_topology_byzantine_slash_requires_escrow() -> None:
         )
 
 
-@given(depth=st.integers(min_value=1, max_value=10000), fanout=st.integers(min_value=1, max_value=10000))
-def test_generative_manifold_geometric_explosion(depth: int, fanout: int) -> None:
-    """Prove that GenerativeManifoldSLA mathematically rejects configurations that cause geometric explosion."""
-    from hypothesis import assume
-
-    assume(fanout**depth > 1000)
-
-    with pytest.raises(ValidationError, match="Geometric explosion risk"):
-        GenerativeManifoldSLA(max_topological_depth=depth, max_node_fanout=fanout, max_synthetic_tokens=1000)
+@given(depth=st.integers(min_value=1, max_value=100), fanout=st.integers(min_value=1, max_value=100))
+def test_generative_manifold_accepts_large_geometry(depth: int, fanout: int) -> None:
+    """Prove that GenerativeManifoldSLA accepts all valid geometries under UAB (enforce_geometric_bounds deleted)."""
+    sla = GenerativeManifoldSLA(max_topological_depth=depth, max_node_fanout=fanout, max_synthetic_tokens=1000)
+    assert sla.max_topological_depth == depth
+    assert sla.max_node_fanout == fanout
 
 
 @given(min_isometry_score=st.sampled_from([1.5, -2.0]))

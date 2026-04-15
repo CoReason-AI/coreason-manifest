@@ -123,7 +123,7 @@ def _discover_canonical_sort_validators() -> list[
     return results
 
 
-_CANONICAL_SORT_CASES = _discover_canonical_sort_validators()
+_CANONICAL_SORT_CASES = sorted(_discover_canonical_sort_validators(), key=lambda c: c[0])
 
 
 def _build_unsorted_field_data(
@@ -458,35 +458,29 @@ class TestAlgebraSemanticGraphBranch:
 # ---------------------------------------------------------------------------
 
 
-class TestFormalLogicProofReceiptSerializer:
-    """Verify answer_sets serialization round-trip."""
+class TestFormalVerificationReceiptSerializer:
+    """Verify extracted_bindings serialization round-trip and key sorting."""
 
-    def test_answer_sets_serializer(self) -> None:
-        obj = o.FormalLogicProofReceipt(
-            causal_provenance_id="did:a:1",
+    def test_extracted_bindings_serializer(self) -> None:
+        obj = o.FormalVerificationReceipt(
             event_cid="test-cid",
             timestamp=1000.0,
-            satisfiability="SATISFIABLE",
-            answer_sets=[["a", "b"], ["c"]],
+            is_proved=True,
+            satisfiability_state="SATISFIABLE",
+            extracted_bindings=[{"z_var": "value", "a_var": "value"}],
         )
         data = obj.model_dump(mode="json")
-        assert data["answer_sets"] == [["a", "b"], ["c"]]
-
-
-class TestPrologDeductionReceiptSerializer:
-    """Verify variable_bindings dict key canonical sorting."""
-
-    def test_variable_bindings_sorted_keys(self) -> None:
-        obj = o.PrologDeductionReceipt(
-            causal_provenance_id="did:a:1",
-            event_cid="test-cid",
-            timestamp=1000.0,
-            truth_value=True,
-            variable_bindings=[{"z_var": "value", "a_var": "value"}],
-        )
-        data = obj.model_dump(mode="json")
-        keys = list(data["variable_bindings"][0].keys())
+        keys = list(data["extracted_bindings"][0].keys())
         assert keys == ["a_var", "z_var"]
+
+    def test_empty_bindings(self) -> None:
+        obj = o.FormalVerificationReceipt(
+            event_cid="test-cid",
+            timestamp=1000.0,
+            is_proved=False,
+        )
+        data = obj.model_dump(mode="json")
+        assert data["extracted_bindings"] == []
 
 
 # ---------------------------------------------------------------------------
@@ -523,7 +517,7 @@ def _discover_payload_bounds_delegates() -> list[tuple[str, type[o.CoreasonBaseS
     return results
 
 
-_PAYLOAD_DELEGATE_CASES = _discover_payload_bounds_delegates()
+_PAYLOAD_DELEGATE_CASES = sorted(_discover_payload_bounds_delegates(), key=lambda c: c[0])
 
 
 @pytest.mark.parametrize(
@@ -697,7 +691,7 @@ def _falsification_registry() -> list[tuple[str, type[o.CoreasonBaseState], str,
                 "intervention_request_cid": "req-123",
                 "attestation": o.WetwareAttestationContract.model_construct(
                     dag_node_nonce="req-123",
-                    mechanism="fido2_webauthn",
+                    mechanism="urn:coreason:attestation:fido2_webauthn",
                     did_subject="did:coreason:human-1",
                     cryptographic_payload="payload",
                     liveness_challenge_hash="a" * 64,
@@ -707,7 +701,7 @@ def _falsification_registry() -> list[tuple[str, type[o.CoreasonBaseState], str,
                 "intervention_request_cid": "req-123",
                 "attestation": o.WetwareAttestationContract.model_construct(
                     dag_node_nonce="WRONG-NONCE",
-                    mechanism="fido2_webauthn",
+                    mechanism="urn:coreason:attestation:fido2_webauthn",
                     did_subject="did:coreason:human-1",
                     cryptographic_payload="payload",
                     liveness_challenge_hash="a" * 64,
@@ -811,26 +805,6 @@ def test_validator_falsification_sad_path(
 # ---------------------------------------------------------------------------
 # §10. TARGETED COMPLEX BRANCH COVERAGE
 # ---------------------------------------------------------------------------
-
-
-class TestSSETransportCRLFInjection:
-    """Exercise the CRLF injection detection in SSETransportProfile headers."""
-
-    def test_crlf_in_header_key_rejected(self) -> None:
-        """Covers lines 9742-9745: CRLF in header key."""
-        with pytest.raises(Exception, match=r"CRLF|validation"):
-            o.SSETransportProfile(
-                uri="https://example.com/sse",  # type: ignore[arg-type]
-                headers={"X-Bad\r\nHeader": "value"},
-            )
-
-    def test_crlf_in_header_value_rejected(self) -> None:
-        """Covers lines 9742-9745: CRLF in header value."""
-        with pytest.raises(Exception, match=r"CRLF|validation"):
-            o.SSETransportProfile(
-                uri="https://example.com/sse",  # type: ignore[arg-type]
-                headers={"X-Good": "bad\r\nvalue"},
-            )
 
 
 class TestFederatedVaultLocks:
@@ -1200,13 +1174,13 @@ class TestSOPManifestGhostReturn:
         assert result is instance
 
 
-class TestGlobalGovernanceLicenseReturn:
-    """Exercise the return self path on enforce_prosperity_license."""
+class TestGlobalGovernanceAnchorReturn:
+    """Exercise the return self path on enforce_governance_anchor."""
 
-    def test_valid_license_passes(self) -> None:
-        """Covers line 6238: return self when license valid."""
+    def test_valid_governance_anchor_passes(self) -> None:
+        """Covers return self when governance anchor has critical severity."""
         license_rule = o.ConstitutionalPolicy.model_construct(  # type: ignore[call-arg]
-            rule_cid="PPL_3_0_COMPLIANCE",
+            rule_cid="ANY_GOVERNANCE_RULE",
             severity="critical",
         )
         instance = o.GlobalGovernancePolicy.model_construct(
@@ -1215,21 +1189,7 @@ class TestGlobalGovernanceLicenseReturn:
             max_global_tokens=100000,
             global_timeout_seconds=3600,
         )
-        result = instance.enforce_prosperity_license()  # type: ignore[operator]
-        assert result is instance
-
-
-class TestGenerativeManifoldGeometricReturn:
-    """Exercise the return self path on enforce_geometric_bounds."""
-
-    def test_safe_geometry_passes(self) -> None:
-        """Covers line 6294: return self when geometry is safe."""
-        instance = o.GenerativeManifoldSLA.model_construct(
-            max_topological_depth=3,
-            max_node_fanout=10,
-            max_synthetic_tokens=1000,
-        )
-        result = instance.enforce_geometric_bounds()  # type: ignore[operator]
+        result = instance.enforce_governance_anchor()  # type: ignore[operator]
         assert result is instance
 
 
@@ -1295,17 +1255,6 @@ class TestDynamicLayoutFStringAST:
         )
         with pytest.raises(ValueError, match=r"AST Complexity Overload"):
             instance.enforce_ast_thermodynamic_gas_limit()  # type: ignore[operator]
-
-
-class TestCRLFReturnPath:
-    """Exercise the ``return v`` line (9745) for clean headers."""
-
-    def test_clean_headers_accepted(self) -> None:
-        """Covers line 9745: CRLF validator returns v when no injection found."""
-        # Directly invoke the classmethod field validator
-        clean_headers: dict[str, str] = {"X-Auth": "Bearer token123", "Accept": "text/event-stream"}
-        result = o.SSETransportProfile._prevent_crlf_injection(clean_headers)
-        assert result == clean_headers
 
 
 class TestTransitionEdgeIntegrity:

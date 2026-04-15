@@ -19,14 +19,12 @@ from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
     BoundedJSONRPCIntent,
-    BrowserDOMState,
     ConstitutionalPolicy,
     ContinuousMutationPolicy,
     DocumentLayoutRegionState,
     DynamicLayoutManifest,
     ExecutionNodeReceipt,
     GlobalGovernancePolicy,
-    InsightCardProfile,
     MultimodalTokenAnchorState,
     NDimensionalTensorManifest,
     ScalePolicy,
@@ -53,29 +51,6 @@ def test_jsonrpc_depth_attack_proof(params: dict[str, Any]) -> None:
 
 
 @pytest.mark.parametrize(
-    "url", ["http://169.254.169.254/iam", "http://localhost:3000", "http://127.0.0.1:5432", "file:///etc/passwd"]
-)
-def test_browser_dom_ssrf_quarantine(url: str) -> None:
-    """Prove Bogon IP space and local routing is severed to prevent SSRF escape."""
-    with pytest.raises(ValidationError, match="SSRF"):
-        BrowserDOMState(current_url=url, viewport_size=(800, 600), dom_hash="a" * 64, accessibility_tree_hash="a" * 64)
-
-
-@pytest.mark.parametrize(
-    "payload",
-    [
-        "<script>alert(1)</script>",
-        "<img src='x' onerror='alert(1)'>",
-    ],
-)
-def test_polymorphic_xss_proof(payload: str) -> None:
-    """Prove InsightCardProfile definitively sanitizes malicious Markdown tags and schemas via ammonia."""
-    profile = InsightCardProfile(panel_cid="panel_1", title="Insight Title", markdown_content=payload)
-    assert "<script>" not in profile.markdown_content
-    assert "alert(1)" not in profile.markdown_content
-
-
-@pytest.mark.parametrize(
     "payload", ["getattr(__builtins__, 'ev' + 'al')('print(1)')", "__import__('os').system('echo 1')"]
 )
 def test_dynamic_layout_ast_execution_bleed(payload: str) -> None:
@@ -93,12 +68,12 @@ def test_continuous_mutation_oom_buffer_limit(rows: int) -> None:
         )
 
 
-def test_epistemic_license_enforcement() -> None:
-    """Prove that instantiating GlobalGovernancePolicy with invalid mandatory_license_rule triggers ValidationError."""
+def test_epistemic_governance_anchor_enforcement() -> None:
+    """Prove that instantiating GlobalGovernancePolicy with non-critical severity triggers ValidationError."""
     invalid_license = ConstitutionalPolicy(
-        rule_cid="MIT_LICENSE", severity="low", description="test", forbidden_intents=[]
+        rule_cid="ANY_RULE", severity="low", description="test", forbidden_intents=[]
     )
-    with pytest.raises(ValidationError, match="CRITICAL LICENSE VIOLATION"):
+    with pytest.raises(ValidationError, match="TOPOLOGICAL GOVERNANCE VIOLATION"):
         GlobalGovernancePolicy(
             mandatory_license_rule=invalid_license,
             max_budget_magnitude=1000,
@@ -336,11 +311,14 @@ def test_kinetic_budget_policy_temperature_upper_bound() -> None:
 
 
 def test_epistemic_escalation_tiers_upper_bound() -> None:
-    """Prove state-space explosion is physically prevented by clamping max_escalation_tiers to le=10."""
+    """Prove max_escalation_tiers is elevated to UAB (2^64-1), accepting previously-rejected values."""
     from coreason_manifest.spec.ontology import EpistemicEscalationContract
 
-    with pytest.raises(ValidationError):
-        EpistemicEscalationContract(baseline_entropy_threshold=0.5, test_time_multiplier=2.0, max_escalation_tiers=11)
+    # max_escalation_tiers=11 was previously rejected at le=10; now accepted under UAB
+    contract = EpistemicEscalationContract(
+        baseline_entropy_threshold=0.5, test_time_multiplier=2.0, max_escalation_tiers=11
+    )
+    assert contract.max_escalation_tiers == 11
 
 
 def test_peft_adapter_rank_upper_bound() -> None:
@@ -352,7 +330,7 @@ def test_peft_adapter_rank_upper_bound() -> None:
             adapter_cid="test_adapter",
             safetensors_hash="a" * 64,
             base_model_hash="b" * 64,
-            adapter_rank=65537,
+            adapter_rank=18446744073709551616,
             target_modules=["q_proj"],
         )
 
