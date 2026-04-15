@@ -1,2 +1,5 @@
-# CoReason Manifest
-::: coreason_manifest
+# Preface
+
+The CoReason Manifest (`coreason_manifest`) operates fundamentally as a "Hollow Data Plane" and a Universal Unified Ontology for decentralized multi-agent architectures. Unlike traditional software packages that couple data structures with runtime behavior, this manifest is strictly passive by design. It contains zero active execution logic, network sockets, file I/O operations, or global loggers.
+
+For academic researchers and AI safety organizations, this architectural constraint is critical for Zero-Trust modeling. By isolating the system's mathematical, causal, and spatial definitions into a pure, inert data library, external execution engines can enforce hardware-level constraints without the risk of Turing-complete logic bleed or arbitrary code execution (ACE) originating from the ontology itself. The manifest relies exclusively on Python `pydantic` schemas and pure structural utilities to define the absolute bounding box for an agent's operational physics, ensuring safe containerized evaluation.
