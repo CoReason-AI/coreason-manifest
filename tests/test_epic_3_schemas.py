@@ -35,7 +35,7 @@ def test_schema_driven_extraction_sla_validation() -> None:
     with pytest.raises(ValueError, match="Epistemic Violation"):
         SchemaDrivenExtractionSLA(
             schema_registry_uri=url_adapter.validate_python("https://example.com/schema"),
-            extraction_framework="ontogpt_spires",
+            extraction_framework="urn:coreason:extraction:ontogpt_spires",
             max_schema_retries=3,
             validation_failure_action="drop_edge",
             linkml_governance=None,
@@ -44,7 +44,7 @@ def test_schema_driven_extraction_sla_validation() -> None:
     # Should pass
     sla = SchemaDrivenExtractionSLA(
         schema_registry_uri=url_adapter.validate_python("https://example.com/schema"),
-        extraction_framework="ontogpt_spires",
+        extraction_framework="urn:coreason:extraction:ontogpt_spires",
         max_schema_retries=3,
         validation_failure_action="drop_edge",
         linkml_governance=LinkMLValidationSLA(

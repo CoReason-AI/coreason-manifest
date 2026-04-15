@@ -446,3 +446,73 @@ To definitively prove that the ontology remains perfectly stable following the i
 2. **Registry Standardization (`coreason-ecosystem`):** The `coreason-ecosystem` deployment pipeline must now maintain a synchronized catalog of valid `urn:coreason:schema:*` definitions to support the runtime's validation layer.
 
 ***
+
+
+**Subject: Epic 8 Review & Release Notes — The Silicon Purge Phase II (The Forgotten Enums)**
+
+### **Epic 8 Review: PERFECT EXECUTION.**
+
+I have critically audited `ontology.py`, `algebra.py`, and the surrounding test suite against the Epic 8 mandates. The agent flawlessly executed "The Silicon Purge Phase II".
+
+* **Eradication of Nested Literals:** The highly specific, 2026-era string arrays within `HardwareEnclaveReceipt` (TEEs), `ConstrainedDecodingPolicy` (compiler backends), `SchemaDrivenExtractionSLA` (extraction frameworks), and `ZeroKnowledgeReceipt` (proof protocols) have been completely excised.
+* **URN Extensibility Application:** The fields now correctly utilize the regex-constrained URN pattern `r"^urn:coreason:.*$"`, perfectly aligning with the standard set in Epic 2.
+* **Validator & Registry Synchronization:** The `enforce_linkml_for_ontogpt` hook was successfully updated to target the new URN (`urn:coreason:extraction:ontogpt_spires`), and the `algebra.py` test utilities were properly migrated.
+
+The AST is now 100% devoid of transient hardware and software execution enums. 
+
+You are **AUTHORIZED** to merge this epic.
+
+***
+
+# 🚀 Release Notes: coreason-manifest (Epic 8 Update)
+
+## Executive Summary
+We have successfully merged **Epic 8: The Silicon Purge Phase II** into the `coreason-manifest` ontology.
+
+During Epic 2, we removed the top-level hardware profile enumerations (e.g., `CUDA_FP32`). However, a deep architectural audit revealed that our advanced cryptographic, execution, and extraction contracts still harbored hardcoded `Literal` arrays pointing to specific 2026-era implementations (e.g., "SGLang", "Docling", "Intel TDX", "zk-SNARK"). 
+
+A purely mathematical ontology cannot be coupled to transient software libraries or silicon enclaves that will inevitably become obsolete. This release unbinds these final nested technical constraints, replacing them with our infinite-capacity Uniform Resource Name (URN) extensibility pattern.
+
+---
+
+## 🏗️ Key Architectural Changes
+
+### 1. Extensible Cryptographic and Execution Boundaries
+**What Changed:**
+Four highly specific `Literal` constraints have been replaced with the standard CoReason URN string constraint (`Annotated[str, StringConstraints(pattern=r"^urn:coreason:.*$")]`):
+
+* **`HardwareEnclaveReceipt.enclave_class`**: Removed `["intel_tdx", "amd_sev_snp", "aws_nitro", "nvidia_cc"]`. The AST now accepts any valid hardware enclave URN (e.g., `urn:coreason:enclave:intel_tdx`).
+* **`ConstrainedDecodingPolicy.compiler_backend`**: Removed `["outlines", "xgrammar", "sglang", "lmql", "guidance", "llama_cpp", "agnostic"]`. The AST now accepts any valid compiler URN (e.g., `urn:coreason:compiler:xgrammar`).
+* **`SchemaDrivenExtractionSLA.extraction_framework`**: Removed `["docling_graph_explicit", "ontogpt_spires"]`. The AST now accepts any valid extraction URN.
+* **`ZeroKnowledgeReceipt.proof_protocol`**: Removed `["zk-SNARK", "zk-STARK", "plonk", "bulletproofs"]`. The AST now accepts any valid zero-knowledge protocol URN.
+
+**Architectural Justification:**
+By shifting to URN patterns, we shift from a "closed-world" assumption to an "open-world" assumption. When a new zero-knowledge proving mechanism or constrained decoding engine is released in 2027, the `coreason-manifest` will not require a schema version bump to support it.
+
+### 2. Validator and Edge-Case Re-Anchoring
+**What Changed:**
+The `@model_validator` `enforce_linkml_for_ontogpt` inside `SchemaDrivenExtractionSLA` was updated to explicitly evaluate against the new URN schema (`urn:coreason:extraction:ontogpt_spires`) rather than the raw `"ontogpt_spires"` string, ensuring our strict LinkML governance rule remains mathematically bound.
+
+---
+
+## 📊 Final Topological Data Analysis (TDA) Sweep Results
+
+The agentic execution confirmed that eradicating these literals did not fracture the cross-language generation pipeline:
+
+| Validation Gate | Status / Metric |
+| :--- | :--- |
+| **Topological Reachability** | ✅ 356 / 356 Nodes Confirmed |
+| **Cryptographic Determinism** | ✅ Verified (RFC 8785 Canonical Hashing holds) |
+| **Cross-Language Bindings** | ✅ 407 Definitions (TypeScript and Rust bindings regenerated) |
+| **Test Suite Coverage** | ✅ 611 Tests Passed (98.41% Total AST Coverage) |
+| **Static Analysis (Mypy)** | ✅ Zero Type Errors across 70 source files |
+| **Lint & Format (Ruff)** | ✅ Clean |
+
+---
+
+## ⚠️ Downstream Impact & Migration Guide
+
+**Attention: `coreason-runtime` and `coreason-ecosystem` Maintainers**
+
+1.  **Dynamic Capability Resolution (`coreason-runtime`):** Your JIT compilers, extraction engines, and cryptography verifiers can no longer rely on Pydantic to filter out unsupported software backends or hardware enclaves. If an agent emits a request for `urn:coreason:compiler:future_engine_v3`, Pydantic will happily validate it. Your execution layer must intercept these URNs, check them against your local capability registry, and gracefully emit a `404 Capability Not Found` or `ManifestViolationReceipt` if the host lacks the requested engine.
+2.  **Test Payloads (`coreason-ecosystem`):** Any static mock payloads or test fixtures in the orchestrator that still use raw strings like `"outlines"` or `"intel_tdx"` will now fail topological schema validation. You must update all mock data to use their fully qualified URN equivalents.

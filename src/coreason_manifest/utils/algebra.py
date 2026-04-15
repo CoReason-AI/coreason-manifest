@@ -228,7 +228,7 @@ def align_semantic_manifolds(
     if "semantic_graph" in target_modalities:
         schema_governance = ontology.SchemaDrivenExtractionSLA(
             schema_registry_uri=AnyUrl("http://example.com/schema"),
-            extraction_framework="docling_graph_explicit",
+            extraction_framework="urn:coreason:extraction:docling_graph_explicit",
             max_schema_retries=3,
             validation_failure_action="escalate_to_human",
         )

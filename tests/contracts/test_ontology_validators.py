@@ -315,7 +315,7 @@ def test_constrained_decoding_policy_lmql_missing_string() -> None:
     ):
         ConstrainedDecodingPolicy(
             enforcement_strategy="lmql_query",
-            compiler_backend="lmql",
+            compiler_backend="urn:coreason:compiler:lmql",
             formal_grammar_string=None,
         )
 
@@ -323,7 +323,7 @@ def test_constrained_decoding_policy_lmql_missing_string() -> None:
 def test_cognitive_format_contract_regex_conflict() -> None:
     policy = ConstrainedDecodingPolicy(
         enforcement_strategy="lmql_query",
-        compiler_backend="lmql",
+        compiler_backend="urn:coreason:compiler:lmql",
         formal_grammar_string='SELECT "Hello World"',
     )
     with pytest.raises(
@@ -340,7 +340,7 @@ def test_cognitive_format_contract_regex_conflict() -> None:
 def test_cognitive_format_contract_valid_lmql() -> None:
     policy = ConstrainedDecodingPolicy(
         enforcement_strategy="lmql_query",
-        compiler_backend="lmql",
+        compiler_backend="urn:coreason:compiler:lmql",
         formal_grammar_string='SELECT "Hello World"',
     )
     contract = CognitiveFormatContract(

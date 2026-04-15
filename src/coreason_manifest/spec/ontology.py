@@ -1727,14 +1727,14 @@ class HardwareEnclaveReceipt(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Authorizes the swarm orchestrator to securely inject RESTRICTED classification payloads into the agent's context by proving the host OS cannot read or tamper with the working memory.
 
-    EPISTEMIC BOUNDS: Physically bounded by the 8192-byte `max_length` of `hardware_signature_blob`. Mathematically anchored to the exact memory state via `platform_measurement_hash` (strict SHA-256 pattern `^[a-f0-9]{64}$` representing PCRs). The `enclave_class` is clamped to a Literal.
+    EPISTEMIC BOUNDS: Physically bounded by the 8192-byte `max_length` of `hardware_signature_blob`. Mathematically anchored to the exact memory state via `platform_measurement_hash` (strict SHA-256 pattern `^[a-f0-9]{64}$` representing PCRs). The `enclave_class` is constrained via URN pattern.
 
     MCP ROUTING TRIGGERS: Trusted Execution Environment, Remote Attestation, Platform Configuration Register, Hardware Root-of-Trust, SGX/TDX/Nitro
 
     """
 
-    enclave_class: Literal["intel_tdx", "amd_sev_snp", "aws_nitro", "nvidia_cc"] = Field(
-        le=18446744073709551615, description="The physical silicon architecture generating the root-of-trust quote."
+    enclave_class: Annotated[str, StringConstraints(pattern=r"^urn:coreason:.*$")] = Field(
+        description="The URN representing the physical silicon architecture generating the root-of-trust quote (e.g., 'urn:coreason:enclave:intel_tdx')."
     )
     platform_measurement_hash: Annotated[
         str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")
@@ -5320,7 +5320,9 @@ class SchemaDrivenExtractionSLA(CoreasonBaseState):
     schema_registry_uri: AnyUrl = Field(
         description="RFC 8785 canonicalized URI to the exact Pydantic template or LinkML definition."
     )
-    extraction_framework: Literal["docling_graph_explicit", "ontogpt_spires"] = Field(...)
+    extraction_framework: Annotated[str, StringConstraints(pattern=r"^urn:coreason:.*$")] = Field(
+        description="The URN of the specific extraction framework utilized (e.g., 'urn:coreason:extraction:docling_graph_explicit')."
+    )
     max_schema_retries: int = Field(ge=0, le=10)
     validation_failure_action: Literal["quarantine_chunk", "escalate_to_human", "drop_edge"]
     linkml_governance: LinkMLValidationSLA | None = Field(
@@ -5329,9 +5331,9 @@ class SchemaDrivenExtractionSLA(CoreasonBaseState):
 
     @model_validator(mode="after")
     def enforce_linkml_for_ontogpt(self) -> Self:
-        if self.extraction_framework == "ontogpt_spires" and self.linkml_governance is None:
+        if self.extraction_framework == "urn:coreason:extraction:ontogpt_spires" and self.linkml_governance is None:
             raise ValueError(
-                "Epistemic Violation: Using the 'ontogpt_spires' framework mathematically requires a LinkMLValidationSLA to govern shape constraints."
+                "Epistemic Violation: Using the 'urn:coreason:extraction:ontogpt_spires' framework mathematically requires a LinkMLValidationSLA to govern shape constraints."
             )
         return self
 
@@ -13056,14 +13058,14 @@ class ZeroKnowledgeReceipt(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Authorizes the zero-trust orchestrator to accept and merge off-chain state mutations by verifying the `cryptographic_blob` against the `public_inputs_hash` and `verifier_key_cid`.
 
-    EPISTEMIC BOUNDS: `proof_protocol` is strictly clamped to a Literal automaton `["zk-SNARK", "zk-STARK", "plonk", "bulletproofs"]`. `public_inputs_hash` guarantees linkage via SHA-256 regex `^[a-f0-9]{64}$`. `cryptographic_blob` is capped at `max_length=5000000`. `latent_state_commitments` restricts dictionary to `le=18446744073709551615`.
+    EPISTEMIC BOUNDS: `proof_protocol` is constrained via URN pattern. `public_inputs_hash` guarantees linkage via SHA-256 regex `^[a-f0-9]{64}$`. `cryptographic_blob` is capped at `max_length=5000000`. `latent_state_commitments` restricts dictionary to `le=18446744073709551615`.
 
     MCP ROUTING TRIGGERS: Computational Integrity, Verifiable Computing, Zero-Knowledge Proofs, zk-SNARK, State Attestation
 
     """
 
-    proof_protocol: Literal["zk-SNARK", "zk-STARK", "plonk", "bulletproofs"] = Field(
-        description="The mathematical dialect of the cryptographic proof."
+    proof_protocol: Annotated[str, StringConstraints(pattern=r"^urn:coreason:.*$")] = Field(
+        description="The URN of the mathematical dialect of the cryptographic proof (e.g., 'urn:coreason:zk:snark')."
     )
     logical_circuit_hash: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] = (
         Field(description="The SHA-256 hash of the exact prompt, weights, and constraints evaluated by the prover.")
@@ -13804,7 +13806,7 @@ class ConstrainedDecodingPolicy(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation by physically suffocating invalid token probabilities. Instructs the inference engine (e.g., Outlines, XGrammar) to compile a DFA/PDA and mechanically overwrite illegal token logits to negative infinity.
 
-    EPISTEMIC BOUNDS: Strict categorical literals on `enforcement_strategy` and `compiler_backend`. The `validate_grammar_requirements` `@model_validator` mandates `formal_grammar_string` is non-null if the strategy expects a Context-Free Grammar (CFG).
+    EPISTEMIC BOUNDS: Strict categorical literal on `enforcement_strategy`. The `compiler_backend` is constrained via URN pattern. The `validate_grammar_requirements` `@model_validator` mandates `formal_grammar_string` is non-null if the strategy expects a Context-Free Grammar (CFG).
 
     MCP ROUTING TRIGGERS: FSM Logit Masking, Constrained Decoding, Tokenizer Interception, Hardware Execution Boundary, Pushdown Automaton
 
@@ -13813,8 +13815,8 @@ class ConstrainedDecodingPolicy(CoreasonBaseState):
     enforcement_strategy: Literal["fsm_logit_mask", "lmql_query", "guidance_program", "ebnf_grammar"] = Field(
         default="fsm_logit_mask", description="The mechanistic strategy for intercepting the LLM forward pass."
     )
-    compiler_backend: Literal["outlines", "xgrammar", "sglang", "lmql", "guidance", "llama_cpp", "agnostic"] = Field(
-        description="The C++/CUDA backend used to compile the CFG or Regex into a DFA/PDA."
+    compiler_backend: Annotated[str, StringConstraints(pattern=r"^urn:coreason:.*$")] = Field(
+        description="The URN of the backend used to compile the CFG or Regex into a DFA/PDA (e.g., 'urn:coreason:compiler:xgrammar')."
     )
     formal_grammar_string: Annotated[str, StringConstraints(max_length=50000)] | None = Field(
         default=None,
