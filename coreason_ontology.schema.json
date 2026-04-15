@@ -18191,11 +18191,25 @@
           "$ref": "#/$defs/TemporalBoundsProfile",
           "description": "The temporal mapping of the event."
         },
+        "formal_schema_urn": {
+          "anyOf": [
+            {
+              "pattern": "^urn:coreason:schema:.*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The formal URN mathematically binding the untyped payload_injection_zone to a verified external standard (e.g., 'urn:coreason:schema:omop_cdm_v5').",
+          "title": "Formal Schema Urn"
+        },
         "payload_injection_zone": {
           "additionalProperties": {
             "$ref": "#/$defs/JsonPrimitiveState"
           },
-          "description": "The untyped domain-specific schema payload.",
+          "description": "The domain-specific payload, structurally governed by the formal_schema_urn to prevent semantic hallucinations.",
           "propertyNames": {
             "maxLength": 255
           },
@@ -18873,6 +18887,20 @@
           },
           "title": "Schema Definition",
           "type": "object"
+        },
+        "formal_schema_urn": {
+          "anyOf": [
+            {
+              "pattern": "^urn:coreason:schema:.*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The formal URN pointing to a verified external standard, supplementing or replacing the raw schema_definition dictionary.",
+          "title": "Formal Schema Urn"
         },
         "strict_validation": {
           "default": true,

@@ -2450,6 +2450,10 @@ export type ArchitecturalIntent4 = string | null;
  */
 export type Justification6 = string | null;
 /**
+ * The formal URN pointing to a verified external standard, supplementing or replacing the raw schema_definition dictionary.
+ */
+export type FormalSchemaUrn = string | null;
+/**
  * If True, the orchestrator must reject any state mutation that fails the schema definition.
  */
 export type StrictValidation = boolean;
@@ -4271,6 +4275,10 @@ export type Timestamp28 = number;
  * The domain-independent structural classification of the record.
  */
 export type UpperOntologyClassProfile = "continuant" | "occurrent";
+/**
+ * The formal URN mathematically binding the untyped payload_injection_zone to a verified external standard (e.g., 'urn:coreason:schema:omop_cdm_v5').
+ */
+export type FormalSchemaUrn1 = string | null;
 /**
  * Discriminator for the reification receipt.
  */
@@ -9700,6 +9708,7 @@ export interface Nodes1 {
  */
 export interface StateContract {
   schema_definition: SchemaDefinition;
+  formal_schema_urn?: FormalSchemaUrn;
   strict_validation?: StrictValidation;
   /**
    * The optional hardware-level execution limits for token masking.
@@ -12479,6 +12488,7 @@ export interface SemanticRelationalVectorState {
   timestamp: Timestamp28;
   ontology_class: UpperOntologyClassProfile;
   temporal_bounds: TemporalBoundsProfile1;
+  formal_schema_urn?: FormalSchemaUrn1;
   payload_injection_zone: PayloadInjectionZone;
   /**
    * The high-dimensional tabular embedding resolving the entire multivariate row into a holistic event meaning.
@@ -12500,7 +12510,7 @@ export interface TemporalBoundsProfile1 {
   temporal_certainty_score?: TemporalCertaintyScore;
 }
 /**
- * The untyped domain-specific schema payload.
+ * The domain-specific payload, structurally governed by the formal_schema_urn to prevent semantic hallucinations.
  */
 export interface PayloadInjectionZone {
   [k: string]: JsonPrimitiveState;

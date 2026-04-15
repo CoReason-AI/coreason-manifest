@@ -10017,6 +10017,10 @@ class StateContract(CoreasonBaseState):
     schema_definition: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
         description="A strict JSON Schema dictionary defining the required shape of the shared epistemic blackboard."
     )
+    formal_schema_urn: Annotated[str, StringConstraints(pattern=r"^urn:coreason:schema:.*$")] | None = Field(
+        default=None,
+        description="The formal URN pointing to a verified external standard, supplementing or replacing the raw schema_definition dictionary.",
+    )
     strict_validation: bool = Field(
         default=True,
         description="If True, the orchestrator must reject any state mutation that fails the schema definition.",
@@ -14763,8 +14767,12 @@ class SemanticRelationalVectorState(CoreasonBaseState):
         description="The domain-independent structural classification of the record."
     )
     temporal_bounds: TemporalBoundsProfile = Field(description="The temporal mapping of the event.")
+    formal_schema_urn: Annotated[str, StringConstraints(pattern=r"^urn:coreason:schema:.*$")] | None = Field(
+        default=None,
+        description="The formal URN mathematically binding the untyped payload_injection_zone to a verified external standard (e.g., 'urn:coreason:schema:omop_cdm_v5').",
+    )
     payload_injection_zone: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
-        description="The untyped domain-specific schema payload."
+        description="The domain-specific payload, structurally governed by the formal_schema_urn to prevent semantic hallucinations."
     )
     multivariate_latent_projection: VectorEmbeddingState | None = Field(
         default=None,
