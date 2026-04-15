@@ -33,6 +33,12 @@
 
 > **"This package is the definitive source of truth. If it isn't in the manifest, it doesn't exist. If it violates the manifest, it doesn't run."**
 
+## Documentation
+
+- [CoReason Manifest Syllabus & Architecture](docs/syllabus.md)
+- [Causal Lexicon & Structural Glossary](docs/LEXICON.md)
+- [Substrate Projections (MCP) in Neurosymbolic Architecture](docs/MCP_PROJECTION.md)
+
 ## Overview
 
 **CoReason Manifest** (`coreason_manifest`) is a 2026+ State-of-the-Art Neurosymbolic architecture component acting as the Universal Unified Ontology for the CoReason AI swarm ecosystem.

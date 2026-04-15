@@ -27,7 +27,7 @@ jobs:
 
       - name: Run Deep Fuzzing (ci-deep profile)
         run: >-
-          uv run pytest tests/fuzzing/
+          uv run pytest tests/
           --hypothesis-profile=ci-deep
           -x
           --tb=long

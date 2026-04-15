@@ -41,7 +41,7 @@ repos:
         types: [python]
       - id: schema-contracts
         name: Schema Contracts Check
-        entry: uv run pytest tests/contracts/
+        entry: uv run pytest tests/
         language: system
         pass_filenames: false
         types: [python]
