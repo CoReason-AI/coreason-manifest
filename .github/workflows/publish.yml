@@ -167,6 +167,8 @@ jobs:
           cd bindings/rust
           sed -i "s/^version = .*/version = \"$VERSION\"/" Cargo.toml
       - name: Publish Rust Bindings
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
         run: |
           cd bindings/rust
           cargo publish
