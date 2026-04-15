@@ -6002,7 +6002,7 @@ export interface CoReasonSharedKernelOntology {
   DraftingIntent?: DraftingIntent;
   DynamicConvergenceSLA?: DynamicConvergenceSLA;
   DynamicLayoutManifest?: DynamicLayoutManifest;
-  DynamicManifoldProjectionManifest?: DynamicManifoldProjectionManifest;
+  DynamicManifoldProjectionManifest?: DynamicManifoldProjectionManifest1;
   DynamicRoutingManifest?: DynamicRoutingManifest;
   EdgeMappingContract?: EdgeMappingContract;
   EmbodiedSensoryVectorProfile?: EmbodiedSensoryVectorProfile;
@@ -8632,21 +8632,10 @@ export interface MCPClientIntent {
   method: Method2;
   params?: Params2;
   id?: Id2;
-  /**
-   * The mathematically pre-calculated view manifold tailored to the observer's frustum.
-   */
-  holographic_projection?: DynamicManifoldProjectionManifest | null;
+  holographic_projection: DynamicManifoldProjectionManifest;
 }
 /**
- * CoReason Shared Kernel Ontology
- *
- * AGENT INSTRUCTION: Provides the rendering matrix that translates the swarm's physics into human retinal variables using the Grammar of Graphics and Semantic Zooming.
- *
- * CAUSAL AFFORDANCE: Maps N-dimensional capabilities onto the UI plane without breaking semantic causal edges.
- *
- * EPISTEMIC BOUNDS: Binds an AST gradient and thermodynamic burn metric, governed by a physical zoom profile limit. Discriminator locked to `Literal["dynamic_manifold"]`.
- *
- * MCP ROUTING TRIGGERS: Grammar of Graphics, Retinal Variables, UI Rendering, Semantic Zooming, Dynamic Manifold
+ * The mathematically pre-calculated view manifold tailored to the observer's frustum.
  */
 export interface DynamicManifoldProjectionManifest {
   topology_class?: TopologyClass55;
@@ -13640,6 +13629,28 @@ export interface Blocks1 {
 export interface DynamicLayoutManifest {
   layout_tstring: LayoutTstring;
   max_ast_node_budget?: MaxAstNodeBudget;
+}
+/**
+ * CoReason Shared Kernel Ontology
+ *
+ * AGENT INSTRUCTION: Provides the rendering matrix that translates the swarm's physics into human retinal variables using the Grammar of Graphics and Semantic Zooming.
+ *
+ * CAUSAL AFFORDANCE: Maps N-dimensional capabilities onto the UI plane without breaking semantic causal edges.
+ *
+ * EPISTEMIC BOUNDS: Binds an AST gradient and thermodynamic burn metric, governed by a physical zoom profile limit. Discriminator locked to `Literal["dynamic_manifold"]`.
+ *
+ * MCP ROUTING TRIGGERS: Grammar of Graphics, Retinal Variables, UI Rendering, Semantic Zooming, Dynamic Manifold
+ */
+export interface DynamicManifoldProjectionManifest1 {
+  topology_class?: TopologyClass55;
+  manifest_cid: ManifestCid1;
+  active_forge_cid: ActiveForgeCid;
+  ast_gradient_visual_mapping: GrammarPanelProfile;
+  /**
+   * Tracks the KinematicDeltaManifest against the human's allocated_budget_magnitude.
+   */
+  thermodynamic_burn_mapping: GrammarPanelProfile1 | InsightCardProfile;
+  viewport_zoom_profile: SemanticZoomProfile;
 }
 /**
  * CoReason Shared Kernel Ontology

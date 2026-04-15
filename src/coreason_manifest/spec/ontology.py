@@ -33,18 +33,6 @@ from pydantic import (
     model_validator,
 )
 
-type JsonPrimitiveState = (
-    str
-    | int
-    | float
-    | bool
-    | None
-    | list["JsonPrimitiveState"]
-    | dict[str, "JsonPrimitiveState"]
-    | "EpistemicProxyState[Any]"
-)
-
-
 # ---------------------------------------------------------------------------
 # Pure-Python DAG utilities (fallback when rustworkx is unavailable,
 # e.g. on free-threaded Python 3.14t where no C-extension wheels exist).
@@ -645,6 +633,18 @@ class EpistemicProxyState[T](CoreasonBaseState):
     structural_type: Annotated[str, StringConstraints(max_length=255)] = Field(
         ..., description="The abstract Python type representation (e.g., 'List[str]')."
     )
+
+
+type JsonPrimitiveState = (
+    str
+    | int
+    | float
+    | bool
+    | None
+    | list["JsonPrimitiveState"]
+    | dict[str, "JsonPrimitiveState"]
+    | EpistemicProxyState[Any]
+)
 
 
 class IdeationPhaseProfile(StrEnum):
@@ -8498,8 +8498,8 @@ class MCPClientIntent(BoundedJSONRPCIntent):
     """
 
     method: Literal["mcp.ui.emit_intent"] = Field(..., description="Method for intent bubbling.")
-    holographic_projection: "DynamicManifoldProjectionManifest | None" = Field(
-        default=None,
+    holographic_projection: "DynamicManifoldProjectionManifest" = Field(
+        ...,
         description="The mathematically pre-calculated view manifold tailored to the observer's frustum.",
     )
 

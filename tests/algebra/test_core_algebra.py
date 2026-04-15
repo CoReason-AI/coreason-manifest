@@ -22,7 +22,6 @@ from hypothesis import given, settings
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
-import coreason_manifest.utils.algebra as algebra
 from coreason_manifest.spec.ontology import (
     BeliefModulationReceipt,
     BypassReceipt,
@@ -51,6 +50,7 @@ from coreason_manifest.spec.ontology import (
     VectorEmbeddingState,
     WorkflowManifest,
 )
+from coreason_manifest.utils import algebra
 from coreason_manifest.utils.algebra import (
     align_semantic_manifolds,
     calculate_latent_alignment,
@@ -926,10 +926,12 @@ def test_calculate_latent_alignment_fuzz(v1_floats: list[float], v2_floats: list
         sim = calculate_latent_alignment(v1, v2, policy)
         assert not math.isnan(sim), "Similarity should never be NaN"
         assert -1.0001 <= sim <= 1.0001, f"Cosine similarity out of bounds: {sim}"
-    except ValueError:
-        pass
     except TamperFaultEvent:
-        pass
+        # Some fuzzed vectors are intentionally invalid for strict tamper checks.
+        return
+    except ValueError:
+        # Some fuzzed inputs may be rejected during numeric validation.
+        return
 
 
 def test_calculate_latent_alignment_edge_cases() -> None:
@@ -983,3 +985,33 @@ def test_calculate_latent_alignment_edge_cases() -> None:
                 vector_base64=base64.b64encode(v2_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
             )
             assert calculate_latent_alignment(v1, v2, policy) == 0.0
+
+
+def test_transmute_to_pycrdt_doc() -> None:
+    """Exercise pycrdt projection for TemporalGraphCRDTManifest."""
+    from coreason_manifest.spec.ontology import TemporalEdgeInvalidationIntent, TemporalGraphCRDTManifest
+    from coreason_manifest.utils.algebra import transmute_to_pycrdt_doc
+
+    manifest = TemporalGraphCRDTManifest(
+        diff_cid="d111111",
+        author_node_cid="n111111",
+        lamport_timestamp=1,
+        vector_clock={"n111111": 1},
+        add_set=["did:z:node111", "did:z:node222"],
+        terminate_set=[
+            TemporalEdgeInvalidationIntent(
+                target_edge_cid="did:z:edge111",
+                invalidation_timestamp=1000000.0,
+                causal_justification_cid="did:z:just111",
+            )
+        ],
+    )
+    doc = transmute_to_pycrdt_doc(manifest)
+    assert doc is not None
+
+
+def test_align_semantic_manifolds_semantic_graph() -> None:
+    """Exercise alignment when target includes 'semantic_graph' modality."""
+    res = align_semantic_manifolds("t1", ["text"], ["text", "semantic_graph"], "e1")  # type: ignore[list-item]
+    assert res is not None
+    assert res.schema_governance is not None
