@@ -6,7 +6,7 @@
   "author": "CoReason, Inc <license@coreason.ai>",
   "repository": {
     "type": "git",
-    "url": "https://github.com/CoReason-AI/coreason-manifest",
+    "url": "git+https://github.com/CoReason-AI/coreason-manifest.git",
     "directory": "bindings/typescript"
   },
   "homepage": "https://github.com/CoReason-AI/coreason-manifest",
@@ -34,5 +34,8 @@
   },
   "dependencies": {
     "fast-json-stable-stringify": "^2.1.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
