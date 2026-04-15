@@ -1495,7 +1495,7 @@
     },
     "AsymptoticComplexityReceipt": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Big-O asymptotic complexity via Monte Carlo fuzzing to populate deterministic Markov transition costs.\n\n    CAUSAL AFFORDANCE: Dynamically allocates topological routing metrics, allowing the swarm to economically bound latency and VRAM before calling a tool.\n\n    EPISTEMIC BOUNDS: The asymptotic classification space is severely bounded via explicit Literals. Peak bytes and CPU constraints enforce hard integer clamping against memory exhaustion.\n\n    MCP ROUTING TRIGGERS: Asymptotic Complexity, Big-O Notation, Monte Carlo Fuzzing, Markov Transition Costs, Computational Budget",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Big-O asymptotic complexity via Monte Carlo fuzzing to populate deterministic Markov transition costs.\n\n    CAUSAL AFFORDANCE: Dynamically allocates topological routing metrics, allowing the swarm to economically bound latency and VRAM before calling a tool.\n\n    EPISTEMIC BOUNDS: The asymptotic classification space is constrained via algebraic regex `^O\\([a-zA-Z0-9_+\\^ \\-\\*]+\\)$` guaranteeing valid Big-O notation while permitting arbitrary mathematical expressions. Peak bytes and CPU constraints enforce hard integer clamping against memory exhaustion.\n\n    MCP ROUTING TRIGGERS: Asymptotic Complexity, Big-O Notation, Monte Carlo Fuzzing, Markov Transition Costs, Computational Budget",
       "properties": {
         "capability_cid": {
           "description": "The exact 128-char physical DID referencing the algorithmic payload evaluated.",
@@ -1505,26 +1505,16 @@
           "type": "string"
         },
         "time_complexity_class": {
-          "description": "The formal Big-O mathematical class mathematically bounding temporal execution limits.",
-          "enum": [
-            "O(1)",
-            "O(log N)",
-            "O(N)",
-            "O(N log N)",
-            "O(N^2)",
-            "O(2^N)"
-          ],
+          "description": "The formal algebraic Big-O notation mathematically bounding temporal execution limits (e.g., 'O(N)', 'O(V + E)', 'O(N^2)').",
+          "maxLength": 255,
+          "pattern": "^O\\([a-zA-Z0-9_+\\^ \\-\\*]+\\)$",
           "title": "Time Complexity Class",
           "type": "string"
         },
         "space_complexity_class": {
-          "description": "The formal Big-O mathematical class representing the asymptotic structural memory geometry.",
-          "enum": [
-            "O(1)",
-            "O(log N)",
-            "O(N)",
-            "O(N^2)"
-          ],
+          "description": "The formal algebraic Big-O notation representing the asymptotic structural memory geometry.",
+          "maxLength": 255,
+          "pattern": "^O\\([a-zA-Z0-9_+\\^ \\-\\*]+\\)$",
           "title": "Space Complexity Class",
           "type": "string"
         },

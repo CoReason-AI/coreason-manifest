@@ -10982,7 +10982,7 @@ class AsymptoticComplexityReceipt(CoreasonBaseState):
 
         CAUSAL AFFORDANCE: Dynamically allocates topological routing metrics, allowing the swarm to economically bound latency and VRAM before calling a tool.
 
-        EPISTEMIC BOUNDS: The asymptotic classification space is severely bounded via explicit Literals. Peak bytes and CPU constraints enforce hard integer clamping against memory exhaustion.
+        EPISTEMIC BOUNDS: The asymptotic classification space is constrained via algebraic regex `^O\([a-zA-Z0-9_+\^ \-\*]+\)$` guaranteeing valid Big-O notation while permitting arbitrary mathematical expressions. Peak bytes and CPU constraints enforce hard integer clamping against memory exhaustion.
 
         MCP ROUTING TRIGGERS: Asymptotic Complexity, Big-O Notation, Monte Carlo Fuzzing, Markov Transition Costs, Computational Budget
     """
@@ -10990,12 +10990,14 @@ class AsymptoticComplexityReceipt(CoreasonBaseState):
     capability_cid: Annotated[str, StringConstraints(max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         description="The exact 128-char physical DID referencing the algorithmic payload evaluated."
     )
-    time_complexity_class: Literal["O(1)", "O(log N)", "O(N)", "O(N log N)", "O(N^2)", "O(2^N)"] = Field(
-        description="The formal Big-O mathematical class mathematically bounding temporal execution limits."
+    time_complexity_class: Annotated[
+        str, StringConstraints(pattern=r"^O\([a-zA-Z0-9_+\^ \-\*]+\)$", max_length=255)
+    ] = Field(
+        description="The formal algebraic Big-O notation mathematically bounding temporal execution limits (e.g., 'O(N)', 'O(V + E)', 'O(N^2)')."
     )
-    space_complexity_class: Literal["O(1)", "O(log N)", "O(N)", "O(N^2)"] = Field(
-        description="The formal Big-O mathematical class representing the asymptotic structural memory geometry."
-    )
+    space_complexity_class: Annotated[
+        str, StringConstraints(pattern=r"^O\([a-zA-Z0-9_+\^ \-\*]+\)$", max_length=255)
+    ] = Field(description="The formal algebraic Big-O notation representing the asymptotic structural memory geometry.")
     peak_vram_bytes: int = Field(
         ge=0,
         le=18446744073709551615,

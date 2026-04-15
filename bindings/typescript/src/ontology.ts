@@ -468,13 +468,13 @@ export type VerifiedTheoremHash = string;
  */
 export type CapabilityCid1 = string;
 /**
- * The formal Big-O mathematical class mathematically bounding temporal execution limits.
+ * The formal algebraic Big-O notation mathematically bounding temporal execution limits (e.g., 'O(N)', 'O(V + E)', 'O(N^2)').
  */
-export type TimeComplexityClass = "O(1)" | "O(log N)" | "O(N)" | "O(N log N)" | "O(N^2)" | "O(2^N)";
+export type TimeComplexityClass = string;
 /**
- * The formal Big-O mathematical class representing the asymptotic structural memory geometry.
+ * The formal algebraic Big-O notation representing the asymptotic structural memory geometry.
  */
-export type SpaceComplexityClass = "O(1)" | "O(log N)" | "O(N)" | "O(N^2)";
+export type SpaceComplexityClass = string;
 /**
  * The strict absolute integer measurement bounding thermodynamic memory allocations.
  */
@@ -6842,7 +6842,7 @@ export interface HoareLogicProofReceipt {
  *
  *     CAUSAL AFFORDANCE: Dynamically allocates topological routing metrics, allowing the swarm to economically bound latency and VRAM before calling a tool.
  *
- *     EPISTEMIC BOUNDS: The asymptotic classification space is severely bounded via explicit Literals. Peak bytes and CPU constraints enforce hard integer clamping against memory exhaustion.
+ *     EPISTEMIC BOUNDS: The asymptotic classification space is constrained via algebraic regex `^O\([a-zA-Z0-9_+\^ \-\*]+\)$` guaranteeing valid Big-O notation while permitting arbitrary mathematical expressions. Peak bytes and CPU constraints enforce hard integer clamping against memory exhaustion.
  *
  *     MCP ROUTING TRIGGERS: Asymptotic Complexity, Big-O Notation, Monte Carlo Fuzzing, Markov Transition Costs, Computational Budget
  */
