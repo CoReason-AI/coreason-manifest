@@ -19,14 +19,12 @@ from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
     BoundedJSONRPCIntent,
-    BrowserDOMState,
     ConstitutionalPolicy,
     ContinuousMutationPolicy,
     DocumentLayoutRegionState,
     DynamicLayoutManifest,
     ExecutionNodeReceipt,
     GlobalGovernancePolicy,
-    InsightCardProfile,
     MultimodalTokenAnchorState,
     NDimensionalTensorManifest,
     ScalePolicy,
@@ -50,29 +48,6 @@ def test_jsonrpc_depth_attack_proof(params: dict[str, Any]) -> None:
     payload = {"jsonrpc": "2.0", "method": "test_method", "params": params, "id": 1}
     with contextlib.suppress(ValidationError):
         BoundedJSONRPCIntent.model_validate(payload)
-
-
-@pytest.mark.parametrize(
-    "url", ["http://169.254.169.254/iam", "http://localhost:3000", "http://127.0.0.1:5432", "file:///etc/passwd"]
-)
-def test_browser_dom_ssrf_quarantine(url: str) -> None:
-    """Prove Bogon IP space and local routing is severed to prevent SSRF escape."""
-    with pytest.raises(ValidationError, match="SSRF"):
-        BrowserDOMState(current_url=url, viewport_size=(800, 600), dom_hash="a" * 64, accessibility_tree_hash="a" * 64)
-
-
-@pytest.mark.parametrize(
-    "payload",
-    [
-        "<script>alert(1)</script>",
-        "<img src='x' onerror='alert(1)'>",
-    ],
-)
-def test_polymorphic_xss_proof(payload: str) -> None:
-    """Prove InsightCardProfile definitively sanitizes malicious Markdown tags and schemas via ammonia."""
-    profile = InsightCardProfile(panel_cid="panel_1", title="Insight Title", markdown_content=payload)
-    assert "<script>" not in profile.markdown_content
-    assert "alert(1)" not in profile.markdown_content
 
 
 @pytest.mark.parametrize(

@@ -6934,7 +6934,7 @@ export interface EnvVars {
  *
  * CAUSAL AFFORDANCE: Authorizes the orchestrator to maintain a persistent, long-lived TCP connection, processing incoming JSON-RPC streams without the thermodynamic overhead of continuous polling.
  *
- * EPISTEMIC BOUNDS: The `headers` are strictly limited via `StringConstraints` (`max_length=255/2000`) and mathematically sanitized against CRLF injection via `@field_validator` `_prevent_crlf_injection` to preserve protocol boundary integrity.
+ * EPISTEMIC BOUNDS: The `headers` are strictly limited via `StringConstraints` (`max_length=255/2000`).
  *
  * MCP ROUTING TRIGGERS: Event-Driven Architecture, Server-Sent Events, Unidirectional Stream, Asynchronous Message Passing, TCP Persistence
  */
@@ -6956,7 +6956,7 @@ export interface Headers {
  *
  * CAUSAL AFFORDANCE: Instructs the orchestrator to open an out-of-band HTTP socket, transmitting structured semantic payloads while strictly confining custom headers to prevent protocol manipulation.
  *
- * EPISTEMIC BOUNDS: The `headers` dictionary is mathematically bounded (`max_length=2000`) and explicitly trapped by the `@field_validator` `_prevent_crlf_injection` to physically block HTTP Request Smuggling.
+ * EPISTEMIC BOUNDS: The `headers` dictionary is mathematically bounded (`max_length=2000`).
  *
  * MCP ROUTING TRIGGERS: Stateless Architecture, Zero-Trust Network Access, HTTP Request Smuggling Prevention, JSON-RPC Egress, Out-of-Band Socket
  */
@@ -7660,7 +7660,7 @@ export interface ContextualSemanticResolutionIntent {
 /**
  * CoReason Shared Kernel Ontology
  *
- * AGENT INSTRUCTION: Authorizes a Semantic Watchdog Agent to perform strict, SSRF-protected out-of-band polling against external semantic registries to monitor for ontological deprecation or semantic drift.
+ * AGENT INSTRUCTION: Authorizes a Semantic Watchdog Agent to perform strict out-of-band polling against external semantic registries to monitor for ontological deprecation or semantic drift.
  */
 export interface OntologyDiscoveryIntent {
   topology_class?: TopologyClass28;
@@ -8342,9 +8342,9 @@ export interface DempsterShaferBeliefVector {
  *
  * CAUSAL AFFORDANCE: Physically anchors an abductive hypothesis to empirical reality, providing the exact string evaluated by the NLI cross-encoder to prevent source drift.
  *
- * EPISTEMIC BOUNDS: Network resolution is strictly gated by the `_enforce_ssrf_quarantine` hook to prevent Bogon/loopback execution. The textual premise is volumetrically clamped by `extracted_snippet` (`max_length=10000`). Entailment probability is bounded `[0.0, 1.0]`.
+ * EPISTEMIC BOUNDS: The textual premise is volumetrically clamped by `extracted_snippet` (`max_length=10000`). Entailment probability is bounded `[0.0, 1.0]`.
  *
- * MCP ROUTING TRIGGERS: Retrieval-Augmented Fact-Checking, Natural Language Inference, SSRF Quarantine, Evidentiary Coordinate, Cross-Encoder Validation
+ * MCP ROUTING TRIGGERS: Retrieval-Augmented Fact-Checking, Natural Language Inference, Evidentiary Coordinate, Cross-Encoder Validation
  */
 export interface EvidentiaryCitationState {
   citation_cid: CitationCid;
@@ -8389,7 +8389,7 @@ export interface SHACLValidationSLA {
  *
  * CAUSAL AFFORDANCE: Unlocks read-only retrieval of Semantic Web data.
  *
- * EPISTEMIC BOUNDS: The target_endpoint implements an SSRF protection hook to mathematically reject lateral movement.
+ * EPISTEMIC BOUNDS: The target_endpoint is a strictly typed HttpUrl.
  *
  * MCP ROUTING TRIGGERS: SPARQL, Semantic Web Query, Triplestore Query, Network Boundary
  */
@@ -11614,9 +11614,9 @@ export interface HardwareEnclaveReceipt {
  *
  * CAUSAL AFFORDANCE: Exposes the deterministic coordinate space (`viewport_size`, `dom_hash`, `accessibility_tree_hash`) enabling spatial kinematics and visual grounding.
  *
- * EPISTEMIC BOUNDS: Enforces strict Server-Side Request Forgery (SSRF) quarantine via the `@field_validator` `_enforce_spatial_safety`, mathematically isolating the agent from Bogon/private IP space. `dom_hash` rigidly locked to SHA-256 pattern.
+ * EPISTEMIC BOUNDS: `dom_hash` rigidly locked to SHA-256 pattern.
  *
- * MCP ROUTING TRIGGERS: Exogenous Perturbation, DOM Topography, SSRF Quarantine, Spatial Execution Bound, Accessibility Tree
+ * MCP ROUTING TRIGGERS: Exogenous Perturbation, DOM Topography, Spatial Execution Bound, Accessibility Tree
  */
 export interface BrowserDOMState {
   topology_class?: TopologyClass87;

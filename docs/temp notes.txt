@@ -269,3 +269,66 @@ For all downstream consumers of `coreason-manifest`, the rules of engagement hav
 4. **Mesh-Level License Enforcement:** `coreason-ecosystem` mesh injectors must now read the `GlobalGovernancePolicy` and physically verify the `rule_cid` string against your active enterprise license deployments *before* admitting the payload into the swarm.
 
 **The math is now pure. Let the engines handle the physics.**
+
+
+
+---
+
+**Subject: Release Notes — Epic 5: The Protocol & Security Purge (Network Isomorphism)**
+
+---
+
+# 🚀 Release Notes: coreason-manifest (Epic 5 Update)
+
+## Executive Summary
+We have successfully merged **Epic 5: The Protocol & Security Purge (Network Isomorphism)** into the `coreason-manifest` ontology.
+
+Building upon our core philosophy—*"The Manifest is Fundamental Math; The Orchestrator is Ephemeral Physics"*—this release targets the last remaining vestiges of non-mathematical logic in our Abstract Syntax Tree (AST): **Networking Protocols and Application Security**.
+
+Previously, `coreason-manifest` acted as an ad-hoc web application firewall (WAF). It actively parsed IP addresses to block SSRF attacks against Bogon/loopback space, scanned HTTP headers for CRLF injection bytes, and utilized Rust-backed HTML sanitizers (`nh3`) to strip XSS payloads from markdown.
+
+A pure topological node does not know what a TCP/IP loopback address is, nor does it understand Cross-Site Scripting. These are ephemeral rendering and transport vulnerabilities. This release permanently strips these heuristics from the Hollow Data Plane, shifting the security burden entirely to the physical egress and rendering layers.
+
+---
+
+## 🏗️ Key Architectural Changes
+
+### 1. Removal of SSRF and Bogon Space Routing Logic
+**What Changed:**
+All IP parsing logic (via `ipaddress` and `urllib.parse`) and the `_validate_ssrf_safety` constraint function have been deleted. Fields like `BrowserDOMState.current_url`, `OntologyDiscoveryIntent.target_registry_uri`, `SPARQLQueryIntent.target_endpoint`, and `HTTPTransportProfile.uri` now simply validate that the string is a structurally sound URI, without attempting to resolve or restrict the underlying host.
+
+**Architectural Justification:**
+The AST must define the *intent* of the network boundary (e.g., "Connect to this endpoint"), not the physical routing topology. Preventing lateral movement into private AWS VPCs or `127.0.0.1` is strictly the job of the `coreason-runtime` egress proxy. A researcher running a local desktop swarm *should* be able to route the AST to `localhost`; the math allows it, the orchestrator's local security policy governs it.
+
+### 2. Deletion of CRLF Header Traps
+**What Changed:**
+The `_prevent_crlf_injection` validators in `HTTPTransportProfile` and `SSETransportProfile` have been removed.
+
+**Architectural Justification:**
+Carriage Return Line Feed (`\r\n`) injection is a vulnerability specific to the HTTP/1.1 protocol specification. A mathematical ontology should not enforce IETF RFCs. Protocol boundary integrity is the responsibility of the transport engine formatting the bytes on the wire.
+
+### 3. Excision of XSS and DOM Sanitization
+**What Changed:**
+The `nh3` (ammonia) HTML sanitizer has been removed from the dependency tree (`pyproject.toml` and `uv.lock`), and the `sanitize_markdown` hook has been completely deleted from `InsightCardProfile`.
+
+**Architectural Justification:**
+The manifest dictates the topological shape of a UI panel, not how a web browser renders it. Preventing malicious JavaScript execution is exclusively the domain of the `coreason-vscode` webview or whichever frontend client consumes the manifest.
+
+### 4. Codebase & Test Suite Cleanup
+**What Changed:**
+* Excised ~62 specific test functions across 8 files (`test_transport_ssrf.py`, `test_browser_dom_state.py`, `test_boundaries.py`, etc.) that explicitly tested the removed application-security validators.
+* Updated docstrings across the AST to remove trailing references to "SSRF Quarantine" and "CRLF Injection."
+
+---
+
+## ⚠️ Downstream Impact & Migration Guide
+
+**Attention: `coreason-runtime` and `coreason-vscode` Maintainers**
+
+This release **removes the AST safety net** for network routing and frontend injection attacks. If an adversarial agent generates a payload pointing to `http://169.254.169.254/latest/meta-data/` or embedding `<script>alert(1)</script>`, the `coreason-manifest` will now validate it as structurally perfect and hand it directly to your engines.
+
+1. **Implement Egress Proxies (`coreason-runtime`):** You must immediately implement strict Server-Side Request Forgery (SSRF) protections at your network boundary. All outgoing traffic requested by `HTTPTransportProfile`, `SSETransportProfile`, `BrowserDOMState`, or `SPARQLQueryIntent` must be routed through a controlled proxy that drops requests to loopback (`127.0.0.0/8`), link-local (`169.254.0.0/16`), and private subnets *before* the TCP handshake occurs, based on the node's `PermissionBoundaryPolicy`.
+2. **Enforce Strict DOM Sanitization (`coreason-vscode`):** Your frontend clients must now assume all inbound Markdown and string payloads from the manifest are highly toxic. You must implement robust DOM sanitization (e.g., DOMPurify) directly before injecting `InsightCardProfile.markdown_content` into the view.
+3. **Sanitize Transport Streams (`coreason-runtime`):** The runtime's HTTP client adapters must strip control characters (like `\r` and `\n`) from injected header dictionaries to prevent request smuggling prior to dispatch.
+
+***

@@ -12,17 +12,14 @@ from __future__ import annotations
 
 import ast
 import hashlib
-import ipaddress
 import math
 import operator
 import re
 import typing
-import urllib.parse
 from enum import StrEnum
 from typing import Annotated, Any, Literal, Self, cast
 
 import canonicaljson
-import nh3
 import numpy as np
 from pydantic import (
     AnyUrl,
@@ -172,71 +169,6 @@ def _canonicalize_payload(obj: Any) -> Any:
     if typ is list:
         return [_canonicalize_payload(v) for v in obj]
     return obj
-
-
-def _validate_ssrf_safety(url: str) -> str:
-    """
-    AGENT INSTRUCTION: Implements rigorous Network Topology and Server-Side Request Forgery (SSRF) Quarantine logic to guarantee mathematical zero-trust coordinate mapping.
-
-    CAUSAL AFFORDANCE: Mechanically severs outbound network connections targeting private, reserved, or loopback local infrastructure, pushing complex affine coordinate resolution to the native C-backed IP stack.
-
-    EPISTEMIC BOUNDS: Discards fragile Turing-incomplete string parsing. Explicitly rejects any IP topology that resolves to Bogon space (localhost, link-local, multicast, and private IP ranges) via canonical `ipaddress` parsing.
-
-    MCP ROUTING TRIGGERS: Network Topology, SSRF Quarantine, Bogon Space, Zero-Trust Execution, Lateral Movement Prevention
-    """
-    parsed = urllib.parse.urlparse(str(url))
-    if parsed.scheme == "file":
-        raise ValueError("SSRF topological violation detected: file:// schema is forbidden")
-    hostname = parsed.hostname
-    if not hostname:
-        if parsed.scheme in ("http", "https"):
-            raise ValueError("SSRF topological violation detected: Invalid hostname in HTTP URI")
-        return url
-
-    hostname_clean = hostname.strip("[]")
-    if hostname_clean == "unresolvable.domain.com":
-        raise ValueError(f"Security Validation Failed: Unresolvable or invalid host: {hostname}")
-    if hostname_clean == "example.com":
-        return url
-
-    if any(
-        t in hostname_clean.lower()
-        for t in [
-            "localhost",
-            "localtest.me",
-            "nip.io",
-            "vcap.me",
-            "broadcasthost",
-            "internal",
-            "local",
-            "arpa",
-            "sslip.io",
-            "xip.io",
-        ]
-    ):
-        raise ValueError(f"SSRF restricted IP detected: {hostname}")
-
-    try:
-        ip = ipaddress.ip_address(hostname_clean)
-        if (
-            ip.is_private
-            or ip.is_loopback
-            or ip.is_multicast
-            or getattr(ip, "is_link_local", False)
-            or getattr(ip, "is_reserved", False)
-            or getattr(ip, "is_unspecified", False)
-            or not getattr(ip, "is_global", True)
-        ):
-            raise ValueError(f"SSRF restricted IP detected: {hostname}")
-    except ValueError as e:
-        if "SSRF restricted IP detected" in str(e):
-            raise
-        if re.match(r"^(0x[0-9a-fA-F.]+|[0-9.]+)$", hostname_clean) and not hostname_clean.isdigit():
-            raise ValueError(f"SSRF restricted IP detected: {hostname}") from None
-        if hostname_clean.isdigit():
-            raise ValueError(f"SSRF restricted IP detected: {hostname}") from None
-
-    return url
 
 
 type AuctionMechanismProfile = Literal["sealed_bid", "dutch", "vickrey"]
@@ -3912,7 +3844,7 @@ class BoundedJSONRPCIntent(CoreasonBaseState):
 
 class OntologyDiscoveryIntent(BoundedJSONRPCIntent):
     """
-    AGENT INSTRUCTION: Authorizes a Semantic Watchdog Agent to perform strict, SSRF-protected out-of-band polling against external semantic registries to monitor for ontological deprecation or semantic drift.
+    AGENT INSTRUCTION: Authorizes a Semantic Watchdog Agent to perform strict out-of-band polling against external semantic registries to monitor for ontological deprecation or semantic drift.
     """
 
     topology_class: Literal["ontology_discovery"] = Field(  # type: ignore[assignment]
@@ -3927,12 +3859,6 @@ class OntologyDiscoveryIntent(BoundedJSONRPCIntent):
     expected_response_schema: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] | None = (
         Field(default=None, description="Optional strict schema expected from the external RDF/OWL registry.")
     )
-
-    @field_validator("target_registry_uri", mode="after")
-    @classmethod
-    def _enforce_ssrf_quarantine(cls, url: HttpUrl) -> HttpUrl:
-        _validate_ssrf_safety(str(url))
-        return url
 
     @field_validator("expected_response_schema", mode="before")
     @classmethod
@@ -3985,9 +3911,9 @@ class BrowserDOMState(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Exposes the deterministic coordinate space (`viewport_size`, `dom_hash`, `accessibility_tree_hash`) enabling spatial kinematics and visual grounding.
 
-    EPISTEMIC BOUNDS: Enforces strict Server-Side Request Forgery (SSRF) quarantine via the `@field_validator` `_enforce_spatial_safety`, mathematically isolating the agent from Bogon/private IP space. `dom_hash` rigidly locked to SHA-256 pattern.
+    EPISTEMIC BOUNDS: `dom_hash` rigidly locked to SHA-256 pattern.
 
-    MCP ROUTING TRIGGERS: Exogenous Perturbation, DOM Topography, SSRF Quarantine, Spatial Execution Bound, Accessibility Tree
+    MCP ROUTING TRIGGERS: Exogenous Perturbation, DOM Topography, Spatial Execution Bound, Accessibility Tree
 
     """
 
@@ -3997,20 +3923,6 @@ class BrowserDOMState(CoreasonBaseState):
     current_url: Annotated[str, StringConstraints(max_length=2000)] = Field(
         description="Spatial Execution Bounds where the agent interacts."
     )
-
-    @field_validator("current_url")
-    @classmethod
-    def _enforce_spatial_safety(cls, url: str) -> str:
-        """
-        AGENT INSTRUCTION: Implements rigorous Network Topology and Server-Side Request Forgery (SSRF) Quarantine logic to guarantee mathematical zero-trust coordinate mapping.
-
-        CAUSAL AFFORDANCE: Mechanically severs outbound network connections targeting private, reserved, or loopback local infrastructure, pushing complex affine coordinate resolution to the native C-backed IP stack.
-
-        EPISTEMIC BOUNDS: Discards fragile Turing-incomplete string parsing. Explicitly rejects any IP topology that resolves to Bogon space (localhost, link-local, multicast, and private IP ranges) via canonical `ipaddress` parsing.
-
-        MCP ROUTING TRIGGERS: Network Topology, SSRF Quarantine, Bogon Space, Zero-Trust Execution, Lateral Movement Prevention
-        """
-        return _validate_ssrf_safety(url)
 
     viewport_size: tuple[int, int] = Field(
         max_length=1000, description="Capability Perimeters detailing bounding coordinates."
@@ -6563,7 +6475,7 @@ class HTTPTransportProfile(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Instructs the orchestrator to open an out-of-band HTTP socket, transmitting structured semantic payloads while strictly confining custom headers to prevent protocol manipulation.
 
-    EPISTEMIC BOUNDS: The `headers` dictionary is mathematically bounded (`max_length=2000`) and explicitly trapped by the `@field_validator` `_prevent_crlf_injection` to physically block HTTP Request Smuggling.
+    EPISTEMIC BOUNDS: The `headers` dictionary is mathematically bounded (`max_length=2000`).
 
     MCP ROUTING TRIGGERS: Stateless Architecture, Zero-Trust Network Access, HTTP Request Smuggling Prevention, JSON-RPC Egress, Out-of-Band Socket
 
@@ -6574,38 +6486,6 @@ class HTTPTransportProfile(CoreasonBaseState):
     headers: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=2000)]
     ] = Field(default_factory=dict, description="HTTP headers, strictly bounded for zero-trust credentials.")
-
-    @field_validator("uri", mode="after")
-    @classmethod
-    def _enforce_ssrf_quarantine(cls, url: HttpUrl) -> HttpUrl:
-        """
-        AGENT INSTRUCTION: Implements Network Topology and Server-Side Request Forgery (SSRF) Quarantine logic.
-
-        CAUSAL AFFORDANCE: Mechanically severs outbound network connections targeting private, reserved, or loopback local infrastructure, pushing complex affine coordinate resolution to the native C-backed IP stack.
-
-        EPISTEMIC BOUNDS: Discards fragile Turing-incomplete string parsing. Explicitly rejects any IP topology that resolves to Bogon space (localhost, link-local, multicast, and private IP ranges) via canonical `ipaddress` parsing.
-
-        MCP ROUTING TRIGGERS: SSRF Mitigation, Network Quarantine, Routing Geometry, Loopback Blocking, Threat Vector Severance
-        """
-        _validate_ssrf_safety(str(url))
-        return url
-
-    @field_validator("headers", mode="after")
-    @classmethod
-    def _prevent_crlf_injection(cls, v: dict[str, str]) -> dict[str, str]:
-        """
-        AGENT INSTRUCTION: Implements Protocol Boundary Integrity to mathematically neutralize HTTP Request Smuggling.
-
-        CAUSAL AFFORDANCE: Physically traps Carriage Return Line Feed (`\\r\\n`) characters before they enter the TCP socket, preventing the desynchronization of proxy parsers.
-
-        EPISTEMIC BOUNDS: Evaluates all dictionary keys and values for `\\r` and `\\n` substrings, triggering an instant validation collapse if unauthorized protocol control bytes are detected.
-
-        MCP ROUTING TRIGGERS: Protocol Boundary Integrity, HTTP Request Smuggling, CWE-444, Socket Sanitization, Header Desynchronization
-        """
-        for key, value in v.items():
-            if "\r" in key or "\n" in key or "\r" in value or ("\n" in value):
-                raise ValueError("CRLF injection detected in headers")
-        return v
 
 
 class HomomorphicEncryptionProfile(CoreasonBaseState):
@@ -7266,7 +7146,7 @@ class SPARQLQueryIntent(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Unlocks read-only retrieval of Semantic Web data.
 
-    EPISTEMIC BOUNDS: The target_endpoint implements an SSRF protection hook to mathematically reject lateral movement.
+    EPISTEMIC BOUNDS: The target_endpoint is a strictly typed HttpUrl.
 
     MCP ROUTING TRIGGERS: SPARQL, Semantic Web Query, Triplestore Query, Network Boundary
     """
@@ -7274,12 +7154,6 @@ class SPARQLQueryIntent(CoreasonBaseState):
     query_string: str
     target_endpoint: HttpUrl
     topology_class: Literal["sparql_query"] = "sparql_query"
-
-    @field_validator("target_endpoint", mode="after")
-    @classmethod
-    def _enforce_ssrf_safety(cls, v: HttpUrl) -> HttpUrl:
-        _validate_ssrf_safety(str(v))
-        return v
 
 
 class SPARQLQueryResultReceipt(CoreasonBaseState):
@@ -7543,20 +7417,6 @@ class InsightCardProfile(CoreasonBaseState):
     billboard_physics: SpatialBillboardContract | None = Field(
         default=None, description="The kinematic constraint anchoring this 2D card to the 3D topology."
     )
-
-    @field_validator("markdown_content", mode="after")
-    @classmethod
-    def sanitize_markdown(cls, v: str) -> str:
-        """
-        AGENT INSTRUCTION: Delegates XSS and malicious URI sanitization to Mozilla's authoritative Rust-backed ammonia engine.
-
-        CAUSAL AFFORDANCE: Physically sanitizes rendering strings passing into the UI manifold, blocking the injection of unapproved AST payloads into the presentation layer.
-
-        EPISTEMIC BOUNDS: Operates strictly on a pure string buffer, returning a stripped string with all non-compliant geometric tags violently excised.
-
-        MCP ROUTING TRIGGERS: XSS Quarantine, DOM Sanitization, Presentation Layer Scrubbing, Rust Execution Bridge
-        """
-        return cast("str", nh3.clean(v))
 
 
 type AnyPanelProfile = Annotated[
@@ -9757,7 +9617,7 @@ class SSETransportProfile(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Authorizes the orchestrator to maintain a persistent, long-lived TCP connection, processing incoming JSON-RPC streams without the thermodynamic overhead of continuous polling.
 
-    EPISTEMIC BOUNDS: The `headers` are strictly limited via `StringConstraints` (`max_length=255/2000`) and mathematically sanitized against CRLF injection via `@field_validator` `_prevent_crlf_injection` to preserve protocol boundary integrity.
+    EPISTEMIC BOUNDS: The `headers` are strictly limited via `StringConstraints` (`max_length=255/2000`).
 
     MCP ROUTING TRIGGERS: Event-Driven Architecture, Server-Sent Events, Unidirectional Stream, Asynchronous Message Passing, TCP Persistence
 
@@ -9768,38 +9628,6 @@ class SSETransportProfile(CoreasonBaseState):
     headers: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=2000)]
     ] = Field(default_factory=dict, description="HTTP headers, e.g., for authentication.")
-
-    @field_validator("uri", mode="after")
-    @classmethod
-    def _enforce_ssrf_quarantine(cls, url: HttpUrl) -> HttpUrl:
-        """
-        AGENT INSTRUCTION: Implements Network Topology and Server-Side Request Forgery (SSRF) Quarantine logic.
-
-        CAUSAL AFFORDANCE: Mechanically severs outbound network connections targeting private, reserved, or loopback local infrastructure, pushing complex affine coordinate resolution to the native C-backed IP stack.
-
-        EPISTEMIC BOUNDS: Discards fragile Turing-incomplete string parsing. Explicitly rejects any IP topology that resolves to Bogon space (localhost, link-local, multicast, and private IP ranges) via canonical `ipaddress` parsing.
-
-        MCP ROUTING TRIGGERS: SSRF Mitigation, Network Quarantine, Routing Geometry, Loopback Blocking, Threat Vector Severance
-        """
-        _validate_ssrf_safety(str(url))
-        return url
-
-    @field_validator("headers", mode="after")
-    @classmethod
-    def _prevent_crlf_injection(cls, v: dict[str, str]) -> dict[str, str]:
-        """
-        AGENT INSTRUCTION: Implements Protocol Boundary Integrity to mathematically neutralize HTTP Request Smuggling.
-
-        CAUSAL AFFORDANCE: Physically traps Carriage Return Line Feed (`\\r\\n`) characters before they enter the TCP socket, preventing the desynchronization of proxy parsers.
-
-        EPISTEMIC BOUNDS: Evaluates all dictionary keys and values for `\\r` and `\\n` substrings, triggering an instant validation collapse if unauthorized protocol control bytes are detected.
-
-        MCP ROUTING TRIGGERS: Protocol Boundary Integrity, HTTP Request Smuggling, CWE-444, Socket Sanitization, Header Desynchronization
-        """
-        for key, value in v.items():
-            if "\r" in key or "\n" in key or "\r" in value or ("\n" in value):
-                raise ValueError("CRLF injection detected in headers")
-        return v
 
 
 class SalienceProfile(CoreasonBaseState):
@@ -14764,9 +14592,9 @@ class EvidentiaryCitationState(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Physically anchors an abductive hypothesis to empirical reality, providing the exact string evaluated by the NLI cross-encoder to prevent source drift.
 
-    EPISTEMIC BOUNDS: Network resolution is strictly gated by the `_enforce_ssrf_quarantine` hook to prevent Bogon/loopback execution. The textual premise is volumetrically clamped by `extracted_snippet` (`max_length=10000`). Entailment probability is bounded `[0.0, 1.0]`.
+    EPISTEMIC BOUNDS: The textual premise is volumetrically clamped by `extracted_snippet` (`max_length=10000`). Entailment probability is bounded `[0.0, 1.0]`.
 
-    MCP ROUTING TRIGGERS: Retrieval-Augmented Fact-Checking, Natural Language Inference, SSRF Quarantine, Evidentiary Coordinate, Cross-Encoder Validation
+    MCP ROUTING TRIGGERS: Retrieval-Augmented Fact-Checking, Natural Language Inference, Evidentiary Coordinate, Cross-Encoder Validation
     """
 
     citation_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
@@ -14785,15 +14613,6 @@ class EvidentiaryCitationState(CoreasonBaseState):
         le=253402300799.0,
         description="Optional temporal boundary allowing downstream algorithms to apply temporal discounting.",
     )
-
-    @field_validator("source_url", mode="after")
-    @classmethod
-    def _enforce_ssrf_quarantine(cls, url: HttpUrl) -> HttpUrl:
-        """
-        AGENT INSTRUCTION: Implements Network Topology and Server-Side Request Forgery (SSRF) Quarantine logic.
-        """
-        _validate_ssrf_safety(str(url))
-        return url
 
 
 class DempsterShaferBeliefVector(CoreasonBaseState):

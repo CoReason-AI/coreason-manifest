@@ -9,51 +9,9 @@
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
 import pytest
-from pydantic import HttpUrl, ValidationError
+from pydantic import HttpUrl
 
 from coreason_manifest.spec.ontology import HTTPTransportProfile, SSETransportProfile
-
-
-@pytest.mark.parametrize(
-    "url",
-    [
-        "http://localhost:8080/admin",
-        "http://127.0.0.1/",
-        "http://[::1]/",
-        "http://169.254.169.254/",
-        "http://192.168.1.1/",
-        "http://localtest.me/",
-        "http://127.0.0.1.nip.io/",
-        "http://[0:0:0:0:0:FFFF:127.0.0.1]/",
-    ],
-)
-def test_http_transport_profile_ssrf(url: str) -> None:
-    with pytest.raises(
-        ValidationError,
-        match=r"(SSRF restricted IP detected|SSRF topological violation detected|Security Validation Failed: Unresolvable or invalid host)",
-    ):
-        HTTPTransportProfile(uri=HttpUrl(url))
-
-
-@pytest.mark.parametrize(
-    "url",
-    [
-        "http://localhost:8080/admin",
-        "http://127.0.0.1/",
-        "http://[::1]/",
-        "http://169.254.169.254/",
-        "http://192.168.1.1/",
-        "http://localtest.me/",
-        "http://127.0.0.1.nip.io/",
-        "http://[0:0:0:0:0:FFFF:127.0.0.1]/",
-    ],
-)
-def test_sse_transport_profile_ssrf(url: str) -> None:
-    with pytest.raises(
-        ValidationError,
-        match=r"(SSRF restricted IP detected|SSRF topological violation detected|Security Validation Failed: Unresolvable or invalid host)",
-    ):
-        SSETransportProfile(uri=HttpUrl(url))
 
 
 @pytest.mark.parametrize(
@@ -78,32 +36,6 @@ def test_http_transport_profile_valid(url: str) -> None:
 def test_sse_transport_profile_valid(url: str) -> None:
     profile = SSETransportProfile(uri=HttpUrl(url))
     assert str(profile.uri) == url
-
-
-@pytest.mark.parametrize(
-    "url",
-    [
-        "http://localhost:8080/sparql",
-        "http://127.0.0.1/",
-        "http://[::1]/",
-        "http://169.254.169.254/",
-        "http://192.168.1.1/",
-        "http://localtest.me/",
-        "http://127.0.0.1.nip.io/",
-        "http://[0:0:0:0:0:FFFF:127.0.0.1]/",
-    ],
-)
-def test_sparql_query_intent_ssrf(url: str) -> None:
-    from coreason_manifest.spec.ontology import SPARQLQueryIntent
-
-    with pytest.raises(
-        ValidationError,
-        match=r"(SSRF restricted IP detected|SSRF topological violation detected|Security Validation Failed: Unresolvable or invalid host)",
-    ):
-        SPARQLQueryIntent(
-            target_endpoint=HttpUrl(url),
-            query_string="SELECT * WHERE { ?s ?p ?o }",
-        )
 
 
 @pytest.mark.parametrize(

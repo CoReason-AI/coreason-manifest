@@ -807,26 +807,6 @@ def test_validator_falsification_sad_path(
 # ---------------------------------------------------------------------------
 
 
-class TestSSETransportCRLFInjection:
-    """Exercise the CRLF injection detection in SSETransportProfile headers."""
-
-    def test_crlf_in_header_key_rejected(self) -> None:
-        """Covers lines 9742-9745: CRLF in header key."""
-        with pytest.raises(Exception, match=r"CRLF|validation"):
-            o.SSETransportProfile(
-                uri="https://example.com/sse",  # type: ignore[arg-type]
-                headers={"X-Bad\r\nHeader": "value"},
-            )
-
-    def test_crlf_in_header_value_rejected(self) -> None:
-        """Covers lines 9742-9745: CRLF in header value."""
-        with pytest.raises(Exception, match=r"CRLF|validation"):
-            o.SSETransportProfile(
-                uri="https://example.com/sse",  # type: ignore[arg-type]
-                headers={"X-Good": "bad\r\nvalue"},
-            )
-
-
 class TestFederatedVaultLocks:
     """Exercise the restricted vault locks branch in FederatedCapabilityAttestationReceipt."""
 
@@ -1289,17 +1269,6 @@ class TestDynamicLayoutFStringAST:
         )
         with pytest.raises(ValueError, match=r"AST Complexity Overload"):
             instance.enforce_ast_thermodynamic_gas_limit()  # type: ignore[operator]
-
-
-class TestCRLFReturnPath:
-    """Exercise the ``return v`` line (9745) for clean headers."""
-
-    def test_clean_headers_accepted(self) -> None:
-        """Covers line 9745: CRLF validator returns v when no injection found."""
-        # Directly invoke the classmethod field validator
-        clean_headers: dict[str, str] = {"X-Auth": "Bearer token123", "Accept": "text/event-stream"}
-        result = o.SSETransportProfile._prevent_crlf_injection(clean_headers)
-        assert result == clean_headers
 
 
 class TestTransitionEdgeIntegrity:

@@ -2274,7 +2274,7 @@
     },
     "BrowserDOMState": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the exogenous structural boundary of a headless browser environment within a Partially Observable Markov Decision Process (POMDP).\n\nCAUSAL AFFORDANCE: Exposes the deterministic coordinate space (`viewport_size`, `dom_hash`, `accessibility_tree_hash`) enabling spatial kinematics and visual grounding.\n\nEPISTEMIC BOUNDS: Enforces strict Server-Side Request Forgery (SSRF) quarantine via the `@field_validator` `_enforce_spatial_safety`, mathematically isolating the agent from Bogon/private IP space. `dom_hash` rigidly locked to SHA-256 pattern.\n\nMCP ROUTING TRIGGERS: Exogenous Perturbation, DOM Topography, SSRF Quarantine, Spatial Execution Bound, Accessibility Tree",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the exogenous structural boundary of a headless browser environment within a Partially Observable Markov Decision Process (POMDP).\n\nCAUSAL AFFORDANCE: Exposes the deterministic coordinate space (`viewport_size`, `dom_hash`, `accessibility_tree_hash`) enabling spatial kinematics and visual grounding.\n\nEPISTEMIC BOUNDS: `dom_hash` rigidly locked to SHA-256 pattern.\n\nMCP ROUTING TRIGGERS: Exogenous Perturbation, DOM Topography, Spatial Execution Bound, Accessibility Tree",
       "properties": {
         "topology_class": {
           "const": "browser",
@@ -9744,7 +9744,7 @@
     },
     "EvidentiaryCitationState": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative coordinate representing an immutable, localized snippet of external evidence retrieved by an oracle, coupled with its calculated Natural Language Inference (NLI) score.\n\nCAUSAL AFFORDANCE: Physically anchors an abductive hypothesis to empirical reality, providing the exact string evaluated by the NLI cross-encoder to prevent source drift.\n\nEPISTEMIC BOUNDS: Network resolution is strictly gated by the `_enforce_ssrf_quarantine` hook to prevent Bogon/loopback execution. The textual premise is volumetrically clamped by `extracted_snippet` (`max_length=10000`). Entailment probability is bounded `[0.0, 1.0]`.\n\nMCP ROUTING TRIGGERS: Retrieval-Augmented Fact-Checking, Natural Language Inference, SSRF Quarantine, Evidentiary Coordinate, Cross-Encoder Validation",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative coordinate representing an immutable, localized snippet of external evidence retrieved by an oracle, coupled with its calculated Natural Language Inference (NLI) score.\n\nCAUSAL AFFORDANCE: Physically anchors an abductive hypothesis to empirical reality, providing the exact string evaluated by the NLI cross-encoder to prevent source drift.\n\nEPISTEMIC BOUNDS: The textual premise is volumetrically clamped by `extracted_snippet` (`max_length=10000`). Entailment probability is bounded `[0.0, 1.0]`.\n\nMCP ROUTING TRIGGERS: Retrieval-Augmented Fact-Checking, Natural Language Inference, Evidentiary Coordinate, Cross-Encoder Validation",
       "properties": {
         "citation_cid": {
           "description": "Cryptographic anchor for the specific piece of evidence.",
@@ -11593,7 +11593,7 @@
     },
     "HTTPTransportProfile": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes a Stateless Client-Server Architecture for JSON-RPC 2.0 message passing, serving as the egress manifold for Zero-Trust Network Access (ZTNA).\n\nCAUSAL AFFORDANCE: Instructs the orchestrator to open an out-of-band HTTP socket, transmitting structured semantic payloads while strictly confining custom headers to prevent protocol manipulation.\n\nEPISTEMIC BOUNDS: The `headers` dictionary is mathematically bounded (`max_length=2000`) and explicitly trapped by the `@field_validator` `_prevent_crlf_injection` to physically block HTTP Request Smuggling.\n\nMCP ROUTING TRIGGERS: Stateless Architecture, Zero-Trust Network Access, HTTP Request Smuggling Prevention, JSON-RPC Egress, Out-of-Band Socket",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes a Stateless Client-Server Architecture for JSON-RPC 2.0 message passing, serving as the egress manifold for Zero-Trust Network Access (ZTNA).\n\nCAUSAL AFFORDANCE: Instructs the orchestrator to open an out-of-band HTTP socket, transmitting structured semantic payloads while strictly confining custom headers to prevent protocol manipulation.\n\nEPISTEMIC BOUNDS: The `headers` dictionary is mathematically bounded (`max_length=2000`).\n\nMCP ROUTING TRIGGERS: Stateless Architecture, Zero-Trust Network Access, HTTP Request Smuggling Prevention, JSON-RPC Egress, Out-of-Band Socket",
       "properties": {
         "topology_class": {
           "const": "http",
@@ -15553,7 +15553,7 @@
     },
     "OntologyDiscoveryIntent": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Authorizes a Semantic Watchdog Agent to perform strict, SSRF-protected out-of-band polling against external semantic registries to monitor for ontological deprecation or semantic drift.",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Authorizes a Semantic Watchdog Agent to perform strict out-of-band polling against external semantic registries to monitor for ontological deprecation or semantic drift.",
       "properties": {
         "topology_class": {
           "const": "ontology_discovery",
@@ -17206,7 +17206,7 @@
     },
     "SPARQLQueryIntent": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Instructs the Semantic Web Archivist to execute a strict, volumetrically bounded query against an enterprise triplestore.\n\nCAUSAL AFFORDANCE: Unlocks read-only retrieval of Semantic Web data.\n\nEPISTEMIC BOUNDS: The target_endpoint implements an SSRF protection hook to mathematically reject lateral movement.\n\nMCP ROUTING TRIGGERS: SPARQL, Semantic Web Query, Triplestore Query, Network Boundary",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Instructs the Semantic Web Archivist to execute a strict, volumetrically bounded query against an enterprise triplestore.\n\nCAUSAL AFFORDANCE: Unlocks read-only retrieval of Semantic Web data.\n\nEPISTEMIC BOUNDS: The target_endpoint is a strictly typed HttpUrl.\n\nMCP ROUTING TRIGGERS: SPARQL, Semantic Web Query, Triplestore Query, Network Boundary",
       "properties": {
         "query_string": {
           "title": "Query String",
@@ -17309,7 +17309,7 @@
     },
     "SSETransportProfile": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements an Asynchronous Event-Driven Architecture leveraging Server-Sent Events (SSE) to map a unidirectional, continuous topology of Server-to-Client state transitions.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator to maintain a persistent, long-lived TCP connection, processing incoming JSON-RPC streams without the thermodynamic overhead of continuous polling.\n\nEPISTEMIC BOUNDS: The `headers` are strictly limited via `StringConstraints` (`max_length=255/2000`) and mathematically sanitized against CRLF injection via `@field_validator` `_prevent_crlf_injection` to preserve protocol boundary integrity.\n\nMCP ROUTING TRIGGERS: Event-Driven Architecture, Server-Sent Events, Unidirectional Stream, Asynchronous Message Passing, TCP Persistence",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements an Asynchronous Event-Driven Architecture leveraging Server-Sent Events (SSE) to map a unidirectional, continuous topology of Server-to-Client state transitions.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator to maintain a persistent, long-lived TCP connection, processing incoming JSON-RPC streams without the thermodynamic overhead of continuous polling.\n\nEPISTEMIC BOUNDS: The `headers` are strictly limited via `StringConstraints` (`max_length=255/2000`).\n\nMCP ROUTING TRIGGERS: Event-Driven Architecture, Server-Sent Events, Unidirectional Stream, Asynchronous Message Passing, TCP Persistence",
       "properties": {
         "topology_class": {
           "const": "sse",

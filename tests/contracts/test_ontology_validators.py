@@ -404,50 +404,8 @@ def test_browser_dom_state_safety_valid_fuzzing(url: str) -> None:
         )
         assert state.current_url == url
     except ValidationError:
-        # It might still trigger SSRF validation if hypothesis generates a local-looking domain,
-        # but that's properly handled as part of the fuzzing scope.
+        # Hypothesis may generate structurally invalid URLs that fail Pydantic validation.
         pass
-
-
-@given(
-    bogon=st.sampled_from(
-        [
-            "localhost",
-            "broadcasthost",
-            "test.local",
-            "test.internal",
-            "test.arpa",
-            "test.nip.io",
-            "test.sslip.io",
-            "127.0.0.1",
-            "192.168.1.1",
-            "10.0.0.1",
-            "169.254.169.254",
-            "0.0.0.0",  # noqa: S104 # nosec B104
-        ]
-    )
-)
-@settings(max_examples=100, deadline=None)
-def test_browser_dom_state_safety_invalid_fuzzing(bogon: str) -> None:
-    from pydantic import ValidationError
-
-    from coreason_manifest.spec.ontology import BrowserDOMState
-
-    with pytest.raises(ValidationError, match=r"SSRF|validation error"):
-        BrowserDOMState(
-            current_url=f"http://{bogon}",
-            viewport_size=(800, 600),
-            dom_hash="a" * 64,
-            accessibility_tree_hash="b" * 64,
-        )
-
-    with pytest.raises(ValidationError, match=r"SSRF|validation error"):
-        BrowserDOMState(
-            current_url=f"file://{bogon}",
-            viewport_size=(800, 600),
-            dom_hash="a" * 64,
-            accessibility_tree_hash="b" * 64,
-        )
 
 
 def test_defeasible_cascade_event_sorting() -> None:
@@ -666,29 +624,6 @@ def test_mcpservermanifest_enforce_did() -> None:
         attestation_receipt=vc_valid,
     )
     assert manifest.attestation_receipt.issuer_did == "did:coreason:123"
-
-
-def test_insight_card_profile_xss_prevention() -> None:
-    from coreason_manifest.spec.ontology import InsightCardProfile
-
-    # Test that valid links work
-    InsightCardProfile(panel_cid="panel_1", title="Title", markdown_content="[click me](https://coreason.ai)")
-
-    malicious_payloads = [
-        "<script>alert(1)</script>",
-        "<img src='x' onerror='alert(1)'>",
-    ]
-
-    for payload in malicious_payloads:
-        profile = InsightCardProfile(panel_cid="panel_1", title="Title", markdown_content=payload)
-        assert "<script>" not in profile.markdown_content
-        assert "alert(1)" not in profile.markdown_content
-
-    # Note: "<a href='javascript:alert(1)'>click me</a>" is caught by `sanitize_markdown` first
-    profile = InsightCardProfile(
-        panel_cid="panel_1", title="Title", markdown_content="<a href='javascript:alert(1)'>click me</a>"
-    )
-    assert "javascript:alert" not in profile.markdown_content
 
 
 def test_macro_grid_profile_referential_integrity() -> None:
