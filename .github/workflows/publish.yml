@@ -126,8 +126,6 @@ jobs:
           cd bindings/typescript
           npm version "$VERSION" --no-git-tag-version
       - name: Publish TypeScript Bindings
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           cd bindings/typescript
           npm ci
