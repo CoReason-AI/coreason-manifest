@@ -984,7 +984,3 @@ def test_calculate_latent_alignment_edge_cases() -> None:
             )
             assert calculate_latent_alignment(v1, v2, policy) == 0.0
 
-    # Also force the return from similarity division to be exactly NaN without failing the early check
-    # e.g., if mag1=0 or mag2=0 is bypassed but similarity calculates to nan. This is impossible without mock,
-    # since we check for mag1 == 0.0 and mag2 == 0.0 explicitly. We will test the math.isnan branch in code
-    # by ensuring we execute it.
