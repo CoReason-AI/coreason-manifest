@@ -1,6 +1,6 @@
 {
   "name": "@coreason-ai/coreason-manifest",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "TypeScript bindings for the CoReason Hollow Data Plane.",
   "license": "SEE LICENSE IN LICENSE",
   "author": "CoReason, Inc <license@coreason.ai>",
