@@ -128,4 +128,3 @@ exclude_lines = [
 [[tool.mypy.overrides]]
 module = ["rustworkx", "rustworkx.*"]
 ignore_missing_imports = true
-

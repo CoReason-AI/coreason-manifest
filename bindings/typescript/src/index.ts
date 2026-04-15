@@ -35,14 +35,14 @@ function canonicalizePayload(obj: any): any {
 export function serializeEnvelope(envelope: ExecutionEnvelopeState): string {
     // 1. Strip nulls to match Python's exclusion physics
     const canonicalParams = canonicalizePayload(envelope);
-    
+
     // 2. Wrap in the JSON-RPC 2.0 Shell
     const wrappedPayload = {
         jsonrpc: "2.0",
         method: "coreason_execute",
         params: canonicalParams,
         // Extract the trace_cid to use as the RPC request ID
-        id: canonicalParams.trace_context?.trace_cid || "unknown" 
+        id: canonicalParams.trace_context?.trace_cid || "unknown"
     };
 
     // 3. Deterministically sort keys and stringify

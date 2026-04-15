@@ -3,9 +3,9 @@
 # 🚀 Release Notes: coreason-manifest (Epic 1 Update)
 
 ## Executive Summary
-We have successfully merged **Epic 1: Thermodynamic Decoupling** into the `coreason-manifest` ontology. This release fundamentally shifts the architectural philosophy of the CoReason stack. 
+We have successfully merged **Epic 1: Thermodynamic Decoupling** into the `coreason-manifest` ontology. This release fundamentally shifts the architectural philosophy of the CoReason stack.
 
-Historically, the manifest conflated **Topological Shape** (pure mathematics) with **Thermodynamic Limits** (ephemeral hardware/business constraints). By enforcing arbitrary limits—such as 24-hour execution timeouts or 24GB VRAM ceilings—at the AST level, we artificially constrained the generative capacity of the swarm and forced brittle schema updates. 
+Historically, the manifest conflated **Topological Shape** (pure mathematics) with **Thermodynamic Limits** (ephemeral hardware/business constraints). By enforcing arbitrary limits—such as 24-hour execution timeouts or 24GB VRAM ceilings—at the AST level, we artificially constrained the generative capacity of the swarm and forced brittle schema updates.
 
 With this release, the Manifest now acts as a purely mathematical Universal Unified Ontology. The responsibility for enforcing physical hardware limits ("The Hardware Guillotine") has been entirely decoupled from the AST and shifted downstream to the `coreason-runtime` and `coreason-ecosystem` admission controllers.
 
@@ -15,12 +15,12 @@ With this release, the Manifest now acts as a purely mathematical Universal Unif
 
 ### 1. Implementation of Universal Architectural Bounds (UAB)
 **What Changed:**
-All arbitrary `le=` limits representing physical, temporal, or economic constraints have been stripped from `pydantic.Field` and `Annotated` declarations. 
+All arbitrary `le=` limits representing physical, temporal, or economic constraints have been stripped from `pydantic.Field` and `Annotated` declarations.
 * **Temporal Limits:** Previous constraints of `86400000` ms (24 hours), `86400` s, and `3600` s have been lifted.
 * **Spatial/Memory Limits:** Previous constraints of `100000000000` bytes (100GB VRAM) and `65536` (LoRA ranks) have been lifted.
 * **Economic Limits:** Previous constraints of `1000000000` (token/budget limits) and `10000.0` (Carbon/ESG bounds) have been lifted.
 
-In their place, we have instituted the **Universal Architectural Bound of `18446744073709551615`** (the absolute maximum value of an unsigned 64-bit integer, `u64`). 
+In their place, we have instituted the **Universal Architectural Bound of `18446744073709551615`** (the absolute maximum value of an unsigned 64-bit integer, `u64`).
 
 **Architectural Justification:**
 While pure mathematics allows for infinite dimensions, our serialization substrate does not. If an LLM generated a budget of $10^{100}$, it would successfully validate in Python but trigger a fatal integer overflow panic (`serde_json`) when crossing the FFI/IPC boundary into our Rust runtime. Capping these dimensions at the `u64` maximum achieves near-infinity for semantic modeling while structurally guaranteeing type-safety and preventing memory corruption across language boundaries. *Note: Pure mathematical geometries (e.g., Shannon Entropy `le=1.0`, Cosine Similarity `ge=-1.0`) remain untouched to preserve Euclidean and probabilistic invariants.*
@@ -42,7 +42,7 @@ Pre-validation clamping is required to prevent downstream integer overflow. By u
 The `@model_validator` named `enforce_deployment_physics` has been completely purged from the `CognitiveAgentNodeProfile`.
 
 **Architectural Justification:**
-This validator historically hardcoded rules such as "KINETIC tiers cannot exceed 24.0 GB VRAM" and "CONFIDENTIAL workloads cannot route to untrusted providers." This is a catastrophic architectural conflation. The AST should not be aware of Nvidia's current VRAM configurations or the physical IP addresses of our compute cluster. By deleting this, the Manifest is now hardware-agnostic. 
+This validator historically hardcoded rules such as "KINETIC tiers cannot exceed 24.0 GB VRAM" and "CONFIDENTIAL workloads cannot route to untrusted providers." This is a catastrophic architectural conflation. The AST should not be aware of Nvidia's current VRAM configurations or the physical IP addresses of our compute cluster. By deleting this, the Manifest is now hardware-agnostic.
 
 ---
 
@@ -50,7 +50,7 @@ This validator historically hardcoded rules such as "KINETIC tiers cannot exceed
 
 **Attention: `coreason-runtime` and `coreason-ecosystem` Maintainers**
 
-This release **removes the AST safety net** for payload size and duration limits. If a user requests a 10-year execution span, the `coreason-manifest` will now validate it and hand it to your engines. 
+This release **removes the AST safety net** for payload size and duration limits. If a user requests a 10-year execution span, the `coreason-manifest` will now validate it and hand it to your engines.
 
 1. **Implement Dynamic Admission Controllers:** You must immediately implement load-shedding and admission control at your ingress boundaries. Your Rust/C++ engines must evaluate the inbound `18446744073709551615` bounds against *actual local server capabilities* and gracefully return a `413 Payload Too Large` or `400 Bad Request` if the requested topology exceeds your physical thermodynamic budget.
 2. **Security Subnets:** Ecosystem routers must now dynamically read the `EpistemicSecurityPolicy` field and map it against live VPC rules, rather than relying on Pydantic to crash on invalid IP routing.
@@ -65,9 +65,9 @@ This release **removes the AST safety net** for payload size and duration limits
 # 🚀 Release Notes: coreason-manifest (Epic 2 Update)
 
 ## Executive Summary
-We have successfully merged **Epic 2: The Silicon Purge (URN Extensibility Protocol)** into the `coreason-manifest` ontology. 
+We have successfully merged **Epic 2: The Silicon Purge (URN Extensibility Protocol)** into the `coreason-manifest` ontology.
 
-Building upon the Universal Architectural Bounds established in Epic 1, this release further cements our core philosophy: *"The Manifest is Fundamental Math; The Orchestrator is Ephemeral Physics."* Previously, our schema was tightly coupled to 2026-era hardware and software technologies. Hardcoding enumerations for specific execution dialects (`sglang`, `outlines`), silicon profiles (`CUDA_FP32`), and attestation mechanisms (`fido2_webauthn`) created a brittle ecosystem where every new technological advancement required a bump in the foundational Pydantic schema. 
+Building upon the Universal Architectural Bounds established in Epic 1, this release further cements our core philosophy: *"The Manifest is Fundamental Math; The Orchestrator is Ephemeral Physics."* Previously, our schema was tightly coupled to 2026-era hardware and software technologies. Hardcoding enumerations for specific execution dialects (`sglang`, `outlines`), silicon profiles (`CUDA_FP32`), and attestation mechanisms (`fido2_webauthn`) created a brittle ecosystem where every new technological advancement required a bump in the foundational Pydantic schema.
 
 This release completely purges those ephemeral enumerations from the Hollow Data Plane. We have replaced them with **Uniform Resource Names (URNs)**. The Manifest now simply mathematically proves that an execution pointer exists and adheres to the `urn:coreason:*` schema format, shifting the burden of technology resolution entirely onto the local orchestrator's capability registry.
 
@@ -84,11 +84,11 @@ The following static classes and type aliases have been completely removed from 
 * `AttestationMechanismProfile` (e.g., `fido2_webauthn`, `zk_snark_groth16`)
 
 **Architectural Justification:**
-In a mathematically pure ontology, a Node does not know what an "Nvidia GPU" is, nor does it inherently know what a "ZK-SNARK" is. It only knows that it requires a specific computational geometry or security perimeter to resolve successfully. By deleting these literals, the Pydantic AST is no longer locked into a rapidly depreciating technology stack. 
+In a mathematically pure ontology, a Node does not know what an "Nvidia GPU" is, nor does it inherently know what a "ZK-SNARK" is. It only knows that it requires a specific computational geometry or security perimeter to resolve successfully. By deleting these literals, the Pydantic AST is no longer locked into a rapidly depreciating technology stack.
 
 ### 2. Introduction of URN Extensibility Patterns
 **What Changed:**
-Fields that previously relied on the deleted enums have been upgraded to accept extensible URN strings validated via Regex (`^urn:coreason:.*$`). 
+Fields that previously relied on the deleted enums have been upgraded to accept extensible URN strings validated via Regex (`^urn:coreason:.*$`).
 Affected schemas include:
 * `SpatialHardwareProfile`: `compute_tier` (default: `urn:coreason:compute:kinetic`) and `accelerator_type` (default: `urn:coreason:accelerator:bf16_tensor`)
 * `ExecutionSubstrateProfile`: `dialect`
@@ -145,7 +145,7 @@ We have successfully merged **Epic 3: Topological Isomorphism** into the `coreas
 
 Previously, our AST suffered from severe structural fragmentation. Whenever a new formal logic prover or constraint solver was integrated into the swarm (e.g., Lean 4, Clingo/ASP, SWI-Prolog), we minted entirely new Pydantic models for both the intent premise and the verification receipt. This bloated the context window, confused the LLMs generating the topologies, and forced constant schema version bumps.
 
-By applying **Category Theory** principles, we recognized that all formal theorem provers and logic solvers are structurally isomorphic: they consume a declarative formal grammar string, process it via an oracle, and return a cryptographic receipt containing a truth value and optional bindings/counter-models. 
+By applying **Category Theory** principles, we recognized that all formal theorem provers and logic solvers are structurally isomorphic: they consume a declarative formal grammar string, process it via an oracle, and return a cryptographic receipt containing a truth value and optional bindings/counter-models.
 
 This release completely eradicates the solver-specific primitives from the AST, collapsing them into two unified, substrate-independent abstractions: `FormalLogicPremise` and `FormalVerificationReceipt`.
 
@@ -199,7 +199,7 @@ Downstream contracts that govern execution bounds have been updated to reference
 
 **Attention: `coreason-runtime` and `coreason-ecosystem` Maintainers**
 
-This release completely refactors how formal logic tasks are dispatched and verified across the swarm. 
+This release completely refactors how formal logic tasks are dispatched and verified across the swarm.
 
 1. **Routing Mesh Refactor:** `coreason-ecosystem` routing loops can no longer use `isinstance(node, EpistemicLean4Premise)` to dispatch tasks to the Lean 4 worker nodes. You must refactor your orchestration layer to implement a **Factory Pattern** that inspects the `FormalLogicPremise.dialect_urn` string to route the payload to the correct logic oracle.
 2. **Oracle Return Payloads:** The runtime adapters for SWI-Prolog, Clingo, and Lean 4 must be updated to map their specific standard outputs/errors into the unified `FormalVerificationReceipt` schema. Unification variables and ASP answer sets must both be mapped to the `extracted_bindings` array.
@@ -216,11 +216,11 @@ This release completely refactors how formal logic tasks are dispatched and veri
 # 🚀 Release Notes: coreason-manifest (Epic 4 Update & Final V1 Release)
 
 ## Executive Summary
-We have successfully merged **Epic 4: Cybernetic Governance Decoupling** into the `coreason-manifest` ontology, marking the definitive completion of our multi-stage topological refactor. 
+We have successfully merged **Epic 4: Cybernetic Governance Decoupling** into the `coreason-manifest` ontology, marking the definitive completion of our multi-stage topological refactor.
 
-With this final release, the `coreason-manifest` has achieved **Pure Mathematical Stability**. We have successfully stripped all ephemeral physics, transient 2026-era hardware constraints, fragmented logic solvers, and—as of this epic—hardcoded business/legal rules from the Abstract Syntax Tree (AST). 
+With this final release, the `coreason-manifest` has achieved **Pure Mathematical Stability**. We have successfully stripped all ephemeral physics, transient 2026-era hardware constraints, fragmented logic solvers, and—as of this epic—hardcoded business/legal rules from the Abstract Syntax Tree (AST).
 
-The Manifest now strictly defines *Topological Shape* and *Causal Relations*. All physical execution limits, hardware resolution, and specific enterprise license verifications have been permanently shifted to the downstream orchestrators (`coreason-runtime` and `coreason-ecosystem`). 
+The Manifest now strictly defines *Topological Shape* and *Causal Relations*. All physical execution limits, hardware resolution, and specific enterprise license verifications have been permanently shifted to the downstream orchestrators (`coreason-runtime` and `coreason-ecosystem`).
 
 ---
 
@@ -228,7 +228,7 @@ The Manifest now strictly defines *Topological Shape* and *Causal Relations*. Al
 
 ### 1. Cybernetic Governance Decoupling
 **What Changed:**
-The `GlobalGovernancePolicy` no longer mathematically requires the string `"PPL_3_0_COMPLIANCE"` to instantiate a valid execution graph. 
+The `GlobalGovernancePolicy` no longer mathematically requires the string `"PPL_3_0_COMPLIANCE"` to instantiate a valid execution graph.
 * The `@model_validator` named `enforce_prosperity_license` has been permanently replaced with `enforce_governance_anchor`.
 * The AST now only mathematically guarantees the *structural presence* of a root safety node (requiring `severity="critical"`).
 * The field description for `mandatory_license_rule` has been updated to describe a generalized "governance constraint" rather than a specific "licensing constraint."
@@ -355,7 +355,7 @@ The `time_complexity_class` and `space_complexity_class` fields within `Asymptot
 `Annotated[str, StringConstraints(pattern=r"^O\([a-zA-Z0-9_+\^ \-\*]+\)$", max_length=255)]`
 
 **Architectural Justification:**
-A mathematically pure ontology must be able to express any valid polynomial, exponential, or logarithmic boundary. By shifting to a Regex pattern, the AST guarantees that the string is formatted as a formal Big-O constraint (starting with `O(` and ending with `)`), while allowing the internal mathematical expression to contain any combination of variables (`V`, `E`, `N`), constants (`1`, `2`), and operators (`^`, `+`, `*`, `-`). 
+A mathematically pure ontology must be able to express any valid polynomial, exponential, or logarithmic boundary. By shifting to a Regex pattern, the AST guarantees that the string is formatted as a formal Big-O constraint (starting with `O(` and ending with `)`), while allowing the internal mathematical expression to contain any combination of variables (`V`, `E`, `N`), constants (`1`, `2`), and operators (`^`, `+`, `*`, `-`).
 
 ### 2. Documentation and Context Bounds
 **What Changed:**
@@ -397,7 +397,7 @@ This release **fundamentally changes how you must evaluate Markov transition cos
 ## Executive Summary
 We have successfully merged **Epic 7: Universal Ontological Grounding** into the `coreason-manifest` ontology.
 
-In highly regulated or rigorously structured data pipelines (like clinical informatics, financial ledgers, or standardized event logging), a purely mathematical ontology cannot rely on the stochastic adherence of an LLM to populate untyped dictionaries. Previously, `SemanticRelationalVectorState.payload_injection_zone` and the `StateContract` Tuple Space relied entirely on untyped `dict[str, JsonPrimitiveState]` arrays or massive inline JSON schema declarations. 
+In highly regulated or rigorously structured data pipelines (like clinical informatics, financial ledgers, or standardized event logging), a purely mathematical ontology cannot rely on the stochastic adherence of an LLM to populate untyped dictionaries. Previously, `SemanticRelationalVectorState.payload_injection_zone` and the `StateContract` Tuple Space relied entirely on untyped `dict[str, JsonPrimitiveState]` arrays or massive inline JSON schema declarations.
 
 This release formally grounds the "Untyped Zone." We have introduced a deterministic Universal Resource Name (URN) schema anchor. The AST will now mathematically bind a specific payload matrix to a verified external standard (e.g., `urn:coreason:schema:omop_cdm_v5`), forcing downstream orchestrators to physically validate the payload's geometry against the declared URN before committing it to the Merkle-DAG.
 
@@ -458,7 +458,7 @@ I have critically audited `ontology.py`, `algebra.py`, and the surrounding test 
 * **URN Extensibility Application:** The fields now correctly utilize the regex-constrained URN pattern `r"^urn:coreason:.*$"`, perfectly aligning with the standard set in Epic 2.
 * **Validator & Registry Synchronization:** The `enforce_linkml_for_ontogpt` hook was successfully updated to target the new URN (`urn:coreason:extraction:ontogpt_spires`), and the `algebra.py` test utilities were properly migrated.
 
-The AST is now 100% devoid of transient hardware and software execution enums. 
+The AST is now 100% devoid of transient hardware and software execution enums.
 
 You are **AUTHORIZED** to merge this epic.
 
@@ -469,7 +469,7 @@ You are **AUTHORIZED** to merge this epic.
 ## Executive Summary
 We have successfully merged **Epic 8: The Silicon Purge Phase II** into the `coreason-manifest` ontology.
 
-During Epic 2, we removed the top-level hardware profile enumerations (e.g., `CUDA_FP32`). However, a deep architectural audit revealed that our advanced cryptographic, execution, and extraction contracts still harbored hardcoded `Literal` arrays pointing to specific 2026-era implementations (e.g., "SGLang", "Docling", "Intel TDX", "zk-SNARK"). 
+During Epic 2, we removed the top-level hardware profile enumerations (e.g., `CUDA_FP32`). However, a deep architectural audit revealed that our advanced cryptographic, execution, and extraction contracts still harbored hardcoded `Literal` arrays pointing to specific 2026-era implementations (e.g., "SGLang", "Docling", "Intel TDX", "zk-SNARK").
 
 A purely mathematical ontology cannot be coupled to transient software libraries or silicon enclaves that will inevitably become obsolete. This release unbinds these final nested technical constraints, replacing them with our infinite-capacity Uniform Resource Name (URN) extensibility pattern.
 
@@ -530,9 +530,9 @@ The agentic execution confirmed that eradicating these literals did not fracture
 # 🚀 Release Notes: coreason-manifest (Epic 6 Update)
 
 ## Executive Summary
-We have successfully merged **Epic 6: Federated Discovery & Substrate Hardening** into the `coreason-manifest` ontology (targeting the `perfect-math` branch). 
+We have successfully merged **Epic 6: Federated Discovery & Substrate Hardening** into the `coreason-manifest` ontology (targeting the `perfect-math` branch).
 
-Following the completion of Epics 1-5—which successfully stripped all ephemeral physics and application-level security traps from the AST to create a mathematically pure "Hollow Data Plane"—this release introduces the structural geometry required for the swarm to interface with external, sovereign Virtual Private Clouds (VPCs). 
+Following the completion of Epics 1-5—which successfully stripped all ephemeral physics and application-level security traps from the AST to create a mathematically pure "Hollow Data Plane"—this release introduces the structural geometry required for the swarm to interface with external, sovereign Virtual Private Clouds (VPCs).
 
 By formalizing **Federated Discovery** and **Ontological Normalization**, the manifest now mathematically supports the `coreason-ecosystem` Master MCP (Model Context Protocol) architecture. Furthermore, this release addresses several critical Thermodynamic and Epistemic vulnerabilities discovered in the Substrate Oracles and MCP JSON Schema adapters, ensuring absolute systemic resilience against OOM (Out-Of-Memory) crashes and IPC (Inter-Process Communication) deadlocks.
 
@@ -562,7 +562,7 @@ In Pydantic, regular expressions with unbound `.*` wildcards can be exploited. W
 
 ### 3. IPC Deadlock Resolution (The Clingo Guillotine)
 **What Changed:**
-The `CombinatorialSolverOracle` (`src/coreason_manifest/oracles/combinatorial.py`) was heavily refactored to enforce true OS-level thermodynamic isolation. 
+The `CombinatorialSolverOracle` (`src/coreason_manifest/oracles/combinatorial.py`) was heavily refactored to enforce true OS-level thermodynamic isolation.
 * Replaced the vulnerable Python GIL `threading.Timer` with a `multiprocessing.Process` wrapper.
 * Patched a critical Inter-Process Communication (IPC) pipe buffer deadlock by introducing `mp_queue.get(timeout=...)` prior to `process.join()`.
 * Runaway C-backed loops are now violently terminated via `SIGKILL`, returning a deterministic `satisfiability="UNKNOWN"` receipt to the swarm.
@@ -606,9 +606,9 @@ Any object entering the `AnyStateEvent` union is eligible to be appended to the 
 ## Executive Summary
 We have successfully merged **Epic 9: Algorithmic Iteration Unbinding** into the `coreason-manifest` ontology.
 
-During Epic 1, we successfully lifted the physical constraints on time (e.g., 24-hour timeouts) and memory (VRAM bytes). However, an architectural audit revealed that we left behind a secondary class of "Hardware Guillotines": **Algorithmic Iteration Ceilings**. 
+During Epic 1, we successfully lifted the physical constraints on time (e.g., 24-hour timeouts) and memory (VRAM bytes). However, an architectural audit revealed that we left behind a secondary class of "Hardware Guillotines": **Algorithmic Iteration Ceilings**.
 
-Previously, the AST enforced arbitrary constraints on graph topology—restricting a DAG to a maximum fan-out of 1,024 nodes, capping self-correction loops at 50, and explicitly forbidding Generative Manifolds from calculating a geometric volume (`fanout ** depth`) greater than 1,000. 
+Previously, the AST enforced arbitrary constraints on graph topology—restricting a DAG to a maximum fan-out of 1,024 nodes, capping self-correction loops at 50, and explicitly forbidding Generative Manifolds from calculating a geometric volume (`fanout ** depth`) greater than 1,000.
 
 A purely mathematical ontology does not restrict DAG fan-out to 1,024; a graph of 10 million nodes is geometrically perfect, even if it crashes a 2026-era server. This release eradicates these arbitrary algorithm ceilings, replacing them with the Universal Architectural Bound (UAB) of `18446744073709551615` (the maximum value of a 64-bit integer), officially unbinding the recursive capabilities of the swarm.
 
@@ -636,7 +636,7 @@ All `le=` boundaries restricting the physical size of recursive graph structures
 
 ### 3. Excision of the Generative Manifold "Hardware Guillotine"
 **What Changed:**
-The `@model_validator` named `enforce_geometric_bounds` was entirely deleted from `GenerativeManifoldSLA`. 
+The `@model_validator` named `enforce_geometric_bounds` was entirely deleted from `GenerativeManifoldSLA`.
 
 **Architectural Justification:**
 This validator explicitly trapped State-Space Explosions within the AST by calculating the polynomial volume of the graph and crashing if it exceeded 1,000. This is a physical GPU limit masquerading as a structural rule. By excising it, the AST permits infinite fractal graph generation, allowing future hardware (e.g., 2030-era clusters) to fully hydrate graphs that our current servers cannot.

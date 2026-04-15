@@ -326,7 +326,7 @@ Unstructured `text_chunks` are lossy and prone to LLM hallucination during cross
 
 ### **1. The Payload Guillotine Law (Anti-VRAM Exhaustion)**
 LLMs and external endpoints (like SPARQL triplestores or JSON-RPC servers) can emit infinitely recursive dictionaries that will cause Out-Of-Memory (OOM) crashes during Pydantic validation or canonical hashing.
-* **The Rule:** Any schema field that accepts an open-ended `dict`, `list`, `Any`, or `JsonPrimitiveState` MUST be protected by a `@field_validator(..., mode="before")` that routes the payload through the `_validate_payload_bounds` function. 
+* **The Rule:** Any schema field that accepts an open-ended `dict`, `list`, `Any`, or `JsonPrimitiveState` MUST be protected by a `@field_validator(..., mode="before")` that routes the payload through the `_validate_payload_bounds` function.
 * **Mechanics:** This mathematically limits the payload to a strict $O(N)$ volume limit (e.g., 10,000 nodes) and a maximum depth (e.g., 10 levels), severing JSON Bombing attacks instantly.
 
 ### **2. The SSRF Quarantine Law (Anti-Lateral Movement)**
@@ -336,7 +336,7 @@ LLMs will hallucinate URIs, and adversarial prompts will attempt to force the sw
 * **The Air-Gap Mandate:** The manifest is mathematically barred from invoking `socket.gethostbyname` or performing live DNS resolution during Pydantic validation. SSRF IP blocking evaluates string literals only; dynamic DNS resolution is deferred to the Tier-1 Compute Plane.
 
 ### **3. The Merkle-DAG Coordinate Standard (Ledger Binding)**
-For the Epistemic Ledger to mathematically prove chain of custody, historical facts cannot be floating objects. 
+For the Epistemic Ledger to mathematically prove chain of custody, historical facts cannot be floating objects.
 * **The Rule:** Any schema bearing the suffix `...Receipt` or `...Event` MUST be treated as an append-only coordinate on the Merkle-DAG.
 * **Mechanics:** It MUST structurally include the following three tracking fields to guarantee sequential cryptography:
   * `event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]`
@@ -403,7 +403,7 @@ You are strictly forbidden from introducing "Active" or "Runtime" logic into thi
   The CI/CD AST compiler (`enforce_cryptographic_determinism.py`) will physically crash the build if an array lacks either a deterministic `@model_validator` sorting hook or this explicit metadata flag.
 
 ### **The Transport Sterilization Mandate (Anti-Null Contagion)**
-* **The Physics of Serialization:** Standard Python `json`, TS `JSON.stringify`, and Pydantic `.model_dump_json()` are mathematically banned for generating `ExecutionEnvelope` transport payloads. 
+* **The Physics of Serialization:** Standard Python `json`, TS `JSON.stringify`, and Pydantic `.model_dump_json()` are mathematically banned for generating `ExecutionEnvelope` transport payloads.
 * **The Null Contagion:** Because Pydantic's `exclude_none` fails to recursively purge `None` values from loosely typed boundaries (e.g., `JsonPrimitiveState`), all JSON-RPC parameters MUST be mathematically stripped of nulls via the `_canonicalize_payload` functor prior to serialization.
 * **The Substrate Match:** * **Python (Tier 0):** Must exclusively use `msgspec.json.Encoder(sort_keys=True)`.
   * **TypeScript (Tier 3):** Must exclusively use `fast-json-stable-stringify`.
@@ -477,5 +477,3 @@ We strictly enforce the Zero-Orphan Invariant ($|V_O| = 0$). You must mathematic
 *(Must return 0. If files changed, you mutated the Python ontology but failed to compile the downstream Rust/TS interfaces).*
 
 ---
-
-

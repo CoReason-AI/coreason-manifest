@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Deep clone for complete history scanning
-      
+
       - name: TruffleHog OSS
         uses: trufflesecurity/trufflehog@main
         with:
@@ -38,14 +38,14 @@ jobs:
           egress-policy: audit
 
       - uses: actions/checkout@v4
-      
+
       - name: Install ClamAV
         run: |
           sudo apt-get update
           sudo apt-get install -y clamav clamav-daemon
           sudo systemctl stop clamav-freshclam
           sudo freshclam
-      
+
       - name: Run ClamAV Scan
         run: clamscan -r -i ./
         # Fails if an infection is found.
