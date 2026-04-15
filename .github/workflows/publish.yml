@@ -171,7 +171,7 @@ jobs:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
         run: |
           cd bindings/rust
-          cargo publish
+          cargo publish --allow-dirty
 
   publish-docs:
     needs: release
