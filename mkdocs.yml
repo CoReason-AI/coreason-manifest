@@ -1,0 +1,23 @@
+site_name: CoReason Manifest Documentation
+theme:
+  name: material
+markdown_extensions:
+  - pymdownx.math:
+      equation_inline: true
+      equation_block: true
+  - pymdownx.admonition
+  - pymdownx.details
+nav:
+  - Academic Guide:
+    - Preface & Introduction: index.md
+    - Syllabus & Table of Contents: syllabus.md
+    - Part I - Mathematical Foundations: mathematical_foundations.md
+    - Part II - Cognitive Science: cognitive_science.md
+    - Part III - Formal Logic: formal_logic.md
+    - Part IV - Economics: economics.md
+    - Part V - AI Safety: ai_safety.md
+    - Part VI - Thermodynamics: thermodynamics.md
+    - Part VII - Applied Research: applied_research.md
+
+extra_javascript:
+  - https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js

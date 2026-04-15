@@ -1105,8 +1105,6 @@ def test_temporal_bounds_profile_validation() -> None:
         TemporalBoundsProfile(valid_from=5.0, valid_to=20.0, probabilistic_end_interval=(5.0, 15.0))
 
 
-
-
 @given(
     st.floats(min_value=0.0, max_value=0.84999),
     st.uuids().map(str),
