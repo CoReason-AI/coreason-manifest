@@ -21,7 +21,7 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies:
-          [pydantic>=2.0, pytest, types-PyYAML, hypothesis>=6.151.9]
+          [pydantic>=2.0, pytest, types-PyYAML, hypothesis>=6.151.9, pandas-stubs]
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.24.0
     hooks:
