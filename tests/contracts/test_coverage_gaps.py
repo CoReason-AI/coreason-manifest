@@ -1193,20 +1193,6 @@ class TestGlobalGovernanceAnchorReturn:
         assert result is instance
 
 
-class TestGenerativeManifoldGeometricReturn:
-    """Exercise the return self path on enforce_geometric_bounds."""
-
-    def test_safe_geometry_passes(self) -> None:
-        """Covers line 6294: return self when geometry is safe."""
-        instance = o.GenerativeManifoldSLA.model_construct(
-            max_topological_depth=3,
-            max_node_fanout=10,
-            max_synthetic_tokens=1000,
-        )
-        result = instance.enforce_geometric_bounds()  # type: ignore[operator]
-        assert result is instance
-
-
 class TestUtilityJustificationReturnSelf:
     """Exercise the return self path on _enforce_mathematical_interlocks."""
 

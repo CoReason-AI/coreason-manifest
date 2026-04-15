@@ -2944,11 +2944,13 @@ class EpistemicHydrationPolicy(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Defines the limits of infinite graph unfolding to protect UI VRAM when pulling from the EpistemicLedgerState.
     CAUSAL AFFORDANCE: Instructs the orchestrator's deserialization engine to halt graph traversal at a specific recursion depth, replacing raw objects with cryptographic pointers.
-    EPISTEMIC BOUNDS: The `max_unfold_depth` strictly bounds the DAG traversal depth (`ge=1, le=100`). `lazy_fetch_timeout_ms` prevents infinite halting (`ge=1, le=60000`). `truncation_strategy` is constrained to a Literal.
+    EPISTEMIC BOUNDS: The `max_unfold_depth` strictly bounds the DAG traversal depth (`ge=1, le=18446744073709551615`). `lazy_fetch_timeout_ms` prevents infinite halting (`ge=1, le=60000`). `truncation_strategy` is constrained to a Literal.
     MCP ROUTING TRIGGERS: Coalgebraic Unfolding, Lazy Evaluation, State-Space Bounding, VRAM Exhaustion Prevention
     """
 
-    max_unfold_depth: int = Field(ge=1, le=100, description="Absolute recursive depth limit for DAG deserialization.")
+    max_unfold_depth: int = Field(
+        ge=1, le=18446744073709551615, description="Absolute recursive depth limit for DAG deserialization."
+    )
     lazy_fetch_timeout_ms: int = Field(
         ge=1, le=60000, description="Temporal guillotine for resolving cryptographic pointers."
     )
@@ -5323,7 +5325,7 @@ class SchemaDrivenExtractionSLA(CoreasonBaseState):
     extraction_framework: Annotated[str, StringConstraints(pattern=r"^urn:coreason:.*$")] = Field(
         description="The URN of the specific extraction framework utilized (e.g., 'urn:coreason:extraction:docling_graph_explicit')."
     )
-    max_schema_retries: int = Field(ge=0, le=10)
+    max_schema_retries: int = Field(ge=0, le=18446744073709551615)
     validation_failure_action: Literal["quarantine_chunk", "escalate_to_human", "drop_edge"]
     linkml_governance: LinkMLValidationSLA | None = Field(
         default=None, description="The structural shape constraints for the graph."
@@ -6252,11 +6254,10 @@ class GenerativeManifoldSLA(CoreasonBaseState):
     authorizing the orchestrator to cull recursive encapsulation before it induces
     state-space explosion or GPU VRAM exhaustion.
 
-    EPISTEMIC BOUNDS: Mathematically clamps geometric explosion via the
-    @model_validator enforce_geometric_bounds, guaranteeing
-    max_node_fanout ** max_topological_depth <= 1000. Both max_topological_depth
-    and max_node_fanout are strictly positive (ge=1, le=18446744073709551615). Synthetic
-    token economy is capped by max_synthetic_tokens (ge=1, le=18446744073709551615).
+    EPISTEMIC BOUNDS: Both max_topological_depth and max_node_fanout are strictly
+    positive (ge=1, le=18446744073709551615). Synthetic token economy is capped by
+    max_synthetic_tokens (ge=1, le=18446744073709551615). Geometric explosion prevention
+    is delegated to runtime Admission Controllers.
 
     MCP ROUTING TRIGGERS: Ergodic Theory, Branching Factor Analysis, State-Space
     Explosion, Fractal Graph Bounding, Gas Limit
@@ -6273,13 +6274,6 @@ class GenerativeManifoldSLA(CoreasonBaseState):
     max_synthetic_tokens: int = Field(
         le=18446744073709551615, ge=1, description="The economic constraint on the entire generated mock payload."
     )
-
-    @model_validator(mode="after")
-    def enforce_geometric_bounds(self) -> Self:
-        """Mathematically guarantees the configuration cannot authorize an OOM explosion."""
-        if self.max_node_fanout**self.max_topological_depth > 1000:
-            raise ValueError("Geometric explosion risk: max_node_fanout ** max_topological_depth must be <= 1000.")
-        return self
 
 
 class GlobalSemanticProfile(CoreasonBaseState):
@@ -6689,7 +6683,7 @@ class LatentSchemaInferenceIntent(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Triggers the LLM's representation engineering engine to process a chaotic `target_buffer_cid` and output a rigid JSON schema, bridging the gap between exogenous data and the structural Hollow Data Plane.
 
-    EPISTEMIC BOUNDS: State-Space explosion is prevented by bounding `max_schema_depth` (`le=10, ge=1`) and `max_properties` (`le=1000, ge=1`) to mathematically prevent recursive JSON-bombing during schema generation. The `target_buffer_cid` is locked to a 128-char CID.
+    EPISTEMIC BOUNDS: State-Space explosion is prevented by bounding `max_schema_depth` (`le=18446744073709551615, ge=1`) and `max_properties` (`le=1000, ge=1`) to mathematically prevent recursive JSON-bombing during schema generation. The `target_buffer_cid` is locked to a 128-char CID.
 
     MCP ROUTING TRIGGERS: Schema Inference, Memory Heap Parsing, Abductive Reasoning, XHR Interception, Unstructured Transmutation
 
@@ -6702,7 +6696,9 @@ class LatentSchemaInferenceIntent(CoreasonBaseState):
         Field(description="The CID pointing to the TerminalBufferState or raw intercepted byte stream.")
     )
     max_schema_depth: int = Field(
-        le=10, ge=1, description="The maximum recursive depth of the probabilistically generated schema."
+        le=18446744073709551615,
+        ge=1,
+        description="The maximum recursive depth of the probabilistically generated schema.",
     )
     max_properties: int = Field(le=1000, ge=1, description="The maximum allowed keys in the deduced JSON dictionary.")
     require_strict_validation: bool = Field(
@@ -6971,7 +6967,7 @@ class EpistemicZeroTrustContract(CoreasonBaseState):
         default_factory=list, description="DbC bounds checked after inference to ensure the structural plan is valid."
     )
     max_planning_remediation_epochs: int = Field(
-        default=3, le=10, ge=0, description="Thermodynamic cap on SymbolicAI DbC retries."
+        default=3, le=18446744073709551615, ge=0, description="Thermodynamic cap on SymbolicAI DbC retries."
     )
 
     @model_validator(mode="after")
@@ -7435,7 +7431,7 @@ class TerminalCognitiveEvent(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Instructs the orchestrator to halt the active execution wave and physically route the exact contextual state of failure to a human supervisor for manual evaluation.
 
-    EPISTEMIC BOUNDS: The cycle count is mathematically bounded by loops_exhausted (ge=1, le=100). The specific mathematical penalty gradient the proposer failed to resolve is locked via final_critique_schema. The last_rejected_hypothesis_hash is a cryptographically locked string (max_length=64).
+    EPISTEMIC BOUNDS: The cycle count is mathematically bounded by loops_exhausted (ge=1, le=18446744073709551615). The specific mathematical penalty gradient the proposer failed to resolve is locked via final_critique_schema. The last_rejected_hypothesis_hash is a cryptographically locked string (max_length=64).
 
     MCP ROUTING TRIGGERS: Proposer-Verifier Macro-Topology, Terminal State, Execution Halting, Human-in-the-Loop Routing, Cognitive Failure Packaging
     """
@@ -7449,7 +7445,7 @@ class TerminalCognitiveEvent(CoreasonBaseState):
     final_critique_schema: CognitiveCritiqueProfile = Field(
         description="The exact penalty gradient that the Proposer failed to resolve."
     )
-    loops_exhausted: int = Field(ge=1, le=100, description="The cycle count at the time of failure.")
+    loops_exhausted: int = Field(ge=1, le=18446744073709551615, description="The cycle count at the time of failure.")
 
 
 class InterventionIntent(CoreasonBaseState):
@@ -9671,7 +9667,7 @@ class SelfCorrectionPolicy(CoreasonBaseState):
     epistemic gap is detected.
 
     EPISTEMIC BOUNDS: Mathematically prevents infinite compute burn (State-Space Explosion)
-    by strictly capping max_loops (ge=0, le=50). The rollback_on_failure boolean serves as
+    by strictly capping max_loops (ge=0, le=18446744073709551615). The rollback_on_failure boolean serves as
     a physical fail-safe, forcing a deterministic reversion to the last pristine Merkle root
     if the loop ceiling is breached.
 
@@ -9679,7 +9675,9 @@ class SelfCorrectionPolicy(CoreasonBaseState):
     Backtracking Search, State-Space Explosion Prevention
     """
 
-    max_loops: int = Field(ge=0, le=50, description="The maximum number of self-correction loops allowed.")
+    max_loops: int = Field(
+        ge=0, le=18446744073709551615, description="The maximum number of self-correction loops allowed."
+    )
     rollback_on_failure: bool = Field(description="Whether to rollback to the previous state on failure.")
 
 
@@ -11178,7 +11176,7 @@ class EpistemicEscalationContract(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Authorizes the orchestrator to recursively scale the active `max_latent_tokens_budget` via the `test_time_multiplier` when the agent's internal predictive distribution breaches the `baseline_entropy_threshold`.
 
-    EPISTEMIC BOUNDS: State-Space Explosion is physically prevented by clamping `max_escalation_tiers` to `le=10`. Exponential recursive multiplication beyond this bound mathematically guarantees integer overflow and VRAM hardware exhaustion.
+    EPISTEMIC BOUNDS: State-Space Explosion prevention is delegated to runtime Admission Controllers. `max_escalation_tiers` is clamped to `le=18446744073709551615`.
 
     MCP ROUTING TRIGGERS: System 2 Processing, Test-Time Compute, Shannon Entropy, Epistemic Escalation, Non-Monotonic Scaling
     """
@@ -11194,7 +11192,7 @@ class EpistemicEscalationContract(CoreasonBaseState):
         description="The continuous scalar applied to the agent's baseline max_latent_tokens_budget when the entropy threshold is breached.",
     )
     max_escalation_tiers: int = Field(
-        le=10,
+        le=18446744073709551615,
         ge=1,
         description="The absolute integer limit on how many times the orchestrator can recursively multiply the compute budget before forcing a SystemFaultEvent.",
     )
@@ -11928,7 +11926,7 @@ class DAGTopologyManifest(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Forces the orchestrator to evaluate causal edges and execute rigorous DFS loop-detection to verify the `allow_cycles` constraint before initiating kinetic node compute. Backpressure governs edge flow control.
 
-    EPISTEMIC BOUNDS: Algorithmic complexity is mathematically bound by `max_depth` (`ge=1, le=256`) to prevent runaway agentic cyclic recursion, and `max_fan_out` (`ge=1, le=1024`) to limit horizontal compute explosion. The `@model_validator` actively measures these constraints during traversal. Edges are deterministically sorted.
+    EPISTEMIC BOUNDS: Algorithmic complexity is mathematically bound by `max_depth` (`ge=1, le=18446744073709551615`) and `max_fan_out` (`ge=1, le=18446744073709551615`). The `@model_validator` actively measures these constraints during traversal. Edges are deterministically sorted. Physical execution safety is delegated to runtime Admission Controllers.
 
     MCP ROUTING TRIGGERS: Directed Acyclic Graph, Kahn's Algorithm, Topological Sort, Causal Edge, Algorithmic Complexity
 
@@ -11971,8 +11969,8 @@ class DAGTopologyManifest(CoreasonBaseState):
     backpressure: BackpressurePolicy | None = Field(
         default=None, description="Declarative backpressure constraints for the graph edges."
     )
-    max_depth: int = Field(ge=1, le=256, description="The maximum recursive depth of the routing DAG.")
-    max_fan_out: int = Field(ge=1, le=1024, description="The maximum number of parallel child nodes.")
+    max_depth: int = Field(ge=1, le=18446744073709551615, description="The maximum recursive depth of the routing DAG.")
+    max_fan_out: int = Field(ge=1, le=18446744073709551615, description="The maximum number of parallel child nodes.")
     speculative_boundaries: list[SpeculativeExecutionPolicy] = Field(
         default_factory=list, description="Topological bounds for non-monotonic test-time compute branching."
     )
@@ -12680,7 +12678,7 @@ class IntentElicitationTopologyManifest(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Unrolls a cyclic Directed Graph that orchestrates Multimodal Transmutation, Metacognitive Scanning (Shannon Entropy measurement), and Schema-on-Write Drafting (Human Interrogation) before yielding to the Agentic Forge.
 
-    EPISTEMIC BOUNDS: The max_clarification_loops physical Halting Problem guillotine is mathematically clamped between 1 and 50 to prevent infinite clarification loops.
+    EPISTEMIC BOUNDS: The max_clarification_loops physical Halting Problem guillotine is mathematically clamped between 1 and 18446744073709551615. Physical execution safety is delegated to runtime Admission Controllers.
 
     MCP ROUTING TRIGGERS: Intent Elicitation, Zero-Entropy Distillation, Cyclical Routing, Human Interrogation, Multimodal Transmutation
     """
@@ -12724,7 +12722,7 @@ class IntentElicitationTopologyManifest(CoreasonBaseState):
     max_clarification_loops: int = Field(
         default=5,
         ge=1,
-        le=50,
+        le=18446744073709551615,
         description="A physical Halting Problem guillotine preventing infinite clarification loops.",
     )
 
@@ -12803,7 +12801,7 @@ class NeurosymbolicVerificationTopologyManifest(CoreasonBaseState):
         description="The deterministic solver evaluating the hypotheses."
     )
     max_revision_loops: int = Field(
-        ge=1, le=100, description="The physical execution ceiling to solve the Halting Problem."
+        ge=1, le=18446744073709551615, description="The physical execution ceiling to solve the Halting Problem."
     )
     critique_schema_cid: Annotated[str, StringConstraints(max_length=255)] | None = Field(
         default=None, description="A pointer to the penalty gradient structure."

@@ -5944,7 +5944,7 @@
     },
     "DAGTopologyManifest": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes a Directed Acyclic Graph (DAG) for deterministic, chronologically ordered task execution, guaranteeing strict topological sorting of operations.\n\nCAUSAL AFFORDANCE: Forces the orchestrator to evaluate causal edges and execute rigorous DFS loop-detection to verify the `allow_cycles` constraint before initiating kinetic node compute. Backpressure governs edge flow control.\n\nEPISTEMIC BOUNDS: Algorithmic complexity is mathematically bound by `max_depth` (`ge=1, le=256`) to prevent runaway agentic cyclic recursion, and `max_fan_out` (`ge=1, le=1024`) to limit horizontal compute explosion. The `@model_validator` actively measures these constraints during traversal. Edges are deterministically sorted.\n\nMCP ROUTING TRIGGERS: Directed Acyclic Graph, Kahn's Algorithm, Topological Sort, Causal Edge, Algorithmic Complexity",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes a Directed Acyclic Graph (DAG) for deterministic, chronologically ordered task execution, guaranteeing strict topological sorting of operations.\n\nCAUSAL AFFORDANCE: Forces the orchestrator to evaluate causal edges and execute rigorous DFS loop-detection to verify the `allow_cycles` constraint before initiating kinetic node compute. Backpressure governs edge flow control.\n\nEPISTEMIC BOUNDS: Algorithmic complexity is mathematically bound by `max_depth` (`ge=1, le=18446744073709551615`) and `max_fan_out` (`ge=1, le=18446744073709551615`). The `@model_validator` actively measures these constraints during traversal. Edges are deterministically sorted. Physical execution safety is delegated to runtime Admission Controllers.\n\nMCP ROUTING TRIGGERS: Directed Acyclic Graph, Kahn's Algorithm, Topological Sort, Causal Edge, Algorithmic Complexity",
       "properties": {
         "epistemic_enforcement": {
           "anyOf": [
@@ -6088,14 +6088,14 @@
         },
         "max_depth": {
           "description": "The maximum recursive depth of the routing DAG.",
-          "maximum": 256,
+          "maximum": 18446744073709551615,
           "minimum": 1,
           "title": "Max Depth",
           "type": "integer"
         },
         "max_fan_out": {
           "description": "The maximum number of parallel child nodes.",
-          "maximum": 1024,
+          "maximum": 18446744073709551615,
           "minimum": 1,
           "title": "Max Fan Out",
           "type": "integer"
@@ -7972,7 +7972,7 @@
     },
     "EpistemicEscalationContract": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes a Kahneman System 2 Test-Time Compute Allocation heuristic, leveraging Information Theory to dynamically unlock compute budgets based on measured Shannon Entropy.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator to recursively scale the active `max_latent_tokens_budget` via the `test_time_multiplier` when the agent's internal predictive distribution breaches the `baseline_entropy_threshold`.\n\nEPISTEMIC BOUNDS: State-Space Explosion is physically prevented by clamping `max_escalation_tiers` to `le=10`. Exponential recursive multiplication beyond this bound mathematically guarantees integer overflow and VRAM hardware exhaustion.\n\nMCP ROUTING TRIGGERS: System 2 Processing, Test-Time Compute, Shannon Entropy, Epistemic Escalation, Non-Monotonic Scaling",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes a Kahneman System 2 Test-Time Compute Allocation heuristic, leveraging Information Theory to dynamically unlock compute budgets based on measured Shannon Entropy.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator to recursively scale the active `max_latent_tokens_budget` via the `test_time_multiplier` when the agent's internal predictive distribution breaches the `baseline_entropy_threshold`.\n\nEPISTEMIC BOUNDS: State-Space Explosion prevention is delegated to runtime Admission Controllers. `max_escalation_tiers` is clamped to `le=18446744073709551615`.\n\nMCP ROUTING TRIGGERS: System 2 Processing, Test-Time Compute, Shannon Entropy, Epistemic Escalation, Non-Monotonic Scaling",
       "properties": {
         "baseline_entropy_threshold": {
           "description": "The mathematical measure of uncertainty (e.g., variance in generated hypotheses) required to trigger escalation.",
@@ -7990,7 +7990,7 @@
         },
         "max_escalation_tiers": {
           "description": "The absolute integer limit on how many times the orchestrator can recursively multiply the compute budget before forcing a SystemFaultEvent.",
-          "maximum": 10,
+          "maximum": 18446744073709551615,
           "minimum": 1,
           "title": "Max Escalation Tiers",
           "type": "integer"
@@ -8119,11 +8119,11 @@
     },
     "EpistemicHydrationPolicy": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the limits of infinite graph unfolding to protect UI VRAM when pulling from the EpistemicLedgerState.\nCAUSAL AFFORDANCE: Instructs the orchestrator's deserialization engine to halt graph traversal at a specific recursion depth, replacing raw objects with cryptographic pointers.\nEPISTEMIC BOUNDS: The `max_unfold_depth` strictly bounds the DAG traversal depth (`ge=1, le=100`). `lazy_fetch_timeout_ms` prevents infinite halting (`ge=1, le=60000`). `truncation_strategy` is constrained to a Literal.\nMCP ROUTING TRIGGERS: Coalgebraic Unfolding, Lazy Evaluation, State-Space Bounding, VRAM Exhaustion Prevention",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the limits of infinite graph unfolding to protect UI VRAM when pulling from the EpistemicLedgerState.\nCAUSAL AFFORDANCE: Instructs the orchestrator's deserialization engine to halt graph traversal at a specific recursion depth, replacing raw objects with cryptographic pointers.\nEPISTEMIC BOUNDS: The `max_unfold_depth` strictly bounds the DAG traversal depth (`ge=1, le=18446744073709551615`). `lazy_fetch_timeout_ms` prevents infinite halting (`ge=1, le=60000`). `truncation_strategy` is constrained to a Literal.\nMCP ROUTING TRIGGERS: Coalgebraic Unfolding, Lazy Evaluation, State-Space Bounding, VRAM Exhaustion Prevention",
       "properties": {
         "max_unfold_depth": {
           "description": "Absolute recursive depth limit for DAG deserialization.",
-          "maximum": 100,
+          "maximum": 18446744073709551615,
           "minimum": 1,
           "title": "Max Unfold Depth",
           "type": "integer"
@@ -9335,7 +9335,7 @@
         "max_planning_remediation_epochs": {
           "default": 3,
           "description": "Thermodynamic cap on SymbolicAI DbC retries.",
-          "maximum": 10,
+          "maximum": 18446744073709551615,
           "minimum": 0,
           "title": "Max Planning Remediation Epochs",
           "type": "integer"
@@ -11196,7 +11196,7 @@
     },
     "GenerativeManifoldSLA": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Ergodic Theory and Branching Factor Analysis to\nrigorously bound the topological expansion of synthetic or fractal graphs. As\nan ...SLA suffix, this enforces rigid mathematical boundaries globally.\n\nCAUSAL AFFORDANCE: Acts as a physical gas limit on generative expansion,\nauthorizing the orchestrator to cull recursive encapsulation before it induces\nstate-space explosion or GPU VRAM exhaustion.\n\nEPISTEMIC BOUNDS: Mathematically clamps geometric explosion via the\n@model_validator enforce_geometric_bounds, guaranteeing\nmax_node_fanout ** max_topological_depth <= 1000. Both max_topological_depth\nand max_node_fanout are strictly positive (ge=1, le=18446744073709551615). Synthetic\ntoken economy is capped by max_synthetic_tokens (ge=1, le=18446744073709551615).\n\nMCP ROUTING TRIGGERS: Ergodic Theory, Branching Factor Analysis, State-Space\nExplosion, Fractal Graph Bounding, Gas Limit",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Ergodic Theory and Branching Factor Analysis to\nrigorously bound the topological expansion of synthetic or fractal graphs. As\nan ...SLA suffix, this enforces rigid mathematical boundaries globally.\n\nCAUSAL AFFORDANCE: Acts as a physical gas limit on generative expansion,\nauthorizing the orchestrator to cull recursive encapsulation before it induces\nstate-space explosion or GPU VRAM exhaustion.\n\nEPISTEMIC BOUNDS: Both max_topological_depth and max_node_fanout are strictly\npositive (ge=1, le=18446744073709551615). Synthetic token economy is capped by\nmax_synthetic_tokens (ge=1, le=18446744073709551615). Geometric explosion prevention\nis delegated to runtime Admission Controllers.\n\nMCP ROUTING TRIGGERS: Ergodic Theory, Branching Factor Analysis, State-Space\nExplosion, Fractal Graph Bounding, Gas Limit",
       "properties": {
         "max_topological_depth": {
           "description": "The absolute physical depth limit for recursive encapsulation.",
@@ -12277,7 +12277,7 @@
     },
     "IntentElicitationTopologyManifest": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Zero-Cost Macro-Topology that translates unstructured, high-entropy human multimodal input into a mathematically verified, zero-entropy HumanDirectiveIntent.\n\nCAUSAL AFFORDANCE: Unrolls a cyclic Directed Graph that orchestrates Multimodal Transmutation, Metacognitive Scanning (Shannon Entropy measurement), and Schema-on-Write Drafting (Human Interrogation) before yielding to the Agentic Forge.\n\nEPISTEMIC BOUNDS: The max_clarification_loops physical Halting Problem guillotine is mathematically clamped between 1 and 50 to prevent infinite clarification loops.\n\nMCP ROUTING TRIGGERS: Intent Elicitation, Zero-Entropy Distillation, Cyclical Routing, Human Interrogation, Multimodal Transmutation",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Zero-Cost Macro-Topology that translates unstructured, high-entropy human multimodal input into a mathematically verified, zero-entropy HumanDirectiveIntent.\n\nCAUSAL AFFORDANCE: Unrolls a cyclic Directed Graph that orchestrates Multimodal Transmutation, Metacognitive Scanning (Shannon Entropy measurement), and Schema-on-Write Drafting (Human Interrogation) before yielding to the Agentic Forge.\n\nEPISTEMIC BOUNDS: The max_clarification_loops physical Halting Problem guillotine is mathematically clamped between 1 and 18446744073709551615. Physical execution safety is delegated to runtime Admission Controllers.\n\nMCP ROUTING TRIGGERS: Intent Elicitation, Zero-Entropy Distillation, Cyclical Routing, Human Interrogation, Multimodal Transmutation",
       "properties": {
         "epistemic_enforcement": {
           "anyOf": [
@@ -12406,7 +12406,7 @@
         "max_clarification_loops": {
           "default": 5,
           "description": "A physical Halting Problem guillotine preventing infinite clarification loops.",
-          "maximum": 50,
+          "maximum": 18446744073709551615,
           "minimum": 1,
           "title": "Max Clarification Loops",
           "type": "integer"
@@ -13216,7 +13216,7 @@
     },
     "LatentSchemaInferenceIntent": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Authorizes Abductive Reasoning on intercepted unstructured byte streams or memory heaps to probabilistically derive a deterministic StateContract.\n\nCAUSAL AFFORDANCE: Triggers the LLM's representation engineering engine to process a chaotic `target_buffer_cid` and output a rigid JSON schema, bridging the gap between exogenous data and the structural Hollow Data Plane.\n\nEPISTEMIC BOUNDS: State-Space explosion is prevented by bounding `max_schema_depth` (`le=10, ge=1`) and `max_properties` (`le=1000, ge=1`) to mathematically prevent recursive JSON-bombing during schema generation. The `target_buffer_cid` is locked to a 128-char CID.\n\nMCP ROUTING TRIGGERS: Schema Inference, Memory Heap Parsing, Abductive Reasoning, XHR Interception, Unstructured Transmutation",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Authorizes Abductive Reasoning on intercepted unstructured byte streams or memory heaps to probabilistically derive a deterministic StateContract.\n\nCAUSAL AFFORDANCE: Triggers the LLM's representation engineering engine to process a chaotic `target_buffer_cid` and output a rigid JSON schema, bridging the gap between exogenous data and the structural Hollow Data Plane.\n\nEPISTEMIC BOUNDS: State-Space explosion is prevented by bounding `max_schema_depth` (`le=18446744073709551615, ge=1`) and `max_properties` (`le=1000, ge=1`) to mathematically prevent recursive JSON-bombing during schema generation. The `target_buffer_cid` is locked to a 128-char CID.\n\nMCP ROUTING TRIGGERS: Schema Inference, Memory Heap Parsing, Abductive Reasoning, XHR Interception, Unstructured Transmutation",
       "properties": {
         "topology_class": {
           "const": "latent_schema_inference",
@@ -13235,7 +13235,7 @@
         },
         "max_schema_depth": {
           "description": "The maximum recursive depth of the probabilistically generated schema.",
-          "maximum": 10,
+          "maximum": 18446744073709551615,
           "minimum": 1,
           "title": "Max Schema Depth",
           "type": "integer"
@@ -14955,7 +14955,7 @@
         },
         "max_revision_loops": {
           "description": "The physical execution ceiling to solve the Halting Problem.",
-          "maximum": 100,
+          "maximum": 18446744073709551615,
           "minimum": 1,
           "title": "Max Revision Loops",
           "type": "integer"
@@ -17701,7 +17701,7 @@
           "type": "string"
         },
         "max_schema_retries": {
-          "maximum": 10,
+          "maximum": 18446744073709551615,
           "minimum": 0,
           "title": "Max Schema Retries",
           "type": "integer"
@@ -17784,11 +17784,11 @@
     },
     "SelfCorrectionPolicy": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as the System 2 executive controller, utilizing Non-Monotonic\nLogic and iterative backtracking to mathematically resolve structural, semantic, or\nkinetic execution errors. As a ...Policy suffix, this object defines rigid mathematical\nboundaries that the orchestrator must enforce globally.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator to physically rewind the causal DAG and\nretry generation paths via an Actor-Critic refinement loop when a System 1 failure or\nepistemic gap is detected.\n\nEPISTEMIC BOUNDS: Mathematically prevents infinite compute burn (State-Space Explosion)\nby strictly capping max_loops (ge=0, le=50). The rollback_on_failure boolean serves as\na physical fail-safe, forcing a deterministic reversion to the last pristine Merkle root\nif the loop ceiling is breached.\n\nMCP ROUTING TRIGGERS: Non-Monotonic Logic, Actor-Critic Refinement, System 2 Executive,\nBacktracking Search, State-Space Explosion Prevention",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as the System 2 executive controller, utilizing Non-Monotonic\nLogic and iterative backtracking to mathematically resolve structural, semantic, or\nkinetic execution errors. As a ...Policy suffix, this object defines rigid mathematical\nboundaries that the orchestrator must enforce globally.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator to physically rewind the causal DAG and\nretry generation paths via an Actor-Critic refinement loop when a System 1 failure or\nepistemic gap is detected.\n\nEPISTEMIC BOUNDS: Mathematically prevents infinite compute burn (State-Space Explosion)\nby strictly capping max_loops (ge=0, le=18446744073709551615). The rollback_on_failure boolean serves as\na physical fail-safe, forcing a deterministic reversion to the last pristine Merkle root\nif the loop ceiling is breached.\n\nMCP ROUTING TRIGGERS: Non-Monotonic Logic, Actor-Critic Refinement, System 2 Executive,\nBacktracking Search, State-Space Explosion Prevention",
       "properties": {
         "max_loops": {
           "description": "The maximum number of self-correction loops allowed.",
-          "maximum": 50,
+          "maximum": 18446744073709551615,
           "minimum": 0,
           "title": "Max Loops",
           "type": "integer"
@@ -20758,7 +20758,7 @@
     },
     "TerminalCognitiveEvent": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A terminal state object generated when the Proposer-Verifier macro-topology exhausts its max_revision_loops without achieving ontological alignment. Packages the failure state for HITL routing.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator to halt the active execution wave and physically route the exact contextual state of failure to a human supervisor for manual evaluation.\n\nEPISTEMIC BOUNDS: The cycle count is mathematically bounded by loops_exhausted (ge=1, le=100). The specific mathematical penalty gradient the proposer failed to resolve is locked via final_critique_schema. The last_rejected_hypothesis_hash is a cryptographically locked string (max_length=64).\n\nMCP ROUTING TRIGGERS: Proposer-Verifier Macro-Topology, Terminal State, Execution Halting, Human-in-the-Loop Routing, Cognitive Failure Packaging",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A terminal state object generated when the Proposer-Verifier macro-topology exhausts its max_revision_loops without achieving ontological alignment. Packages the failure state for HITL routing.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator to halt the active execution wave and physically route the exact contextual state of failure to a human supervisor for manual evaluation.\n\nEPISTEMIC BOUNDS: The cycle count is mathematically bounded by loops_exhausted (ge=1, le=18446744073709551615). The specific mathematical penalty gradient the proposer failed to resolve is locked via final_critique_schema. The last_rejected_hypothesis_hash is a cryptographically locked string (max_length=64).\n\nMCP ROUTING TRIGGERS: Proposer-Verifier Macro-Topology, Terminal State, Execution Halting, Human-in-the-Loop Routing, Cognitive Failure Packaging",
       "properties": {
         "source_entity": {
           "$ref": "#/$defs/ContextualizedSourceState",
@@ -20776,7 +20776,7 @@
         },
         "loops_exhausted": {
           "description": "The cycle count at the time of failure.",
-          "maximum": 100,
+          "maximum": 18446744073709551615,
           "minimum": 1,
           "title": "Loops Exhausted",
           "type": "integer"

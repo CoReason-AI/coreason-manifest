@@ -311,11 +311,14 @@ def test_kinetic_budget_policy_temperature_upper_bound() -> None:
 
 
 def test_epistemic_escalation_tiers_upper_bound() -> None:
-    """Prove state-space explosion is physically prevented by clamping max_escalation_tiers to le=10."""
+    """Prove max_escalation_tiers is elevated to UAB (2^64-1), accepting previously-rejected values."""
     from coreason_manifest.spec.ontology import EpistemicEscalationContract
 
-    with pytest.raises(ValidationError):
-        EpistemicEscalationContract(baseline_entropy_threshold=0.5, test_time_multiplier=2.0, max_escalation_tiers=11)
+    # max_escalation_tiers=11 was previously rejected at le=10; now accepted under UAB
+    contract = EpistemicEscalationContract(
+        baseline_entropy_threshold=0.5, test_time_multiplier=2.0, max_escalation_tiers=11
+    )
+    assert contract.max_escalation_tiers == 11
 
 
 def test_peft_adapter_rank_upper_bound() -> None:

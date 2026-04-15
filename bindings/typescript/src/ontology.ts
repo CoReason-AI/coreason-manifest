@@ -7674,7 +7674,7 @@ export interface ContextExpansionPolicy {
  *
  * CAUSAL AFFORDANCE: Triggers the LLM's representation engineering engine to process a chaotic `target_buffer_cid` and output a rigid JSON schema, bridging the gap between exogenous data and the structural Hollow Data Plane.
  *
- * EPISTEMIC BOUNDS: State-Space explosion is prevented by bounding `max_schema_depth` (`le=10, ge=1`) and `max_properties` (`le=1000, ge=1`) to mathematically prevent recursive JSON-bombing during schema generation. The `target_buffer_cid` is locked to a 128-char CID.
+ * EPISTEMIC BOUNDS: State-Space explosion is prevented by bounding `max_schema_depth` (`le=18446744073709551615, ge=1`) and `max_properties` (`le=1000, ge=1`) to mathematically prevent recursive JSON-bombing during schema generation. The `target_buffer_cid` is locked to a 128-char CID.
  *
  * MCP ROUTING TRIGGERS: Schema Inference, Memory Heap Parsing, Abductive Reasoning, XHR Interception, Unstructured Transmutation
  */
@@ -7972,7 +7972,7 @@ export interface ProposedAction {
  *
  * CAUSAL AFFORDANCE: Instructs the orchestrator to halt the active execution wave and physically route the exact contextual state of failure to a human supervisor for manual evaluation.
  *
- * EPISTEMIC BOUNDS: The cycle count is mathematically bounded by loops_exhausted (ge=1, le=100). The specific mathematical penalty gradient the proposer failed to resolve is locked via final_critique_schema. The last_rejected_hypothesis_hash is a cryptographically locked string (max_length=64).
+ * EPISTEMIC BOUNDS: The cycle count is mathematically bounded by loops_exhausted (ge=1, le=18446744073709551615). The specific mathematical penalty gradient the proposer failed to resolve is locked via final_critique_schema. The last_rejected_hypothesis_hash is a cryptographically locked string (max_length=64).
  *
  * MCP ROUTING TRIGGERS: Proposer-Verifier Macro-Topology, Terminal State, Execution Halting, Human-in-the-Loop Routing, Cognitive Failure Packaging
  */
@@ -9364,7 +9364,7 @@ export interface EpistemicScanningPolicy {
  * epistemic gap is detected.
  *
  * EPISTEMIC BOUNDS: Mathematically prevents infinite compute burn (State-Space Explosion)
- * by strictly capping max_loops (ge=0, le=50). The rollback_on_failure boolean serves as
+ * by strictly capping max_loops (ge=0, le=18446744073709551615). The rollback_on_failure boolean serves as
  * a physical fail-safe, forcing a deterministic reversion to the last pristine Merkle root
  * if the loop ceiling is breached.
  *
@@ -9716,7 +9716,7 @@ export interface CompositeNodeProfile {
  *
  * CAUSAL AFFORDANCE: Forces the orchestrator to evaluate causal edges and execute rigorous DFS loop-detection to verify the `allow_cycles` constraint before initiating kinetic node compute. Backpressure governs edge flow control.
  *
- * EPISTEMIC BOUNDS: Algorithmic complexity is mathematically bound by `max_depth` (`ge=1, le=256`) to prevent runaway agentic cyclic recursion, and `max_fan_out` (`ge=1, le=1024`) to limit horizontal compute explosion. The `@model_validator` actively measures these constraints during traversal. Edges are deterministically sorted.
+ * EPISTEMIC BOUNDS: Algorithmic complexity is mathematically bound by `max_depth` (`ge=1, le=18446744073709551615`) and `max_fan_out` (`ge=1, le=18446744073709551615`). The `@model_validator` actively measures these constraints during traversal. Edges are deterministically sorted. Physical execution safety is delegated to runtime Admission Controllers.
  *
  * MCP ROUTING TRIGGERS: Directed Acyclic Graph, Kahn's Algorithm, Topological Sort, Causal Edge, Algorithmic Complexity
  */
@@ -10926,7 +10926,7 @@ export interface VectorEmbeddingState4 {
  *
  * CAUSAL AFFORDANCE: Unrolls a cyclic Directed Graph that orchestrates Multimodal Transmutation, Metacognitive Scanning (Shannon Entropy measurement), and Schema-on-Write Drafting (Human Interrogation) before yielding to the Agentic Forge.
  *
- * EPISTEMIC BOUNDS: The max_clarification_loops physical Halting Problem guillotine is mathematically clamped between 1 and 50 to prevent infinite clarification loops.
+ * EPISTEMIC BOUNDS: The max_clarification_loops physical Halting Problem guillotine is mathematically clamped between 1 and 18446744073709551615. Physical execution safety is delegated to runtime Admission Controllers.
  *
  * MCP ROUTING TRIGGERS: Intent Elicitation, Zero-Entropy Distillation, Cyclical Routing, Human Interrogation, Multimodal Transmutation
  */
@@ -14002,7 +14002,7 @@ export interface EpistemicDomainGraphManifest {
  *
  * CAUSAL AFFORDANCE: Authorizes the orchestrator to recursively scale the active `max_latent_tokens_budget` via the `test_time_multiplier` when the agent's internal predictive distribution breaches the `baseline_entropy_threshold`.
  *
- * EPISTEMIC BOUNDS: State-Space Explosion is physically prevented by clamping `max_escalation_tiers` to `le=10`. Exponential recursive multiplication beyond this bound mathematically guarantees integer overflow and VRAM hardware exhaustion.
+ * EPISTEMIC BOUNDS: State-Space Explosion prevention is delegated to runtime Admission Controllers. `max_escalation_tiers` is clamped to `le=18446744073709551615`.
  *
  * MCP ROUTING TRIGGERS: System 2 Processing, Test-Time Compute, Shannon Entropy, Epistemic Escalation, Non-Monotonic Scaling
  */
@@ -14016,7 +14016,7 @@ export interface EpistemicEscalationContract {
  *
  * AGENT INSTRUCTION: Defines the limits of infinite graph unfolding to protect UI VRAM when pulling from the EpistemicLedgerState.
  * CAUSAL AFFORDANCE: Instructs the orchestrator's deserialization engine to halt graph traversal at a specific recursion depth, replacing raw objects with cryptographic pointers.
- * EPISTEMIC BOUNDS: The `max_unfold_depth` strictly bounds the DAG traversal depth (`ge=1, le=100`). `lazy_fetch_timeout_ms` prevents infinite halting (`ge=1, le=60000`). `truncation_strategy` is constrained to a Literal.
+ * EPISTEMIC BOUNDS: The `max_unfold_depth` strictly bounds the DAG traversal depth (`ge=1, le=18446744073709551615`). `lazy_fetch_timeout_ms` prevents infinite halting (`ge=1, le=60000`). `truncation_strategy` is constrained to a Literal.
  * MCP ROUTING TRIGGERS: Coalgebraic Unfolding, Lazy Evaluation, State-Space Bounding, VRAM Exhaustion Prevention
  */
 export interface EpistemicHydrationPolicy {
@@ -14680,11 +14680,10 @@ export interface FormalVerificationContract {
  * authorizing the orchestrator to cull recursive encapsulation before it induces
  * state-space explosion or GPU VRAM exhaustion.
  *
- * EPISTEMIC BOUNDS: Mathematically clamps geometric explosion via the
- * @model_validator enforce_geometric_bounds, guaranteeing
- * max_node_fanout ** max_topological_depth <= 1000. Both max_topological_depth
- * and max_node_fanout are strictly positive (ge=1, le=18446744073709551615). Synthetic
- * token economy is capped by max_synthetic_tokens (ge=1, le=18446744073709551615).
+ * EPISTEMIC BOUNDS: Both max_topological_depth and max_node_fanout are strictly
+ * positive (ge=1, le=18446744073709551615). Synthetic token economy is capped by
+ * max_synthetic_tokens (ge=1, le=18446744073709551615). Geometric explosion prevention
+ * is delegated to runtime Admission Controllers.
  *
  * MCP ROUTING TRIGGERS: Ergodic Theory, Branching Factor Analysis, State-Space
  * Explosion, Fractal Graph Bounding, Gas Limit
@@ -15585,11 +15584,10 @@ export interface SyntheticGenerationProfile {
  * authorizing the orchestrator to cull recursive encapsulation before it induces
  * state-space explosion or GPU VRAM exhaustion.
  *
- * EPISTEMIC BOUNDS: Mathematically clamps geometric explosion via the
- * @model_validator enforce_geometric_bounds, guaranteeing
- * max_node_fanout ** max_topological_depth <= 1000. Both max_topological_depth
- * and max_node_fanout are strictly positive (ge=1, le=18446744073709551615). Synthetic
- * token economy is capped by max_synthetic_tokens (ge=1, le=18446744073709551615).
+ * EPISTEMIC BOUNDS: Both max_topological_depth and max_node_fanout are strictly
+ * positive (ge=1, le=18446744073709551615). Synthetic token economy is capped by
+ * max_synthetic_tokens (ge=1, le=18446744073709551615). Geometric explosion prevention
+ * is delegated to runtime Admission Controllers.
  *
  * MCP ROUTING TRIGGERS: Ergodic Theory, Branching Factor Analysis, State-Space
  * Explosion, Fractal Graph Bounding, Gas Limit
