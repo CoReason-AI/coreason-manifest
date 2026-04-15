@@ -516,3 +516,80 @@ The agentic execution confirmed that eradicating these literals did not fracture
 
 1.  **Dynamic Capability Resolution (`coreason-runtime`):** Your JIT compilers, extraction engines, and cryptography verifiers can no longer rely on Pydantic to filter out unsupported software backends or hardware enclaves. If an agent emits a request for `urn:coreason:compiler:future_engine_v3`, Pydantic will happily validate it. Your execution layer must intercept these URNs, check them against your local capability registry, and gracefully emit a `404 Capability Not Found` or `ManifestViolationReceipt` if the host lacks the requested engine.
 2.  **Test Payloads (`coreason-ecosystem`):** Any static mock payloads or test fixtures in the orchestrator that still use raw strings like `"outlines"` or `"intel_tdx"` will now fail topological schema validation. You must update all mock data to use their fully qualified URN equivalents.
+
+
+
+
+----
+
+***
+**Subject: Release Notes — Epic 6: Federated Discovery & Substrate Hardening**
+
+---
+
+# 🚀 Release Notes: coreason-manifest (Epic 6 Update)
+
+## Executive Summary
+We have successfully merged **Epic 6: Federated Discovery & Substrate Hardening** into the `coreason-manifest` ontology (targeting the `perfect-math` branch). 
+
+Following the completion of Epics 1-5—which successfully stripped all ephemeral physics and application-level security traps from the AST to create a mathematically pure "Hollow Data Plane"—this release introduces the structural geometry required for the swarm to interface with external, sovereign Virtual Private Clouds (VPCs). 
+
+By formalizing **Federated Discovery** and **Ontological Normalization**, the manifest now mathematically supports the `coreason-ecosystem` Master MCP (Model Context Protocol) architecture. Furthermore, this release addresses several critical Thermodynamic and Epistemic vulnerabilities discovered in the Substrate Oracles and MCP JSON Schema adapters, ensuring absolute systemic resilience against OOM (Out-Of-Memory) crashes and IPC (Inter-Process Communication) deadlocks.
+
+---
+
+## 🏗️ Key Architectural Changes
+
+### 1. The Federated Discovery Protocol
+**What Changed:**
+Three new fundamental topological shapes have been integrated into the `AnyIntent` and `AnyStateEvent` discriminated unions:
+* **`FederatedDiscoveryIntent`**: A mathematically bounded query allowing an agent to interrogate the Master MCP for available sovereign oracles based on a strict `domain_filter` and `required_security_clearance`.
+* **`OracleExecutionReceipt`**: An append-only Merkle-DAG coordinate proving that a sovereign oracle was securely executed via the Master MCP, locked to a specific `action_space_id` and `executed_urn`.
+* **`OntologicalNormalizationIntent`**: A semantic crosswalk hypothesis triggering proprietary ETL pipelines to transmute dirty external data (e.g., public biomedical databases) into pristine, structurally isomorphic vectors.
+
+**Architectural Justification:**
+The manifest remains mathematically hollow; it does not execute the API calls. Instead, it defines the *intent* to discover external data and the *receipt* of its retrieval, allowing the `coreason-ecosystem` to proxy these geometries down to containerized micro-MCPs securely hosted within a VPC.
+
+### 2. Thermodynamic Volumetric Hardening (Dictionary Bombing Prevention)
+**What Changed:**
+Strict `max_length` and cardinality constraints were injected into the new schemas:
+* URN constraints (`executed_urn`, `target_ontology_urn`, `domain_filter` elements) are rigidly clamped to `max_length=2000`.
+* The `domain_filter` array itself is physically capped at `max_length=1000`.
+* `action_space_id` is clamped to `max_length=255`.
+
+**Architectural Justification:**
+In Pydantic, regular expressions with unbound `.*` wildcards can be exploited. Without volumetric clamping, a compromised downstream MCP server could inject a 4-Gigabyte string that technically passes the Regex but triggers a catastrophic OOM CPU spike during validation. These bounds mathematically enforce the "Dictionary Bombing" prevention mandate.
+
+### 3. IPC Deadlock Resolution (The Clingo Guillotine)
+**What Changed:**
+The `CombinatorialSolverOracle` (`src/coreason_manifest/oracles/combinatorial.py`) was heavily refactored to enforce true OS-level thermodynamic isolation. 
+* Replaced the vulnerable Python GIL `threading.Timer` with a `multiprocessing.Process` wrapper.
+* Patched a critical Inter-Process Communication (IPC) pipe buffer deadlock by introducing `mp_queue.get(timeout=...)` prior to `process.join()`.
+* Runaway C-backed loops are now violently terminated via `SIGKILL`, returning a deterministic `satisfiability="UNKNOWN"` receipt to the swarm.
+
+**Architectural Justification:**
+Heavyweight mathematical solvers (like ASP/Clingo) can occasionally hoard VRAM and resist cooperative thread interrupts. Shifting the physics engine to a strictly bounded subprocess ensures that thermodynamic starvation limits are mathematically guaranteed.
+
+### 4. Epistemic Softmax Filtering (Multi-Line Regex Hardening)
+**What Changed:**
+The PCRE Regular Expressions backing the Neurosymbolic Triad MCP tools (`generate_lean4_mcp_tool`, `generate_clingo_mcp_tool`, `generate_prolog_mcp_tool`) were patched to replace the dot wildcard (`.*`) with the absolute wildcard (`[\s\S]*`).
+
+**Architectural Justification:**
+Because the standard regex dot (`.`) does not match newline characters, the previous schemas were violently rejecting perfectly formatted, multi-line formal logic proofs. This fix preserves the "Semantic Softmax Filter"—which physically chokes conversational hallucination tokens (e.g., *"Sure, here is the code:"*) to $-\infty$ during the LLM's forward pass—while allowing valid, multi-line mathematical geometries to pass seamlessly.
+
+### 5. Merkle-DAG Lineage Watermarking
+**What Changed:**
+The new `OracleExecutionReceipt` was updated to require the three foundational cryptographic watermarks: `event_cid`, `prior_event_hash`, and `timestamp`.
+
+**Architectural Justification:**
+Any object entering the `AnyStateEvent` union is eligible to be appended to the `EpistemicLedgerState.history` array. Lacking these fields would have fractured the chronological sorting and `verify_merkle_chain` hooks, collapsing the distributed ledger.
+
+---
+
+## ⚠️ Downstream Impact & Migration Guide
+
+**Attention: `coreason-ecosystem` and `coreason-runtime` Maintainers**
+
+1. **Deploy the Master MCP:** `coreason-ecosystem` must now deploy a Federated MCP Gateway (e.g., via Envoy or a FastAPI multiplexer). This gateway must intercept the new `FederatedDiscoveryIntent`, read the agent's DID, and dynamically project the merged JSON schemas of your VPC-hosted sub-MCPs back to the agent.
+2. **Route Normalization Intents:** `coreason-runtime` must intercept the `OntologicalNormalizationIntent` and route it strictly to your internal ETL and vectorization pipelines (e.g., Milvus/Neo4j ingestion nodes), returning an `OracleExecutionReceipt` upon success.
+3. **Handle Thermodynamic Terminations:** If an agent submits an NP-Hard constraint problem that exceeds the Clingo timeout, `coreason-runtime` will now receive a receipt with an `unsat_core` string containing `"Execution terminated: Thermodynamic bound exceeded (SIGKILL applied)."`. The orchestration layer must handle this gracefully, typically by triggering a `System2RemediationIntent` to ask the agent to simplify its logic.

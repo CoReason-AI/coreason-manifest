@@ -7359,7 +7359,9 @@ type AnyIntent = Annotated[
     | InterventionalCausalTask
     | MCPClientIntent
     | RollbackIntent
-    | StateMutationIntent,
+    | StateMutationIntent
+    | FederatedDiscoveryIntent
+    | OntologicalNormalizationIntent,
     Field(discriminator="topology_class"),
 ]
 
@@ -14589,9 +14591,104 @@ type AnyStateEvent = Annotated[
     | BeliefModulationReceipt
     | RDFExportReceipt
     | EpistemicStarvationEvent
-    | SPARQLQueryResultReceipt,
+    | SPARQLQueryResultReceipt
+    | OracleExecutionReceipt,
     Field(discriminator="topology_class", description="A discriminated union of state events."),
 ]
+
+
+class FederatedDiscoveryIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Use this intent to query the Master MCP for available sovereign oracles and verifiable execution substrates.
+
+    CAUSAL AFFORDANCE: Projects a bounded subgraph of available URNs based on the agent's cryptographic identity and security clearance.
+
+    EPISTEMIC BOUNDS: The domain_filter strictly limits the discovery surface to the requested URN namespaces to prevent context window dilution. Physically capped at 1000 elements to prevent CPU exhaustion during canonical sorting.
+
+    MCP ROUTING TRIGGERS: Federated Discovery, Service Mesh, Capability Registry, Substrate Interrogation
+    """
+
+    topology_class: Literal["federated_discovery"] = Field(
+        default="federated_discovery",
+        description="Discriminator for the FederatedDiscoveryIntent topology.",
+    )
+    domain_filter: list[Annotated[str, StringConstraints(max_length=2000, pattern=r"^urn:coreason:domain:.*$")]] = (
+        Field(
+            max_length=1000,
+            description="The bounded set of URN namespaces to interrogate during sovereign oracle discovery.",
+        )
+    )
+    required_security_clearance: Literal["PUBLIC", "CONFIDENTIAL", "RESTRICTED"] = Field(
+        description="The minimum security clearance required from the discovered execution substrates."
+    )
+
+    @model_validator(mode="after")
+    def sort_domain_filter(self) -> Self:
+        """Enforce cryptographic determinism via lexicographic sorting."""
+        object.__setattr__(self, "domain_filter", sorted(self.domain_filter))
+        return self
+
+
+class OracleExecutionReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A cryptographically frozen historical fact confirming the execution of a sovereign oracle via the Master MCP. Do not attempt to mutate this object.
+
+    CAUSAL AFFORDANCE: Unlocks downstream neurosymbolic synthesis by proving that external epistemic grounding was securely retrieved from a validated action space.
+
+    EPISTEMIC BOUNDS: The action_space_id guarantees an immutable cryptographic pointer to the specific VPC deployment that serviced the URN. Volumetrically clamped to prevent dictionary bombing.
+
+    MCP ROUTING TRIGGERS: Execution Audit, Oracle Telemetry, Provenance Ledger, Factual Assertion
+    """
+
+    topology_class: Literal["oracle_execution_receipt"] = Field(
+        default="oracle_execution_receipt",
+        description="Discriminator for the OracleExecutionReceipt topology.",
+    )
+    # --- MANDATORY MERKLE-DAG LINEAGE WATERMARKS ---
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+    )
+    prior_event_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(
+        default=None,
+        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+    )
+    timestamp: float = Field(
+        ge=0.0,
+        le=253402300799.0,
+        description="Causal Ancestry markers required to resolve decentralized event ordering.",
+    )
+    # -----------------------------------------------
+    executed_urn: Annotated[str, StringConstraints(max_length=2000, pattern=r"^urn:coreason:oracle:.*$")] = Field(
+        description="The fully qualified URN of the sovereign oracle that was executed."
+    )
+    action_space_id: Annotated[str, StringConstraints(min_length=1, max_length=255, pattern=r"^[a-zA-Z0-9_-]+$")] = (
+        Field(description="An immutable local deployment pointer identifying the specific VPC action space.")
+    )
+
+
+class OntologicalNormalizationIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A non-monotonic hypothesis requesting the transformation of unstructured or dirty public data into a pristine, mathematically bounded resource.
+
+    CAUSAL AFFORDANCE: Triggers the execution of proprietary ETL and semantic vectorization pipelines within the sovereign VPC.
+
+    EPISTEMIC BOUNDS: Forces absolute structural isomorphism by demanding that the resulting artifact perfectly matches the geometries declared in the target_ontology_urn. URN is clamped to 2000 chars.
+
+    MCP ROUTING TRIGGERS: Semantic Crosswalk, ETL Pipeline, Data Normalization, Knowledge Graph Extraction
+    """
+
+    topology_class: Literal["ontological_normalization"] = Field(
+        default="ontological_normalization",
+        description="Discriminator for the OntologicalNormalizationIntent topology.",
+    )
+    source_artifact_cid: Annotated[
+        str, StringConstraints(min_length=1, max_length=128, pattern=r"^[a-zA-Z0-9_.:-]+$")
+    ] = Field(description="The Content Identifier (CID) of the raw ingested data artifact.")
+    target_ontology_urn: Annotated[str, StringConstraints(max_length=2000, pattern=r"^urn:coreason:ontology:.*$")] = (
+        Field(description="The formal URN declaring the target ontological geometry for structural isomorphism.")
+    )
 
 
 class EvidentiaryCitationState(CoreasonBaseState):
@@ -15158,3 +15255,6 @@ TemporalEdgeInvalidationIntent.model_rebuild()
 TemporalGraphCRDTManifest.model_rebuild()
 MCPToolDefinition.model_rebuild()
 ContinuousManifoldMappingContract.model_rebuild()
+FederatedDiscoveryIntent.model_rebuild()
+OracleExecutionReceipt.model_rebuild()
+OntologicalNormalizationIntent.model_rebuild()

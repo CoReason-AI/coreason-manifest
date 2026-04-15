@@ -895,6 +895,7 @@
           "escalation": "#/$defs/EscalationIntent",
           "fallback_intent": "#/$defs/FallbackIntent",
           "falsification_contract": "#/$defs/FalsificationContract",
+          "federated_discovery": "#/$defs/FederatedDiscoveryIntent",
           "forced_adjudication": "#/$defs/AdjudicationIntent",
           "formal_logic_premise": "#/$defs/FormalLogicPremise",
           "fyi": "#/$defs/FYIIntent",
@@ -906,6 +907,7 @@
           "mcp_client_intent": "#/$defs/MCPClientIntent",
           "neurosymbolic_inference": "#/$defs/NeurosymbolicInferenceIntent",
           "ontological_crosswalk": "#/$defs/OntologicalCrosswalkIntent",
+          "ontological_normalization": "#/$defs/OntologicalNormalizationIntent",
           "ontology_discovery": "#/$defs/OntologyDiscoveryIntent",
           "override": "#/$defs/OverrideIntent",
           "quarantine_intent": "#/$defs/QuarantineIntent",
@@ -1062,6 +1064,12 @@
         },
         {
           "$ref": "#/$defs/StateMutationIntent"
+        },
+        {
+          "$ref": "#/$defs/FederatedDiscoveryIntent"
+        },
+        {
+          "$ref": "#/$defs/OntologicalNormalizationIntent"
         }
       ]
     },
@@ -1172,6 +1180,7 @@
           "normative_drift": "#/$defs/NormativeDriftEvent",
           "observation": "#/$defs/ObservationEvent",
           "ontological_reification": "#/$defs/OntologicalReificationReceipt",
+          "oracle_execution_receipt": "#/$defs/OracleExecutionReceipt",
           "persistence_commit": "#/$defs/PersistenceCommitReceipt",
           "post_coordinated_concept": "#/$defs/PostCoordinatedSemanticState",
           "rdf_export_receipt": "#/$defs/RDFExportReceipt",
@@ -1309,6 +1318,9 @@
         },
         {
           "$ref": "#/$defs/SPARQLQueryResultReceipt"
+        },
+        {
+          "$ref": "#/$defs/OracleExecutionReceipt"
         }
       ]
     },
@@ -10729,6 +10741,46 @@
       "title": "FederatedCapabilityAttestationReceipt",
       "type": "object"
     },
+    "FederatedDiscoveryIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Use this intent to query the Master MCP for available sovereign oracles and verifiable execution substrates.\n\nCAUSAL AFFORDANCE: Projects a bounded subgraph of available URNs based on the agent's cryptographic identity and security clearance.\n\nEPISTEMIC BOUNDS: The domain_filter strictly limits the discovery surface to the requested URN namespaces to prevent context window dilution. Physically capped at 1000 elements to prevent CPU exhaustion during canonical sorting.\n\nMCP ROUTING TRIGGERS: Federated Discovery, Service Mesh, Capability Registry, Substrate Interrogation",
+      "properties": {
+        "topology_class": {
+          "const": "federated_discovery",
+          "default": "federated_discovery",
+          "description": "Discriminator for the FederatedDiscoveryIntent topology.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "domain_filter": {
+          "description": "The bounded set of URN namespaces to interrogate during sovereign oracle discovery.",
+          "items": {
+            "maxLength": 2000,
+            "pattern": "^urn:coreason:domain:.*$",
+            "type": "string"
+          },
+          "maxItems": 1000,
+          "title": "Domain Filter",
+          "type": "array"
+        },
+        "required_security_clearance": {
+          "description": "The minimum security clearance required from the discovered execution substrates.",
+          "enum": [
+            "PUBLIC",
+            "CONFIDENTIAL",
+            "RESTRICTED"
+          ],
+          "title": "Required Security Clearance",
+          "type": "string"
+        }
+      },
+      "required": [
+        "domain_filter",
+        "required_security_clearance"
+      ],
+      "title": "FederatedDiscoveryIntent",
+      "type": "object"
+    },
     "FederatedDiscoveryManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Governs the B2B Multi-Swarm Gossip Protocol, establishing the initial\nModel Context Protocol (MCP) broadcast endpoints for external discovery. As a ...Manifest\nsuffix, this is a declarative, frozen snapshot of N-dimensional geometry at a specific\npoint in time.\n\nCAUSAL AFFORDANCE: Emits a structured tensor beacon to neighboring swarms, authorizing\nthe initiation of an OntologicalHandshakeReceipt if the supported_ontologies hashes\nmathematically overlap.\n\nEPISTEMIC BOUNDS: Geometrically capped by broadcast_endpoints and supported_ontologies\nstring arrays (each max_length=1000). Both are explicitly sorted by the\n@model_validator (broadcast_endpoints by str key, supported_ontologies alphabetically)\nto guarantee invariant canonical RFC 8785 hashing across distinct environments.\n\nMCP ROUTING TRIGGERS: Gossip Protocol, Peer-to-Peer Discovery, Decentralized Federation,\nSemantic Broadcasting, Tensor Beacon",
@@ -15404,6 +15456,40 @@
       "title": "OntologicalHandshakeReceipt",
       "type": "object"
     },
+    "OntologicalNormalizationIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A non-monotonic hypothesis requesting the transformation of unstructured or dirty public data into a pristine, mathematically bounded resource.\n\nCAUSAL AFFORDANCE: Triggers the execution of proprietary ETL and semantic vectorization pipelines within the sovereign VPC.\n\nEPISTEMIC BOUNDS: Forces absolute structural isomorphism by demanding that the resulting artifact perfectly matches the geometries declared in the target_ontology_urn. URN is clamped to 2000 chars.\n\nMCP ROUTING TRIGGERS: Semantic Crosswalk, ETL Pipeline, Data Normalization, Knowledge Graph Extraction",
+      "properties": {
+        "topology_class": {
+          "const": "ontological_normalization",
+          "default": "ontological_normalization",
+          "description": "Discriminator for the OntologicalNormalizationIntent topology.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "source_artifact_cid": {
+          "description": "The Content Identifier (CID) of the raw ingested data artifact.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Source Artifact Cid",
+          "type": "string"
+        },
+        "target_ontology_urn": {
+          "description": "The formal URN declaring the target ontological geometry for structural isomorphism.",
+          "maxLength": 2000,
+          "pattern": "^urn:coreason:ontology:.*$",
+          "title": "Target Ontology Urn",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_artifact_cid",
+        "target_ontology_urn"
+      ],
+      "title": "OntologicalNormalizationIntent",
+      "type": "object"
+    },
     "OntologicalReificationReceipt": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: An append-only, cryptographically frozen coordinate verifying the integrity of a generalized bimodal semantic transformation. Commits the transformation mechanism to the Epistemic Ledger, physically separating explicit empirical facts from machine-inferred hypotheses to eliminate traceability collapse.\n\n    CAUSAL AFFORDANCE: Physically authorizes the orchestrator to commit the transformation mechanism to the Epistemic Ledger.\n\n    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.\n\n    MCP ROUTING TRIGGERS: Ontological Reification, Bimodal Semantic Transformation, Epistemic Ledger, Traceability Collapse",
@@ -15699,6 +15785,73 @@
         "minimize"
       ],
       "type": "string"
+    },
+    "OracleExecutionReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact confirming the execution of a sovereign oracle via the Master MCP. Do not attempt to mutate this object.\n\nCAUSAL AFFORDANCE: Unlocks downstream neurosymbolic synthesis by proving that external epistemic grounding was securely retrieved from a validated action space.\n\nEPISTEMIC BOUNDS: The action_space_id guarantees an immutable cryptographic pointer to the specific VPC deployment that serviced the URN. Volumetrically clamped to prevent dictionary bombing.\n\nMCP ROUTING TRIGGERS: Execution Audit, Oracle Telemetry, Provenance Ledger, Factual Assertion",
+      "properties": {
+        "topology_class": {
+          "const": "oracle_execution_receipt",
+          "default": "oracle_execution_receipt",
+          "description": "Discriminator for the OracleExecutionReceipt topology.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "event_cid": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "executed_urn": {
+          "description": "The fully qualified URN of the sovereign oracle that was executed.",
+          "maxLength": 2000,
+          "pattern": "^urn:coreason:oracle:.*$",
+          "title": "Executed Urn",
+          "type": "string"
+        },
+        "action_space_id": {
+          "description": "An immutable local deployment pointer identifying the specific VPC action space.",
+          "maxLength": 255,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_-]+$",
+          "title": "Action Space Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event_cid",
+        "timestamp",
+        "executed_urn",
+        "action_space_id"
+      ],
+      "title": "OracleExecutionReceipt",
+      "type": "object"
     },
     "OutputMappingContract": {
       "additionalProperties": false,
