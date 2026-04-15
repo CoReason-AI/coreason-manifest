@@ -24,7 +24,7 @@ from coreason_manifest.spec.ontology import (
 
 
 @given(
-    max_unfold_depth=st.integers(max_value=0) | st.integers(min_value=101),
+    max_unfold_depth=st.integers(max_value=0),
     lazy_fetch_timeout_ms=st.integers(min_value=1, max_value=60000),
     truncation_strategy=st.sampled_from(["hash_pointer", "nullify", "scalar_summary"]),
 )
@@ -45,7 +45,7 @@ def test_epistemic_hydration_policy_max_depth_bounds(
 
 
 @given(
-    max_unfold_depth=st.integers(min_value=1, max_value=100),
+    max_unfold_depth=st.integers(min_value=1, max_value=18446744073709551615),
     lazy_fetch_timeout_ms=st.integers(max_value=0) | st.integers(min_value=60001),
     truncation_strategy=st.sampled_from(["hash_pointer", "nullify", "scalar_summary"]),
 )

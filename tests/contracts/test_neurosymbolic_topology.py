@@ -99,18 +99,18 @@ def test_bipartite_type_violation_both_systems() -> None:
 
 
 def test_cycle_bound_enforcement_too_high() -> None:
+    """Prove max_revision_loops=1000 is accepted under UAB (previously rejected at le=100)."""
     nodes: dict[str, Any] = {
         "did:coreason:agent-1": CognitiveAgentNodeProfile(description="Agent 1", topology_class="agent"),
         "did:coreason:system-1": CognitiveSystemNodeProfile(description="System 1", topology_class="system"),
     }
-    with pytest.raises(ValidationError) as exc_info:
-        NeurosymbolicVerificationTopologyManifest(
-            nodes=nodes,
-            proposer_node_cid="did:coreason:agent-1",
-            verifier_node_cid="did:coreason:system-1",
-            max_revision_loops=1000,
-        )
-    assert "100" in str(exc_info.value)
+    macro = NeurosymbolicVerificationTopologyManifest(
+        nodes=nodes,
+        proposer_node_cid="did:coreason:agent-1",
+        verifier_node_cid="did:coreason:system-1",
+        max_revision_loops=1000,
+    )
+    assert macro.max_revision_loops == 1000
 
 
 def test_cycle_bound_enforcement_too_low() -> None:

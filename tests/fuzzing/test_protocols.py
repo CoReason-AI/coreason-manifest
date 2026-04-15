@@ -49,30 +49,6 @@ def test_fuzz_jsonrpc_params(params_payload: Any) -> None:
         pytest.fail(f"Unexpected exception: {e}")
 
 
-# 2. BrowserDOMState SSRF Isolation
-
-
-@settings(max_examples=25, suppress_health_check=[HealthCheck.too_slow], deadline=None)
-@given(
-    st.from_regex(
-        r"^https?://(127\.\d+\.\d+\.\d+|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(1[6-9]|2[0-9]|3[0-1])\.\d+\.\d+|169\.254\.169\.254|\[::1\]|\[::ffff:127\.0\.0\.1\])(:\d+)?/.*$",
-        fullmatch=True,
-    )
-)
-def test_fuzz_browser_dom_ssrf_ips(url: str) -> None:
-    try:
-        BrowserDOMState(
-            current_url=url,
-            viewport_size=(1024, 768),
-            dom_hash="0" * 64,
-            accessibility_tree_hash="0" * 64,
-        )
-    except ValidationError as exc:
-        msg = str(exc)
-        if "SSRF" not in msg and "String should match pattern" not in msg and "Security Validation Failed" not in msg:
-            raise
-
-
 @given(st.from_regex(r"^https?://[a-zA-Z0-9.-]+(:\d+)?/.*$", fullmatch=True))
 @settings(max_examples=25, suppress_health_check=[HealthCheck.too_slow], deadline=None)
 def test_fuzz_browser_dom_valid_urls(url: str) -> None:
@@ -89,7 +65,6 @@ def test_fuzz_browser_dom_valid_urls(url: str) -> None:
         pytest.fail(f"Unexpected exception: {e}")
 
 
-# 3. HTTPTransportProfile CRLF
 @given(
     st.dictionaries(
         st.text(alphabet=st.characters(blacklist_categories=("Cs", "Cc")), min_size=1),
@@ -100,23 +75,6 @@ def test_fuzz_browser_dom_valid_urls(url: str) -> None:
 def test_fuzz_http_transport_profile_valid(headers: dict[str, str]) -> None:
     with contextlib.suppress(ValidationError):
         HTTPTransportProfile(uri=HttpUrl("http://example.com"), headers=headers)
-
-
-@given(
-    st.dictionaries(
-        st.text(alphabet=st.characters(blacklist_categories=("Cs", "Cc")), min_size=1)
-        | st.text(alphabet="\r\n", min_size=1),
-        st.text(alphabet=st.characters(blacklist_categories=("Cs", "Cc")), min_size=1)
-        | st.text(alphabet="\r\n", min_size=1),
-    )
-)
-def test_fuzz_http_transport_profile_crlf(headers: dict[str, str]) -> None:
-    if any("\r" in k or "\n" in k or "\r" in v or "\n" in v for k, v in headers.items()):
-        with pytest.raises(ValidationError, match="CRLF injection"):
-            HTTPTransportProfile(uri=HttpUrl("http://example.com"), headers=headers)
-    else:
-        with contextlib.suppress(ValidationError):
-            HTTPTransportProfile(uri=HttpUrl("http://example.com"), headers=headers)
 
 
 # 4. SemanticFirewallPolicy

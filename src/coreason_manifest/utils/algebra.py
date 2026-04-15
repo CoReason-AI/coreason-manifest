@@ -59,12 +59,8 @@ SCHEMA_REGISTRY: dict[str, type[BaseModel]] = {
     "state_differential": StateMutationIntent,
     "cognitive_sync": CognitiveStateProfile,
     "system2_remediation": System2RemediationIntent,
-    "lean4_premise": ontology.EpistemicLean4Premise,
-    "lean4_receipt": ontology.Lean4VerificationReceipt,
-    "logic_premise": ontology.EpistemicLogicPremise,
-    "logic_receipt": ontology.FormalLogicProofReceipt,
-    "prolog_premise": ontology.EpistemicPrologPremise,
-    "prolog_receipt": ontology.PrologDeductionReceipt,
+    "formal_logic_premise": ontology.FormalLogicPremise,
+    "formal_verification_receipt": ontology.FormalVerificationReceipt,
     "falsification_contract": ontology.FalsificationContract,
 }
 
@@ -232,7 +228,7 @@ def align_semantic_manifolds(
     if "semantic_graph" in target_modalities:
         schema_governance = ontology.SchemaDrivenExtractionSLA(
             schema_registry_uri=AnyUrl("http://example.com/schema"),
-            extraction_framework="docling_graph_explicit",
+            extraction_framework="urn:coreason:extraction:docling_graph_explicit",
             max_schema_retries=3,
             validation_failure_action="escalate_to_human",
         )

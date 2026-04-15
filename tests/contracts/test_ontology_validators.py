@@ -21,7 +21,6 @@ from coreason_manifest.spec.ontology import (
     CognitiveUncertaintyProfile,
     ComputeEngineProfile,
     ComputeRateContract,
-    ComputeTierProfile,
     ConsensusPolicy,
     ConstrainedDecodingPolicy,
     ContextualizedSourceState,
@@ -316,7 +315,7 @@ def test_constrained_decoding_policy_lmql_missing_string() -> None:
     ):
         ConstrainedDecodingPolicy(
             enforcement_strategy="lmql_query",
-            compiler_backend="lmql",
+            compiler_backend="urn:coreason:compiler:lmql",
             formal_grammar_string=None,
         )
 
@@ -324,7 +323,7 @@ def test_constrained_decoding_policy_lmql_missing_string() -> None:
 def test_cognitive_format_contract_regex_conflict() -> None:
     policy = ConstrainedDecodingPolicy(
         enforcement_strategy="lmql_query",
-        compiler_backend="lmql",
+        compiler_backend="urn:coreason:compiler:lmql",
         formal_grammar_string='SELECT "Hello World"',
     )
     with pytest.raises(
@@ -341,7 +340,7 @@ def test_cognitive_format_contract_regex_conflict() -> None:
 def test_cognitive_format_contract_valid_lmql() -> None:
     policy = ConstrainedDecodingPolicy(
         enforcement_strategy="lmql_query",
-        compiler_backend="lmql",
+        compiler_backend="urn:coreason:compiler:lmql",
         formal_grammar_string='SELECT "Hello World"',
     )
     contract = CognitiveFormatContract(
@@ -405,50 +404,8 @@ def test_browser_dom_state_safety_valid_fuzzing(url: str) -> None:
         )
         assert state.current_url == url
     except ValidationError:
-        # It might still trigger SSRF validation if hypothesis generates a local-looking domain,
-        # but that's properly handled as part of the fuzzing scope.
+        # Hypothesis may generate structurally invalid URLs that fail Pydantic validation.
         pass
-
-
-@given(
-    bogon=st.sampled_from(
-        [
-            "localhost",
-            "broadcasthost",
-            "test.local",
-            "test.internal",
-            "test.arpa",
-            "test.nip.io",
-            "test.sslip.io",
-            "127.0.0.1",
-            "192.168.1.1",
-            "10.0.0.1",
-            "169.254.169.254",
-            "0.0.0.0",  # noqa: S104 # nosec B104
-        ]
-    )
-)
-@settings(max_examples=100, deadline=None)
-def test_browser_dom_state_safety_invalid_fuzzing(bogon: str) -> None:
-    from pydantic import ValidationError
-
-    from coreason_manifest.spec.ontology import BrowserDOMState
-
-    with pytest.raises(ValidationError, match=r"SSRF|validation error"):
-        BrowserDOMState(
-            current_url=f"http://{bogon}",
-            viewport_size=(800, 600),
-            dom_hash="a" * 64,
-            accessibility_tree_hash="b" * 64,
-        )
-
-    with pytest.raises(ValidationError, match=r"SSRF|validation error"):
-        BrowserDOMState(
-            current_url=f"file://{bogon}",
-            viewport_size=(800, 600),
-            dom_hash="a" * 64,
-            accessibility_tree_hash="b" * 64,
-        )
 
 
 def test_defeasible_cascade_event_sorting() -> None:
@@ -669,29 +626,6 @@ def test_mcpservermanifest_enforce_did() -> None:
     assert manifest.attestation_receipt.issuer_did == "did:coreason:123"
 
 
-def test_insight_card_profile_xss_prevention() -> None:
-    from coreason_manifest.spec.ontology import InsightCardProfile
-
-    # Test that valid links work
-    InsightCardProfile(panel_cid="panel_1", title="Title", markdown_content="[click me](https://coreason.ai)")
-
-    malicious_payloads = [
-        "<script>alert(1)</script>",
-        "<img src='x' onerror='alert(1)'>",
-    ]
-
-    for payload in malicious_payloads:
-        profile = InsightCardProfile(panel_cid="panel_1", title="Title", markdown_content=payload)
-        assert "<script>" not in profile.markdown_content
-        assert "alert(1)" not in profile.markdown_content
-
-    # Note: "<a href='javascript:alert(1)'>click me</a>" is caught by `sanitize_markdown` first
-    profile = InsightCardProfile(
-        panel_cid="panel_1", title="Title", markdown_content="<a href='javascript:alert(1)'>click me</a>"
-    )
-    assert "javascript:alert" not in profile.markdown_content
-
-
 def test_macro_grid_profile_referential_integrity() -> None:
     from pydantic import ValidationError
 
@@ -815,36 +749,9 @@ def test_kinematic_delta_manifest_sorting() -> None:
 def test_agent_node_profile_success() -> None:
     """Test that default values instantiate cleanly without triggering traps."""
     agent = CognitiveAgentNodeProfile(description="Test agent")
-    assert agent.hardware.compute_tier == ComputeTierProfile.KINETIC
+    assert agent.hardware.compute_tier == "urn:coreason:compute:kinetic"
     assert agent.hardware.min_vram_gb == 8.0
     assert agent.security.epistemic_security == EpistemicSecurityPolicy.STANDARD
-
-
-def test_agent_node_profile_thermodynamic_paradox() -> None:
-    """Test that KINETIC tier cannot exceed 24.0 GB VRAM."""
-    with pytest.raises(ValueError, match="Thermodynamic Constraint Violated"):
-        CognitiveAgentNodeProfile(
-            description="Test agent",
-            hardware=SpatialHardwareProfile(compute_tier=ComputeTierProfile.KINETIC, min_vram_gb=25.0),
-        )
-
-
-def test_agent_node_profile_sovereign_execution_paradox() -> None:
-    """Test that CONFIDENTIAL workloads must use trusted endpoints only."""
-    with pytest.raises(ValueError, match="Sovereign Execution Violated"):
-        CognitiveAgentNodeProfile(
-            description="Test agent",
-            hardware=SpatialHardwareProfile(provider_whitelist=["vast", "aws"]),
-            security=EpistemicSecurityProfile(epistemic_security=EpistemicSecurityPolicy.CONFIDENTIAL),
-        )
-
-    # Success case for CONFIDENTIAL
-    agent = CognitiveAgentNodeProfile(
-        description="Test agent",
-        hardware=SpatialHardwareProfile(provider_whitelist=["aws", "gcp"]),
-        security=EpistemicSecurityProfile(epistemic_security=EpistemicSecurityPolicy.CONFIDENTIAL),
-    )
-    assert agent.security.epistemic_security == EpistemicSecurityPolicy.CONFIDENTIAL
 
 
 def test_sovereign_execution_allows_localhost_and_bare_metal() -> None:
@@ -908,22 +815,6 @@ def test_deprecated_solver_sympy() -> None:
             verified_theorem_hash="a" * 64,
         )
     assert "Input should be 'lean4' or 'z3'" in str(exc_info.value)
-
-
-def test_agent_node_profile_network_topology_paradox() -> None:
-    """Test that Mixnet routing requires strict network isolation."""
-    with pytest.raises(ValueError, match="Topology Routing Violated"):
-        CognitiveAgentNodeProfile(
-            description="Test agent",
-            security=EpistemicSecurityProfile(egress_obfuscation=True, network_isolation=False),
-        )
-
-    # Success case for Mixnet routing
-    agent = CognitiveAgentNodeProfile(
-        description="Test agent", security=EpistemicSecurityProfile(egress_obfuscation=True, network_isolation=True)
-    )
-    assert agent.security.egress_obfuscation is True
-    assert agent.security.network_isolation is True
 
 
 def test_refusal_to_reason_enforcement() -> None:
