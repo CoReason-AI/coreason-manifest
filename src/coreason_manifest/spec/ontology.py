@@ -1144,26 +1144,33 @@ class VolumetricBoundingProfile(CoreasonBaseState):
         return self
 
 
-class GaussianSplattingProfile(CoreasonBaseState):
+class SpatialRenderMaterial(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Defines a single localized 3D Gaussian ellipsoid for volumetric rendering in Neural Radiance Fields.
+    AGENT INSTRUCTION: A mathematically pure, physics-agnostic material reference for spatial rendering.
 
-    CAUSAL AFFORDANCE: Authorizes the rendering engine to spatially rasterize point-based continuous geometries using view-dependent spherical harmonics and anisotropic covariance scaling.
+    CAUSAL AFFORDANCE: Instructs the frontend client (e.g., coreason-vscode) to apply a specific visual identity or compiled shader to a spatial coordinate, delegating all photon and rasterization physics to the client's GPU.
 
-    EPISTEMIC BOUNDS: The `spherical_harmonics_degree` is physically clamped (`ge=0, le=3`) to prevent VRAM exhaustion. The `opacity_alpha` parameter is rigidly clamped between `ge=0.0, le=1.0`. The `covariance_scale` utilizes a Topological Exemption against array sorting.
+    EPISTEMIC BOUNDS: Bounded to a strict URN pattern or cryptographic CID, severing the AST from transient WebGL/WebXR implementations.
 
-    MCP ROUTING TRIGGERS: Neural Radiance Fields, 3D Gaussian Splatting, Spherical Harmonics, Volumetric Rendering, Covariance Matrix
+    MCP ROUTING TRIGGERS: Material Reference, Shader Artifact, Spatial Rendering, Visual Identity
     """
 
-    spherical_harmonics_degree: int = Field(
-        ge=0, le=3, description="Capped at 3 to physically prevent VRAM explosion during WebGL rasterization."
+    material_urn: Annotated[str, StringConstraints(pattern=r"^urn:coreason:material:.*$", max_length=2000)] | None = (
+        Field(
+            default=None,
+            description="The abstract material identifier (e.g., 'urn:coreason:material:glass_refractive').",
+        )
     )
-    covariance_scale: tuple[float, float, float] = Field(
-        json_schema_extra={"coreason_topological_exemption": True},
-        description="The 3D anisotropic scaling vector of the Gaussian ellipsoid.",
-    )
-    # Note: covariance_scale is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
-    opacity_alpha: float = Field(ge=0.0, le=1.0, description="The alpha transmittance scalar of the splat.")
+    compiled_shader_cid: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] | None
+    ) = Field(default=None, description="An optional cryptographic pointer to a pre-compiled shader artifact.")
+
+    @model_validator(mode="after")
+    def ensure_material_definition(self) -> Self:
+        """At least one of material_urn or compiled_shader_cid must be provided."""
+        if self.material_urn is None and self.compiled_shader_cid is None:
+            raise ValueError("SpatialRenderMaterial requires either a material_urn or a compiled_shader_cid.")
+        return self
 
 
 class ViewportProjectionContract(CoreasonBaseState):
@@ -1202,30 +1209,6 @@ class ViewportProjectionContract(CoreasonBaseState):
                 "Optical Singularity Risk: Perspective projection mathematically requires field_of_view_degrees."
             )
         return self
-
-
-class PhysicallyBasedRenderingProfile(CoreasonBaseState):
-    r"""
-    AGENT INSTRUCTION: Formalizes the Cook-Torrance Microfacet BRDF (Bidirectional Reflectance Distribution Function) to establish the exact physical optic properties of a topological vertex.
-
-    CAUSAL AFFORDANCE: Authorizes the spatial computing renderer to deterministically compute light scattering, reflection, and refraction for the node's geometry, translating logical state into physical optic variables (e.g., pulsing emission during active compute).
-
-    EPISTEMIC BOUNDS: Diffuse and specular physics are rigidly clamped to normalized probability spaces (`ge=0.0, le=1.0`) for `metalness`, `roughness`, and `transmission`. The Index of Refraction (`ior`) is bounded to valid physical materials `[1.0, 3.0]`. `emissive_intensity` is clamped to `[0.0, 100.0]`.
-
-    MCP ROUTING TRIGGERS: Physically Based Rendering, Microfacet BRDF, Index of Refraction, Spatial Optics, Material Thermodynamics
-
-    """
-
-    mesh_geometry: Literal["sphere", "box", "icosahedron", "cylinder", "tetrahedron"] = Field(
-        description="The rigid 3D primitive geometry bounding the topological vertex."
-    )
-    metalness: float = Field(ge=0.0, le=1.0, description="The dielectric vs. metallic material property scalar.")
-    roughness: float = Field(ge=0.0, le=1.0, description="The microfacet surface scattering scalar.")
-    transmission: float = Field(ge=0.0, le=1.0, description="The optical clarity or volumetric glass effect.")
-    ior: float = Field(ge=1.0, le=3.0, description="The Index of Refraction dictating photon trajectory.")
-    emissive_intensity: float = Field(
-        ge=0.0, le=100.0, description="The thermodynamic glow indicating active kinetic compute."
-    )
 
 
 class EpistemicAttentionState(CoreasonBaseState):
@@ -6620,8 +6603,9 @@ class TaxonomicNodeState(CoreasonBaseState):
         default_factory=list,
         description="The mathematical chain of custody binding this virtual coordinate back to physical vectors.",
     )
-    optical_physics: PhysicallyBasedRenderingProfile | None = Field(
-        default=None, description="The strict microfacet BRDF physics governing the visual representation of this node."
+    render_material: SpatialRenderMaterial | None = Field(
+        default=None,
+        description="The physics-agnostic visual identity or shader governing the spatial rendering of this node.",
     )
 
     @model_validator(mode="after")
@@ -7740,11 +7724,9 @@ class CognitiveHumanNodeProfile(CoreasonBaseState):
     markov_blanket: MarkovBlanketRenderingPolicy | None = Field(
         default=None, description="The epistemic isolation boundary guarding this agent's internal generative states."
     )
-    optical_physics: PhysicallyBasedRenderingProfile | None = Field(
-        default=None, description="The strict microfacet BRDF physics governing the visual representation of this node."
-    )
-    neural_optics: GaussianSplattingProfile | None = Field(
-        default=None, description="The volumetric Gaussian Splatting configuration for non-polygonal rendering."
+    render_material: SpatialRenderMaterial | None = Field(
+        default=None,
+        description="The physics-agnostic visual identity or shader governing the spatial rendering of this node.",
     )
 
     @field_validator("domain_extensions", mode="before")
@@ -7809,11 +7791,9 @@ class MemoizedNodeProfile(CoreasonBaseState):
     markov_blanket: MarkovBlanketRenderingPolicy | None = Field(
         default=None, description="The epistemic isolation boundary guarding this agent's internal generative states."
     )
-    optical_physics: PhysicallyBasedRenderingProfile | None = Field(
-        default=None, description="The strict microfacet BRDF physics governing the visual representation of this node."
-    )
-    neural_optics: GaussianSplattingProfile | None = Field(
-        default=None, description="The volumetric Gaussian Splatting configuration for non-polygonal rendering."
+    render_material: SpatialRenderMaterial | None = Field(
+        default=None,
+        description="The physics-agnostic visual identity or shader governing the spatial rendering of this node.",
     )
 
     @field_validator("domain_extensions", mode="before")
@@ -7877,11 +7857,9 @@ class CognitiveSystemNodeProfile(CoreasonBaseState):
     markov_blanket: MarkovBlanketRenderingPolicy | None = Field(
         default=None, description="The epistemic isolation boundary guarding this agent's internal generative states."
     )
-    optical_physics: PhysicallyBasedRenderingProfile | None = Field(
-        default=None, description="The strict microfacet BRDF physics governing the visual representation of this node."
-    )
-    neural_optics: GaussianSplattingProfile | None = Field(
-        default=None, description="The volumetric Gaussian Splatting configuration for non-polygonal rendering."
+    render_material: SpatialRenderMaterial | None = Field(
+        default=None,
+        description="The physics-agnostic visual identity or shader governing the spatial rendering of this node.",
     )
     hoare_proof: HoareLogicProofReceipt | None = Field(
         default=None, description="Formal mathematical proof of pre/post conditions."
@@ -9176,11 +9154,9 @@ class CompositeNodeProfile(CoreasonBaseState):
     markov_blanket: MarkovBlanketRenderingPolicy | None = Field(
         default=None, description="The epistemic isolation boundary guarding this agent's internal generative states."
     )
-    optical_physics: PhysicallyBasedRenderingProfile | None = Field(
-        default=None, description="The strict microfacet BRDF physics governing the visual representation of this node."
-    )
-    neural_optics: GaussianSplattingProfile | None = Field(
-        default=None, description="The volumetric Gaussian Splatting configuration for non-polygonal rendering."
+    render_material: SpatialRenderMaterial | None = Field(
+        default=None,
+        description="The physics-agnostic visual identity or shader governing the spatial rendering of this node.",
     )
 
     @field_validator("domain_extensions", mode="before")
@@ -11479,11 +11455,9 @@ class CognitiveAgentNodeProfile(CoreasonBaseState):
     markov_blanket: MarkovBlanketRenderingPolicy | None = Field(
         default=None, description="The epistemic isolation boundary guarding this agent's internal generative states."
     )
-    optical_physics: PhysicallyBasedRenderingProfile | None = Field(
-        default=None, description="The strict microfacet BRDF physics governing the visual representation of this node."
-    )
-    neural_optics: GaussianSplattingProfile | None = Field(
-        default=None, description="The volumetric Gaussian Splatting configuration for non-polygonal rendering."
+    render_material: SpatialRenderMaterial | None = Field(
+        default=None,
+        description="The physics-agnostic visual identity or shader governing the spatial rendering of this node.",
     )
 
     @field_validator("domain_extensions", mode="before")
@@ -15149,11 +15123,11 @@ SE3TransformProfile.model_rebuild()
 VolumetricBoundingProfile.model_rebuild()
 ViewportProjectionContract.model_rebuild()
 
-PhysicallyBasedRenderingProfile.model_rebuild()
+SpatialRenderMaterial.model_rebuild()
 KinematicDeltaManifest.model_rebuild()
 SpatialBillboardContract.model_rebuild()
 VolumetricEdgeProfile.model_rebuild()
-GaussianSplattingProfile.model_rebuild()
+
 KinematicDerivativeProfile.model_rebuild()
 SemanticZoomProfile.model_rebuild()
 MarkovBlanketRenderingPolicy.model_rebuild()

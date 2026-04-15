@@ -3122,29 +3122,17 @@
           "default": null,
           "description": "The epistemic isolation boundary guarding this agent's internal generative states."
         },
-        "optical_physics": {
+        "render_material": {
           "anyOf": [
             {
-              "$ref": "#/$defs/PhysicallyBasedRenderingProfile"
+              "$ref": "#/$defs/SpatialRenderMaterial"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "The strict microfacet BRDF physics governing the visual representation of this node."
-        },
-        "neural_optics": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/GaussianSplattingProfile"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The volumetric Gaussian Splatting configuration for non-polygonal rendering."
+          "description": "The physics-agnostic visual identity or shader governing the spatial rendering of this node."
         },
         "description": {
           "description": "The semantic boundary defining the objective function of the execution node. [SITD-Gamma: Neurosymbolic Substrate Alignment]",
@@ -3668,29 +3656,17 @@
           "default": null,
           "description": "The epistemic isolation boundary guarding this agent's internal generative states."
         },
-        "optical_physics": {
+        "render_material": {
           "anyOf": [
             {
-              "$ref": "#/$defs/PhysicallyBasedRenderingProfile"
+              "$ref": "#/$defs/SpatialRenderMaterial"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "The strict microfacet BRDF physics governing the visual representation of this node."
-        },
-        "neural_optics": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/GaussianSplattingProfile"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The volumetric Gaussian Splatting configuration for non-polygonal rendering."
+          "description": "The physics-agnostic visual identity or shader governing the spatial rendering of this node."
         },
         "topology_class": {
           "const": "human",
@@ -4191,29 +4167,17 @@
           "default": null,
           "description": "The epistemic isolation boundary guarding this agent's internal generative states."
         },
-        "optical_physics": {
+        "render_material": {
           "anyOf": [
             {
-              "$ref": "#/$defs/PhysicallyBasedRenderingProfile"
+              "$ref": "#/$defs/SpatialRenderMaterial"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "The strict microfacet BRDF physics governing the visual representation of this node."
-        },
-        "neural_optics": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/GaussianSplattingProfile"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The volumetric Gaussian Splatting configuration for non-polygonal rendering."
+          "description": "The physics-agnostic visual identity or shader governing the spatial rendering of this node."
         },
         "hoare_proof": {
           "anyOf": [
@@ -4433,29 +4397,17 @@
           "default": null,
           "description": "The epistemic isolation boundary guarding this agent's internal generative states."
         },
-        "optical_physics": {
+        "render_material": {
           "anyOf": [
             {
-              "$ref": "#/$defs/PhysicallyBasedRenderingProfile"
+              "$ref": "#/$defs/SpatialRenderMaterial"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "The strict microfacet BRDF physics governing the visual representation of this node."
-        },
-        "neural_optics": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/GaussianSplattingProfile"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The volumetric Gaussian Splatting configuration for non-polygonal rendering."
+          "description": "The physics-agnostic visual identity or shader governing the spatial rendering of this node."
         },
         "topology_class": {
           "const": "composite",
@@ -11148,52 +11100,6 @@
       "title": "FormalVerificationReceipt",
       "type": "object"
     },
-    "GaussianSplattingProfile": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines a single localized 3D Gaussian ellipsoid for volumetric rendering in Neural Radiance Fields.\n\nCAUSAL AFFORDANCE: Authorizes the rendering engine to spatially rasterize point-based continuous geometries using view-dependent spherical harmonics and anisotropic covariance scaling.\n\nEPISTEMIC BOUNDS: The `spherical_harmonics_degree` is physically clamped (`ge=0, le=3`) to prevent VRAM exhaustion. The `opacity_alpha` parameter is rigidly clamped between `ge=0.0, le=1.0`. The `covariance_scale` utilizes a Topological Exemption against array sorting.\n\nMCP ROUTING TRIGGERS: Neural Radiance Fields, 3D Gaussian Splatting, Spherical Harmonics, Volumetric Rendering, Covariance Matrix",
-      "properties": {
-        "spherical_harmonics_degree": {
-          "description": "Capped at 3 to physically prevent VRAM explosion during WebGL rasterization.",
-          "maximum": 3,
-          "minimum": 0,
-          "title": "Spherical Harmonics Degree",
-          "type": "integer"
-        },
-        "covariance_scale": {
-          "coreason_topological_exemption": true,
-          "description": "The 3D anisotropic scaling vector of the Gaussian ellipsoid.",
-          "maxItems": 3,
-          "minItems": 3,
-          "prefixItems": [
-            {
-              "type": "number"
-            },
-            {
-              "type": "number"
-            },
-            {
-              "type": "number"
-            }
-          ],
-          "title": "Covariance Scale",
-          "type": "array"
-        },
-        "opacity_alpha": {
-          "description": "The alpha transmittance scalar of the splat.",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "Opacity Alpha",
-          "type": "number"
-        }
-      },
-      "required": [
-        "spherical_harmonics_degree",
-        "covariance_scale",
-        "opacity_alpha"
-      ],
-      "title": "GaussianSplattingProfile",
-      "type": "object"
-    },
     "GenerativeManifoldSLA": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Ergodic Theory and Branching Factor Analysis to\nrigorously bound the topological expansion of synthetic or fractal graphs. As\nan ...SLA suffix, this enforces rigid mathematical boundaries globally.\n\nCAUSAL AFFORDANCE: Acts as a physical gas limit on generative expansion,\nauthorizing the orchestrator to cull recursive encapsulation before it induces\nstate-space explosion or GPU VRAM exhaustion.\n\nEPISTEMIC BOUNDS: Both max_topological_depth and max_node_fanout are strictly\npositive (ge=1, le=18446744073709551615). Synthetic token economy is capped by\nmax_synthetic_tokens (ge=1, le=18446744073709551615). Geometric explosion prevention\nis delegated to runtime Admission Controllers.\n\nMCP ROUTING TRIGGERS: Ergodic Theory, Branching Factor Analysis, State-Space\nExplosion, Fractal Graph Bounding, Gas Limit",
@@ -14211,29 +14117,17 @@
           "default": null,
           "description": "The epistemic isolation boundary guarding this agent's internal generative states."
         },
-        "optical_physics": {
+        "render_material": {
           "anyOf": [
             {
-              "$ref": "#/$defs/PhysicallyBasedRenderingProfile"
+              "$ref": "#/$defs/SpatialRenderMaterial"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "The strict microfacet BRDF physics governing the visual representation of this node."
-        },
-        "neural_optics": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/GaussianSplattingProfile"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The volumetric Gaussian Splatting configuration for non-polygonal rendering."
+          "description": "The physics-agnostic visual identity or shader governing the spatial rendering of this node."
         },
         "topology_class": {
           "const": "memoized",
@@ -16136,69 +16030,6 @@
         "target_table_uri"
       ],
       "title": "PersistenceCommitReceipt",
-      "type": "object"
-    },
-    "PhysicallyBasedRenderingProfile": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes the Cook-Torrance Microfacet BRDF (Bidirectional Reflectance Distribution Function) to establish the exact physical optic properties of a topological vertex.\n\nCAUSAL AFFORDANCE: Authorizes the spatial computing renderer to deterministically compute light scattering, reflection, and refraction for the node's geometry, translating logical state into physical optic variables (e.g., pulsing emission during active compute).\n\nEPISTEMIC BOUNDS: Diffuse and specular physics are rigidly clamped to normalized probability spaces (`ge=0.0, le=1.0`) for `metalness`, `roughness`, and `transmission`. The Index of Refraction (`ior`) is bounded to valid physical materials `[1.0, 3.0]`. `emissive_intensity` is clamped to `[0.0, 100.0]`.\n\nMCP ROUTING TRIGGERS: Physically Based Rendering, Microfacet BRDF, Index of Refraction, Spatial Optics, Material Thermodynamics",
-      "properties": {
-        "mesh_geometry": {
-          "description": "The rigid 3D primitive geometry bounding the topological vertex.",
-          "enum": [
-            "sphere",
-            "box",
-            "icosahedron",
-            "cylinder",
-            "tetrahedron"
-          ],
-          "title": "Mesh Geometry",
-          "type": "string"
-        },
-        "metalness": {
-          "description": "The dielectric vs. metallic material property scalar.",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "Metalness",
-          "type": "number"
-        },
-        "roughness": {
-          "description": "The microfacet surface scattering scalar.",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "Roughness",
-          "type": "number"
-        },
-        "transmission": {
-          "description": "The optical clarity or volumetric glass effect.",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "Transmission",
-          "type": "number"
-        },
-        "ior": {
-          "description": "The Index of Refraction dictating photon trajectory.",
-          "maximum": 3.0,
-          "minimum": 1.0,
-          "title": "Ior",
-          "type": "number"
-        },
-        "emissive_intensity": {
-          "description": "The thermodynamic glow indicating active kinetic compute.",
-          "maximum": 100.0,
-          "minimum": 0.0,
-          "title": "Emissive Intensity",
-          "type": "number"
-        }
-      },
-      "required": [
-        "mesh_geometry",
-        "metalness",
-        "roughness",
-        "transmission",
-        "ior",
-        "emissive_intensity"
-      ],
-      "title": "PhysicallyBasedRenderingProfile",
       "type": "object"
     },
     "PostCoordinatedSemanticState": {
@@ -18837,6 +18668,45 @@
       "title": "SpatialReferenceFrameManifest",
       "type": "object"
     },
+    "SpatialRenderMaterial": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A mathematically pure, physics-agnostic material reference for spatial rendering.\n\nCAUSAL AFFORDANCE: Instructs the frontend client (e.g., coreason-vscode) to apply a specific visual identity or compiled shader to a spatial coordinate, delegating all photon and rasterization physics to the client's GPU.\n\nEPISTEMIC BOUNDS: Bounded to a strict URN pattern or cryptographic CID, severing the AST from transient WebGL/WebXR implementations.\n\nMCP ROUTING TRIGGERS: Material Reference, Shader Artifact, Spatial Rendering, Visual Identity",
+      "properties": {
+        "material_urn": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "pattern": "^urn:coreason:material:.*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The abstract material identifier (e.g., 'urn:coreason:material:glass_refractive').",
+          "title": "Material Urn"
+        },
+        "compiled_shader_cid": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "An optional cryptographic pointer to a pre-compiled shader artifact.",
+          "title": "Compiled Shader Cid"
+        }
+      },
+      "title": "SpatialRenderMaterial",
+      "type": "object"
+    },
     "SpatialToolManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the discrete formalization of a Gibsonian Affordance within the agent's Reinforcement Learning Action Space ($A$). As a ...Manifest suffix, this is a declarative, frozen N-dimensional coordinate of a capability.\n\nCAUSAL AFFORDANCE: Unlocks a specific, localized Pearlian Do-Operator intervention ($do(X=x)$) mapped to an external kinetic capability. Governed by side_effects, permissions, and an optional execution SLA.\n\nEPISTEMIC BOUNDS: The operational perimeter is rigidly confined by `input_schema` and `output_schema` (dictionaries bounded to `max_length=1000` properties). The `is_preemptible` boolean (default=False) establishes a physical Halting Problem limit by authorizing the orchestrator to abort execution mid-flight.\n\nMCP ROUTING TRIGGERS: Gibsonian Affordance, MDP Action Space, Pearlian Do-Operator, Capability-Based Security, Halting Problem",
@@ -20198,17 +20068,17 @@
           "title": "Leaf Provenance",
           "type": "array"
         },
-        "optical_physics": {
+        "render_material": {
           "anyOf": [
             {
-              "$ref": "#/$defs/PhysicallyBasedRenderingProfile"
+              "$ref": "#/$defs/SpatialRenderMaterial"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "The strict microfacet BRDF physics governing the visual representation of this node."
+          "description": "The physics-agnostic visual identity or shader governing the spatial rendering of this node."
         }
       },
       "required": [

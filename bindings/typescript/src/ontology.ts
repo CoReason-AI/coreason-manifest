@@ -960,29 +960,13 @@ export type JustificationHash = string | null;
  */
 export type LeafProvenance = EpistemicProvenanceReceipt[];
 /**
- * The rigid 3D primitive geometry bounding the topological vertex.
+ * The abstract material identifier (e.g., 'urn:coreason:material:glass_refractive').
  */
-export type MeshGeometry = "sphere" | "box" | "icosahedron" | "cylinder" | "tetrahedron";
+export type MaterialUrn = string | null;
 /**
- * The dielectric vs. metallic material property scalar.
+ * An optional cryptographic pointer to a pre-compiled shader artifact.
  */
-export type Metalness = number;
-/**
- * The microfacet surface scattering scalar.
- */
-export type Roughness = number;
-/**
- * The optical clarity or volumetric glass effect.
- */
-export type Transmission = number;
-/**
- * The Index of Refraction dictating photon trajectory.
- */
-export type Ior = number;
-/**
- * The thermodynamic glow indicating active kinetic compute.
- */
-export type EmissiveIntensity = number;
+export type CompiledShaderCid = string | null;
 /**
  * Discriminator for RAG projection intent.
  */
@@ -1972,21 +1956,6 @@ export type ExposeSensoryActiveStates = boolean;
  * Forces absolute rendering occlusion of internal non-monotonic reasoning loops unless the pierce distance is breached.
  */
 export type OccludeInternalMechanistics = boolean;
-/**
- * Capped at 3 to physically prevent VRAM explosion during WebGL rasterization.
- */
-export type SphericalHarmonicsDegree = number;
-/**
- * The 3D anisotropic scaling vector of the Gaussian ellipsoid.
- *
- * @minItems 3
- * @maxItems 3
- */
-export type CovarianceScale = [unknown, unknown, unknown];
-/**
- * The alpha transmittance scalar of the splat.
- */
-export type OpacityAlpha = number;
 /**
  * The semantic boundary defining the objective function of the execution node. [SITD-Gamma: Neurosymbolic Substrate Alignment]
  */
@@ -6110,7 +6079,6 @@ export interface CoReasonSharedKernelOntology {
   FormalLogicPremise?: FormalLogicPremise;
   FormalVerificationContract?: FormalVerificationContract;
   FormalVerificationReceipt?: FormalVerificationReceipt;
-  GaussianSplattingProfile?: GaussianSplattingProfile;
   GenerativeManifoldSLA?: GenerativeManifoldSLA;
   GenerativeTaxonomyManifest?: GenerativeTaxonomyManifest1;
   GlobalGovernancePolicy?: GlobalGovernancePolicy;
@@ -6200,7 +6168,6 @@ export interface CoReasonSharedKernelOntology {
   PeftAdapterContract?: PeftAdapterContract;
   PermissionBoundaryPolicy?: PermissionBoundaryPolicy1;
   PersistenceCommitReceipt?: PersistenceCommitReceipt;
-  PhysicallyBasedRenderingProfile?: PhysicallyBasedRenderingProfile;
   PostCoordinatedSemanticState?: PostCoordinatedSemanticState;
   PostQuantumSignatureReceipt?: PostQuantumSignatureReceipt;
   PredictionMarketPolicy?: PredictionMarketPolicy1;
@@ -6257,6 +6224,7 @@ export interface CoReasonSharedKernelOntology {
   SpatialHardwareProfile?: SpatialHardwareProfile1;
   SpatialKinematicActionIntent?: SpatialKinematicActionIntent;
   SpatialReferenceFrameManifest?: SpatialReferenceFrameManifest;
+  SpatialRenderMaterial?: SpatialRenderMaterial;
   SpatialToolManifest?: SpatialToolManifest;
   SpeculativeExecutionPolicy?: SpeculativeExecutionPolicy;
   StateContract?: StateContract;
@@ -7456,9 +7424,9 @@ export interface TaxonomicNodeState {
   children_node_cids?: ChildrenNodeCids;
   leaf_provenance?: LeafProvenance;
   /**
-   * The strict microfacet BRDF physics governing the visual representation of this node.
+   * The physics-agnostic visual identity or shader governing the spatial rendering of this node.
    */
-  optical_physics?: PhysicallyBasedRenderingProfile | null;
+  render_material?: SpatialRenderMaterial | null;
 }
 /**
  * CoReason Shared Kernel Ontology
@@ -7546,21 +7514,17 @@ export interface HopSignatures {
 /**
  * CoReason Shared Kernel Ontology
  *
- * AGENT INSTRUCTION: Formalizes the Cook-Torrance Microfacet BRDF (Bidirectional Reflectance Distribution Function) to establish the exact physical optic properties of a topological vertex.
+ * AGENT INSTRUCTION: A mathematically pure, physics-agnostic material reference for spatial rendering.
  *
- * CAUSAL AFFORDANCE: Authorizes the spatial computing renderer to deterministically compute light scattering, reflection, and refraction for the node's geometry, translating logical state into physical optic variables (e.g., pulsing emission during active compute).
+ * CAUSAL AFFORDANCE: Instructs the frontend client (e.g., coreason-vscode) to apply a specific visual identity or compiled shader to a spatial coordinate, delegating all photon and rasterization physics to the client's GPU.
  *
- * EPISTEMIC BOUNDS: Diffuse and specular physics are rigidly clamped to normalized probability spaces (`ge=0.0, le=1.0`) for `metalness`, `roughness`, and `transmission`. The Index of Refraction (`ior`) is bounded to valid physical materials `[1.0, 3.0]`. `emissive_intensity` is clamped to `[0.0, 100.0]`.
+ * EPISTEMIC BOUNDS: Bounded to a strict URN pattern or cryptographic CID, severing the AST from transient WebGL/WebXR implementations.
  *
- * MCP ROUTING TRIGGERS: Physically Based Rendering, Microfacet BRDF, Index of Refraction, Spatial Optics, Material Thermodynamics
+ * MCP ROUTING TRIGGERS: Material Reference, Shader Artifact, Spatial Rendering, Visual Identity
  */
-export interface PhysicallyBasedRenderingProfile {
-  mesh_geometry: MeshGeometry;
-  metalness: Metalness;
-  roughness: Roughness;
-  transmission: Transmission;
-  ior: Ior;
-  emissive_intensity: EmissiveIntensity;
+export interface SpatialRenderMaterial {
+  material_urn?: MaterialUrn;
+  compiled_shader_cid?: CompiledShaderCid;
 }
 /**
  * CoReason Shared Kernel Ontology
@@ -8924,13 +8888,9 @@ export interface CognitiveAgentNodeProfile {
    */
   markov_blanket?: MarkovBlanketRenderingPolicy | null;
   /**
-   * The strict microfacet BRDF physics governing the visual representation of this node.
+   * The physics-agnostic visual identity or shader governing the spatial rendering of this node.
    */
-  optical_physics?: PhysicallyBasedRenderingProfile | null;
-  /**
-   * The volumetric Gaussian Splatting configuration for non-polygonal rendering.
-   */
-  neural_optics?: GaussianSplattingProfile | null;
+  render_material?: SpatialRenderMaterial | null;
   description: Description3;
   topology_class?: TopologyClass63;
   hardware?: SpatialHardwareProfile;
@@ -9095,22 +9055,6 @@ export interface MarkovBlanketRenderingPolicy {
   pierce_distance_meters: PierceDistanceMeters;
   expose_sensory_active_states?: ExposeSensoryActiveStates;
   occlude_internal_mechanistics?: OccludeInternalMechanistics;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
- * AGENT INSTRUCTION: Defines a single localized 3D Gaussian ellipsoid for volumetric rendering in Neural Radiance Fields.
- *
- * CAUSAL AFFORDANCE: Authorizes the rendering engine to spatially rasterize point-based continuous geometries using view-dependent spherical harmonics and anisotropic covariance scaling.
- *
- * EPISTEMIC BOUNDS: The `spherical_harmonics_degree` is physically clamped (`ge=0, le=3`) to prevent VRAM exhaustion. The `opacity_alpha` parameter is rigidly clamped between `ge=0.0, le=1.0`. The `covariance_scale` utilizes a Topological Exemption against array sorting.
- *
- * MCP ROUTING TRIGGERS: Neural Radiance Fields, 3D Gaussian Splatting, Spherical Harmonics, Volumetric Rendering, Covariance Matrix
- */
-export interface GaussianSplattingProfile {
-  spherical_harmonics_degree: SphericalHarmonicsDegree;
-  covariance_scale: CovarianceScale;
-  opacity_alpha: OpacityAlpha;
 }
 /**
  * The physical constraints binding this agent to a specific thermodynamic deployment topology.
@@ -9574,13 +9518,9 @@ export interface CognitiveHumanNodeProfile {
    */
   markov_blanket?: MarkovBlanketRenderingPolicy | null;
   /**
-   * The strict microfacet BRDF physics governing the visual representation of this node.
+   * The physics-agnostic visual identity or shader governing the spatial rendering of this node.
    */
-  optical_physics?: PhysicallyBasedRenderingProfile | null;
-  /**
-   * The volumetric Gaussian Splatting configuration for non-polygonal rendering.
-   */
-  neural_optics?: GaussianSplattingProfile | null;
+  render_material?: SpatialRenderMaterial | null;
   topology_class?: TopologyClass64;
   required_attestation: RequiredAttestation;
   /**
@@ -9614,13 +9554,9 @@ export interface CognitiveSystemNodeProfile {
    */
   markov_blanket?: MarkovBlanketRenderingPolicy | null;
   /**
-   * The strict microfacet BRDF physics governing the visual representation of this node.
+   * The physics-agnostic visual identity or shader governing the spatial rendering of this node.
    */
-  optical_physics?: PhysicallyBasedRenderingProfile | null;
-  /**
-   * The volumetric Gaussian Splatting configuration for non-polygonal rendering.
-   */
-  neural_optics?: GaussianSplattingProfile | null;
+  render_material?: SpatialRenderMaterial | null;
   /**
    * Formal mathematical proof of pre/post conditions.
    */
@@ -9678,13 +9614,9 @@ export interface CompositeNodeProfile {
    */
   markov_blanket?: MarkovBlanketRenderingPolicy | null;
   /**
-   * The strict microfacet BRDF physics governing the visual representation of this node.
+   * The physics-agnostic visual identity or shader governing the spatial rendering of this node.
    */
-  optical_physics?: PhysicallyBasedRenderingProfile | null;
-  /**
-   * The volumetric Gaussian Splatting configuration for non-polygonal rendering.
-   */
-  neural_optics?: GaussianSplattingProfile | null;
+  render_material?: SpatialRenderMaterial | null;
   topology_class?: TopologyClass66;
   /**
    * The encapsulated subgraph to execute.
@@ -11504,13 +11436,9 @@ export interface MemoizedNodeProfile {
    */
   markov_blanket?: MarkovBlanketRenderingPolicy | null;
   /**
-   * The strict microfacet BRDF physics governing the visual representation of this node.
+   * The physics-agnostic visual identity or shader governing the spatial rendering of this node.
    */
-  optical_physics?: PhysicallyBasedRenderingProfile | null;
-  /**
-   * The volumetric Gaussian Splatting configuration for non-polygonal rendering.
-   */
-  neural_optics?: GaussianSplattingProfile | null;
+  render_material?: SpatialRenderMaterial | null;
   topology_class?: TopologyClass83;
   /**
    * The exact SHA-256 fingerprint of the executed topology.
