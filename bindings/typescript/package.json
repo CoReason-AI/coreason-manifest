@@ -21,6 +21,9 @@
   "types": "dist/index.d.ts",
   "files": [
     "dist",
+    "LICENSE",
+    "NOTICE",
+    "THIRD-PARTY-NOTICES.md",
     "README.md"
   ],
   "scripts": {

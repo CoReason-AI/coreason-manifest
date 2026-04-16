@@ -62,9 +62,7 @@ jobs:
         run: uv run python scripts/generate_cross_language_bindings.py
 
       - name: Enforce Absolute Type Isomorphism (Drift Guillotine)
-        run: |
-          git add bindings/
-          git diff --staged --exit-code
+        run: git diff --exit-code bindings/
 
       - name: Deptry Check
         run: uv run deptry src/

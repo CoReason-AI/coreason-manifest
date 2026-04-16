@@ -92,7 +92,6 @@ warn_unused_configs = true
 plugins = ["pydantic.mypy"]
 exclude = [
     ".*human\\.py$",
-    "scratch/.*",
 ]
 
 [tool.pytest.ini_options]

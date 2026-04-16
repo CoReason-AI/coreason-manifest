@@ -1,0 +1,150 @@
+# Copyright (c) 2026 CoReason, Inc
+#
+# This software is proprietary and dual-licensed
+# Licensed under the Prosperity Public License 3.0 (the "License")
+# A copy of the license is available at <https://prosperitylicense.com/versions/3.0.0>
+# For details, see the LICENSE file
+# Commercial use beyond a 30-day trial requires a separate license
+#
+# Source Code: <https://github.com/CoReason-AI/coreason-manifest>
+
+from typing import Any
+
+import pytest
+from pydantic import ValidationError
+
+from coreason_manifest.spec.ontology import (
+    CognitiveAgentNodeProfile,
+    CognitiveSystemNodeProfile,
+    NeurosymbolicVerificationTopologyManifest,
+)
+
+
+def test_bipartite_identity_violation() -> None:
+    # Setup standard agent and system
+    nodes: dict[str, Any] = {
+        "did:coreason:node-1": CognitiveAgentNodeProfile(description="Test Proposer", topology_class="agent"),
+    }
+
+    with pytest.raises(ValidationError) as exc_info:
+        NeurosymbolicVerificationTopologyManifest(
+            nodes=nodes,
+            proposer_node_cid="did:coreason:node-1",
+            verifier_node_cid="did:coreason:node-1",
+            max_revision_loops=10,
+        )
+    assert "Topological Contradiction" in str(exc_info.value)
+    assert "Proposer and Verifier cannot be the same node" in str(exc_info.value)
+
+
+def test_missing_proposer_in_registry() -> None:
+    nodes: dict[str, Any] = {
+        "did:coreason:system-1": CognitiveSystemNodeProfile(description="System 1", topology_class="system"),
+    }
+    with pytest.raises(ValidationError) as exc_info:
+        NeurosymbolicVerificationTopologyManifest(
+            nodes=nodes,
+            proposer_node_cid="did:coreason:agent-missing",
+            verifier_node_cid="did:coreason:system-1",
+            max_revision_loops=10,
+        )
+    assert "Proposer node did:coreason:agent-missing not found" in str(exc_info.value)
+
+
+def test_missing_verifier_in_registry() -> None:
+    nodes: dict[str, Any] = {
+        "did:coreason:agent-1": CognitiveAgentNodeProfile(description="Agent 1", topology_class="agent"),
+    }
+    with pytest.raises(ValidationError) as exc_info:
+        NeurosymbolicVerificationTopologyManifest(
+            nodes=nodes,
+            proposer_node_cid="did:coreason:agent-1",
+            verifier_node_cid="did:coreason:system-missing",
+            max_revision_loops=10,
+        )
+    assert "Verifier node did:coreason:system-missing not found" in str(exc_info.value)
+
+
+def test_bipartite_type_violation_both_agents() -> None:
+    nodes: dict[str, Any] = {
+        "did:coreason:agent-1": CognitiveAgentNodeProfile(description="Agent 1", topology_class="agent"),
+        "did:coreason:agent-2": CognitiveAgentNodeProfile(description="Agent 2", topology_class="agent"),
+    }
+    with pytest.raises(ValidationError) as exc_info:
+        NeurosymbolicVerificationTopologyManifest(
+            nodes=nodes,
+            proposer_node_cid="did:coreason:agent-1",
+            verifier_node_cid="did:coreason:agent-2",
+            max_revision_loops=10,
+        )
+    assert "Topological Contradiction" in str(exc_info.value)
+    assert "Proposer must be a Connectionist Agent, and the Verifier must be a Deterministic System" in str(
+        exc_info.value
+    )
+
+
+def test_bipartite_type_violation_both_systems() -> None:
+    nodes: dict[str, Any] = {
+        "did:coreason:system-1": CognitiveSystemNodeProfile(description="System 1", topology_class="system"),
+        "did:coreason:system-2": CognitiveSystemNodeProfile(description="System 2", topology_class="system"),
+    }
+    with pytest.raises(ValidationError) as exc_info:
+        NeurosymbolicVerificationTopologyManifest(
+            nodes=nodes,
+            proposer_node_cid="did:coreason:system-1",
+            verifier_node_cid="did:coreason:system-2",
+            max_revision_loops=10,
+        )
+    assert "Topological Contradiction" in str(exc_info.value)
+
+
+def test_cycle_bound_enforcement_too_high() -> None:
+    """Prove max_revision_loops=1000 is accepted under UAB (previously rejected at le=100)."""
+    nodes: dict[str, Any] = {
+        "did:coreason:agent-1": CognitiveAgentNodeProfile(description="Agent 1", topology_class="agent"),
+        "did:coreason:system-1": CognitiveSystemNodeProfile(description="System 1", topology_class="system"),
+    }
+    macro = NeurosymbolicVerificationTopologyManifest(
+        nodes=nodes,
+        proposer_node_cid="did:coreason:agent-1",
+        verifier_node_cid="did:coreason:system-1",
+        max_revision_loops=1000,
+    )
+    assert macro.max_revision_loops == 1000
+
+
+def test_cycle_bound_enforcement_too_low() -> None:
+    nodes: dict[str, Any] = {
+        "did:coreason:agent-1": CognitiveAgentNodeProfile(description="Agent 1", topology_class="agent"),
+        "did:coreason:system-1": CognitiveSystemNodeProfile(description="System 1", topology_class="system"),
+    }
+    with pytest.raises(ValidationError) as exc_info:
+        NeurosymbolicVerificationTopologyManifest(
+            nodes=nodes,
+            proposer_node_cid="did:coreason:agent-1",
+            verifier_node_cid="did:coreason:system-1",
+            max_revision_loops=-5,
+        )
+    assert "1" in str(exc_info.value)
+
+
+def test_successful_compilation() -> None:
+    nodes: dict[str, Any] = {
+        "did:coreason:agent-1": CognitiveAgentNodeProfile(description="Agent 1", topology_class="agent"),
+        "did:coreason:system-1": CognitiveSystemNodeProfile(description="System 1", topology_class="system"),
+    }
+    macro = NeurosymbolicVerificationTopologyManifest(
+        nodes=nodes,
+        proposer_node_cid="did:coreason:agent-1",
+        verifier_node_cid="did:coreason:system-1",
+        max_revision_loops=42,
+    )
+
+    dag = macro.compile_to_base_topology()
+    assert dag.topology_class == "dag"
+    assert dag.allow_cycles is True
+    assert dag.max_depth == 42
+    # Verify the edges exactly match the bidirectional Proposer-Verifier loop
+    assert ("did:coreason:agent-1", "did:coreason:system-1") in dag.edges
+    assert ("did:coreason:system-1", "did:coreason:agent-1") in dag.edges
+    assert len(dag.edges) == 2

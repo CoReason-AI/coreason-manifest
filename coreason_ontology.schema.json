@@ -13503,14 +13503,21 @@
           "title": "Id"
         },
         "holographic_projection": {
-          "$ref": "#/$defs/DynamicManifoldProjectionManifest",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DynamicManifoldProjectionManifest"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
           "description": "The mathematically pre-calculated view manifold tailored to the observer's frustum."
         }
       },
       "required": [
         "jsonrpc",
-        "method",
-        "holographic_projection"
+        "method"
       ],
       "title": "MCPClientIntent",
       "type": "object"

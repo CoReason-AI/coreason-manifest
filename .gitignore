@@ -157,14 +157,8 @@ tmp_*.py
 .ruff_cache/
 .benchmarks/
 
-# Node dependencies (installed from lockfile at build time)
-node_modules/
-
-# Temp output / debug files
-cov_final.txt
-cov_report.txt
-debug_output.txt
-out.txt
-
-# Scratch experiments
-scratch/
+# Bindings build artifacts
+bindings/typescript/node_modules/
+bindings/typescript/dist/
+bindings/rust/target/
+bindings/rust/Cargo.lock

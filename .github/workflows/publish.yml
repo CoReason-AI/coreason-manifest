@@ -59,6 +59,7 @@ jobs:
         with:
           format: spdx-json
           output-file: sbom.spdx.json
+          upload-release-assets: false
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

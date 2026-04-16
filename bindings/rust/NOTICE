@@ -1,0 +1,13 @@
+Copyright (c) 2026 CoReason, Inc.. All Rights Reserved
+
+This software is licensed under the Prosperity Public License 3.0.0.
+The issuer of the Prosperity Public License for this software is CoReason, Inc..
+
+This crate (coreason-manifest) contains auto-generated Rust type definitions
+derived from the CoReason Shared Kernel Ontology. The generated types are
+structural translations of the canonical Pydantic schemas maintained in the
+coreason-manifest Python package.
+
+For commercial licensing inquiries, please contact license@coreason.ai.
+
+Source Code: https://github.com/CoReason-AI/coreason-manifest
