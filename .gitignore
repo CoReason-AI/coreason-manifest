@@ -156,3 +156,15 @@ fix_*.py
 tmp_*.py
 .ruff_cache/
 .benchmarks/
+
+# Node dependencies (installed from lockfile at build time)
+node_modules/
+
+# Temp output / debug files
+cov_final.txt
+cov_report.txt
+debug_output.txt
+out.txt
+
+# Scratch experiments
+scratch/
