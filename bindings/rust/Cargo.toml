@@ -3,7 +3,7 @@ name = "coreason-manifest"
 version = "1.0.0"
 edition = "2021"
 description = "Rust bindings for the CoReason Hollow Data Plane."
-license = "LicenseRef-Prosperity-3.0"
+license-file = "LICENSE"
 repository = "https://github.com/CoReason-AI/coreason-manifest"
 homepage = "https://github.com/CoReason-AI/coreason-manifest"
 documentation = "https://github.com/CoReason-AI/coreason-manifest"
@@ -11,6 +11,7 @@ authors = ["CoReason, Inc <license@coreason.ai>"]
 categories = ["data-structures", "encoding"]
 keywords = ["coreason", "ontology", "manifest", "schema"]
 readme = "../../README.md"
+include = ["src/**/*", "Cargo.toml", "LICENSE", "NOTICE"]
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
