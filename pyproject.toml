@@ -58,8 +58,15 @@ dev = [
     "types-defusedxml>=0.7.0.20260408",
 ]
 
+[tool.hatch.build.targets.sdist]
+include = ["src/", "LICENSE", "NOTICE", "README.md", "pyproject.toml"]
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/coreason_manifest"]
+
+[tool.hatch.build.targets.wheel.shared-data]
+"LICENSE" = "coreason_manifest-license/LICENSE"
+"NOTICE" = "coreason_manifest-license/NOTICE"
 
 [tool.hatch.version]
 source = "vcs"

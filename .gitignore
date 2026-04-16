@@ -160,6 +160,12 @@ tmp_*.py
 # Node dependencies (installed from lockfile at build time)
 node_modules/
 
+# CI-generated license copies in binding directories (canonical files live at repo root)
+bindings/typescript/LICENSE
+bindings/typescript/NOTICE
+bindings/rust/LICENSE
+bindings/rust/NOTICE
+
 # Temp output / debug files
 cov_final.txt
 cov_report.txt
