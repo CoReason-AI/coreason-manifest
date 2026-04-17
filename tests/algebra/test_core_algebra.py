@@ -946,45 +946,52 @@ def test_calculate_latent_alignment_edge_cases() -> None:
 
     with unittest.mock.patch("numpy.dot") as mock_dot:
         # Force dot_product > mag1 * mag2 (so similarity > 1.0)
-        mock_dot.return_value = 1.1
-        with unittest.mock.patch("numpy.linalg.norm", return_value=1.0):
-            v1_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
-            v2_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
-            v1 = VectorEmbeddingState(
-                vector_base64=base64.b64encode(v1_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
-            )
-            v2 = VectorEmbeddingState(
-                vector_base64=base64.b64encode(v2_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
-            )
-            assert calculate_latent_alignment(v1, v2, policy) == 1.0
+        # Using side_effect to mock mag1, mag2 and dot product
+        # Call 1: arr1 dot arr1 (returns 1.0 -> mag1 = 1.0)
+        # Call 2: arr2 dot arr2 (returns 1.0 -> mag2 = 1.0)
+        # Call 3: arr1 dot arr2 (returns 1.1 -> similarity = 1.1)
+        mock_dot.side_effect = [1.0, 1.0, 1.1]
+        v1_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
+        v2_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
+        v1 = VectorEmbeddingState(
+            vector_base64=base64.b64encode(v1_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
+        )
+        v2 = VectorEmbeddingState(
+            vector_base64=base64.b64encode(v2_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
+        )
+        assert calculate_latent_alignment(v1, v2, policy) == 1.0
 
     with unittest.mock.patch("numpy.dot") as mock_dot:
         # Force dot_product < -mag1 * mag2 (so similarity < -1.0)
-        mock_dot.return_value = -1.1
-        with unittest.mock.patch("numpy.linalg.norm", return_value=1.0):
-            v1_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
-            v2_packed = struct.pack(f"<{dim}f", -1.0, 0.0)
-            v1 = VectorEmbeddingState(
-                vector_base64=base64.b64encode(v1_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
-            )
-            v2 = VectorEmbeddingState(
-                vector_base64=base64.b64encode(v2_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
-            )
-            assert calculate_latent_alignment(v1, v2, policy) == -1.0
+        # Call 1: arr1 dot arr1 (returns 1.0 -> mag1 = 1.0)
+        # Call 2: arr2 dot arr2 (returns 1.0 -> mag2 = 1.0)
+        # Call 3: arr1 dot arr2 (returns -1.1 -> similarity = -1.1)
+        mock_dot.side_effect = [1.0, 1.0, -1.1]
+        v1_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
+        v2_packed = struct.pack(f"<{dim}f", -1.0, 0.0)
+        v1 = VectorEmbeddingState(
+            vector_base64=base64.b64encode(v1_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
+        )
+        v2 = VectorEmbeddingState(
+            vector_base64=base64.b64encode(v2_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
+        )
+        assert calculate_latent_alignment(v1, v2, policy) == -1.0
 
     with unittest.mock.patch("numpy.dot") as mock_dot:
         # Force similarity to be NaN by returning float('nan') for dot_product
-        mock_dot.return_value = float("nan")
-        with unittest.mock.patch("numpy.linalg.norm", return_value=1.0):
-            v1_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
-            v2_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
-            v1 = VectorEmbeddingState(
-                vector_base64=base64.b64encode(v1_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
-            )
-            v2 = VectorEmbeddingState(
-                vector_base64=base64.b64encode(v2_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
-            )
-            assert calculate_latent_alignment(v1, v2, policy) == 0.0
+        # Call 1: arr1 dot arr1 (returns 1.0 -> mag1 = 1.0)
+        # Call 2: arr2 dot arr2 (returns 1.0 -> mag2 = 1.0)
+        # Call 3: arr1 dot arr2 (returns nan -> similarity = nan)
+        mock_dot.side_effect = [1.0, 1.0, float("nan")]
+        v1_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
+        v2_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
+        v1 = VectorEmbeddingState(
+            vector_base64=base64.b64encode(v1_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
+        )
+        v2 = VectorEmbeddingState(
+            vector_base64=base64.b64encode(v2_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
+        )
+        assert calculate_latent_alignment(v1, v2, policy) == 0.0
 
 
 def test_transmute_to_pycrdt_doc() -> None:
