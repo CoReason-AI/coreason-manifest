@@ -10,7 +10,7 @@ permissions:
   contents: write
   id-token: write # Required for PyPI OIDC Trusted Publishing and Sigstore
   pages: write    # Required for GitHub Pages deployment
-  attestations: write # Required for SLSA Level 3 provenance
+  # attestations: write # Requires Enterprise Cloud or public repo for SLSA Level 3 provenance
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
@@ -47,12 +47,14 @@ jobs:
       - name: Build Artifacts
         run: uv build
 
-      - name: Generate SLSA Provenance
-        uses: actions/attest-build-provenance@v2
-        with:
-          subject-path: |
-            dist/*.whl
-            dist/*.tar.gz
+      # NOTE: SLSA provenance attestation requires GitHub Enterprise Cloud or a public repo.
+      # Re-enable when the org upgrades or the repository is made public.
+      # - name: Generate SLSA Provenance
+      #   uses: actions/attest-build-provenance@v2
+      #   with:
+      #     subject-path: |
+      #       dist/*.whl
+      #       dist/*.tar.gz
 
       - name: Generate SBOM
         uses: anchore/sbom-action@v0
@@ -64,7 +66,7 @@ jobs:
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          attestations: true
+          attestations: false  # Requires Enterprise Cloud or public repo
 
       - name: Sign Wheel
         uses: sigstore/gh-action-sigstore-python@v3.0.0
