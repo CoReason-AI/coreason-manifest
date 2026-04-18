@@ -18,12 +18,14 @@ jobs:
     permissions:
       # Required for uploading SARIF results to Code Scanning
       security-events: write
-      # Required for publishing results
+      # Required for publishing results (public repos only)
       id-token: write
-      # Required for reading repo contents
+      # Required for reading repo contents and commit history
       contents: read
       # Required for accessing OIDC token
       actions: read
+      # Required for Scorecard Vulnerabilities check on private repos
+      vulnerability-alerts: read
 
     steps:
       - name: Checkout code
@@ -36,8 +38,10 @@ jobs:
         with:
           results_file: results.sarif
           results_format: sarif
-          # Publish results to OpenSSF REST API for badge generation
-          publish_results: true
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          # NOTE: publish_results only works for public repos.
+          # Set to true once the repository is made public.
+          publish_results: false
 
       - name: Upload SARIF to Code Scanning
         uses: github/codeql-action/upload-sarif@v3
