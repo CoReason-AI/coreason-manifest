@@ -24,8 +24,6 @@ jobs:
       contents: read
       # Required for accessing OIDC token
       actions: read
-      # Required for Scorecard Vulnerabilities check on private repos
-      vulnerability-alerts: read
 
     steps:
       - name: Checkout code
