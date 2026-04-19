@@ -948,7 +948,8 @@ def test_calculate_latent_alignment_edge_cases() -> None:
         # Force dot_product > mag1 * mag2 (so similarity > 1.0)
         # We need to distinguish between np.dot for magnitude vs similarity now
         def mock_dot_effect(a, b):
-            if a is b: return 1.0
+            if a is b:
+                return 1.0
             return 1.1
         mock_dot.side_effect = mock_dot_effect
         v1_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
@@ -964,7 +965,8 @@ def test_calculate_latent_alignment_edge_cases() -> None:
     with unittest.mock.patch("numpy.dot") as mock_dot:
         # Force dot_product < -mag1 * mag2 (so similarity < -1.0)
         def mock_dot_effect(a, b):
-            if a is b: return 1.0
+            if a is b:
+                return 1.0
             return -1.1
         mock_dot.side_effect = mock_dot_effect
         v1_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
@@ -980,7 +982,8 @@ def test_calculate_latent_alignment_edge_cases() -> None:
     with unittest.mock.patch("numpy.dot") as mock_dot:
         # Force similarity to be NaN by returning float('nan') for dot_product
         def mock_dot_effect(a, b):
-            if a is b: return 1.0
+            if a is b:
+                return 1.0
             return float("nan")
         mock_dot.side_effect = mock_dot_effect
         v1_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
