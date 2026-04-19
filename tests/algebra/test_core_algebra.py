@@ -951,6 +951,7 @@ def test_calculate_latent_alignment_edge_cases() -> None:
             if a is b:
                 return 1.0
             return 1.1
+
         mock_dot.side_effect = mock_dot_effect
         v1_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
         v2_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
@@ -968,6 +969,7 @@ def test_calculate_latent_alignment_edge_cases() -> None:
             if a is b:
                 return 1.0
             return -1.1
+
         mock_dot.side_effect = mock_dot_effect
         v1_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
         v2_packed = struct.pack(f"<{dim}f", -1.0, 0.0)
@@ -985,6 +987,7 @@ def test_calculate_latent_alignment_edge_cases() -> None:
             if a is b:
                 return 1.0
             return float("nan")
+
         mock_dot.side_effect = mock_dot_effect
         v1_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
         v2_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
