@@ -1,4 +1,4 @@
-name: Container Vulnerability Scan
+﻿name: Container Vulnerability Scan
 
 on:
   push:
