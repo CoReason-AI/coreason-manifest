@@ -174,9 +174,9 @@ class TestEpistemicProxyState:
     """Test the generic proxy state."""
 
     def test_valid_proxy(self) -> None:
-        proxy = EpistemicProxyState(proxy_id="test.proxy:1", structural_type="List[str]")  # type: ignore[var-annotated]
-        assert proxy.proxy_id == "test.proxy:1"
+        proxy = EpistemicProxyState(proxy_cid="test.proxy:1", structural_type="List[str]")  # type: ignore[var-annotated]
+        assert proxy.proxy_cid == "test.proxy:1"
 
-    def test_invalid_proxy_id_pattern(self) -> None:
+    def test_invalid_proxy_cid_pattern(self) -> None:
         with pytest.raises(ValidationError):
-            EpistemicProxyState(proxy_id="invalid chars!!", structural_type="str")
+            EpistemicProxyState(proxy_cid="invalid chars!!", structural_type="str")
