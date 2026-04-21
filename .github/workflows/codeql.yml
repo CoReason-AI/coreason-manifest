@@ -32,18 +32,16 @@ jobs:
         languages: ${{ matrix.language }}
         queries: security-extended,security-and-quality
 
-<<<<<<< Updated upstream
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-        continue-on-error: true
-        with:
-          category: "/language:${{ matrix.language }}"
-=======
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
       with:
         category: "/language:${{matrix.language}}"
->>>>>>> Stashed changes
+          upload: false
+          output: sarif-results
+
+      - name: Upload CodeQL Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeql-results-${{ matrix.language }}
+          path: sarif-results
+          retention-days: 5
