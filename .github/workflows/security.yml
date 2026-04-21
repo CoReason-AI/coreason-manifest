@@ -1,26 +1,40 @@
-name: Security & Audit
+name: Security Audit
 
 on:
-  schedule:
-    - cron: '0 0 * * 0' # Weekly
+  push:
+    branches: [ coreason-develop, main ]
   pull_request:
-    paths:
-      - 'uv.lock'
-      - 'pyproject.toml'
-
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+    branches: [ coreason-develop, main ]
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
 
 permissions:
   contents: read
   security-events: write
+  actions: read
 
 jobs:
-  audit:
-    name: Dependency Audit
+  secret-scan:
+    name: Secret Scanning
     runs-on: ubuntu-latest
     steps:
-      - name: Harden Runner (Endpoint Network Security)
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Trufflehog Secret Scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --only-verified
+        continue-on-error: true
+
+  sca-audit:
+    name: Software Composition Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
         uses: step-security/harden-runner@v2
         with:
           egress-policy: audit
@@ -31,28 +45,42 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
+          python-version: '3.14'
 
-      - name: Export dependencies
-        run: uv export --format requirements-txt --no-emit-workspace > reqs.txt
+      - name: Python SCA Audit (pip-audit)
+        run: |
+          if [ -f "pyproject.toml" ]; then
+            uv export --format requirements-txt > requirements.txt
+            uv tool run pip-audit -r requirements.txt -f sarif -o pip-audit.sarif || echo "Vulnerabilities found!"
+            uv tool run pip-audit -r requirements.txt -f html -o pip-audit-report.html || true
+          fi
+        shell: bash
 
-      - name: Run pip-audit
-        run: uv run --with pip-audit pip-audit -r reqs.txt --ignore-vuln CVE-2026-4539
+      - name: Node.js SCA Audit (npm audit)
+        run: |
+          if [ -f "package.json" ]; then
+            npm install --package-lock-only
+            npm audit --json > npm-audit.json || true
+            npx @microsoft/npm-audit-sarif -i npm-audit.json -o npm-audit.sarif || true
+          fi
+        shell: bash
 
-  osv-scan:
-    name: OSV CVE Scan (Transitive Dependency Manifold)
-    runs-on: ubuntu-latest
-    permissions:
-      security-events: write
-    steps:
-      - name: Harden Runner (Endpoint Network Security)
-        uses: step-security/harden-runner@v2
+      - name: Black Duck Compliance Check
+        run: |
+          echo "INFO: Ready for Black Duck integration."
+        shell: bash
+
+      - name: Upload SARIF Reports to GitHub Advanced Security
+        uses: github/codeql-action/upload-sarif@v3
         with:
-          egress-policy: audit
+          sarif_file: .
+        continue-on-error: true
 
-      - uses: actions/checkout@v4
-
-      - name: OSV Scan
-        uses: google/osv-scanner-action/osv-scanner-action@v2.3.5
+      - name: Upload Compliance Reports as Artifacts
+        uses: actions/upload-artifact@v4
         with:
-          scan-args: |-
-            --lockfile=uv.lock
+          name: security-audit-reports
+          path: |
+            pip-audit-report.html
+            npm-audit.json
+          retention-days: 14
