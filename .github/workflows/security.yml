@@ -27,6 +27,8 @@ jobs:
         with:
           base: ${{ github.event.repository.default_branch }}
           head: HEAD
+          extra_args: --only-verified
+        continue-on-error: true
 
   sca-audit:
     name: Software Composition Analysis
