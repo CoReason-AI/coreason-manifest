@@ -65,16 +65,8 @@ jobs:
 
       - name: Black Duck Compliance Check
         run: |
-          echo "INFO: Ready for Synopsys Detect / Black Duck integration."
-          echo "Uncomment the synopsys-action block to push SARIF to Black Duck."
+          echo "INFO: Ready for Black Duck integration."
         shell: bash
-      
-      # - name: Synopsys Detect Analysis (Black Duck)
-      #   uses: synopsys-sig/synopsys-action@v1
-      #   with:
-      #     blackduck_url: ${{ secrets.BLACKDUCK_URL }}
-      #     blackduck_apiToken: ${{ secrets.BLACKDUCK_API_TOKEN }}
-      #     blackduck_scan_full: true
 
       - name: Upload SARIF Reports to GitHub Advanced Security
         uses: github/codeql-action/upload-sarif@v3
