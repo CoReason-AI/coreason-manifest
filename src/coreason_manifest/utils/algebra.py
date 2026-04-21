@@ -298,9 +298,10 @@ def calculate_latent_alignment(
         raise ValueError("Byte length does not match declared dimensionality.")
 
     with np.errstate(all="ignore"):
-        # ⚡ Bolt Optimization: Replace np.linalg.norm with math.sqrt(np.dot(v, v)) for ~35% faster 1D vector norm calculation
-        mag1 = math.sqrt(float(np.dot(arr1, arr1)))
-        mag2 = math.sqrt(float(np.dot(arr2, arr2)))
+        # ⚡ Bolt Optimization: Replacing np.linalg.norm with math.sqrt(np.dot) for 1D arrays
+        # is significantly faster (~35%) because it avoids NumPy's internal multi-dimensional checks.
+        mag1 = float(math.sqrt(np.dot(arr1, arr1)))
+        mag2 = float(math.sqrt(np.dot(arr2, arr2)))
         similarity = 0.0 if mag1 == 0.0 or mag2 == 0.0 else float(np.dot(arr1, arr2) / (mag1 * mag2))
 
     if np.isnan(similarity):

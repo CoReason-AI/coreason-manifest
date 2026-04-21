@@ -946,11 +946,14 @@ def test_calculate_latent_alignment_edge_cases() -> None:
 
     with unittest.mock.patch("numpy.dot") as mock_dot:
         # Force dot_product > mag1 * mag2 (so similarity > 1.0)
-        # Using side_effect to mock mag1, mag2 and dot product
-        # Call 1: arr1 dot arr1 (returns 1.0 -> mag1 = 1.0)
-        # Call 2: arr2 dot arr2 (returns 1.0 -> mag2 = 1.0)
-        # Call 3: arr1 dot arr2 (returns 1.1 -> similarity = 1.1)
-        mock_dot.side_effect = [1.0, 1.0, 1.1]
+        # We need dot product to return 1.1 when vectors are different (arr1, arr2)
+        # but 1.0 when vectors are the same (arr1, arr1 or arr2, arr2) for mag1/mag2
+        def mock_dot_side_effect1(a: Any, b: Any) -> float:
+            if a is b:
+                return 1.0
+            return 1.1
+
+        mock_dot.side_effect = mock_dot_side_effect1
         v1_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
         v2_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
         v1 = VectorEmbeddingState(
@@ -963,10 +966,12 @@ def test_calculate_latent_alignment_edge_cases() -> None:
 
     with unittest.mock.patch("numpy.dot") as mock_dot:
         # Force dot_product < -mag1 * mag2 (so similarity < -1.0)
-        # Call 1: arr1 dot arr1 (returns 1.0 -> mag1 = 1.0)
-        # Call 2: arr2 dot arr2 (returns 1.0 -> mag2 = 1.0)
-        # Call 3: arr1 dot arr2 (returns -1.1 -> similarity = -1.1)
-        mock_dot.side_effect = [1.0, 1.0, -1.1]
+        def mock_dot_side_effect2(a: Any, b: Any) -> float:
+            if a is b:
+                return 1.0
+            return -1.1
+
+        mock_dot.side_effect = mock_dot_side_effect2
         v1_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
         v2_packed = struct.pack(f"<{dim}f", -1.0, 0.0)
         v1 = VectorEmbeddingState(
@@ -979,10 +984,12 @@ def test_calculate_latent_alignment_edge_cases() -> None:
 
     with unittest.mock.patch("numpy.dot") as mock_dot:
         # Force similarity to be NaN by returning float('nan') for dot_product
-        # Call 1: arr1 dot arr1 (returns 1.0 -> mag1 = 1.0)
-        # Call 2: arr2 dot arr2 (returns 1.0 -> mag2 = 1.0)
-        # Call 3: arr1 dot arr2 (returns nan -> similarity = nan)
-        mock_dot.side_effect = [1.0, 1.0, float("nan")]
+        def mock_dot_side_effect3(a: Any, b: Any) -> float:
+            if a is b:
+                return 1.0
+            return float("nan")
+
+        mock_dot.side_effect = mock_dot_side_effect3
         v1_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
         v2_packed = struct.pack(f"<{dim}f", 1.0, 0.0)
         v1 = VectorEmbeddingState(
