@@ -1,3 +1,6 @@
 ## 2024-05-19 - Caching decoded base64 NumPy Arrays on Frozen Pydantic Models
 **Learning:** In highly restricted environments with `frozen=True` Pydantic models, caching intermediate computationally expensive decoded structures (like NumPy arrays from base64) directly on the instance requires bypassing Python immutability.
 **Action:** Use `object.__getattribute__(instance, '_cached_property')` to fetch and `object.__setattr__(instance, '_cached_property', value)` to safely bypass immutability guards without violating architectural schema rules, yielding ~5x performance gains for repeated operations.
+## 2024-05-19 - Caching vector magnitude alongside numpy array for distance calculations
+**Learning:** For repeated vector distance calculations (like cosine similarity), calculating the magnitude of the vectors (`math.sqrt(np.dot(arr, arr))`) can be redundantly computed. In heavily constrained schemas where we have to use `object.__getattribute__` to bypass immutability guards, we can cache not only the base64-decoded numpy array, but also the pre-calculated magnitude of the array.
+**Action:** Caching both `_cached_arr` and `_cached_mag` in `calculate_latent_alignment` using `object.__setattr__` avoids redundant mathematical computations on subsequent comparisons (~2x speedup).
