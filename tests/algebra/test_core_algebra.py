@@ -180,6 +180,15 @@ def test_calculate_latent_alignment_success(v1: list[float]) -> None:
         else:
             assert res >= 0.9
 
+        # Re-calculate to hit cache
+        try:
+            res = calculate_latent_alignment(vec1, vec2, policy)
+        except ValueError as e:
+            if "Latent alignment failed" not in str(e):
+                raise
+        else:
+            assert res >= 0.9
+
 
 @given(
     ops=st.lists(
@@ -639,6 +648,20 @@ def test_calculate_latent_alignment_errors() -> None:
     with pytest.raises(ValueError, match="Byte length does not match"):
         calculate_latent_alignment(v3, v4, pol)
 
+    v5 = VectorEmbeddingState(
+        vector_base64=base64.b64encode(struct.pack("<3f", 1.0, 2.0, 3.0)).decode(),
+        dimensionality=3,
+        foundation_matrix_name="m1",
+    )
+    v6 = VectorEmbeddingState(
+        vector_base64=base64.b64encode(struct.pack("<2f", 1.0, 2.0)).decode(),
+        dimensionality=3,
+        foundation_matrix_name="m1",
+    )
+    with pytest.raises(ValueError, match="Byte length does not match"):
+        calculate_latent_alignment(v5, v6, pol)
+
+
 
 def test_get_ontology_schema_empty() -> None:
 
@@ -664,6 +687,9 @@ def test_calculate_latent_alignment_invalid_base64() -> None:
 
     with pytest.raises(ValueError, match=r"Topological Contradiction: Invalid base64 encoding\."):
         calculate_latent_alignment(v_invalid, v_valid, pol)
+
+    with pytest.raises(ValueError, match=r"Topological Contradiction: Invalid base64 encoding\."):
+        calculate_latent_alignment(v_valid, v_invalid, pol)
 
 
 def test_epistemic_transmutation_schema_presence() -> None:
