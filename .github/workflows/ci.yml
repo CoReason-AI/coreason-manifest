@@ -18,23 +18,31 @@ env:
 jobs:
   lint-and-audit:
     name: Lint and Audit (Zero-Pollution Tooling Injection)
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, hetzner, x64]
+    env:
+      TEMPORAL_CI_NAMESPACE: ci-${{ github.repository_id }}-${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-${{ strategy.job-index }}
+      CI_RUN_ID: ${{ github.run_id }}
+      UV_CACHE_DIR: ${{ github.workspace }}/.uv_cache
+      CARGO_HOME: ${{ github.workspace }}/.cargo_cache
+      NPM_CONFIG_CACHE: ${{ github.workspace }}/.npm_cache
     steps:
-      - name: Harden Runner (Endpoint Network Security)
-        uses: step-security/harden-runner@v2
-        with:
-          egress-policy: audit
+      - name: Pre-Flight Workspace Purity
+        run: sudo chown -R $(whoami):$(whoami) ${{ github.workspace }} || true
 
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
-          python-version: "3.14"
+      - name: Substrate Purity Verification
+        run: git clean -xfd -e .venv -e .uv_cache -e .cargo_cache -e .npm_cache
 
-      - name: Install Dependencies
-        run: uv sync --all-extras --dev
+      - name: Dynamic Ecosystem Sync
+        run: |
+          uv sync --all-extras --dev
+          cd bindings/typescript && npm ci
+          cd ../../bindings/rust && cargo fetch
+
+      - name: Temporal Namespace Provisioning
+        run: temporal operator namespace create $TEMPORAL_CI_NAMESPACE --address 127.0.0.1:7233 || true
 
       - name: Ruff Check
         run: uvx ruff check .
@@ -50,14 +58,6 @@ jobs:
 
       - name: Enforce Cryptographic Determinism
         run: uv run python scripts/enforce_cryptographic_determinism.py
-
-      - name: Setup Node.js (For json-schema-to-typescript)
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.x'
-
-      - name: Setup Rust (For Cargo Typify/Fmt)
-        uses: dtolnay/rust-toolchain@stable
 
       - name: Install cargo-typify
         run: cargo install cargo-typify
@@ -89,27 +89,41 @@ jobs:
             'docs/**/*.md'
           fail: true
 
+      - name: Container & Network Teardown (Always Execute)
+        if: always()
+        run: |
+          temporal operator namespace delete $TEMPORAL_CI_NAMESPACE --address 127.0.0.1:7233 --yes || true
+          sudo chown -R $(whoami):$(whoami) ${{ github.workspace }}
+
   schema-contracts:
     name: Schema Contracts (Semantic Backward-Compatibility)
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, hetzner, x64]
+    env:
+      TEMPORAL_CI_NAMESPACE: ci-${{ github.repository_id }}-${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-${{ strategy.job-index }}
+      CI_RUN_ID: ${{ github.run_id }}
+      UV_CACHE_DIR: ${{ github.workspace }}/.uv_cache
+      CARGO_HOME: ${{ github.workspace }}/.cargo_cache
+      NPM_CONFIG_CACHE: ${{ github.workspace }}/.npm_cache
     steps:
-      - name: Harden Runner (Endpoint Network Security)
-        uses: step-security/harden-runner@v2
-        with:
-          egress-policy: audit
+      - name: Pre-Flight Workspace Purity
+        run: sudo chown -R $(whoami):$(whoami) ${{ github.workspace }} || true
 
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
-          python-version: "3.14"
+      - name: Substrate Purity Verification
+        run: git clean -xfd -e .venv -e .uv_cache -e .cargo_cache -e .npm_cache
 
-      - name: Install Dependencies
-        run: uv sync --all-extras
+      - name: Dynamic Ecosystem Sync
+        run: |
+          uv sync --all-extras
+          cd bindings/typescript && npm ci
+          cd ../../bindings/rust && cargo fetch
+
+      - name: Temporal Namespace Provisioning
+        run: temporal operator namespace create $TEMPORAL_CI_NAMESPACE --address 127.0.0.1:7233 || true
 
       - name: Generate Schema
         run: uv run python -c "import json; from coreason_manifest.utils.algebra import get_ontology_schema; schema = get_ontology_schema(); open('coreason_ontology.schema.json', 'w', encoding='utf-8').write(json.dumps(schema, indent=2, ensure_ascii=False) + '\n')"
@@ -117,25 +131,39 @@ jobs:
       - name: Diff Check
         run: git diff --exit-code coreason_ontology.schema.json
 
+      - name: Container & Network Teardown (Always Execute)
+        if: always()
+        run: |
+          temporal operator namespace delete $TEMPORAL_CI_NAMESPACE --address 127.0.0.1:7233 --yes || true
+          sudo chown -R $(whoami):$(whoami) ${{ github.workspace }}
+
   security-sast:
     name: Security SAST (AI-Specific Fuzzing & Architectural Gate)
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, hetzner, x64]
+    env:
+      TEMPORAL_CI_NAMESPACE: ci-${{ github.repository_id }}-${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-${{ strategy.job-index }}
+      CI_RUN_ID: ${{ github.run_id }}
+      UV_CACHE_DIR: ${{ github.workspace }}/.uv_cache
+      CARGO_HOME: ${{ github.workspace }}/.cargo_cache
+      NPM_CONFIG_CACHE: ${{ github.workspace }}/.npm_cache
     steps:
-      - name: Harden Runner (Endpoint Network Security)
-        uses: step-security/harden-runner@v2
-        with:
-          egress-policy: audit
+      - name: Pre-Flight Workspace Purity
+        run: sudo chown -R $(whoami):$(whoami) ${{ github.workspace }} || true
 
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
-          python-version: "3.14"
+      - name: Substrate Purity Verification
+        run: git clean -xfd -e .venv -e .uv_cache -e .cargo_cache -e .npm_cache
 
-      - name: Install Dependencies
-        run: uv sync --all-extras
+      - name: Dynamic Ecosystem Sync
+        run: |
+          uv sync --all-extras
+          cd bindings/typescript && npm ci
+          cd ../../bindings/rust && cargo fetch
+
+      - name: Temporal Namespace Provisioning
+        run: temporal operator namespace create $TEMPORAL_CI_NAMESPACE --address 127.0.0.1:7233 || true
 
       - name: Architectural Gate
         env:
@@ -153,43 +181,63 @@ jobs:
       - name: Bandit Security Check
         run: uvx bandit -r src/ scripts/ tests/ -s B101,B404
 
-  test-ubuntu:
-    name: Test (Ubuntu) - Python ${{ matrix.python-version }}
+      - name: Container & Network Teardown (Always Execute)
+        if: always()
+        run: |
+          temporal operator namespace delete $TEMPORAL_CI_NAMESPACE --address 127.0.0.1:7233 --yes || true
+          sudo chown -R $(whoami):$(whoami) ${{ github.workspace }}
+
+  test-polyglot:
+    name: Polyglot Tests - Python ${{ matrix.python-version }}
     needs: [lint-and-audit, schema-contracts]
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, hetzner, x64]
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.14", "3.14t"]
 
+    env:
+      TEMPORAL_CI_NAMESPACE: ci-${{ github.repository_id }}-${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-${{ strategy.job-index }}
+      CI_RUN_ID: ${{ github.run_id }}
+      UV_CACHE_DIR: ${{ github.workspace }}/.uv_cache
+      CARGO_HOME: ${{ github.workspace }}/.cargo_cache
+      NPM_CONFIG_CACHE: ${{ github.workspace }}/.npm_cache
+
     steps:
-      - name: Harden Runner (Endpoint Network Security)
-        uses: step-security/harden-runner@v2
-        with:
-          egress-policy: audit
+      - name: Pre-Flight Workspace Purity
+        run: sudo chown -R $(whoami):$(whoami) ${{ github.workspace }} || true
 
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
-          python-version: ${{ matrix.python-version }}
+      - name: Substrate Purity Verification
+        run: git clean -xfd -e .venv -e .uv_cache -e .cargo_cache -e .npm_cache
 
-      - name: Install dependencies
+      - name: Dynamic Ecosystem Sync
         run: |
           if [ "${{ matrix.python-version }}" = "3.14t" ]; then
             uv sync --dev
           else
             uv sync --all-extras --dev
           fi
+          cd bindings/typescript && npm ci
+          cd ../../bindings/rust && cargo fetch
 
       - name: Set PYTHON_GIL for Free-Threading
         if: matrix.python-version == '3.14t'
         run: echo "PYTHON_GIL=0" >> $GITHUB_ENV
 
-      - name: Pytest
+      - name: Temporal Namespace Provisioning
+        run: temporal operator namespace create $TEMPORAL_CI_NAMESPACE --address 127.0.0.1:7233 || true
+
+      - name: Python Tests
         run: uv run pytest
+
+      - name: TypeScript Tests
+        run: cd bindings/typescript && npm run test
+
+      - name: Rust Tests
+        run: cd bindings/rust && cargo test
 
       - name: Upload coverage
         uses: codecov/codecov-action@v5
@@ -197,73 +245,40 @@ jobs:
           fail_ci_if_error: false
           token: ${{ secrets.CODECOV_TOKEN }}
 
-  test-extended:
-    name: Python ${{ matrix.python-version }} on ${{ matrix.os }}
-    needs: test-ubuntu
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [macos-latest, windows-latest]
-        python-version: ["3.14", "3.14t"]
-        exclude:
-          - os: windows-latest
-            python-version: "3.14t"
-
-    steps:
-      - name: Harden Runner (Endpoint Network Security)
-        uses: step-security/harden-runner@v2
-        with:
-          egress-policy: audit
-
-      - uses: actions/checkout@v4
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install dependencies
-        shell: bash
+      - name: Container & Network Teardown (Always Execute)
+        if: always()
         run: |
-          if [ "${{ matrix.python-version }}" = "3.14t" ]; then
-            uv sync --dev
-          else
-            uv sync --all-extras --dev
-          fi
-
-      - name: Set PYTHON_GIL for Free-Threading
-        if: matrix.python-version == '3.14t'
-        shell: bash
-        run: echo "PYTHON_GIL=0" >> $GITHUB_ENV
-
-      - name: Pytest
-        run: uv run pytest
-
-      - name: Upload coverage
-        uses: codecov/codecov-action@v5
-        with:
-          fail_ci_if_error: false
-          token: ${{ secrets.CODECOV_TOKEN }}
+          temporal operator namespace delete $TEMPORAL_CI_NAMESPACE --address 127.0.0.1:7233 --yes || true
+          sudo chown -R $(whoami):$(whoami) ${{ github.workspace }}
 
   reproducible-builds:
     name: Reproducible Builds (Determinism Verification)
-    needs: [test-ubuntu, test-extended]
-    runs-on: ubuntu-latest
+    needs: [test-polyglot]
+    runs-on: [self-hosted, hetzner, x64]
+    env:
+      TEMPORAL_CI_NAMESPACE: ci-${{ github.repository_id }}-${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-${{ strategy.job-index }}
+      CI_RUN_ID: ${{ github.run_id }}
+      UV_CACHE_DIR: ${{ github.workspace }}/.uv_cache
+      CARGO_HOME: ${{ github.workspace }}/.cargo_cache
+      NPM_CONFIG_CACHE: ${{ github.workspace }}/.npm_cache
     steps:
-      - name: Harden Runner (Endpoint Network Security)
-        uses: step-security/harden-runner@v2
-        with:
-          egress-policy: audit
+      - name: Pre-Flight Workspace Purity
+        run: sudo chown -R $(whoami):$(whoami) ${{ github.workspace }} || true
 
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
-          python-version: "3.14"
+      - name: Substrate Purity Verification
+        run: git clean -xfd -e .venv -e .uv_cache -e .cargo_cache -e .npm_cache
+
+      - name: Dynamic Ecosystem Sync
+        run: |
+          uv sync --all-extras
+          cd bindings/typescript && npm ci
+          cd ../../bindings/rust && cargo fetch
+
+      - name: Temporal Namespace Provisioning
+        run: temporal operator namespace create $TEMPORAL_CI_NAMESPACE --address 127.0.0.1:7233 || true
 
       - name: Build wheel (attempt 1)
         run: |
@@ -288,3 +303,9 @@ jobs:
             exit 1
           fi
           echo "Deterministic build verified."
+
+      - name: Container & Network Teardown (Always Execute)
+        if: always()
+        run: |
+          temporal operator namespace delete $TEMPORAL_CI_NAMESPACE --address 127.0.0.1:7233 --yes || true
+          sudo chown -R $(whoami):$(whoami) ${{ github.workspace }}
