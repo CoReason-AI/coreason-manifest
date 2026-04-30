@@ -21,7 +21,6 @@
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
 import ast
-import base64
 import copy
 import hashlib
 import math
@@ -275,24 +274,14 @@ def calculate_latent_alignment(
     # ⚡ Bolt Optimization: Cache base64 decoding and numpy array conversion on the immutable state instance
     # Reduces redundant decoding for repeated distance calculations by ~5x
     try:
-        arr1 = object.__getattribute__(v1, "_cached_arr")
-    except AttributeError:
-        try:
-            b1 = base64.b64decode(v1.vector_base64)
-        except Exception as e:
-            raise ValueError("Topological Contradiction: Invalid base64 encoding.") from e
-        arr1 = np.frombuffer(b1, dtype=np.float32)
-        object.__setattr__(v1, "_cached_arr", arr1)
+        arr1 = v1.decoded_vector
+    except Exception as e:
+        raise ValueError("Topological Contradiction: Invalid base64 encoding.") from e
 
     try:
-        arr2 = object.__getattribute__(v2, "_cached_arr")
-    except AttributeError:
-        try:
-            b2 = base64.b64decode(v2.vector_base64)
-        except Exception as e:
-            raise ValueError("Topological Contradiction: Invalid base64 encoding.") from e
-        arr2 = np.frombuffer(b2, dtype=np.float32)
-        object.__setattr__(v2, "_cached_arr", arr2)
+        arr2 = v2.decoded_vector
+    except Exception as e:
+        raise ValueError("Topological Contradiction: Invalid base64 encoding.") from e
 
     if len(arr1) != v1.dimensionality or len(arr2) != v2.dimensionality:
         raise ValueError("Byte length does not match declared dimensionality.")

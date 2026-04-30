@@ -11096,6 +11096,19 @@ class VectorEmbeddingState(CoreasonBaseState):
         Annotated[str, StringConstraints(pattern="^[A-Za-z0-9+/]*={0,2}$", max_length=5000000)] | None
     ) = Field(default=None, description="A base64-encoded tensor defining the geometric rate of change over time.")
 
+    @property
+    def decoded_vector(self) -> Any:
+        try:
+            return object.__getattribute__(self, "_decoded_vector")
+        except AttributeError:
+            import base64
+
+            import numpy as np
+
+            arr = np.frombuffer(base64.b64decode(self.vector_base64), dtype=np.float32)
+            object.__setattr__(self, "_decoded_vector", arr)
+            return arr
+
 
 class CognitiveCritiqueProfile(CoreasonBaseState):
     r"""
