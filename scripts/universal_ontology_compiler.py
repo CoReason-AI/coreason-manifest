@@ -279,6 +279,7 @@ def evaluate_ast_instantiation_bounds() -> None:
                                 "model_validator" not in decorators
                                 and "field_validator" not in decorators
                                 and "field_serializer" not in decorators
+                                and "property" not in decorators
                             ):
                                 print(
                                     f"Rule B Violation: Class '{node.name}' function '{item.name}' missing validator decorator in {filepath}",
