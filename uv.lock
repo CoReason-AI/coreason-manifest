@@ -33,6 +33,15 @@ wheels = [
 ]
 
 [[package]]
+name = "canonicaljson"
+version = "2.0.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/a8/f2/2835b7ab464988d1f85e351a19c4d6b2e4c317ba8484ebd2a311850eab8c/canonicaljson-2.0.0.tar.gz", hash = "sha256:e2fdaef1d7fadc5d9cb59bd3d0d41b064ddda697809ac4325dced721d12f113f", size = 10716, upload-time = "2023-03-15T01:51:52.883Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e5/54/346f681c24a9c3a08e2e74dcee2555ccd1081705b46f791f7b228e177d06/canonicaljson-2.0.0-py3-none-any.whl", hash = "sha256:c38a315de3b5a0532f1ec1f9153cd3d716abfc565a558d00a4835428a34fca5b", size = 7921, upload-time = "2023-03-15T01:51:50.931Z" },
+]
+
+[[package]]
 name = "cfgv"
 version = "3.5.0"
 source = { registry = "https://pypi.org/simple" }
@@ -66,6 +75,7 @@ wheels = [
 name = "coreason-manifest"
 source = { editable = "." }
 dependencies = [
+    { name = "canonicaljson" },
     { name = "jsonpatch" },
     { name = "msgspec" },
     { name = "numpy" },
@@ -101,6 +111,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "canonicaljson", specifier = ">=2.0.0" },
     { name = "jsonpatch", specifier = ">=1.33" },
     { name = "msgspec", specifier = ">=0.21.1" },
     { name = "numpy", specifier = ">=2.4" },
