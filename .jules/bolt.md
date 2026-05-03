@@ -1,3 +1,3 @@
-## 2024-05-19 - Caching decoded base64 NumPy Arrays on Frozen Pydantic Models
-**Learning:** In highly restricted environments with `frozen=True` Pydantic models, caching intermediate computationally expensive decoded structures (like NumPy arrays from base64) directly on the instance requires bypassing Python immutability.
-**Action:** Use `object.__getattribute__(instance, '_cached_property')` to fetch and `object.__setattr__(instance, '_cached_property', value)` to safely bypass immutability guards without violating architectural schema rules, yielding ~5x performance gains for repeated operations.
+## 2026-04-25 - Copy deepcopy optimization on large dictionaries
+**Learning:** `copy.deepcopy()` is extremely slow for complex, deeply nested JSON-serializable structures. The initial attempt to optimize via `msgspec` caused a runtime dependency issue.
+**Action:** Always prefer Python's built-in `json.loads` over `copy.deepcopy()` when returning safe, decoupled deep copies of JSON-safe data (like Pydantic JSON schemas) to achieve a massive performance boost natively without breaking dependency boundaries.
