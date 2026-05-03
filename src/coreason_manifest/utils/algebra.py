@@ -289,9 +289,7 @@ def calculate_latent_alignment(
     with np.errstate(all="ignore"):
         norm1 = float(np.linalg.norm(arr1))
         norm2 = float(np.linalg.norm(arr2))
-        similarity = (
-            0.0 if norm1 == 0.0 or norm2 == 0.0 else float(np.dot(arr1, arr2) / (norm1 * norm2))
-        )
+        similarity = 0.0 if norm1 == 0.0 or norm2 == 0.0 else float(np.dot(arr1, arr2) / (norm1 * norm2))
 
     if np.isnan(similarity):
         similarity = 0.0
