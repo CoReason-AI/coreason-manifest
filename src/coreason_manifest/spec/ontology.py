@@ -1037,7 +1037,7 @@ class TraceContextState(CoreasonBaseState):
             pattern=r"^[0-9A-HJKMNP-TV-Z]{26}$|^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
         ),
     ] = Field(
-        description="Unique identifier for the specific execution of this actionSpaceId. Must be a ULID or UUIDv7."
+        description="Unique identifier for the specific execution of this actionSpaceCId. Must be a ULID or UUIDv7."
     )
     parent_span_cid: (
         Annotated[
