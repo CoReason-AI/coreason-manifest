@@ -169,22 +169,15 @@ type CausalIntervalProfile = Literal["strictly_precedes", "overlaps", "contains"
 type CrossoverMechanismProfile = Literal["uniform_blend", "single_point", "heuristic"]
 
 
-_CLEARANCE_MAPPING: dict[str, int] = {"public": 0, "internal": 1, "confidential": 2, "restricted": 3}
-
-
-class EpistemicSecurityPolicy(StrEnum):
-    """
-    AGENT INSTRUCTION: Defines the minimum cryptographic isolation perimeter required for this node's thermodynamic execution.
-
-    CAUSAL AFFORDANCE: Binds the execution graph to hardware Trusted Execution Environments (TEEs) if CONFIDENTIAL is set, physically guillotining unauthorized exfiltration.
-
-    EPISTEMIC BOUNDS: Constrained strictly to the predefined enumeration values.
-
-    MCP ROUTING TRIGGERS: TEE Enforcement, Hardware Isolation, Secure Enclave, Zero-Trust Execution
-    """
-
-    STANDARD = "STANDARD"
-    CONFIDENTIAL = "CONFIDENTIAL"
+_CLEARANCE_MAPPING: dict[str, int] = {
+    "public": 0,
+    "internal_hr": 50,
+    "confidential_finance": 100,
+    "restricted_hipaa": 200,
+    "air_gapped": 255,
+}
+# Note: The above mapping is an example default. Enterprise clients should
+# inject their custom mapping to align with their internal OPA/rules engines.
 
 
 class UpperOntologyClassProfile(StrEnum):
@@ -1963,6 +1956,57 @@ class RoutingFrontierPolicy(CoreasonBaseState):
                 except (ValueError, TypeError) as e:  # noqa: F841
                     pass
         return values
+
+
+class EpistemicRigidityPolicy(CoreasonBaseState):
+    r"""
+    AGENT INSTRUCTION: Defines the acceptable bounds of probabilistic drift for an execution task, establishing the exact hardware and physics requirements for LLM inference.
+
+    CAUSAL AFFORDANCE: Instructs the Tier-1 Tensor Router to either enforce local SGLang execution, execute a two-stage decoupled pipeline, or permit Cloud Oracle escalation via structured outputs.
+
+    EPISTEMIC BOUNDS: The `minimum_rigidity_tier` is strictly constrained to a scalar mathematical bound `ge=0, le=255`. The semantic-to-scalar mapping (e.g., 'H100_CLUSTER' -> 255) is resolved via a Sovereign MCP Projection. `max_retries_on_semantic_tax` is bounded `ge=0, le=100` to prevent infinite validation loops.
+
+    MCP ROUTING TRIGGERS: Epistemic Rigidity Matrix, Execution Routing Policy, Logit Suffocation, Probabilistic Escalation, Semantic Tax Bounding
+
+    """
+
+    minimum_rigidity_tier: int = Field(
+        default=0,
+        ge=0,
+        le=255,
+        description="The mathematical scalar representing minimum hardware execution rigor (0=CPU, 255=Max GPU). Allows enterprises to inject custom gradient mappings.",
+    )
+    max_retries_on_semantic_tax: int = Field(
+        ge=0,
+        le=100,
+        default=3,
+        description="The maximum number of times the CPU orchestrator is authorized to bounce structurally invalid generation back to the Cloud Oracle.",
+    )
+    permitted_remote_decoding_protocols: list[
+        Annotated[
+            str,
+            StringConstraints(pattern="^(STRICT_JSON_SCHEMA|NATIVE_PDA_GRAMMAR|LOOSE_JSON_MODE|NONE)$"),
+        ]
+    ] = Field(
+        default_factory=lambda: ["NONE"],
+        description="A list of structured output protocols that the orchestrator is permitted to push to a remote Oracle. This explicitly allows the orchestrator to pick and choose how to offload constrained decoding (e.g., via STRICT_JSON_SCHEMA) rather than executing it purely on local bare-metal.",
+    )
+    required_epistemic_security: Annotated[str, StringConstraints(pattern="^(PUBLIC|CONFIDENTIAL|RESTRICTED)$")] = (
+        Field(
+            default="PUBLIC",
+            description="The minimum Lattice-Based Access Control (LBAC) network perimeter required for the hardware.",
+        )
+    )
+    minimum_vram_gb: int | None = Field(
+        default=None,
+        ge=0,
+        description="Minimum VRAM required on the target substrate to load the tensor topology.",
+    )
+    maximum_latency_ms: int | None = Field(
+        default=None,
+        ge=0,
+        description="Maximum acceptable round-trip network latency to the Substrate to guarantee SLA.",
+    )
 
 
 class SaeFeatureActivationState(CoreasonBaseState):
@@ -7679,9 +7723,17 @@ class EpistemicSecurityProfile(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Sovereign Execution, Trusted Execution Environment, Egress Obfuscation, Mixnet Routing, Network Isolation
     """
 
-    epistemic_security: EpistemicSecurityPolicy = Field(
-        default=EpistemicSecurityPolicy.STANDARD,
-        description="The level of hardware-enforced cryptographic isolation required (STANDARD or CONFIDENTIAL).",
+    clearance_tiers: list[int] = Field(
+        default_factory=lambda: [0],
+        description="A list of mathematical scalars representing the exact data sensitivity levels this node is authorized to process. Allows discrete horizontal compartmentalization (e.g., [50, 100] but not 0).",
+    )
+    network_boundary: Literal["INTERNET", "VPC_INTERNAL", "LOCAL_ENCLAVE"] = Field(
+        default="INTERNET",
+        description="The maximum allowed physical network egress boundary for the data.",
+    )
+    pii_quarantine_required: bool = Field(
+        default=False,
+        description="If True, mathematically forces the Tier 1 orchestrator to execute an EpistemicFirewall mask over the payload before it can be passed to any LLM or external API.",
     )
     network_isolation: bool = Field(
         default=False,
@@ -15239,3 +15291,4 @@ ContinuousManifoldMappingContract.model_rebuild()
 FederatedDiscoveryIntent.model_rebuild()
 OracleExecutionReceipt.model_rebuild()
 OntologicalNormalizationIntent.model_rebuild()
+EpistemicRigidityPolicy.model_rebuild()
