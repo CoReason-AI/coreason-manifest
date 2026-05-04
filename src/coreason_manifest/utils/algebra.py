@@ -24,7 +24,6 @@ import ast
 import base64
 import copy
 import hashlib
-import math
 import typing
 from collections.abc import Sequence
 from typing import Any, Literal, cast
@@ -272,37 +271,25 @@ def calculate_latent_alignment(
     if v1.foundation_matrix_name != v2.foundation_matrix_name or v1.dimensionality != v2.dimensionality:
         raise ValueError("Topological Contradiction: Vector geometries are incommensurable.")
 
-    # ⚡ Bolt Optimization: Cache base64 decoding and numpy array conversion on the immutable state instance
-    # Reduces redundant decoding for repeated distance calculations by ~5x
     try:
-        arr1 = object.__getattribute__(v1, "_cached_arr")
-    except AttributeError:
-        try:
-            b1 = base64.b64decode(v1.vector_base64)
-        except Exception as e:
-            raise ValueError("Topological Contradiction: Invalid base64 encoding.") from e
-        arr1 = np.frombuffer(b1, dtype=np.float32)
-        object.__setattr__(v1, "_cached_arr", arr1)
+        b1 = base64.b64decode(v1.vector_base64)
+    except Exception as e:
+        raise ValueError("Topological Contradiction: Invalid base64 encoding.") from e
+    arr1 = np.frombuffer(b1, dtype=np.float32)
 
     try:
-        arr2 = object.__getattribute__(v2, "_cached_arr")
-    except AttributeError:
-        try:
-            b2 = base64.b64decode(v2.vector_base64)
-        except Exception as e:
-            raise ValueError("Topological Contradiction: Invalid base64 encoding.") from e
-        arr2 = np.frombuffer(b2, dtype=np.float32)
-        object.__setattr__(v2, "_cached_arr", arr2)
+        b2 = base64.b64decode(v2.vector_base64)
+    except Exception as e:
+        raise ValueError("Topological Contradiction: Invalid base64 encoding.") from e
+    arr2 = np.frombuffer(b2, dtype=np.float32)
 
     if len(arr1) != v1.dimensionality or len(arr2) != v2.dimensionality:
         raise ValueError("Byte length does not match declared dimensionality.")
 
     with np.errstate(all="ignore"):
-        # ⚡ Bolt Optimization: Replacing np.linalg.norm with math.sqrt(np.dot) for 1D arrays
-        # is significantly faster (~35%) because it avoids NumPy's internal multi-dimensional checks.
-        mag1 = float(math.sqrt(np.dot(arr1, arr1)))
-        mag2 = float(math.sqrt(np.dot(arr2, arr2)))
-        similarity = 0.0 if mag1 == 0.0 or mag2 == 0.0 else float(np.dot(arr1, arr2) / (mag1 * mag2))
+        norm1 = float(np.linalg.norm(arr1))
+        norm2 = float(np.linalg.norm(arr2))
+        similarity = 0.0 if norm1 == 0.0 or norm2 == 0.0 else float(np.dot(arr1, arr2) / (norm1 * norm2))
 
     if np.isnan(similarity):
         similarity = 0.0
@@ -316,6 +303,40 @@ def calculate_latent_alignment(
         raise TamperFaultEvent("Latent alignment failed.")
 
     return similarity
+
+
+def compute_merkle_directory_cid(file_contents: dict[str, bytes]) -> str:
+    """Compute a Merkle-style SHA-256 CID over a set of named files.
+
+    This is the **universal content-addressing primitive** for the CoReason
+    ecosystem.  It follows the same pattern used by git tree objects, IPFS
+    UnixFS directories, and OCI image layers:
+
+    1. Hash each file individually: ``sha256(file_bytes)``.
+    2. Build a sorted manifest of ``filename:hex_digest`` lines.
+    3. SHA-256 hash that manifest to produce the Merkle root.
+    4. Prefix with ``sha256:`` to produce the CID.
+
+    The Merkle approach eliminates concatenation ambiguity (where boundary
+    shifts between files could produce false hash collisions) and is
+    deterministic regardless of platform or OS.
+
+    Args:
+        file_contents: Mapping of canonical filenames to their raw bytes.
+            For self-referential files (e.g. a manifest that stores its own
+            hash), the caller is responsible for zeroing the hash field
+            before passing the bytes.
+
+    Returns:
+        A string in the format ``sha256:<64-char hex digest>``.
+    """
+    file_hashes: list[str] = []
+    for filename in sorted(file_contents.keys()):
+        file_hash = hashlib.sha256(file_contents[filename]).hexdigest()
+        file_hashes.append(f"{filename}:{file_hash}")
+
+    merkle_input = "\n".join(file_hashes).encode("utf-8")
+    return f"sha256:{hashlib.sha256(merkle_input).hexdigest()}"
 
 
 def compute_topology_hash(topology: "AnyTopologyManifest") -> str:

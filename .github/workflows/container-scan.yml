@@ -1,10 +1,13 @@
-﻿name: Container Vulnerability Scan
+name: Container Vulnerability Scan
 
 on:
   push:
     branches: [ "coreason-develop", "main" ]
   pull_request:
     branches: [ "coreason-develop", "main" ]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 jobs:
   trivy:
@@ -15,7 +18,7 @@ jobs:
       actions: read
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Run Trivy vulnerability scanner in fs mode
         if: hashFiles('Dockerfile') != ''

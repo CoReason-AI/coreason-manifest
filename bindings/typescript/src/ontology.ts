@@ -1981,9 +1981,21 @@ export type AcceleratorType = string;
  */
 export type ProviderWhitelist = string[];
 /**
- * The level of hardware-enforced cryptographic isolation required (STANDARD or CONFIDENTIAL).
+ * The level of hardware-enforced cryptographic isolation required.
  */
-export type EpistemicSecurityPolicy = "STANDARD" | "CONFIDENTIAL";
+export type EpistemicSecurityPolicy = "PUBLIC" | "STANDARD" | "CONFIDENTIAL" | "RESTRICTED";
+/**
+ * A list of mathematical scalars representing the exact data sensitivity levels this node is authorized to process. Allows discrete horizontal compartmentalization (e.g., [50, 100] but not 0).
+ */
+export type ClearanceTiers = number[];
+/**
+ * The maximum allowed physical network egress boundary for the data.
+ */
+export type NetworkBoundary = "INTERNET" | "VPC_INTERNAL" | "LOCAL_ENCLAVE";
+/**
+ * If True, mathematically forces the Tier 1 orchestrator to execute an EpistemicFirewall mask over the payload before it can be passed to any LLM or external API.
+ */
+export type PiiQuarantineRequired = boolean;
 /**
  * The strict Boolean constraint mandating a fully isolated subnet or eBPF mesh.
  */
@@ -2054,6 +2066,30 @@ export type TradeoffPreference =
  * The maximum operational carbon intensity of the physical data center grid allowed for this agent's routing.
  */
 export type MaxCarbonIntensityGco2EqKwh = number | null;
+/**
+ * The mathematical scalar representing minimum hardware execution rigor (0=CPU, 255=Max GPU). Allows enterprises to inject custom gradient mappings.
+ */
+export type MinimumRigidityTier = number;
+/**
+ * The maximum number of times the CPU orchestrator is authorized to bounce structurally invalid generation back to the Cloud Oracle.
+ */
+export type MaxRetriesOnSemanticTax = number;
+/**
+ * A list of structured output protocols that the orchestrator is permitted to push to a remote Oracle. This explicitly allows the orchestrator to pick and choose how to offload constrained decoding (e.g., via STRICT_JSON_SCHEMA) rather than executing it purely on local bare-metal.
+ */
+export type PermittedRemoteDecodingProtocols = string[];
+/**
+ * The minimum Lattice-Based Access Control (LBAC) network perimeter required for the hardware.
+ */
+export type EpistemicSecurityPolicy1 = "PUBLIC" | "STANDARD" | "CONFIDENTIAL" | "RESTRICTED";
+/**
+ * Minimum VRAM required on the target substrate to load the tensor topology.
+ */
+export type MinimumVramGb = number | null;
+/**
+ * Maximum acceptable round-trip network latency to the Substrate to guarantee SLA.
+ */
+export type MaximumLatencyMs = number | null;
 /**
  * Unique identifier for the requested LoRA adapter.
  */
@@ -4699,6 +4735,10 @@ export type ClearingTimeout = number;
  */
 export type MinimumTickSize = number;
 /**
+ * A content-addressed SHA-256 hash of a deterministic artifact bundle (e.g., an Action Space MCP server, an OHDSI Circe cohort definition JSON, or any RFC 8785 canonicalizable resource), enabling zero-trust verification and distributed exchangeability across federated boundaries.
+ */
+export type BundleContentHashState = string;
+/**
  * The exact genesis globally unique decentralized identifier (DID) anchoring the document, ensuring continuity.
  */
 export type ArtifactEventCid1 = string;
@@ -5291,7 +5331,7 @@ export type PrmEvaluations = ProcessRewardContract[];
  *
  * MCP ROUTING TRIGGERS: TEE Enforcement, Hardware Isolation, Secure Enclave, Zero-Trust Execution
  */
-export type EpistemicSecurityPolicy1 = "STANDARD" | "CONFIDENTIAL";
+export type EpistemicSecurityPolicy2 = "PUBLIC" | "STANDARD" | "CONFIDENTIAL" | "RESTRICTED";
 export type SimilarityThresholdAlpha = number;
 export type RelationDiversityBucketSize = number;
 /**
@@ -5299,7 +5339,7 @@ export type RelationDiversityBucketSize = number;
  */
 export type TraceCid2 = string;
 /**
- * Unique identifier for the specific execution of this actionSpaceId. Must be a ULID or UUIDv7.
+ * Unique identifier for the specific execution of this actionSpaceCId. Must be a ULID or UUIDv7.
  */
 export type SpanCid = string;
 /**
@@ -5927,6 +5967,7 @@ export interface CoReasonSharedKernelOntology {
   BoundedJSONRPCIntent?: BoundedJSONRPCIntent;
   BrowserDOMState?: BrowserDOMState;
   BudgetExhaustionEvent?: BudgetExhaustionEvent;
+  BundleContentHashState?: BundleContentHashState;
   BypassReceipt?: BypassReceipt;
   CapabilityForgeTopologyManifest?: CapabilityForgeTopologyManifest;
   CapabilityPointerState?: CapabilityPointerState;
@@ -6034,9 +6075,10 @@ export interface CoReasonSharedKernelOntology {
   EpistemicQuarantineSnapshot?: EpistemicQuarantineSnapshot;
   EpistemicRejectionReceipt?: EpistemicRejectionReceipt;
   EpistemicRewardGradientPolicy?: EpistemicRewardGradientPolicy;
+  EpistemicRigidityPolicy?: EpistemicRigidityPolicy;
   EpistemicSOPManifest?: EpistemicSOPManifest;
   EpistemicScanningPolicy?: EpistemicScanningPolicy;
-  EpistemicSecurityPolicy?: EpistemicSecurityPolicy1;
+  EpistemicSecurityPolicy?: EpistemicSecurityPolicy2;
   EpistemicSecurityProfile?: EpistemicSecurityProfile1;
   EpistemicSeedInjectionPolicy?: EpistemicSeedInjectionPolicy;
   EpistemicStarvationEvent?: EpistemicStarvationEvent;
@@ -8896,6 +8938,10 @@ export interface CognitiveAgentNodeProfile {
    * The dynamic spot-market compute requirements for this agent.
    */
   compute_frontier?: RoutingFrontierPolicy | null;
+  /**
+   * The mathematical bounds defining acceptable probabilistic drift, hardware requirements, and remote decoding protocols for this agent's execution routing.
+   */
+  epistemic_rigidity?: EpistemicRigidityPolicy | null;
   peft_adapters?: PeftAdapters;
   /**
    * The cryptographic identity passport and AI-BOM for the agent.
@@ -9059,6 +9105,9 @@ export interface SpatialHardwareProfile {
  */
 export interface EpistemicSecurityProfile {
   epistemic_security?: EpistemicSecurityPolicy;
+  clearance_tiers?: ClearanceTiers;
+  network_boundary?: NetworkBoundary;
+  pii_quarantine_required?: PiiQuarantineRequired;
   network_isolation?: NetworkIsolation;
   egress_obfuscation?: EgressObfuscation;
 }
@@ -9141,6 +9190,25 @@ export interface RoutingFrontierPolicy {
   min_capability_score: MinCapabilityScore;
   tradeoff_preference: TradeoffPreference;
   max_carbon_intensity_gco2eq_kwh?: MaxCarbonIntensityGco2EqKwh;
+}
+/**
+ * CoReason Shared Kernel Ontology
+ *
+ * AGENT INSTRUCTION: Defines the acceptable bounds of probabilistic drift for an execution task, establishing the exact hardware and physics requirements for LLM inference.
+ *
+ * CAUSAL AFFORDANCE: Instructs the Tier-1 Tensor Router to either enforce local SGLang execution, execute a two-stage decoupled pipeline, or permit Cloud Oracle escalation via structured outputs.
+ *
+ * EPISTEMIC BOUNDS: The `minimum_rigidity_tier` is strictly constrained to a scalar mathematical bound `ge=0, le=255`. The semantic-to-scalar mapping (e.g., 'H100_CLUSTER' -> 255) is resolved via a Sovereign MCP Projection. `max_retries_on_semantic_tax` is bounded `ge=0, le=100` to prevent infinite validation loops.
+ *
+ * MCP ROUTING TRIGGERS: Epistemic Rigidity Matrix, Execution Routing Policy, Logit Suffocation, Probabilistic Escalation, Semantic Tax Bounding
+ */
+export interface EpistemicRigidityPolicy {
+  minimum_rigidity_tier?: MinimumRigidityTier;
+  max_retries_on_semantic_tax?: MaxRetriesOnSemanticTax;
+  permitted_remote_decoding_protocols?: PermittedRemoteDecodingProtocols;
+  required_epistemic_security?: EpistemicSecurityPolicy1;
+  minimum_vram_gb?: MinimumVramGb;
+  maximum_latency_ms?: MaximumLatencyMs;
 }
 /**
  * CoReason Shared Kernel Ontology
@@ -14287,6 +14355,9 @@ export interface StructuralGrammarHashes {
  */
 export interface EpistemicSecurityProfile1 {
   epistemic_security?: EpistemicSecurityPolicy;
+  clearance_tiers?: ClearanceTiers;
+  network_boundary?: NetworkBoundary;
+  pii_quarantine_required?: PiiQuarantineRequired;
   network_isolation?: NetworkIsolation;
   egress_obfuscation?: EgressObfuscation;
 }
@@ -14555,6 +14626,10 @@ export interface FederatedSecurityMacroManifest {
   target_endpoint_uri: TargetEndpointUri;
   required_clearance: SemanticClassificationProfile3;
   max_liability_budget: MaxLiabilityBudget;
+  /**
+   * Content-addressed identity of the capability bundle for zero-trust verification.
+   */
+  content_hash?: BundleContentHashState | null;
 }
 /**
  * CoReason Shared Kernel Ontology

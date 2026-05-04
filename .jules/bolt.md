@@ -1,3 +1,3 @@
-## 2024-05-19 - Caching decoded base64 NumPy Arrays on Frozen Pydantic Models
-**Learning:** In highly restricted environments with `frozen=True` Pydantic models, caching intermediate computationally expensive decoded structures (like NumPy arrays from base64) directly on the instance requires bypassing Python immutability.
-**Action:** Use `object.__getattribute__(instance, '_cached_property')` to fetch and `object.__setattr__(instance, '_cached_property', value)` to safely bypass immutability guards without violating architectural schema rules, yielding ~5x performance gains for repeated operations.
+## 2026-04-22 - Replacing isinstance with type() breaks polymorphic models
+**Learning:** In Pydantic-heavy schemas or standard duck-typed APIs, replacing `isinstance()` checks with exact `type() is` checks is a functional regression. While `type() is` is faster because it skips MRO traversal, it breaks inheritance (e.g. `dict` vs `defaultdict`, or Pydantic subclasses). The minor speedup is not worth breaking codebase polymorphism.
+**Action:** Do not replace `isinstance()` with `type() is` unless strict type constraints are mathematically proven to be required and no subclasses are ever passed. Opt to optimize loop structures or data ingestion over runtime type reflection constraints.

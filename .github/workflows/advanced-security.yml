@@ -20,7 +20,7 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0 # Deep clone for complete history scanning
 
@@ -40,10 +40,10 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Cache ClamAV Database
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: /var/lib/clamav
           key: ${{ runner.os }}-clamav-db-${{ github.sha }}
@@ -76,7 +76,7 @@ jobs:
           egress-policy: audit
 
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Dependency Review & Legal Firewall
         uses: actions/dependency-review-action@v4
