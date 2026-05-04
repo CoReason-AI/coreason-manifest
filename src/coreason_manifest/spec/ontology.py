@@ -434,6 +434,130 @@ type TopologyHashReceipt = Annotated[
     StringConstraints(pattern="^[a-f0-9]{64}$"),
     Field(description="A strictly typed SHA-256 hash pointing to a historically executed topological state."),
 ]
+type BundleContentHashState = Annotated[
+    str,
+    StringConstraints(pattern=r"^sha256:[a-f0-9]{64}$"),
+    Field(
+        description="A content-addressed SHA-256 hash of a deterministic artifact bundle "
+        "(e.g., an Action Space MCP server, an OHDSI Circe cohort definition JSON, "
+        "or any RFC 8785 canonicalizable resource), enabling zero-trust verification "
+        "and distributed exchangeability across federated boundaries."
+    ),
+]
+
+
+class ActionSpaceCategoryProfile(StrEnum):
+    """
+    AGENT INSTRUCTION: Defines the 6 Universal Asset Categories that partition the entire capability space
+    into orthogonal I/O classes. Each category encodes strict architectural constraints: I/O direction
+    (read/compute/write), statefulness (stateless vs. stateful), and composition rules (atomic vs. composite).
+    The orchestrator MUST select exactly one category per Action Space; a capability cannot span categories.
+
+    CAUSAL AFFORDANCE: Empowers the constrained decoding engine to collapse the LLM's generative
+    probability mass onto valid category tokens during URN assignment. Enables compile_registry.py to
+    validate that the declared category matches the filesystem path and the manifest.yaml topology field.
+
+    EPISTEMIC BOUNDS: Strictly bounded to exactly 6 members. The Zero-State Rule mandates that all categories
+    except SUBSTRATE must be stateless — this is enforced by the is_stateless property. The io_direction
+    property encodes the Read/Compute/Write/Mixed classification that the WASM sandbox uses to enforce
+    capability-based access control (no ambient authority).
+
+    MCP ROUTING TRIGGERS: Universal Asset Categories, Capability Taxonomy, Zero-State Rule, WASM Capability ACL,
+    Action Space Classification, URN Category Segment
+    """
+
+    ORACLE = "oracle"
+    """Pure Read — retrieves data from external sources (APIs, databases, knowledge graphs, vector stores).
+    Oracles are the ecosystem's eyes: they observe the world but never change it. An oracle
+    may query PubMed, read from an OMOP database, or fetch a FHIR resource, but it must never
+    write, mutate, or delete external state. This guarantee allows the orchestrator to
+    speculatively execute oracles in parallel without side-effect conflicts."""
+
+    SOLVER = "solver"
+    """Pure Compute — performs NLP, ML analysis, structured extraction, or formal reasoning.
+    Solvers are the ecosystem's brain: they transform input data into structured output but
+    never read from or write to external systems. A solver may classify ICD codes, extract
+    clinical entities, run a SAT solver, or perform sentiment analysis. Because solvers are
+    both read-free and write-free (operating only on their input payload), they are trivially
+    parallelizable and deterministically replayable."""
+
+    EFFECTOR = "effector"
+    """Pure Write — mutates external state (writes to databases, sends notifications, triggers workflows).
+    Effectors are the ecosystem's hands: they change the world but do not observe it. An
+    effector may write to an OMOP CDM table, send a Slack notification, or publish to a
+    message queue. The separation of reads (Oracle) from writes (Effector) enforces the
+    Command-Query Responsibility Segregation (CQRS) pattern at the architectural level."""
+
+    SUBSTRATE = "substrate"
+    """Execution Environment — bare-metal hardware, managed LLM endpoints, digital twins, or compute providers.
+    Substrates are the ecosystem's infrastructure: they provide the physical or virtual compute
+    fabric that other capabilities execute upon. A substrate may represent a GPU cluster, a
+    Model-as-a-Service (MaaS) translation gateway, or a sandboxed execution environment.
+    Substrates are the SOLE EXCEPTION to the Zero-State Rule — they may maintain persistent
+    state (connection pools, session tokens, hardware reservations)."""
+
+    SENSORY = "sensory"
+    """Human-Computer Interaction — UI projections, visual dashboards, notification surfaces.
+    Sensory capabilities are the ecosystem's voice: they project internal state to human
+    operators via visual, auditory, or haptic interfaces. A sensory capability may render a
+    TDA canvas, stream a telemetry dashboard, or present an interactive form. Sensory
+    capabilities must be stateless — they project a snapshot of state, they do not own it."""
+
+    NODE = "node"
+    """Encapsulated Agent — an autonomous entity that composes multiple capabilities into a DAG topology.
+    Nodes are Master MCPs: they orchestrate nested oracles, solvers, effectors, and substrates
+    into a coherent multi-step workflow. A node's manifest.yaml declares COMPOSITE topology
+    and lists its dependencies (with optional pinned CIDs for recursive integrity verification).
+    Nodes are stateless — their execution state lives in the Temporal workflow, not in the node itself."""
+
+    @property
+    def is_stateless(self) -> bool:
+        """The Zero-State Rule: all categories except SUBSTRATE must be stateless."""
+        return self != ActionSpaceCategoryProfile.SUBSTRATE
+
+    @property
+    def io_direction(self) -> str:
+        """The I/O classification used by the WASM sandbox for capability-based access control."""
+        return _IO_DIRECTION_MAPPING[self.value]
+
+    @property
+    def allows_composite_topology(self) -> bool:
+        """Only NODE category capabilities may declare COMPOSITE topology with dependencies."""
+        return self == ActionSpaceCategoryProfile.NODE
+
+
+_IO_DIRECTION_MAPPING: dict[str, str] = {
+    "oracle": "read",
+    "solver": "compute",
+    "effector": "write",
+    "substrate": "environment",
+    "sensory": "projection",
+    "node": "orchestration",
+}
+
+
+type ActionSpaceURNState = Annotated[
+    str,
+    StringConstraints(
+        pattern=r"^urn:[a-z0-9_]+:actionspace:(oracle|solver|effector|substrate|sensory|node):[a-z0-9_]+:v[0-9]+$",
+        min_length=20,
+        max_length=256,
+    ),
+    Field(
+        description="A regex-constrained Uniform Resource Name (URN) identifying an Action Space capability "
+        "within the CoReason ecosystem. The URN is scoped to a Namespace Authority (the second segment), "
+        "which acts as the sovereignty boundary — analogous to a DNS domain. The URN is NOT inherently "
+        "globally unique; only the CID (BundleContentHashState) provides mathematical global uniqueness. "
+        "Format: urn:{authority}:actionspace:{category}:{capability_name}:v{version}. "
+        "Authority must be a lowercase alphanumeric namespace owned by a sovereign organization. "
+        "Category must be one of the 6 Universal Asset Categories defined by ActionSpaceCategoryProfile.",
+        examples=[
+            "urn:coreason:actionspace:solver:clinical_extractor:v1",
+            "urn:nlm:actionspace:oracle:mesh_lookup:v3",
+            "urn:ohdsi:actionspace:solver:cohort_builder:v1",
+        ],
+    ),
+]
 
 
 def _inject_topological_lock(schema: dict[str, Any]) -> None:
@@ -12339,6 +12463,10 @@ class FederatedSecurityMacroManifest(CoreasonBaseState):
     target_endpoint_uri: str = Field(description="The endpoint to connect to.")
     required_clearance: SemanticClassificationProfile = Field(description="Default security tier.")
     max_liability_budget: int = Field(description="Max token/compute allocation.")
+    content_hash: BundleContentHashState | None = Field(
+        default=None,
+        description="Content-addressed identity of the capability bundle for zero-trust verification.",
+    )
 
     def compile_to_base_topology(self) -> FederatedBilateralSLA:
         """Deterministically unwraps the macro into a rigid FederatedBilateralSLA."""

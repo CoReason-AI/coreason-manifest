@@ -321,6 +321,40 @@ def calculate_latent_alignment(
     return similarity
 
 
+def compute_merkle_directory_cid(file_contents: dict[str, bytes]) -> str:
+    """Compute a Merkle-style SHA-256 CID over a set of named files.
+
+    This is the **universal content-addressing primitive** for the CoReason
+    ecosystem.  It follows the same pattern used by git tree objects, IPFS
+    UnixFS directories, and OCI image layers:
+
+    1. Hash each file individually: ``sha256(file_bytes)``.
+    2. Build a sorted manifest of ``filename:hex_digest`` lines.
+    3. SHA-256 hash that manifest to produce the Merkle root.
+    4. Prefix with ``sha256:`` to produce the CID.
+
+    The Merkle approach eliminates concatenation ambiguity (where boundary
+    shifts between files could produce false hash collisions) and is
+    deterministic regardless of platform or OS.
+
+    Args:
+        file_contents: Mapping of canonical filenames to their raw bytes.
+            For self-referential files (e.g. a manifest that stores its own
+            hash), the caller is responsible for zeroing the hash field
+            before passing the bytes.
+
+    Returns:
+        A string in the format ``sha256:<64-char hex digest>``.
+    """
+    file_hashes: list[str] = []
+    for filename in sorted(file_contents.keys()):
+        file_hash = hashlib.sha256(file_contents[filename]).hexdigest()
+        file_hashes.append(f"{filename}:{file_hash}")
+
+    merkle_input = "\n".join(file_hashes).encode("utf-8")
+    return f"sha256:{hashlib.sha256(merkle_input).hexdigest()}"
+
+
 def compute_topology_hash(topology: "AnyTopologyManifest") -> str:
     """
     Deterministically computes the SOTA Merkle-DAG SHA-256 fingerprint of a given topology.
