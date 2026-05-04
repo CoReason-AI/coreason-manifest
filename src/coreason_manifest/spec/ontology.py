@@ -70,23 +70,22 @@ def _pure_python_longest_path_length(adjacency: dict[str, list[str]]) -> int:
         for t in targets:
             in_degree[t] = in_degree.get(t, 0) + 1
 
-    # ⚡ Bolt Optimization: Combine topological sort and longest path calculation into a single pass (~1.5x faster)
+    topo: list[str] = []
     queue: list[str] = [n for n, d in in_degree.items() if d == 0]
-    dist: dict[str, int] = dict.fromkeys(adjacency, 0)
-
     while queue:
         node = queue.pop()
-        node_dist = dist.get(node, 0)
-
+        topo.append(node)
         for t in adjacency.get(node, []):
             in_degree[t] -= 1
             if in_degree[t] == 0:
                 queue.append(t)
 
-            candidate = node_dist + 1
-            if candidate > dist.get(t, 0):
+    dist: dict[str, int] = dict.fromkeys(adjacency, 0)
+    for node in topo:
+        for t in adjacency.get(node, []):
+            candidate = dist[node] + 1
+            if candidate > dist[t]:
                 dist[t] = candidate
-
     return max(dist.values()) if dist else 0
 
 
