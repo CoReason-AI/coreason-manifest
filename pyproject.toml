@@ -22,6 +22,7 @@ dependencies = [
     "pydantic>=2.12.5",
     "jsonpatch>=1.33",
     "numpy>=2.4",
+    "canonicaljson>=2.0.0",
     "msgspec>=0.21.1",
     "pycrdt>=0.12.50",
 ]
