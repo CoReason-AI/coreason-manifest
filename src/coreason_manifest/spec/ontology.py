@@ -2143,7 +2143,9 @@ class EpistemicRigidityPolicy(CoreasonBaseState):
 
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
-        object.__setattr__(self, "permitted_remote_decoding_protocols", sorted(self.permitted_remote_decoding_protocols))
+        object.__setattr__(
+            self, "permitted_remote_decoding_protocols", sorted(self.permitted_remote_decoding_protocols)
+        )
         return self
 
 
