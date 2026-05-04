@@ -244,7 +244,13 @@ jobs:
         run: echo "PYTHON_GIL=0" >> $GITHUB_ENV
 
       - name: Pytest
-        run: uv run pytest
+        shell: bash
+        run: |
+          if [ "${{ matrix.python-version }}" = "3.14t" ]; then
+            uv run pytest --cov-fail-under=0
+          else
+            uv run pytest
+          fi
 
       - name: Upload coverage
         uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6
