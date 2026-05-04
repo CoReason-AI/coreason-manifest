@@ -167,6 +167,7 @@ bindings/rust/LICENSE
 bindings/rust/NOTICE
 
 # Temp output / debug files
+git_log.txt
 cov_final.txt
 cov_report.txt
 debug_output.txt
@@ -174,3 +175,7 @@ out.txt
 
 # Scratch experiments
 scratch/
+
+# IDEs / Editors
+.vscode/
+.jules/
