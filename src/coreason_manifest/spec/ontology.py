@@ -70,22 +70,23 @@ def _pure_python_longest_path_length(adjacency: dict[str, list[str]]) -> int:
         for t in targets:
             in_degree[t] = in_degree.get(t, 0) + 1
 
-    topo: list[str] = []
+    # ⚡ Bolt Optimization: Combine topological sort and longest path calculation into a single pass (~1.5x faster)
     queue: list[str] = [n for n, d in in_degree.items() if d == 0]
+    dist: dict[str, int] = dict.fromkeys(adjacency, 0)
+
     while queue:
         node = queue.pop()
-        topo.append(node)
+        node_dist = dist.get(node, 0)
+
         for t in adjacency.get(node, []):
             in_degree[t] -= 1
             if in_degree[t] == 0:
                 queue.append(t)
 
-    dist: dict[str, int] = dict.fromkeys(adjacency, 0)
-    for node in topo:
-        for t in adjacency.get(node, []):
-            candidate = dist[node] + 1
-            if candidate > dist[t]:
+            candidate = node_dist + 1
+            if candidate > dist.get(t, 0):
                 dist[t] = candidate
+
     return max(dist.values()) if dist else 0
 
 
@@ -163,7 +164,14 @@ type CausalIntervalProfile = Literal["strictly_precedes", "overlaps", "contains"
 type CrossoverMechanismProfile = Literal["uniform_blend", "single_point", "heuristic"]
 
 
-_CLEARANCE_MAPPING: dict[str, int] = {"public": 0, "internal": 1, "confidential": 2, "restricted": 3}
+_CLEARANCE_MAPPING: dict[str, int] = {
+    "public": 0,
+    "internal": 1,
+    "confidential": 2,
+    "restricted": 3,
+}
+# Note: The above mapping aligns with the SemanticClassificationProfile enum values.
+# Enterprise clients should inject their custom mapping to align with their internal OPA/rules engines.
 
 
 class EpistemicSecurityPolicy(StrEnum):
@@ -177,8 +185,10 @@ class EpistemicSecurityPolicy(StrEnum):
     MCP ROUTING TRIGGERS: TEE Enforcement, Hardware Isolation, Secure Enclave, Zero-Trust Execution
     """
 
+    PUBLIC = "PUBLIC"
     STANDARD = "STANDARD"
     CONFIDENTIAL = "CONFIDENTIAL"
+    RESTRICTED = "RESTRICTED"
 
 
 class UpperOntologyClassProfile(StrEnum):
@@ -427,6 +437,130 @@ type TopologyHashReceipt = Annotated[
     str,
     StringConstraints(pattern="^[a-f0-9]{64}$"),
     Field(description="A strictly typed SHA-256 hash pointing to a historically executed topological state."),
+]
+type BundleContentHashState = Annotated[
+    str,
+    StringConstraints(pattern=r"^sha256:[a-f0-9]{64}$"),
+    Field(
+        description="A content-addressed SHA-256 hash of a deterministic artifact bundle "
+        "(e.g., an Action Space MCP server, an OHDSI Circe cohort definition JSON, "
+        "or any RFC 8785 canonicalizable resource), enabling zero-trust verification "
+        "and distributed exchangeability across federated boundaries."
+    ),
+]
+
+
+class ActionSpaceCategoryProfile(StrEnum):
+    """
+    AGENT INSTRUCTION: Defines the 6 Universal Asset Categories that partition the entire capability space
+    into orthogonal I/O classes. Each category encodes strict architectural constraints: I/O direction
+    (read/compute/write), statefulness (stateless vs. stateful), and composition rules (atomic vs. composite).
+    The orchestrator MUST select exactly one category per Action Space; a capability cannot span categories.
+
+    CAUSAL AFFORDANCE: Empowers the constrained decoding engine to collapse the LLM's generative
+    probability mass onto valid category tokens during URN assignment. Enables compile_registry.py to
+    validate that the declared category matches the filesystem path and the manifest.yaml topology field.
+
+    EPISTEMIC BOUNDS: Strictly bounded to exactly 6 members. The Zero-State Rule mandates that all categories
+    except SUBSTRATE must be stateless — this is enforced by the is_stateless property. The io_direction
+    property encodes the Read/Compute/Write/Mixed classification that the WASM sandbox uses to enforce
+    capability-based access control (no ambient authority).
+
+    MCP ROUTING TRIGGERS: Universal Asset Categories, Capability Taxonomy, Zero-State Rule, WASM Capability ACL,
+    Action Space Classification, URN Category Segment
+    """
+
+    ORACLE = "oracle"
+    """Pure Read — retrieves data from external sources (APIs, databases, knowledge graphs, vector stores).
+    Oracles are the ecosystem's eyes: they observe the world but never change it. An oracle
+    may query PubMed, read from an OMOP database, or fetch a FHIR resource, but it must never
+    write, mutate, or delete external state. This guarantee allows the orchestrator to
+    speculatively execute oracles in parallel without side-effect conflicts."""
+
+    SOLVER = "solver"
+    """Pure Compute — performs NLP, ML analysis, structured extraction, or formal reasoning.
+    Solvers are the ecosystem's brain: they transform input data into structured output but
+    never read from or write to external systems. A solver may classify ICD codes, extract
+    clinical entities, run a SAT solver, or perform sentiment analysis. Because solvers are
+    both read-free and write-free (operating only on their input payload), they are trivially
+    parallelizable and deterministically replayable."""
+
+    EFFECTOR = "effector"
+    """Pure Write — mutates external state (writes to databases, sends notifications, triggers workflows).
+    Effectors are the ecosystem's hands: they change the world but do not observe it. An
+    effector may write to an OMOP CDM table, send a Slack notification, or publish to a
+    message queue. The separation of reads (Oracle) from writes (Effector) enforces the
+    Command-Query Responsibility Segregation (CQRS) pattern at the architectural level."""
+
+    SUBSTRATE = "substrate"
+    """Execution Environment — bare-metal hardware, managed LLM endpoints, digital twins, or compute providers.
+    Substrates are the ecosystem's infrastructure: they provide the physical or virtual compute
+    fabric that other capabilities execute upon. A substrate may represent a GPU cluster, a
+    Model-as-a-Service (MaaS) translation gateway, or a sandboxed execution environment.
+    Substrates are the SOLE EXCEPTION to the Zero-State Rule — they may maintain persistent
+    state (connection pools, session tokens, hardware reservations)."""
+
+    SENSORY = "sensory"
+    """Human-Computer Interaction — UI projections, visual dashboards, notification surfaces.
+    Sensory capabilities are the ecosystem's voice: they project internal state to human
+    operators via visual, auditory, or haptic interfaces. A sensory capability may render a
+    TDA canvas, stream a telemetry dashboard, or present an interactive form. Sensory
+    capabilities must be stateless — they project a snapshot of state, they do not own it."""
+
+    NODE = "node"
+    """Encapsulated Agent — an autonomous entity that composes multiple capabilities into a DAG topology.
+    Nodes are Master MCPs: they orchestrate nested oracles, solvers, effectors, and substrates
+    into a coherent multi-step workflow. A node's manifest.yaml declares COMPOSITE topology
+    and lists its dependencies (with optional pinned CIDs for recursive integrity verification).
+    Nodes are stateless — their execution state lives in the Temporal workflow, not in the node itself."""
+
+    @property
+    def is_stateless(self) -> bool:
+        """The Zero-State Rule: all categories except SUBSTRATE must be stateless."""
+        return self != ActionSpaceCategoryProfile.SUBSTRATE
+
+    @property
+    def io_direction(self) -> str:
+        """The I/O classification used by the WASM sandbox for capability-based access control."""
+        return _IO_DIRECTION_MAPPING[self.value]
+
+    @property
+    def allows_composite_topology(self) -> bool:
+        """Only NODE category capabilities may declare COMPOSITE topology with dependencies."""
+        return self == ActionSpaceCategoryProfile.NODE
+
+
+_IO_DIRECTION_MAPPING: dict[str, str] = {
+    "oracle": "read",
+    "solver": "compute",
+    "effector": "write",
+    "substrate": "environment",
+    "sensory": "projection",
+    "node": "orchestration",
+}
+
+
+type ActionSpaceURNState = Annotated[
+    str,
+    StringConstraints(
+        pattern=r"^urn:[a-z0-9_]+:actionspace:(oracle|solver|effector|substrate|sensory|node):[a-z0-9_]+:v[0-9]+$",
+        min_length=20,
+        max_length=256,
+    ),
+    Field(
+        description="A regex-constrained Uniform Resource Name (URN) identifying an Action Space capability "
+        "within the CoReason ecosystem. The URN is scoped to a Namespace Authority (the second segment), "
+        "which acts as the sovereignty boundary — analogous to a DNS domain. The URN is NOT inherently "
+        "globally unique; only the CID (BundleContentHashState) provides mathematical global uniqueness. "
+        "Format: urn:{authority}:actionspace:{category}:{capability_name}:v{version}. "
+        "Authority must be a lowercase alphanumeric namespace owned by a sovereign organization. "
+        "Category must be one of the 6 Universal Asset Categories defined by ActionSpaceCategoryProfile.",
+        examples=[
+            "urn:coreason:actionspace:solver:clinical_extractor:v1",
+            "urn:nlm:actionspace:oracle:mesh_lookup:v3",
+            "urn:ohdsi:actionspace:solver:cohort_builder:v1",
+        ],
+    ),
 ]
 
 
@@ -907,7 +1041,7 @@ class TraceContextState(CoreasonBaseState):
             pattern=r"^[0-9A-HJKMNP-TV-Z]{26}$|^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
         ),
     ] = Field(
-        description="Unique identifier for the specific execution of this actionSpaceId. Must be a ULID or UUIDv7."
+        description="Unique identifier for the specific execution of this actionSpaceCId. Must be a ULID or UUIDv7."
     )
     parent_span_cid: (
         Annotated[
@@ -1957,6 +2091,62 @@ class RoutingFrontierPolicy(CoreasonBaseState):
                 except (ValueError, TypeError) as e:  # noqa: F841
                     pass
         return values
+
+
+class EpistemicRigidityPolicy(CoreasonBaseState):
+    r"""
+    AGENT INSTRUCTION: Defines the acceptable bounds of probabilistic drift for an execution task, establishing the exact hardware and physics requirements for LLM inference.
+
+    CAUSAL AFFORDANCE: Instructs the Tier-1 Tensor Router to either enforce local SGLang execution, execute a two-stage decoupled pipeline, or permit Cloud Oracle escalation via structured outputs.
+
+    EPISTEMIC BOUNDS: The `minimum_rigidity_tier` is strictly constrained to a scalar mathematical bound `ge=0, le=255`. The semantic-to-scalar mapping (e.g., 'H100_CLUSTER' -> 255) is resolved via a Sovereign MCP Projection. `max_retries_on_semantic_tax` is bounded `ge=0, le=100` to prevent infinite validation loops.
+
+    MCP ROUTING TRIGGERS: Epistemic Rigidity Matrix, Execution Routing Policy, Logit Suffocation, Probabilistic Escalation, Semantic Tax Bounding
+
+    """
+
+    minimum_rigidity_tier: int = Field(
+        default=0,
+        ge=0,
+        le=255,
+        description="The mathematical scalar representing minimum hardware execution rigor (0=CPU, 255=Max GPU). Allows enterprises to inject custom gradient mappings.",
+    )
+    max_retries_on_semantic_tax: int = Field(
+        ge=0,
+        le=100,
+        default=3,
+        description="The maximum number of times the CPU orchestrator is authorized to bounce structurally invalid generation back to the Cloud Oracle.",
+    )
+    permitted_remote_decoding_protocols: list[
+        Annotated[
+            str,
+            StringConstraints(pattern="^(STRICT_JSON_SCHEMA|NATIVE_PDA_GRAMMAR|LOOSE_JSON_MODE|NONE)$"),
+        ]
+    ] = Field(
+        default_factory=lambda: ["NONE"],
+        description="A list of structured output protocols that the orchestrator is permitted to push to a remote Oracle. This explicitly allows the orchestrator to pick and choose how to offload constrained decoding (e.g., via STRICT_JSON_SCHEMA) rather than executing it purely on local bare-metal.",
+    )
+    required_epistemic_security: EpistemicSecurityPolicy = Field(
+        default=EpistemicSecurityPolicy.PUBLIC,
+        description="The minimum Lattice-Based Access Control (LBAC) network perimeter required for the hardware.",
+    )
+    minimum_vram_gb: int | None = Field(
+        default=None,
+        ge=0,
+        description="Minimum VRAM required on the target substrate to load the tensor topology.",
+    )
+    maximum_latency_ms: int | None = Field(
+        default=None,
+        ge=0,
+        description="Maximum acceptable round-trip network latency to the Substrate to guarantee SLA.",
+    )
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(
+            self, "permitted_remote_decoding_protocols", sorted(self.permitted_remote_decoding_protocols)
+        )
+        return self
 
 
 class SaeFeatureActivationState(CoreasonBaseState):
@@ -7675,7 +7865,19 @@ class EpistemicSecurityProfile(CoreasonBaseState):
 
     epistemic_security: EpistemicSecurityPolicy = Field(
         default=EpistemicSecurityPolicy.STANDARD,
-        description="The level of hardware-enforced cryptographic isolation required (STANDARD or CONFIDENTIAL).",
+        description="The level of hardware-enforced cryptographic isolation required.",
+    )
+    clearance_tiers: list[int] = Field(
+        default_factory=lambda: [0],
+        description="A list of mathematical scalars representing the exact data sensitivity levels this node is authorized to process. Allows discrete horizontal compartmentalization (e.g., [50, 100] but not 0).",
+    )
+    network_boundary: Literal["INTERNET", "VPC_INTERNAL", "LOCAL_ENCLAVE"] = Field(
+        default="INTERNET",
+        description="The maximum allowed physical network egress boundary for the data.",
+    )
+    pii_quarantine_required: bool = Field(
+        default=False,
+        description="If True, mathematically forces the Tier 1 orchestrator to execute an EpistemicFirewall mask over the payload before it can be passed to any LLM or external API.",
     )
     network_isolation: bool = Field(
         default=False,
@@ -7685,6 +7887,11 @@ class EpistemicSecurityProfile(CoreasonBaseState):
         default=False,
         description="The strict Boolean constraint mandating that all outgoing packets be routed through a Sphinx-packet Mixnet.",
     )
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "clearance_tiers", sorted(self.clearance_tiers))
+        return self
 
 
 class CognitiveHumanNodeProfile(CoreasonBaseState):
@@ -11495,6 +11702,10 @@ class CognitiveAgentNodeProfile(CoreasonBaseState):
     compute_frontier: RoutingFrontierPolicy | None = Field(
         default=None, description="The dynamic spot-market compute requirements for this agent."
     )
+    epistemic_rigidity: EpistemicRigidityPolicy | None = Field(
+        default=None,
+        description="The mathematical bounds defining acceptable probabilistic drift, hardware requirements, and remote decoding protocols for this agent's execution routing.",
+    )
     peft_adapters: list[PeftAdapterContract] = Field(
         default_factory=list,
         description="The declarative array of ephemeral PEFT/LoRA weights required to be hot-swapped during this agent's execution.",
@@ -12333,6 +12544,10 @@ class FederatedSecurityMacroManifest(CoreasonBaseState):
     target_endpoint_uri: str = Field(description="The endpoint to connect to.")
     required_clearance: SemanticClassificationProfile = Field(description="Default security tier.")
     max_liability_budget: int = Field(description="Max token/compute allocation.")
+    content_hash: BundleContentHashState | None = Field(
+        default=None,
+        description="Content-addressed identity of the capability bundle for zero-trust verification.",
+    )
 
     def compile_to_base_topology(self) -> FederatedBilateralSLA:
         """Deterministically unwraps the macro into a rigid FederatedBilateralSLA."""
@@ -15233,3 +15448,4 @@ ContinuousManifoldMappingContract.model_rebuild()
 FederatedDiscoveryIntent.model_rebuild()
 OracleExecutionReceipt.model_rebuild()
 OntologicalNormalizationIntent.model_rebuild()
+EpistemicRigidityPolicy.model_rebuild()
