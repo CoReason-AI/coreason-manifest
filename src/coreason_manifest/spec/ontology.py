@@ -174,6 +174,23 @@ _CLEARANCE_MAPPING: dict[str, int] = {
 # Enterprise clients should inject their custom mapping to align with their internal OPA/rules engines.
 
 
+class EpistemicSecurityPolicy(StrEnum):
+    """
+    AGENT INSTRUCTION: Defines the minimum cryptographic isolation perimeter required for this node's thermodynamic execution.
+
+    CAUSAL AFFORDANCE: Binds the execution graph to hardware Trusted Execution Environments (TEEs) if CONFIDENTIAL is set, physically guillotining unauthorized exfiltration.
+
+    EPISTEMIC BOUNDS: Constrained strictly to the predefined enumeration values.
+
+    MCP ROUTING TRIGGERS: TEE Enforcement, Hardware Isolation, Secure Enclave, Zero-Trust Execution
+    """
+
+    PUBLIC = "PUBLIC"
+    STANDARD = "STANDARD"
+    CONFIDENTIAL = "CONFIDENTIAL"
+    RESTRICTED = "RESTRICTED"
+
+
 class UpperOntologyClassProfile(StrEnum):
     """AGENT INSTRUCTION: Classifies reality into domain-independent categories based on Basic Formal Ontology principles to prevent graph bloat."""
 
@@ -1985,11 +2002,9 @@ class EpistemicRigidityPolicy(CoreasonBaseState):
         default_factory=lambda: ["NONE"],
         description="A list of structured output protocols that the orchestrator is permitted to push to a remote Oracle. This explicitly allows the orchestrator to pick and choose how to offload constrained decoding (e.g., via STRICT_JSON_SCHEMA) rather than executing it purely on local bare-metal.",
     )
-    required_epistemic_security: Annotated[str, StringConstraints(pattern="^(PUBLIC|CONFIDENTIAL|RESTRICTED)$")] = (
-        Field(
-            default="PUBLIC",
-            description="The minimum Lattice-Based Access Control (LBAC) network perimeter required for the hardware.",
-        )
+    required_epistemic_security: EpistemicSecurityPolicy = Field(
+        default=EpistemicSecurityPolicy.PUBLIC,
+        description="The minimum Lattice-Based Access Control (LBAC) network perimeter required for the hardware.",
     )
     minimum_vram_gb: int | None = Field(
         default=None,
@@ -7717,6 +7732,10 @@ class EpistemicSecurityProfile(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Sovereign Execution, Trusted Execution Environment, Egress Obfuscation, Mixnet Routing, Network Isolation
     """
 
+    epistemic_security: EpistemicSecurityPolicy = Field(
+        default=EpistemicSecurityPolicy.STANDARD,
+        description="The level of hardware-enforced cryptographic isolation required.",
+    )
     clearance_tiers: list[int] = Field(
         default_factory=lambda: [0],
         description="A list of mathematical scalars representing the exact data sensitivity levels this node is authorized to process. Allows discrete horizontal compartmentalization (e.g., [50, 100] but not 0).",
