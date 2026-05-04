@@ -171,13 +171,12 @@ type CrossoverMechanismProfile = Literal["uniform_blend", "single_point", "heuri
 
 _CLEARANCE_MAPPING: dict[str, int] = {
     "public": 0,
-    "internal_hr": 50,
-    "confidential_finance": 100,
-    "restricted_hipaa": 200,
-    "air_gapped": 255,
+    "internal": 1,
+    "confidential": 2,
+    "restricted": 3,
 }
-# Note: The above mapping is an example default. Enterprise clients should
-# inject their custom mapping to align with their internal OPA/rules engines.
+# Note: The above mapping aligns with the SemanticClassificationProfile enum values.
+# Enterprise clients should inject their custom mapping to align with their internal OPA/rules engines.
 
 
 class UpperOntologyClassProfile(StrEnum):
