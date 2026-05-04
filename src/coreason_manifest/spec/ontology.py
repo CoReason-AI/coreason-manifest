@@ -2141,6 +2141,11 @@ class EpistemicRigidityPolicy(CoreasonBaseState):
         description="Maximum acceptable round-trip network latency to the Substrate to guarantee SLA.",
     )
 
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "permitted_remote_decoding_protocols", sorted(self.permitted_remote_decoding_protocols))
+        return self
+
 
 class SaeFeatureActivationState(CoreasonBaseState):
     r"""
@@ -7881,6 +7886,11 @@ class EpistemicSecurityProfile(CoreasonBaseState):
         description="The strict Boolean constraint mandating that all outgoing packets be routed through a Sphinx-packet Mixnet.",
     )
 
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "clearance_tiers", sorted(self.clearance_tiers))
+        return self
+
 
 class CognitiveHumanNodeProfile(CoreasonBaseState):
     r"""
@@ -11689,6 +11699,10 @@ class CognitiveAgentNodeProfile(CoreasonBaseState):
     )
     compute_frontier: RoutingFrontierPolicy | None = Field(
         default=None, description="The dynamic spot-market compute requirements for this agent."
+    )
+    epistemic_rigidity: EpistemicRigidityPolicy | None = Field(
+        default=None,
+        description="The mathematical bounds defining acceptable probabilistic drift, hardware requirements, and remote decoding protocols for this agent's execution routing.",
     )
     peft_adapters: list[PeftAdapterContract] = Field(
         default_factory=list,

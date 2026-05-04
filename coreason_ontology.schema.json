@@ -2414,6 +2414,11 @@
       "title": "BudgetExhaustionEvent",
       "type": "object"
     },
+    "BundleContentHashState": {
+      "description": "A content-addressed SHA-256 hash of a deterministic artifact bundle (e.g., an Action Space MCP server, an OHDSI Circe cohort definition JSON, or any RFC 8785 canonicalizable resource), enabling zero-trust verification and distributed exchangeability across federated boundaries.",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "type": "string"
+    },
     "BypassReceipt": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as a Cryptographic Null-Operator within Kahn's\nTopological Sort, preserving the topological chain of custody when an\nextraction node is intentionally skipped. As a ...Receipt suffix, this is an\nappend-only coordinate that the LLM must never mutate.\n\nCAUSAL AFFORDANCE: Safely starves a subgraph of compute without fracturing\nthe continuous Merkle-DAG hash chain. The bypassed_node_cid\n(NodeCIDState) identifies the exact starved vertex. The\nartifact_event_cid (128-char CID) ensures continuity with the genesis artifact.\n\nEPISTEMIC BOUNDS: The cryptographic_null_hash strictly requires a 64-char\nSHA-256 fingerprint (^[a-f0-9]{64}$). The execution skip rationale is\nmathematically locked to the justification Literal automaton\n[\"modality_mismatch\", \"budget_exhaustion\", \"sla_timeout\"], preventing\nhallucinated bypass reasons.\n\nMCP ROUTING TRIGGERS: Topological Sort, Cryptographic Null-Operator, Compute\nStarvation, DAG Integrity, Lazy Evaluation",
@@ -3190,6 +3195,18 @@
           ],
           "default": null,
           "description": "The dynamic spot-market compute requirements for this agent."
+        },
+        "epistemic_rigidity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EpistemicRigidityPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The mathematical bounds defining acceptable probabilistic drift, hardware requirements, and remote decoding protocols for this agent's execution routing."
         },
         "peft_adapters": {
           "description": "The declarative array of ephemeral PEFT/LoRA weights required to be hot-swapped during this agent's execution.",
@@ -8727,6 +8744,72 @@
       "title": "EpistemicRewardGradientPolicy",
       "type": "object"
     },
+    "EpistemicRigidityPolicy": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the acceptable bounds of probabilistic drift for an execution task, establishing the exact hardware and physics requirements for LLM inference.\n\nCAUSAL AFFORDANCE: Instructs the Tier-1 Tensor Router to either enforce local SGLang execution, execute a two-stage decoupled pipeline, or permit Cloud Oracle escalation via structured outputs.\n\nEPISTEMIC BOUNDS: The `minimum_rigidity_tier` is strictly constrained to a scalar mathematical bound `ge=0, le=255`. The semantic-to-scalar mapping (e.g., 'H100_CLUSTER' -> 255) is resolved via a Sovereign MCP Projection. `max_retries_on_semantic_tax` is bounded `ge=0, le=100` to prevent infinite validation loops.\n\nMCP ROUTING TRIGGERS: Epistemic Rigidity Matrix, Execution Routing Policy, Logit Suffocation, Probabilistic Escalation, Semantic Tax Bounding",
+      "properties": {
+        "minimum_rigidity_tier": {
+          "default": 0,
+          "description": "The mathematical scalar representing minimum hardware execution rigor (0=CPU, 255=Max GPU). Allows enterprises to inject custom gradient mappings.",
+          "maximum": 255,
+          "minimum": 0,
+          "title": "Minimum Rigidity Tier",
+          "type": "integer"
+        },
+        "max_retries_on_semantic_tax": {
+          "default": 3,
+          "description": "The maximum number of times the CPU orchestrator is authorized to bounce structurally invalid generation back to the Cloud Oracle.",
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Max Retries On Semantic Tax",
+          "type": "integer"
+        },
+        "permitted_remote_decoding_protocols": {
+          "description": "A list of structured output protocols that the orchestrator is permitted to push to a remote Oracle. This explicitly allows the orchestrator to pick and choose how to offload constrained decoding (e.g., via STRICT_JSON_SCHEMA) rather than executing it purely on local bare-metal.",
+          "items": {
+            "pattern": "^(STRICT_JSON_SCHEMA|NATIVE_PDA_GRAMMAR|LOOSE_JSON_MODE|NONE)$",
+            "type": "string"
+          },
+          "title": "Permitted Remote Decoding Protocols",
+          "type": "array"
+        },
+        "required_epistemic_security": {
+          "$ref": "#/$defs/EpistemicSecurityPolicy",
+          "default": "PUBLIC",
+          "description": "The minimum Lattice-Based Access Control (LBAC) network perimeter required for the hardware."
+        },
+        "minimum_vram_gb": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Minimum VRAM required on the target substrate to load the tensor topology.",
+          "title": "Minimum Vram Gb"
+        },
+        "maximum_latency_ms": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Maximum acceptable round-trip network latency to the Substrate to guarantee SLA.",
+          "title": "Maximum Latency Ms"
+        }
+      },
+      "title": "EpistemicRigidityPolicy",
+      "type": "object"
+    },
     "EpistemicSOPManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Encodes a macroscopic Petri net or Directed Acyclic Graph (DAG)\nformalizing standard operating procedures into mathematically traversable state\ntransitions. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate\nstate.\n\nCAUSAL AFFORDANCE: Physically bounds the executing agent (target_persona:\nProfileCIDState) to a deterministic sequence of CognitiveStateProfiles, unlocking\nthe ability for the orchestrator to dynamically evaluate execution via Process Reward\nModels (prm_evaluations: list[ProcessRewardContract]) at each topological node.\n\nEPISTEMIC BOUNDS: The cognitive_steps dictionary is constrained to max_length=1000\nto cap memory footprint. The @model_validator reject_ghost_nodes mathematically enforces\nreferential integrity, guaranteeing that no chronological_flow_edges AND no\nstructural_grammar_hashes point to an undefined state.\n\nMCP ROUTING TRIGGERS: Petri Net, Directed Acyclic Graph, Process Reward Model,\nTopological Flow, Referential Integrity",
@@ -8844,8 +8927,10 @@
     "EpistemicSecurityPolicy": {
       "description": "AGENT INSTRUCTION: Defines the minimum cryptographic isolation perimeter required for this node's thermodynamic execution.\n\nCAUSAL AFFORDANCE: Binds the execution graph to hardware Trusted Execution Environments (TEEs) if CONFIDENTIAL is set, physically guillotining unauthorized exfiltration.\n\nEPISTEMIC BOUNDS: Constrained strictly to the predefined enumeration values.\n\nMCP ROUTING TRIGGERS: TEE Enforcement, Hardware Isolation, Secure Enclave, Zero-Trust Execution",
       "enum": [
+        "PUBLIC",
         "STANDARD",
-        "CONFIDENTIAL"
+        "CONFIDENTIAL",
+        "RESTRICTED"
       ],
       "title": "EpistemicSecurityPolicy",
       "type": "string"
@@ -8857,7 +8942,32 @@
         "epistemic_security": {
           "$ref": "#/$defs/EpistemicSecurityPolicy",
           "default": "STANDARD",
-          "description": "The level of hardware-enforced cryptographic isolation required (STANDARD or CONFIDENTIAL)."
+          "description": "The level of hardware-enforced cryptographic isolation required."
+        },
+        "clearance_tiers": {
+          "description": "A list of mathematical scalars representing the exact data sensitivity levels this node is authorized to process. Allows discrete horizontal compartmentalization (e.g., [50, 100] but not 0).",
+          "items": {
+            "type": "integer"
+          },
+          "title": "Clearance Tiers",
+          "type": "array"
+        },
+        "network_boundary": {
+          "default": "INTERNET",
+          "description": "The maximum allowed physical network egress boundary for the data.",
+          "enum": [
+            "INTERNET",
+            "VPC_INTERNAL",
+            "LOCAL_ENCLAVE"
+          ],
+          "title": "Network Boundary",
+          "type": "string"
+        },
+        "pii_quarantine_required": {
+          "default": false,
+          "description": "If True, mathematically forces the Tier 1 orchestrator to execute an EpistemicFirewall mask over the payload before it can be passed to any LLM or external API.",
+          "title": "Pii Quarantine Required",
+          "type": "boolean"
         },
         "network_isolation": {
           "default": false,
@@ -10825,6 +10935,18 @@
           "description": "Max token/compute allocation.",
           "title": "Max Liability Budget",
           "type": "integer"
+        },
+        "content_hash": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BundleContentHashState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Content-addressed identity of the capability bundle for zero-trust verification."
         }
       },
       "required": [
@@ -21178,7 +21300,7 @@
           "type": "string"
         },
         "span_cid": {
-          "description": "Unique identifier for the specific execution of this actionSpaceId. Must be a ULID or UUIDv7.",
+          "description": "Unique identifier for the specific execution of this actionSpaceCId. Must be a ULID or UUIDv7.",
           "maxLength": 36,
           "minLength": 26,
           "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$|^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
