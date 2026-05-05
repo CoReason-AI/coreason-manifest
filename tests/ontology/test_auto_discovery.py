@@ -60,7 +60,6 @@ def test_model_fields_accessible(name: str, model_cls: type[BaseModel]) -> None:
 def test_model_has_docstring(name: str, model_cls: type[BaseModel]) -> None:
     """Architecture mandate: every model should have a class docstring."""
     doc = model_cls.__doc__
-    # Skip (don't fail) models without docstrings — they need to be addressed
     if (
         hasattr(model_cls, "__mro__")
         and any(c.__name__ == "CoreasonBaseState" for c in model_cls.__mro__)

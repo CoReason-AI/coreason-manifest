@@ -170,8 +170,6 @@ _CLEARANCE_MAPPING: dict[str, int] = {
     "confidential": 2,
     "restricted": 3,
 }
-# Note: The above mapping aligns with the SemanticClassificationProfile enum values.
-# Enterprise clients should inject their custom mapping to align with their internal OPA/rules engines.
 
 
 class EpistemicSecurityPolicy(StrEnum):
@@ -12590,7 +12588,6 @@ class CognitiveSwarmDeploymentManifest(CoreasonBaseState):
             description="Synthesizing Adjudicator for Swarm Deployment"
         )
 
-        # Need to construct the policy based on mechanism
         if self.consensus_mechanism == "pbft":
             q_rules = QuorumPolicy(
                 max_tolerable_faults=0,
