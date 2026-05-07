@@ -8,7 +8,7 @@
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
-from typing import Any, cast
+from typing import Any
 
 import msgspec
 

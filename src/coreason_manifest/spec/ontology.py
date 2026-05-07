@@ -17,7 +17,7 @@ import operator
 import re
 import typing
 from enum import StrEnum
-from typing import Annotated, Any, Literal, Self, cast
+from typing import Annotated, Any, Literal, Self
 
 import canonicaljson
 from pydantic import (
