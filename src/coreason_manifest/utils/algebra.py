@@ -24,6 +24,7 @@ import ast
 import base64
 import copy
 import hashlib
+import math
 import typing
 from collections.abc import Sequence
 from typing import Any, Literal, cast
@@ -296,7 +297,7 @@ def calculate_latent_alignment(
         dot = float(np.dot(arr1, arr2))
         similarity = dot / ((norm1_sq * norm2_sq) ** 0.5)
 
-    if similarity != similarity:
+    if math.isnan(similarity):
         similarity = 0.0
     elif similarity > 1.0:
         similarity = 1.0
