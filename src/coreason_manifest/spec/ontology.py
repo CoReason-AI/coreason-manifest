@@ -744,7 +744,7 @@ class CoreasonBaseState(BaseModel):
             canonical_payload = _canonicalize_payload(raw_dict)
             canonical_dump = canonicaljson.encode_canonical_json(canonical_payload)
             object.__setattr__(self, "_cached_canonical_dump", canonical_dump)
-            return cast("bytes", canonical_dump)
+            return canonical_dump
 
 
 class EpistemicProxyState[T](CoreasonBaseState):
@@ -5034,6 +5034,24 @@ class SemanticDiscoveryIntent(CoreasonBaseState):
         return self
 
 
+class CIDFetchIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Triggers the zero-copy streaming of a binary or metadata blob from a discovered peer based on its Content Identifier (CID).
+
+    CAUSAL AFFORDANCE: Physically executes the download of decentralized assets into the local embedded LanceDB and WASM runtime.
+
+    EPISTEMIC BOUNDS: Bounded to strict RFC 8785 CIDs.
+
+    MCP ROUTING TRIGGERS: Content Addressing, Zero-Copy Streaming, Decentralized Fetch, IPFS, FlatBuffers
+    """
+
+    topology_class: Literal["cid_fetch"] = Field(
+        default="cid_fetch", description="Discriminator for fetching assets via CID."
+    )
+    target_cid: BundleContentHashState = Field(description="The content-addressed hash of the target blob.")
+    timeout_ms: int = Field(default=5000, ge=100, le=60000, description="Network timeout in milliseconds.")
+
+
 class ContextualSemanticResolutionIntent(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Acts as the kinetic trigger forcing the orchestrator to dynamically resolve a raw, untyped SemanticRelationalVectorState against a global standard ontology using optimal transport metrics, entirely bypassing legacy ETL string-matching.
@@ -7835,6 +7853,10 @@ class SpatialHardwareProfile(CoreasonBaseState):
         default=8.0,
         description="The absolute physical minimum Video RAM required to load this node's latent space.",
     )
+    coreason_network_mode: Literal["P2P", "STRICT_GENESIS"] = Field(
+        default="STRICT_GENESIS",
+        description="The networking mode defining the P2P boundary for enterprise compliance.",
+    )
     accelerator_type: Annotated[str, StringConstraints(pattern=r"^urn:coreason:.*$")] = Field(
         default="urn:coreason:accelerator:bf16_tensor",
         description="The rigid silicon precision format required to execute this node's neural circuits.",
@@ -8548,9 +8570,22 @@ class CognitiveActionSpaceManifest(CoreasonBaseState):
     kinetic_separation: KineticSeparationPolicy | None = Field(
         default=None, description="The bipartite graph constraint preventing toxic tool combinations."
     )
+    capability_cid: BundleContentHashState | None = Field(
+        default=None, description="The content-addressed SHA-256 hash of the capability."
+    )
+    metadata_cid: BundleContentHashState | None = Field(
+        default=None, description="The content-addressed SHA-256 hash of the FAIR metadata."
+    )
+    trusted_validators: list[NodeCIDState] = Field(
+        default_factory=list, description="A deterministic array of DIDs authorized to validate this manifest."
+    )
+    execution_fee_lmsr: float = Field(
+        default=0.0, description="The logarithmic market scoring rule threshold for thermodynamic execution."
+    )
 
     @model_validator(mode="after")
     def _enforce_structural_integrity(self) -> Self:
+        object.__setattr__(self, "trusted_validators", sorted(self.trusted_validators))
         if self.entry_point_cid not in self.capabilities:
             raise ValueError(f"entry_point_cid '{self.entry_point_cid}' not found in capabilities.")
 
@@ -14805,6 +14840,10 @@ class FederatedDiscoveryIntent(CoreasonBaseState):
             description="The bounded set of URN namespaces to interrogate during sovereign oracle discovery.",
         )
     )
+    target_capability_cid: BundleContentHashState | None = Field(
+        default=None, description="The content-addressed hash of the capability being searched for via P2P mesh."
+    )
+    max_network_hops: int = Field(default=5, ge=1, le=20, description="The maximum number of P2P network hops allowed.")
     required_security_clearance: Literal["PUBLIC", "CONFIDENTIAL", "RESTRICTED"] = Field(
         description="The minimum security clearance required from the discovered execution substrates."
     )
