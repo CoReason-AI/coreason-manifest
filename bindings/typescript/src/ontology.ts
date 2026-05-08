@@ -1890,6 +1890,14 @@ export type TopologyClass61 = "federated_discovery";
  */
 export type DomainFilter = string[];
 /**
+ * A content-addressed SHA-256 hash of a deterministic artifact bundle (e.g., an Action Space MCP server, an OHDSI Circe cohort definition JSON, or any RFC 8785 canonicalizable resource), enabling zero-trust verification and distributed exchangeability across federated boundaries.
+ */
+export type BundleContentHashState = string;
+/**
+ * The maximum number of P2P network hops allowed.
+ */
+export type MaxNetworkHops = number;
+/**
  * The minimum security clearance required from the discovered execution substrates.
  */
 export type RequiredSecurityClearance = "PUBLIC" | "CONFIDENTIAL" | "RESTRICTED";
@@ -1972,6 +1980,10 @@ export type ComputeTier = string;
  * The absolute physical minimum Video RAM required to load this node's latent space.
  */
 export type MinVramGb = number;
+/**
+ * The networking mode defining the P2P boundary for enterprise compliance.
+ */
+export type CoreasonNetworkMode = "P2P" | "STRICT_GENESIS";
 /**
  * The rigid silicon precision format required to execute this node's neural circuits.
  */
@@ -4735,10 +4747,6 @@ export type ClearingTimeout = number;
  */
 export type MinimumTickSize = number;
 /**
- * A content-addressed SHA-256 hash of a deterministic artifact bundle (e.g., an Action Space MCP server, an OHDSI Circe cohort definition JSON, or any RFC 8785 canonicalizable resource), enabling zero-trust verification and distributed exchangeability across federated boundaries.
- */
-export type BundleContentHashState = string;
-/**
  * The exact genesis globally unique decentralized identifier (DID) anchoring the document, ensuring continuity.
  */
 export type ArtifactEventCid1 = string;
@@ -4750,6 +4758,14 @@ export type Justification18 = "modality_mismatch" | "budget_exhaustion" | "sla_t
  * The SHA-256 null-hash representing the skipped state to satisfy the Epistemic Ledger.
  */
 export type CryptographicNullHash = string;
+/**
+ * Discriminator for fetching assets via CID.
+ */
+export type TopologyClass127 = "cid_fetch";
+/**
+ * Network timeout in milliseconds.
+ */
+export type TimeoutMs1 = number;
 /**
  * A cryptographically deterministic capability pointer binding the agent to a verifiable spatial environment.
  */
@@ -4774,6 +4790,14 @@ export type MutuallyExclusiveClusters = string[][];
  * The deterministic action the orchestrator must take if a bipartite cycle is detected.
  */
 export type EnforcementAction = "halt_and_quarantine" | "sever_causal_chain";
+/**
+ * A deterministic array of DIDs authorized to validate this manifest.
+ */
+export type TrustedValidators = NodeCIDState[];
+/**
+ * The logarithmic market scoring rule threshold for thermodynamic execution.
+ */
+export type ExecutionFeeLmsr = number;
 /**
  * Strict Boolean indicating if BOTH agents mathematically agree on factual alignment.
  */
@@ -5969,6 +5993,7 @@ export interface CoReasonSharedKernelOntology {
   BudgetExhaustionEvent?: BudgetExhaustionEvent;
   BundleContentHashState?: BundleContentHashState;
   BypassReceipt?: BypassReceipt;
+  CIDFetchIntent?: CIDFetchIntent;
   CapabilityForgeTopologyManifest?: CapabilityForgeTopologyManifest;
   CapabilityPointerState?: CapabilityPointerState;
   CausalAttributionState?: CausalAttributionState;
@@ -8876,6 +8901,11 @@ export interface StateMutationIntent {
 export interface FederatedDiscoveryIntent {
   topology_class?: TopologyClass61;
   domain_filter: DomainFilter;
+  /**
+   * The content-addressed hash of the capability being searched for via P2P mesh.
+   */
+  target_capability_cid?: BundleContentHashState | null;
+  max_network_hops?: MaxNetworkHops;
   required_security_clearance: RequiredSecurityClearance;
 }
 /**
@@ -9097,6 +9127,7 @@ export interface MarkovBlanketRenderingPolicy {
 export interface SpatialHardwareProfile {
   compute_tier?: ComputeTier;
   min_vram_gb?: MinVramGb;
+  coreason_network_mode?: CoreasonNetworkMode;
   accelerator_type?: AcceleratorType;
   provider_whitelist?: ProviderWhitelist;
 }
@@ -13084,6 +13115,25 @@ export interface BypassReceipt {
 /**
  * CoReason Shared Kernel Ontology
  *
+ * AGENT INSTRUCTION: Triggers the zero-copy streaming of a binary or metadata blob from a discovered peer based on its Content Identifier (CID).
+ *
+ * CAUSAL AFFORDANCE: Physically executes the download of decentralized assets into the local embedded LanceDB and WASM runtime.
+ *
+ * EPISTEMIC BOUNDS: Bounded to strict RFC 8785 CIDs.
+ *
+ * MCP ROUTING TRIGGERS: Content Addressing, Zero-Copy Streaming, Decentralized Fetch, IPFS, FlatBuffers
+ */
+export interface CIDFetchIntent {
+  topology_class?: TopologyClass127;
+  /**
+   * A content-addressed SHA-256 hash of a deterministic artifact bundle (e.g., an Action Space MCP server, an OHDSI Circe cohort definition JSON, or any RFC 8785 canonicalizable resource), enabling zero-trust verification and distributed exchangeability across federated boundaries.
+   */
+  target_cid: string;
+  timeout_ms?: TimeoutMs1;
+}
+/**
+ * CoReason Shared Kernel Ontology
+ *
  * AGENT INSTRUCTION: Defines the finite, discrete Markov Decision Process (MDP) Action Space and affordance landscape available to a specific execution node. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate state.
  *
  * CAUSAL AFFORDANCE: Projects the combined multi-dimensional matrix of capabilities into the agent's context, mathematically dictating which kinetic operations it can initiate via its `transition_matrix`. Optionally enforces kinetic separation.
@@ -13101,6 +13151,16 @@ export interface CognitiveActionSpaceManifest {
    * The bipartite graph constraint preventing toxic tool combinations.
    */
   kinetic_separation?: KineticSeparationPolicy | null;
+  /**
+   * The content-addressed SHA-256 hash of the capability.
+   */
+  capability_cid?: BundleContentHashState | null;
+  /**
+   * The content-addressed SHA-256 hash of the FAIR metadata.
+   */
+  metadata_cid?: BundleContentHashState | null;
+  trusted_validators?: TrustedValidators;
+  execution_fee_lmsr?: ExecutionFeeLmsr;
 }
 /**
  * The State Space (S) of the MDP, indexed by their unique capability CIDs.
@@ -15429,6 +15489,7 @@ export interface SimulationEscrowContract1 {
 export interface SpatialHardwareProfile1 {
   compute_tier?: ComputeTier;
   min_vram_gb?: MinVramGb;
+  coreason_network_mode?: CoreasonNetworkMode;
   accelerator_type?: AcceleratorType;
   provider_whitelist?: ProviderWhitelist;
 }
