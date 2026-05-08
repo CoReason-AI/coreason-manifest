@@ -2463,6 +2463,36 @@
       "title": "BypassReceipt",
       "type": "object"
     },
+    "CIDFetchIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Triggers the zero-copy streaming of a binary or metadata blob from a discovered peer based on its Content Identifier (CID).\n\nCAUSAL AFFORDANCE: Physically executes the download of decentralized assets into the local embedded LanceDB and WASM runtime.\n\nEPISTEMIC BOUNDS: Bounded to strict RFC 8785 CIDs.\n\nMCP ROUTING TRIGGERS: Content Addressing, Zero-Copy Streaming, Decentralized Fetch, IPFS, FlatBuffers",
+      "properties": {
+        "topology_class": {
+          "const": "cid_fetch",
+          "default": "cid_fetch",
+          "description": "Discriminator for fetching assets via CID.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "target_cid": {
+          "$ref": "#/$defs/BundleContentHashState",
+          "description": "The content-addressed hash of the target blob."
+        },
+        "timeout_ms": {
+          "default": 5000,
+          "description": "Network timeout in milliseconds.",
+          "maximum": 60000,
+          "minimum": 100,
+          "title": "Timeout Ms",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "target_cid"
+      ],
+      "title": "CIDFetchIntent",
+      "type": "object"
+    },
     "CapabilityForgeTopologyManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Create a zero-cost macro abstraction that unrolls the entire Zero-to-One generation, verification, and profiling loop.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator to physically bind the ephemeral tool-creation workflow into a rigid DAG topology, enabling full cryptographic observability over the dynamic synthesis of capabilities.\n\nEPISTEMIC BOUNDS: Binds the execution state to a closed, finite mathematical matrix where every constituent node (generator, fuzzer, profiler) must resolve before the final capability is materialized onto the Hollow Data Plane.\n\nMCP ROUTING TRIGGERS: Tool Synthesis, Capability Generation, Verification Matrix, Ephemeral Execution, Macro Topology",
@@ -3033,6 +3063,44 @@
           ],
           "default": null,
           "description": "The bipartite graph constraint preventing toxic tool combinations."
+        },
+        "capability_cid": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BundleContentHashState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The content-addressed SHA-256 hash of the capability."
+        },
+        "metadata_cid": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BundleContentHashState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The content-addressed SHA-256 hash of the FAIR metadata."
+        },
+        "trusted_validators": {
+          "description": "A deterministic array of DIDs authorized to validate this manifest.",
+          "items": {
+            "$ref": "#/$defs/NodeCIDState"
+          },
+          "title": "Trusted Validators",
+          "type": "array"
+        },
+        "execution_fee_lmsr": {
+          "default": 0.0,
+          "description": "The logarithmic market scoring rule threshold for thermodynamic execution.",
+          "title": "Execution Fee Lmsr",
+          "type": "number"
         }
       },
       "required": [
@@ -10824,6 +10892,26 @@
           "maxItems": 1000,
           "title": "Domain Filter",
           "type": "array"
+        },
+        "target_capability_cid": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BundleContentHashState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The content-addressed hash of the capability being searched for via P2P mesh."
+        },
+        "max_network_hops": {
+          "default": 5,
+          "description": "The maximum number of P2P network hops allowed.",
+          "maximum": 20,
+          "minimum": 1,
+          "title": "Max Network Hops",
+          "type": "integer"
         },
         "required_security_clearance": {
           "description": "The minimum security clearance required from the discovered execution substrates.",
@@ -18636,6 +18724,16 @@
           "exclusiveMinimum": 0.0,
           "title": "Min Vram Gb",
           "type": "number"
+        },
+        "coreason_network_mode": {
+          "default": "STRICT_GENESIS",
+          "description": "The networking mode defining the P2P boundary for enterprise compliance.",
+          "enum": [
+            "P2P",
+            "STRICT_GENESIS"
+          ],
+          "title": "Coreason Network Mode",
+          "type": "string"
         },
         "accelerator_type": {
           "default": "urn:coreason:accelerator:bf16_tensor",
