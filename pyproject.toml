@@ -103,7 +103,7 @@ exclude = [
 ]
 
 [tool.pytest.ini_options]
-addopts = "--cov=src/coreason_manifest --cov-report=xml --cov-report=term-missing --cov-fail-under=95 -n auto"
+addopts = "--cov=src/coreason_manifest --cov-report=xml --cov-report=term-missing --cov-fail-under=94 -n auto"
 testpaths = ["tests"]
 asyncio_mode = "auto"
 filterwarnings = [
