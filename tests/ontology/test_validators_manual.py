@@ -1,3 +1,5 @@
+from typing import Any
+
 import pytest
 
 from coreason_manifest.spec import ontology
@@ -62,7 +64,6 @@ class_names = [
 ]
 
 
-from typing import Any
 @pytest.mark.parametrize("cls_name", class_names)
 def test_validators_manual_debug(cls_name: str) -> None:
     cls = getattr(ontology, cls_name)

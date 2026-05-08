@@ -61,14 +61,16 @@ def test_intervention_receipt_attestation_nonce_failure() -> None:
 
 def test_epistemic_zero_trust_receipt_failure() -> None:
     with pytest.raises(ValidationError, match="2 validation errors for EpistemicZeroTrustReceipt"):
-        EpistemicZeroTrustReceipt.model_validate({
-            "event_cid": "event112345",
-            "timestamp": 123.0,
-            "intent_reference_cid": "cid112345",
-            "llm_blind_plan_hash": "a" * 64,
-            "firewall_breach_detected": True,
-            "remediation_epochs_consumed": 1,
-        })
+        EpistemicZeroTrustReceipt.model_validate(
+            {
+                "event_cid": "event112345",
+                "timestamp": 123.0,
+                "intent_reference_cid": "cid112345",
+                "llm_blind_plan_hash": "a" * 64,
+                "firewall_breach_detected": True,
+                "remediation_epochs_consumed": 1,
+            }
+        )
 
 
 def test_billboard_manifold() -> None:
