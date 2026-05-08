@@ -1043,8 +1043,51 @@ def test_compute_merkle_directory_cid_invalid_characters():
         compute_merkle_directory_cid({"file1\0.txt": b"content"})
     with pytest.raises(ValueError, match="Invalid characters in filename"):
         compute_merkle_directory_cid({"file1:txt": b"content"})
+
+
 def test_compute_merkle_directory_cid_self_referential():
     from coreason_manifest.utils.algebra import compute_merkle_directory_cid
-    file_contents = {"manifest.json": b"{\"hash\": 0}", "file1.txt": b"content"}
+
+    file_contents = {"manifest.json": b'{"hash": 0}', "file1.txt": b"content"}
     cid = compute_merkle_directory_cid(file_contents)
     assert cid.startswith("sha256:")
+
+
+def test_verify_merkle_proof_none_hash():
+    from coreason_manifest.utils.algebra import verify_merkle_proof
+    from coreason_manifest.spec.ontology import ExecutionNodeReceipt
+
+    node = ExecutionNodeReceipt.model_construct(request_cid="a", node_id="b", parent_hashes=[], node_hash=None)
+    assert verify_merkle_proof([node]) is False
+
+
+def test_verify_merkle_proof_coverage_valid_and_invalid_2():
+    from coreason_manifest.utils.algebra import verify_merkle_proof
+    from coreason_manifest.spec.ontology import TamperFaultEvent
+    import pytest
+
+    # Mock object to bypass pydantic freeze validation
+    class MockNode:
+        def __init__(self, request_cid, parent_hashes, node_hash, generated_hash):
+            self.request_cid = request_cid
+            self.parent_hashes = parent_hashes
+            self.node_hash = node_hash
+            self.generated_hash = generated_hash
+
+        def generate_node_hash(self):
+            return self.generated_hash
+
+    # Hash mismatch
+    node_invalid_hash = MockNode("a", [], "hash1", "hash2")
+    with pytest.raises(TamperFaultEvent, match="Node hash mismatch"):
+        verify_merkle_proof([node_invalid_hash])  # type: ignore
+
+    # Missing parent hash
+    node_missing_parent = MockNode("b", ["missing"], "hash3", "hash3")
+    with pytest.raises(TamperFaultEvent, match="Missing parent hash"):
+        verify_merkle_proof([node_missing_parent])  # type: ignore
+
+    # Valid
+    node_valid1 = MockNode("c", [], "hash_c", "hash_c")
+    node_valid2 = MockNode("d", ["hash_c"], "hash_d", "hash_d")
+    assert verify_merkle_proof([node_valid1, node_valid2]) is True  # type: ignore
