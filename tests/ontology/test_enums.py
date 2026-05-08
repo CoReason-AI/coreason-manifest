@@ -1,7 +1,7 @@
 from coreason_manifest.spec.ontology import ActionSpaceCategoryProfile
 
 
-def test_action_space_category_properties():
+def test_action_space_category_properties() -> None:
     assert ActionSpaceCategoryProfile.ORACLE.is_stateless is True
     assert ActionSpaceCategoryProfile.SUBSTRATE.is_stateless is False
     assert ActionSpaceCategoryProfile.ORACLE.io_direction == "read"

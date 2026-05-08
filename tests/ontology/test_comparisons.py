@@ -1,7 +1,7 @@
 from coreason_manifest.spec.ontology import RiskLevelPolicy, SemanticClassificationProfile
 
 
-def test_semantic_classification_comparisons():
+def test_semantic_classification_comparisons() -> None:
     p = SemanticClassificationProfile.PUBLIC
     i = SemanticClassificationProfile.INTERNAL
     c = SemanticClassificationProfile.CONFIDENTIAL
@@ -20,7 +20,7 @@ def test_semantic_classification_comparisons():
     assert r.__ge__(123) is NotImplemented
 
 
-def test_risk_level_policy_comparisons():
+def test_risk_level_policy_comparisons() -> None:
     s = RiskLevelPolicy.SAFE
     st = RiskLevelPolicy.STANDARD
     c = RiskLevelPolicy.CRITICAL

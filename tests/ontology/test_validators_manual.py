@@ -62,11 +62,12 @@ class_names = [
 ]
 
 
+from typing import Any
 @pytest.mark.parametrize("cls_name", class_names)
-def test_validators_manual_debug(cls_name):
+def test_validators_manual_debug(cls_name: str) -> None:
     cls = getattr(ontology, cls_name)
 
-    kwargs = {}
+    kwargs: dict[str, Any] = {}
     for field_name, field_info in cls.model_fields.items():
         ann = str(field_info.annotation).lower()
         if "list[" in ann or "set[" in ann or "tuple[" in ann or "dict[" in ann:

@@ -27,19 +27,19 @@ from coreason_manifest.spec.ontology import (
 from coreason_manifest.utils.algebra import calculate_latent_alignment, compute_merkle_directory_cid
 
 
-def test_federated_discovery_intent():
+def test_federated_discovery_intent() -> None:
     intent = FederatedDiscoveryIntent(
         domain_filter=["urn:coreason:domain:healthcare"], required_security_clearance="PUBLIC"
     )
     assert intent.topology_class == "federated_discovery"
 
 
-def test_cid_fetch_intent():
+def test_cid_fetch_intent() -> None:
     intent = CIDFetchIntent(target_cid="sha256:" + "a" * 64, timeout_ms=1000)
     assert intent.topology_class == "cid_fetch"
 
 
-def test_intervention_receipt_attestation_nonce_failure():
+def test_intervention_receipt_attestation_nonce_failure() -> None:
     attest = WetwareAttestationContract(
         mechanism="urn:coreason:mech1",
         did_subject="did:example:123",
@@ -59,26 +59,26 @@ def test_intervention_receipt_attestation_nonce_failure():
         )
 
 
-def test_epistemic_zero_trust_receipt_failure():
+def test_epistemic_zero_trust_receipt_failure() -> None:
     with pytest.raises(ValidationError, match="2 validation errors for EpistemicZeroTrustReceipt"):
-        EpistemicZeroTrustReceipt(
-            event_cid="event112345",
-            timestamp=123.0,
-            intent_reference_cid="cid112345",
-            llm_blind_plan_hash="a" * 64,
-            firewall_breach_detected=True,
-            remediation_epochs_consumed=1,
-        )
+        EpistemicZeroTrustReceipt.model_validate({
+            "event_cid": "event112345",
+            "timestamp": 123.0,
+            "intent_reference_cid": "cid112345",
+            "llm_blind_plan_hash": "a" * 64,
+            "firewall_breach_detected": True,
+            "remediation_epochs_consumed": 1,
+        })
 
 
-def test_billboard_manifold():
+def test_billboard_manifold() -> None:
     with pytest.raises(ValidationError, match="1 validation error for SpatialBillboardContract"):
         SpatialBillboardContract(
             anchoring_node_cid="cid1", spherical_cylindrical_lock="none", distance_scaling_factor=1.0
         )
 
 
-def test_data_sanitization_rule():
+def test_data_sanitization_rule() -> None:
     policy = RedactionPolicy(
         rule_cid="rule1",
         classification=SemanticClassificationProfile.CONFIDENTIAL,
@@ -90,12 +90,12 @@ def test_data_sanitization_rule():
     assert policy.context_exclusion_zones == ["zone1", "zone2"]
 
 
-def test_discourse_tree_manifest():
+def test_discourse_tree_manifest() -> None:
     with pytest.raises(ValueError, match="root_node_cid not found in discourse_nodes"):
         DiscourseTreeManifest(manifest_cid="manifest123", root_node_cid="did:example:123", discourse_nodes={})
 
 
-def test_algebra_coverage():
+def test_algebra_coverage() -> None:
     # Test compute_merkle_directory_cid
     cid = compute_merkle_directory_cid({"file.txt": b"content"})
     assert cid.startswith("sha256:")

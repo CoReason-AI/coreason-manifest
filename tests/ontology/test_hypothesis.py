@@ -94,12 +94,12 @@ class_names = [
 
 
 @pytest.mark.parametrize("cls_name", class_names)
-def test_models_hypothesis_from_type_registered(cls_name):
+def test_models_hypothesis_from_type_registered(cls_name: str) -> None:
     cls = getattr(ontology, cls_name)
 
     @given(st.builds(cls))
     @settings(max_examples=5, suppress_health_check=list(HealthCheck))
-    def _test(instance):
+    def _test(instance: object) -> None:
         pass
 
     with suppress(Exception):
