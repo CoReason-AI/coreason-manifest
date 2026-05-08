@@ -1,4 +1,3 @@
-
 import pytest
 
 from coreason_manifest.spec import ontology
