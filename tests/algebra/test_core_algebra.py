@@ -1029,3 +1029,22 @@ def test_align_semantic_manifolds_semantic_graph() -> None:
     res = align_semantic_manifolds("t1", ["text"], ["text", "semantic_graph"], "e1")  # type: ignore[list-item]
     assert res is not None
     assert res.schema_governance is not None
+
+
+def test_compute_merkle_directory_cid_invalid_characters():
+    import pytest
+    from coreason_manifest.utils.algebra import compute_merkle_directory_cid
+
+    with pytest.raises(ValueError, match="Invalid characters in filename"):
+        compute_merkle_directory_cid({"file1\n.txt": b"content"})
+    with pytest.raises(ValueError, match="Invalid characters in filename"):
+        compute_merkle_directory_cid({"file1\r.txt": b"content"})
+    with pytest.raises(ValueError, match="Invalid characters in filename"):
+        compute_merkle_directory_cid({"file1\0.txt": b"content"})
+    with pytest.raises(ValueError, match="Invalid characters in filename"):
+        compute_merkle_directory_cid({"file1:txt": b"content"})
+def test_compute_merkle_directory_cid_self_referential():
+    from coreason_manifest.utils.algebra import compute_merkle_directory_cid
+    file_contents = {"manifest.json": b"{\"hash\": 0}", "file1.txt": b"content"}
+    cid = compute_merkle_directory_cid(file_contents)
+    assert cid.startswith("sha256:")
