@@ -9,29 +9,35 @@
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
 import pytest
+from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    FederatedDiscoveryIntent,
     CIDFetchIntent,
+    DiscourseTreeManifest,
     EpistemicZeroTrustReceipt,
+    FederatedDiscoveryIntent,
     InterventionReceipt,
-    WetwareAttestationContract,
-    SpatialBillboardContract,
+    OntologicalAlignmentPolicy,
     RedactionPolicy,
     SemanticClassificationProfile,
-    DiscourseTreeManifest,
+    SpatialBillboardContract,
     VectorEmbeddingState,
-    OntologicalAlignmentPolicy
+    WetwareAttestationContract,
 )
-from coreason_manifest.utils.algebra import compute_merkle_directory_cid, calculate_latent_alignment
+from coreason_manifest.utils.algebra import calculate_latent_alignment, compute_merkle_directory_cid
+
 
 def test_federated_discovery_intent():
-    intent = FederatedDiscoveryIntent(domain_filter=["urn:coreason:domain:healthcare"], required_security_clearance="PUBLIC")
+    intent = FederatedDiscoveryIntent(
+        domain_filter=["urn:coreason:domain:healthcare"], required_security_clearance="PUBLIC"
+    )
     assert intent.topology_class == "federated_discovery"
 
+
 def test_cid_fetch_intent():
-    intent = CIDFetchIntent(target_cid="sha256:" + "a"*64, timeout_ms=1000)
+    intent = CIDFetchIntent(target_cid="sha256:" + "a" * 64, timeout_ms=1000)
     assert intent.topology_class == "cid_fetch"
+
 
 def test_intervention_receipt_attestation_nonce_failure():
     attest = WetwareAttestationContract(
@@ -39,7 +45,7 @@ def test_intervention_receipt_attestation_nonce_failure():
         did_subject="did:example:123",
         cryptographic_payload="ABCD",
         dag_node_nonce="diff-nonce",
-        liveness_challenge_hash="a"*64
+        liveness_challenge_hash="a" * 64,
     )
     with pytest.raises(ValueError, match="Anti-Replay Lock Triggered"):
         InterventionReceipt(
@@ -49,23 +55,28 @@ def test_intervention_receipt_attestation_nonce_failure():
             feedback=None,
             attestation=attest,
             event_cid="event112345",
-            timestamp=123.0
+            timestamp=123.0,
         )
 
+
 def test_epistemic_zero_trust_receipt_failure():
-    with pytest.raises(ValueError):
+    with pytest.raises(ValidationError, match="2 validation errors for EpistemicZeroTrustReceipt"):
         EpistemicZeroTrustReceipt(
             event_cid="event112345",
             timestamp=123.0,
             intent_reference_cid="cid112345",
-            llm_blind_plan_hash="a"*64,
+            llm_blind_plan_hash="a" * 64,
             firewall_breach_detected=True,
             remediation_epochs_consumed=1,
         )
 
+
 def test_billboard_manifold():
-    with pytest.raises(ValueError):
-        SpatialBillboardContract(anchoring_node_cid="cid1", spherical_cylindrical_lock="none", distance_scaling_factor=1.0)
+    with pytest.raises(ValidationError, match="1 validation error for SpatialBillboardContract"):
+        SpatialBillboardContract(
+            anchoring_node_cid="cid1", spherical_cylindrical_lock="none", distance_scaling_factor=1.0
+        )
+
 
 def test_data_sanitization_rule():
     policy = RedactionPolicy(
@@ -74,35 +85,33 @@ def test_data_sanitization_rule():
         target_pattern="test",
         target_regex_pattern=".*",
         action="redact",
-        context_exclusion_zones=["zone2", "zone1"]
+        context_exclusion_zones=["zone2", "zone1"],
     )
     assert policy.context_exclusion_zones == ["zone1", "zone2"]
 
+
 def test_discourse_tree_manifest():
     with pytest.raises(ValueError, match="root_node_cid not found in discourse_nodes"):
-        DiscourseTreeManifest(
-            manifest_cid="manifest123",
-            root_node_cid="did:example:123",
-            discourse_nodes={}
-        )
+        DiscourseTreeManifest(manifest_cid="manifest123", root_node_cid="did:example:123", discourse_nodes={})
+
 
 def test_algebra_coverage():
     # Test compute_merkle_directory_cid
     cid = compute_merkle_directory_cid({"file.txt": b"content"})
     assert cid.startswith("sha256:")
-    
+
     # Test calculate_latent_alignment invalid v2
     v1 = VectorEmbeddingState(
         foundation_matrix_name="matrix1",
         dimensionality=1,
-        vector_base64="AAAAAA==" # valid base64 (4 bytes)
+        vector_base64="AAAAAA==",  # valid base64 (4 bytes)
     )
     v2 = VectorEmbeddingState(
         foundation_matrix_name="matrix1",
         dimensionality=1,
-        vector_base64="A==" # invalid base64 (incorrect padding)
+        vector_base64="A==",  # invalid base64 (incorrect padding)
     )
     policy = OntologicalAlignmentPolicy(min_cosine_similarity=0.5, require_isometry_proof=False)
-    
-    with pytest.raises(ValueError, match="Topological Contradiction: Invalid base64 encoding."):
+
+    with pytest.raises(ValueError, match=r"Topological Contradiction: Invalid base64 encoding\."):
         calculate_latent_alignment(v1, v2, policy)

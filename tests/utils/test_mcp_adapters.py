@@ -50,13 +50,9 @@ def test_canonicalize_payload_tuple() -> None:
 def test_serialize_envelope_with_trace_context() -> None:
     intent = CIDFetchIntent(target_cid="sha256:" + "a" * 64, timeout_ms=1000)
     envelope = ExecutionEnvelopeState[CIDFetchIntent].model_construct(
-        state_vector=StateVectorProfile.model_construct(
-            immutable_matrix={}, mutable_matrix={}, is_delta=False
-        ),
+        state_vector=StateVectorProfile.model_construct(immutable_matrix={}, mutable_matrix={}, is_delta=False),
         payload=intent,
-        trace_context=TraceContextState.model_construct(
-            trace_cid="a" * 64, span_cid="b" * 64
-        ),
+        trace_context=TraceContextState.model_construct(trace_cid="a" * 64, span_cid="b" * 64),
     )
 
     result_bytes = DeterministicTransportAdapter.serialize_envelope(envelope)
@@ -73,9 +69,7 @@ def test_serialize_envelope_with_trace_context() -> None:
 def test_serialize_envelope_missing_trace_cid() -> None:
     intent = CIDFetchIntent(target_cid="sha256:" + "b" * 64, timeout_ms=1000)
     envelope = ExecutionEnvelopeState[CIDFetchIntent].model_construct(
-        state_vector=StateVectorProfile.model_construct(
-            immutable_matrix={}, mutable_matrix={}, is_delta=False
-        ),
+        state_vector=StateVectorProfile.model_construct(immutable_matrix={}, mutable_matrix={}, is_delta=False),
         payload=intent,
         trace_context=TraceContextState.model_construct(  # type: ignore[call-arg]
             span_cid="c" * 64
@@ -91,9 +85,7 @@ def test_serialize_envelope_missing_trace_cid() -> None:
 def test_serialize_envelope_missing_trace_context() -> None:
     intent = CIDFetchIntent(target_cid="sha256:" + "c" * 64, timeout_ms=1000)
     envelope = ExecutionEnvelopeState[CIDFetchIntent].model_construct(  # type: ignore[call-arg]
-        state_vector=StateVectorProfile.model_construct(
-            immutable_matrix={}, mutable_matrix={}, is_delta=False
-        ),
+        state_vector=StateVectorProfile.model_construct(immutable_matrix={}, mutable_matrix={}, is_delta=False),
         payload=intent,
         # No trace_context provided
     )
