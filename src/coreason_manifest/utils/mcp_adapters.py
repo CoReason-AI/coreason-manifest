@@ -14,6 +14,8 @@ import msgspec
 
 from coreason_manifest.spec.ontology import ExecutionEnvelopeState
 
+_ENCODER = msgspec.json.Encoder(order="deterministic")
+
 
 def _canonicalize_payload(payload: Any) -> Any:
     """
@@ -50,5 +52,4 @@ class DeterministicTransportAdapter:
             "params": canonical_dict,
             "id": request_cid,  # Note: External Protocol Exemption.
         }
-        encoder = msgspec.json.Encoder(order="deterministic")
-        return cast("bytes", encoder.encode(wrapped_payload))
+        return cast("bytes", _ENCODER.encode(wrapped_payload))
