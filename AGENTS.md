@@ -485,3 +485,16 @@ We strictly enforce the Zero-Orphan Invariant ($|V_O| = 0$). You must mathematic
 *(Must return 0. If files changed, you mutated the Python ontology but failed to compile the downstream Rust/TS interfaces).*
 
 ---
+
+## 12. Machine Propagation & Agentic Constraints
+
+**CRITICAL:** To maintain the Epistemic Firewall, all AI agents (including Claw Code) must operate under the constraints of **Deterministic Constrained Decoding**.
+
+### The Neurosymbolic Caging Protocol
+1. **Deterministic Bitmasking**: All high-entropy output (JSON, AST, or Code) MUST pass through an **XGrammar AOT FSM** bitmask at the inference layer. Probabilities for invalid syntax or schema keys must be mathematically set to $-\infty$.
+2. **Segregated Prompting (System 2 Handoff)**: Agents must execute probabilistic reasoning (MCTS, Chain-of-Thought) exclusively within unconstrained `<deliberation>` tags.
+3. **Deterministic Submission**: Final outputs must be emitted within `<proposed_diff>` or `<manifest_state>` tags, where the FSM bitmask is aggressively enforced.
+4. **The Hollow Data Plane Constraint**: Agents are forbidden from hallucinating schema keys. All structural boundaries must be derived directly from the `coreason-manifest` Pydantic models.
+5. **Forge-Centric Mutation**: Agents do NOT possess ambient authority to write to the file system. They MUST submit 100% schema-compliant AST differentials to the `coreason-meta-engineering` Forge for deterministic "etching."
+
+*Copyright (c) 2026 CoReason, Inc. Licensed under the Prosperity Public License 3.0.*

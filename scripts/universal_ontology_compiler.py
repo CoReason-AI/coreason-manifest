@@ -473,6 +473,7 @@ def evaluate_topological_reachability() -> None:
         "EpistemicUpsamplingTask",
         "SyntheticGenerationProfile",
         "NDimensionalTensorManifest",
+        "DeliberativeEnvelope",
     ]
     reachable_indices = set()
     for root in root_nodes:
