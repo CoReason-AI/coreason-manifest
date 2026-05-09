@@ -5766,9 +5766,7 @@ class EscalationIntent(CoreasonBaseState):
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
         """Enforce RFC 8785 canonical sorting on the `context_window_cids` array."""
-        sorted_cids = sorted(self.context_window_cids)
-        if self.context_window_cids != sorted_cids:
-            object.__setattr__(self, "context_window_cids", sorted_cids)
+        object.__setattr__(self, "context_window_cids", sorted(self.context_window_cids))
         return self
 
 
