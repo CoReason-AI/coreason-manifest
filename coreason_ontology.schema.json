@@ -863,6 +863,7 @@
       "discriminator": {
         "mapping": {
           "stochastic_ensemble": "#/$defs/StochasticTopologyManifest",
+          "strategic_thought_node": "#/$defs/StrategicThoughtNodeIntent",
           "thought_branch": "#/$defs/ThoughtBranchState"
         },
         "propertyName": "topology_class"
@@ -873,6 +874,9 @@
         },
         {
           "$ref": "#/$defs/StochasticTopologyManifest"
+        },
+        {
+          "$ref": "#/$defs/StrategicThoughtNodeIntent"
         }
       ]
     },

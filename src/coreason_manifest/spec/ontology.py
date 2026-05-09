@@ -3313,7 +3313,7 @@ class ThoughtBranchState(CoreasonBaseState):
 
 
 type AnyExplorationBranch = Annotated[
-    ThoughtBranchState | StochasticTopologyManifest, Field(discriminator="topology_class")
+    ThoughtBranchState | StochasticTopologyManifest | StrategicThoughtNodeIntent, Field(discriminator="topology_class")
 ]
 
 
