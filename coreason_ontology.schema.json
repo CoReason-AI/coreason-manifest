@@ -3033,6 +3033,44 @@
           ],
           "default": null,
           "description": "The bipartite graph constraint preventing toxic tool combinations."
+        },
+        "capability_cid": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BundleContentHashState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The content-addressed SHA-256 hash of the capability."
+        },
+        "metadata_cid": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BundleContentHashState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The content-addressed SHA-256 hash of the FAIR metadata."
+        },
+        "trusted_validators": {
+          "description": "A deterministic array of DIDs authorized to validate this manifest.",
+          "items": {
+            "$ref": "#/$defs/NodeCIDState"
+          },
+          "title": "Trusted Validators",
+          "type": "array"
+        },
+        "execution_fee_lmsr": {
+          "default": 0.0,
+          "description": "The logarithmic market scoring rule threshold for thermodynamic execution.",
+          "title": "Execution Fee Lmsr",
+          "type": "number"
         }
       },
       "required": [
@@ -10769,6 +10807,36 @@
       "title": "FederatedBilateralSLA",
       "type": "object"
     },
+    "FederatedCIDFetchIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Triggers the zero-copy streaming of a binary or metadata blob from a discovered peer based on its Content Identifier (CID).\n\nCAUSAL AFFORDANCE: Physically executes the download of decentralized assets into the local embedded LanceDB and WASM runtime.\n\nEPISTEMIC BOUNDS: Bounded to strict RFC 8785 CIDs.\n\nMCP ROUTING TRIGGERS: Content Addressing, Zero-Copy Streaming, Decentralized Fetch, IPFS, FlatBuffers",
+      "properties": {
+        "topology_class": {
+          "const": "cid_fetch",
+          "default": "cid_fetch",
+          "description": "Discriminator for fetching assets via CID.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "target_cid": {
+          "$ref": "#/$defs/BundleContentHashState",
+          "description": "The content-addressed hash of the target blob."
+        },
+        "timeout_ms": {
+          "default": 5000,
+          "description": "Network timeout in milliseconds.",
+          "maximum": 60000,
+          "minimum": 100,
+          "title": "Timeout Ms",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "target_cid"
+      ],
+      "title": "FederatedCIDFetchIntent",
+      "type": "object"
+    },
     "FederatedCapabilityAttestationReceipt": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: An immutable cryptographic receipt representing an Object Capability (OCap) grant within a Federated Identity Management (FIM) framework.\n\nCAUSAL AFFORDANCE: Unlocks cross-domain graph traversal, cryptographically proving to the target topology that the swarm agent is authorized to establish an active connection governed by the SLA.\n\nEPISTEMIC BOUNDS: Locked to a 128-char `attestation_cid`. The `@model_validator` `enforce_restricted_vault_locks` mathematically enforces cross-schema invariants: if `governing_sla.max_permitted_classification` is 'restricted', the `authorized_session` MUST contain explicit `allowed_vault_keys`.\n\nMCP ROUTING TRIGGERS: Object Capability Model, Federated Identity Management, Cross-Domain Federation, Capability Attestation, Zero-Trust Execution",
@@ -10824,6 +10892,26 @@
           "maxItems": 1000,
           "title": "Domain Filter",
           "type": "array"
+        },
+        "target_capability_cid": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BundleContentHashState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The content-addressed hash of the capability being searched for via P2P mesh."
+        },
+        "max_network_hops": {
+          "default": 5,
+          "description": "The maximum number of P2P network hops allowed.",
+          "maximum": 20,
+          "minimum": 1,
+          "title": "Max Network Hops",
+          "type": "integer"
         },
         "required_security_clearance": {
           "description": "The minimum security clearance required from the discovered execution substrates.",
@@ -18636,6 +18724,16 @@
           "exclusiveMinimum": 0.0,
           "title": "Min Vram Gb",
           "type": "number"
+        },
+        "coreason_network_mode": {
+          "default": "STRICT_GENESIS",
+          "description": "The networking mode defining the P2P boundary for enterprise compliance.",
+          "enum": [
+            "P2P",
+            "STRICT_GENESIS"
+          ],
+          "title": "Coreason Network Mode",
+          "type": "string"
         },
         "accelerator_type": {
           "default": "urn:coreason:accelerator:bf16_tensor",
