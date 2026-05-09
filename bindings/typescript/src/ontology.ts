@@ -4759,14 +4759,6 @@ export type Justification18 = "modality_mismatch" | "budget_exhaustion" | "sla_t
  */
 export type CryptographicNullHash = string;
 /**
- * Discriminator for fetching assets via CID.
- */
-export type TopologyClass127 = "cid_fetch";
-/**
- * Network timeout in milliseconds.
- */
-export type TimeoutMs1 = number;
-/**
  * A cryptographically deterministic capability pointer binding the agent to a verifiable spatial environment.
  */
 export type CapabilityPointerState = string;
@@ -5452,6 +5444,14 @@ export type FaultCategoryProfile =
   | "temporal_dilation"
   | "dependency_blackout";
 /**
+ * Discriminator for fetching assets via CID.
+ */
+export type TopologyClass127 = "cid_fetch";
+/**
+ * Network timeout in milliseconds.
+ */
+export type TimeoutMs1 = number;
+/**
  * The explicit array of strictly bounded MCP URI broadcast endpoints.
  *
  * @maxItems 1000
@@ -5993,7 +5993,6 @@ export interface CoReasonSharedKernelOntology {
   BudgetExhaustionEvent?: BudgetExhaustionEvent;
   BundleContentHashState?: BundleContentHashState;
   BypassReceipt?: BypassReceipt;
-  CIDFetchIntent?: CIDFetchIntent;
   CapabilityForgeTopologyManifest?: CapabilityForgeTopologyManifest;
   CapabilityPointerState?: CapabilityPointerState;
   CausalAttributionState?: CausalAttributionState;
@@ -6136,6 +6135,7 @@ export interface CoReasonSharedKernelOntology {
   FaultCategoryProfile?: FaultCategoryProfile;
   FaultInjectionProfile?: FaultInjectionProfile;
   FederatedBilateralSLA?: FederatedBilateralSLA2;
+  FederatedCIDFetchIntent?: FederatedCIDFetchIntent;
   FederatedCapabilityAttestationReceipt?: FederatedCapabilityAttestationReceipt;
   FederatedDiscoveryIntent?: FederatedDiscoveryIntent;
   FederatedDiscoveryManifest?: FederatedDiscoveryManifest;
@@ -13115,25 +13115,6 @@ export interface BypassReceipt {
 /**
  * CoReason Shared Kernel Ontology
  *
- * AGENT INSTRUCTION: Triggers the zero-copy streaming of a binary or metadata blob from a discovered peer based on its Content Identifier (CID).
- *
- * CAUSAL AFFORDANCE: Physically executes the download of decentralized assets into the local embedded LanceDB and WASM runtime.
- *
- * EPISTEMIC BOUNDS: Bounded to strict RFC 8785 CIDs.
- *
- * MCP ROUTING TRIGGERS: Content Addressing, Zero-Copy Streaming, Decentralized Fetch, IPFS, FlatBuffers
- */
-export interface CIDFetchIntent {
-  topology_class?: TopologyClass127;
-  /**
-   * A content-addressed SHA-256 hash of a deterministic artifact bundle (e.g., an Action Space MCP server, an OHDSI Circe cohort definition JSON, or any RFC 8785 canonicalizable resource), enabling zero-trust verification and distributed exchangeability across federated boundaries.
-   */
-  target_cid: string;
-  timeout_ms?: TimeoutMs1;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
  * AGENT INSTRUCTION: Defines the finite, discrete Markov Decision Process (MDP) Action Space and affordance landscape available to a specific execution node. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate state.
  *
  * CAUSAL AFFORDANCE: Projects the combined multi-dimensional matrix of capabilities into the agent's context, mathematically dictating which kinetic operations it can initiate via its `transition_matrix`. Optionally enforces kinetic separation.
@@ -14629,6 +14610,25 @@ export interface FederatedBilateralSLA2 {
    * The quantum-resistant signature securing the multi-tenant structural boundary.
    */
   pq_signature?: PostQuantumSignatureReceipt | null;
+}
+/**
+ * CoReason Shared Kernel Ontology
+ *
+ * AGENT INSTRUCTION: Triggers the zero-copy streaming of a binary or metadata blob from a discovered peer based on its Content Identifier (CID).
+ *
+ * CAUSAL AFFORDANCE: Physically executes the download of decentralized assets into the local embedded LanceDB and WASM runtime.
+ *
+ * EPISTEMIC BOUNDS: Bounded to strict RFC 8785 CIDs.
+ *
+ * MCP ROUTING TRIGGERS: Content Addressing, Zero-Copy Streaming, Decentralized Fetch, IPFS, FlatBuffers
+ */
+export interface FederatedCIDFetchIntent {
+  topology_class?: TopologyClass127;
+  /**
+   * A content-addressed SHA-256 hash of a deterministic artifact bundle (e.g., an Action Space MCP server, an OHDSI Circe cohort definition JSON, or any RFC 8785 canonicalizable resource), enabling zero-trust verification and distributed exchangeability across federated boundaries.
+   */
+  target_cid: string;
+  timeout_ms?: TimeoutMs1;
 }
 /**
  * CoReason Shared Kernel Ontology

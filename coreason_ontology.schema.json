@@ -2463,36 +2463,6 @@
       "title": "BypassReceipt",
       "type": "object"
     },
-    "CIDFetchIntent": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Triggers the zero-copy streaming of a binary or metadata blob from a discovered peer based on its Content Identifier (CID).\n\nCAUSAL AFFORDANCE: Physically executes the download of decentralized assets into the local embedded LanceDB and WASM runtime.\n\nEPISTEMIC BOUNDS: Bounded to strict RFC 8785 CIDs.\n\nMCP ROUTING TRIGGERS: Content Addressing, Zero-Copy Streaming, Decentralized Fetch, IPFS, FlatBuffers",
-      "properties": {
-        "topology_class": {
-          "const": "cid_fetch",
-          "default": "cid_fetch",
-          "description": "Discriminator for fetching assets via CID.",
-          "title": "Topology Class",
-          "type": "string"
-        },
-        "target_cid": {
-          "$ref": "#/$defs/BundleContentHashState",
-          "description": "The content-addressed hash of the target blob."
-        },
-        "timeout_ms": {
-          "default": 5000,
-          "description": "Network timeout in milliseconds.",
-          "maximum": 60000,
-          "minimum": 100,
-          "title": "Timeout Ms",
-          "type": "integer"
-        }
-      },
-      "required": [
-        "target_cid"
-      ],
-      "title": "CIDFetchIntent",
-      "type": "object"
-    },
     "CapabilityForgeTopologyManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Create a zero-cost macro abstraction that unrolls the entire Zero-to-One generation, verification, and profiling loop.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator to physically bind the ephemeral tool-creation workflow into a rigid DAG topology, enabling full cryptographic observability over the dynamic synthesis of capabilities.\n\nEPISTEMIC BOUNDS: Binds the execution state to a closed, finite mathematical matrix where every constituent node (generator, fuzzer, profiler) must resolve before the final capability is materialized onto the Hollow Data Plane.\n\nMCP ROUTING TRIGGERS: Tool Synthesis, Capability Generation, Verification Matrix, Ephemeral Execution, Macro Topology",
@@ -10835,6 +10805,36 @@
         "liability_limit_magnitude"
       ],
       "title": "FederatedBilateralSLA",
+      "type": "object"
+    },
+    "FederatedCIDFetchIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Triggers the zero-copy streaming of a binary or metadata blob from a discovered peer based on its Content Identifier (CID).\n\nCAUSAL AFFORDANCE: Physically executes the download of decentralized assets into the local embedded LanceDB and WASM runtime.\n\nEPISTEMIC BOUNDS: Bounded to strict RFC 8785 CIDs.\n\nMCP ROUTING TRIGGERS: Content Addressing, Zero-Copy Streaming, Decentralized Fetch, IPFS, FlatBuffers",
+      "properties": {
+        "topology_class": {
+          "const": "cid_fetch",
+          "default": "cid_fetch",
+          "description": "Discriminator for fetching assets via CID.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "target_cid": {
+          "$ref": "#/$defs/BundleContentHashState",
+          "description": "The content-addressed hash of the target blob."
+        },
+        "timeout_ms": {
+          "default": 5000,
+          "description": "Network timeout in milliseconds.",
+          "maximum": 60000,
+          "minimum": 100,
+          "title": "Timeout Ms",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "target_cid"
+      ],
+      "title": "FederatedCIDFetchIntent",
       "type": "object"
     },
     "FederatedCapabilityAttestationReceipt": {

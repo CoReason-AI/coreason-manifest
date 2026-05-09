@@ -5034,7 +5034,7 @@ class SemanticDiscoveryIntent(CoreasonBaseState):
         return self
 
 
-class CIDFetchIntent(CoreasonBaseState):
+class FederatedCIDFetchIntent(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Triggers the zero-copy streaming of a binary or metadata blob from a discovered peer based on its Content Identifier (CID).
 

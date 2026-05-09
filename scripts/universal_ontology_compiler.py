@@ -421,7 +421,7 @@ def evaluate_topological_reachability() -> None:
         "MCPClientIntent",
         "OntologyDiscoveryIntent",
         "SemanticMappingHeuristicIntent",
-        "CIDFetchIntent",
+        "FederatedCIDFetchIntent",
         "TerminalCognitiveEvent",
         "CognitiveActionSpaceManifest",
         "EpistemicSOPManifest",

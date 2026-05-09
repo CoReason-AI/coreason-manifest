@@ -12,9 +12,9 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    CIDFetchIntent,
     DiscourseTreeManifest,
     EpistemicZeroTrustReceipt,
+    FederatedCIDFetchIntent,
     FederatedDiscoveryIntent,
     InterventionReceipt,
     OntologicalAlignmentPolicy,
@@ -35,7 +35,7 @@ def test_federated_discovery_intent() -> None:
 
 
 def test_cid_fetch_intent() -> None:
-    intent = CIDFetchIntent(target_cid="sha256:" + "a" * 64, timeout_ms=1000)
+    intent = FederatedCIDFetchIntent(target_cid="sha256:" + "a" * 64, timeout_ms=1000)
     assert intent.topology_class == "cid_fetch"
 
 
