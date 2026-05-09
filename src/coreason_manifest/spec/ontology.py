@@ -14939,9 +14939,7 @@ class OracleExecutionReceipt(CoreasonBaseState):
     )
     solver_urn: Annotated[
         str, StringConstraints(min_length=1, max_length=2000, pattern=r"^urn:coreason:solver:.*$")
-    ] = Field(
-        description="The fully qualified URN of the solver agent that performed the execution."
-    )
+    ] = Field(description="The fully qualified URN of the solver agent that performed the execution.")
     tokens_burned: int = Field(
         ge=0,
         le=10_000_000,
