@@ -335,6 +335,8 @@ def compute_merkle_directory_cid(file_contents: dict[str, bytes]) -> str:
     """
     file_hashes: list[str] = []
     for filename in sorted(file_contents.keys()):
+        if "\n" in filename or ":" in filename:
+            raise ValueError(f"Invalid characters in filename: {filename}")
         file_hash = hashlib.sha256(file_contents[filename]).hexdigest()
         file_hashes.append(f"{filename}:{file_hash}")
 

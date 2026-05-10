@@ -64,6 +64,7 @@ from coreason_manifest.utils.algebra import (
     verify_ast_safety,
     verify_manifold_bounds,
     verify_merkle_proof,
+    compute_merkle_directory_cid,
 )
 
 
@@ -1029,3 +1030,10 @@ def test_align_semantic_manifolds_semantic_graph() -> None:
     res = align_semantic_manifolds("t1", ["text"], ["text", "semantic_graph"], "e1")  # type: ignore[list-item]
     assert res is not None
     assert res.schema_governance is not None
+
+def test_compute_merkle_directory_cid_invalid_filename() -> None:
+    with pytest.raises(ValueError, match="Invalid characters in filename"):
+        compute_merkle_directory_cid({"a:b.txt": b"hello"})
+
+    with pytest.raises(ValueError, match="Invalid characters in filename"):
+        compute_merkle_directory_cid({"a\nb.txt": b"hello"})
