@@ -644,6 +644,7 @@ def test_get_ontology_schema_empty() -> None:
 
     with (
         unittest.mock.patch.object(algebra, "_CACHED_ONTOLOGY_SCHEMA", None),
+        unittest.mock.patch.object(algebra, "_CACHED_ONTOLOGY_SCHEMA_BYTES", None),
         patch("coreason_manifest.utils.algebra.dir", return_value=[]),
     ):
         # Temporarily clear models_to_export condition by mocking the return directly if empty
