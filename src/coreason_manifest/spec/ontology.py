@@ -9787,81 +9787,6 @@ class ExogenousEpistemicEvent(CoreasonBaseState):
         return self
 
 
-class SpanEvent(CoreasonBaseState):
-    r"""
-    AGENT INSTRUCTION: Represents a discrete, point-in-time OpenTelemetry annotation within a broader Dapper-style `ExecutionSpanReceipt`.
-
-    CAUSAL AFFORDANCE: Provides fine-grained, localized state-machine logging within an active span, anchoring semantic attributes to a precise nanosecond coordinate without spawning a new causal branch.
-
-    EPISTEMIC BOUNDS: `timestamp_unix_nano` physically bounded `[0, 253402300799000000000]`. The `attributes` payload strictly constrained by a dictionary with string keys (`max_length=255`) to prevent dictionary bombing.
-
-    MCP ROUTING TRIGGERS: Span Annotation, Point-in-Time Event, Micro-State Logging, OpenTelemetry, Telemetry Serialization
-
-    """
-
-    name: Annotated[str, StringConstraints(max_length=2000)] = Field(description="The semantic name of the event.")
-    timestamp_unix_nano: int = Field(
-        ge=0, le=253402300799000000000, description="The precise temporal execution point."
-    )
-    attributes: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
-        max_length=1000, default_factory=dict, description="Typed metadata bound to the event."
-    )
-
-    @field_validator("attributes", mode="before")
-    @classmethod
-    def enforce_payload_topology(cls, v: Any) -> Any:
-        """
-        AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing.
-        EPISTEMIC BOUNDS: Physically guillotines evaluation the millisecond the absolute volume exceeds total_nodes <= 10000.
-        """
-        return _validate_payload_bounds(v)
-
-
-class ExecutionSpanReceipt(CoreasonBaseState):
-    r"""
-    AGENT INSTRUCTION: Implements the Dapper distributed tracing model to deterministically map the causal execution DAG of the swarm. As an append-only coordinate on the Merkle-DAG, it mathematically binds parent-child RPC calls.
-
-    CAUSAL AFFORDANCE: Unlocks global observability by mapping causal edges across the zero-trust network, enabling exact bottleneck detection and graph reconstruction.
-
-    EPISTEMIC BOUNDS: Temporal boundaries are rigidly constrained by `start_time_unix_nano` (`ge=0`). The `@model_validator` enforces Allen's Interval Algebra to physically guarantee `end_time` cannot precede `start_time`. `events` array sorted by time.
-
-    MCP ROUTING TRIGGERS: Dapper Tracing Model, Distributed Causal DAG, Allen's Interval Algebra, OpenTelemetry, Execution Provenance
-
-    """
-
-    trace_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="The global identifier for the entire execution causal tree."
-    )
-    span_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="The unique identifier for this specific operation."
-    )
-    parent_span_cid: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] | None
-    ) = Field(default=None, description="The causal edge to the invoking node.")
-    name: Annotated[str, StringConstraints(max_length=2000)] = Field(
-        description="The semantic identifier for the operation."
-    )
-    kind: SpanKindProfile = Field(default="internal", description="The role of the span.")
-    start_time_unix_nano: int = Field(ge=0, le=253402300799000000000, description="Temporal start bound.")
-    end_time_unix_nano: int | None = Field(
-        default=None, ge=0, le=253402300799000000000, description="Temporal end bound, if completed."
-    )
-    status: SpanStatusCodeProfile = Field(default="unset", description="The execution health flag.")
-    events: list[SpanEvent] = Field(
-        default_factory=list, max_length=10000, description="Structured log records emitted during the span."
-    )
-
-    @model_validator(mode="after")
-    def validate_temporal_bounds(self) -> Any:
-        if self.end_time_unix_nano is not None and self.end_time_unix_nano < self.start_time_unix_nano:
-            raise ValueError("end_time_unix_nano cannot be before start_time_unix_nano")
-        return self
-
-    @model_validator(mode="after")
-    def _enforce_canonical_sort_events(self) -> Any:
-        object.__setattr__(self, "events", sorted(self.events, key=operator.attrgetter("timestamp_unix_nano")))
-        return self
-
 
 class SpatialKinematicActionIntent(CoreasonBaseState):
     """
@@ -10709,37 +10634,6 @@ class ToolInvocationEvent(CoreasonBaseState):
         """
         return _validate_payload_bounds(v)
 
-
-class TraceExportManifest(CoreasonBaseState):
-    r"""
-    AGENT INSTRUCTION: Functions as a deterministic serialization envelope for flushing Dapper-style trace subgraphs to external observability sinks.
-
-    CAUSAL AFFORDANCE: Authorizes the mass export of `ExecutionSpanReceipt` objects across the network boundary, structurally binding disconnected spans into a coherent `batch_cid` for downstream reconstruction.
-
-    EPISTEMIC BOUNDS: Bounded by a rigid `batch_cid` (CID regex `^[a-zA-Z0-9_.:-]+$`). The `spans` array is deterministically sorted by `span_cid` via a `@model_validator` to mathematically prevent Byzantine replay anomalies.
-
-    MCP ROUTING TRIGGERS: Trace Serialization, Telemetry Export, Batch Flushing, DAG Reconstruction, Canonical Egress
-
-    """
-
-    batch_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="Unique identifier for this telemetry snapshot."
-    )
-    spans: list[ExecutionSpanReceipt] = Field(
-        default_factory=list, description="A collection of execution spans to be serialized."
-    )
-    execution_nodes: list[ExecutionNodeReceipt] = Field(
-        default_factory=list, description="The array of strictly typed trace executions."
-    )
-
-    @model_validator(mode="after")
-    def _enforce_canonical_sort(self) -> Any:
-        object.__setattr__(self, "spans", sorted(self.spans, key=operator.attrgetter("span_cid")))
-        if self.execution_nodes:
-            object.__setattr__(
-                self, "execution_nodes", sorted(self.execution_nodes, key=operator.attrgetter("node_hash"))
-            )
-        return self
 
 
 class TruthMaintenancePolicy(CoreasonBaseState):
