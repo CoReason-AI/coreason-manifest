@@ -69,7 +69,7 @@ jobs:
           attestations: false  # Requires Enterprise Cloud or public repo
 
       - name: Sign Wheel
-        uses: sigstore/gh-action-sigstore-python@v3.0.0
+        uses: sigstore/gh-action-sigstore-python@v3.3.0
         with:
           inputs: >-
             dist/*.whl
