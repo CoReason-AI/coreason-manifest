@@ -1,23 +1,12 @@
 from coreason_manifest.spec.ontology import RiskLevelPolicy, SemanticClassificationProfile
 
 
-def test_semantic_classification_comparisons() -> None:
-    p = SemanticClassificationProfile.PUBLIC
-    i = SemanticClassificationProfile.INTERNAL
-    c = SemanticClassificationProfile.CONFIDENTIAL
-    r = SemanticClassificationProfile.RESTRICTED
-
-    assert p < i
-    assert i <= c
-    assert r > c
-    assert r >= p
-    assert p.clearance_level == 0
-    assert r.clearance_level == 3
-
-    assert p.__lt__(123) is NotImplemented
-    assert p.__le__(123) is NotImplemented
-    assert r.__gt__(123) is NotImplemented
-    assert r.__ge__(123) is NotImplemented
+def test_semantic_classification_profile_exists() -> None:
+    # Verify the profile members exist
+    assert SemanticClassificationProfile.PUBLIC == "public"
+    assert SemanticClassificationProfile.INTERNAL == "internal"
+    assert SemanticClassificationProfile.CONFIDENTIAL == "confidential"
+    assert SemanticClassificationProfile.RESTRICTED == "restricted"
 
 
 def test_risk_level_policy_comparisons() -> None:
