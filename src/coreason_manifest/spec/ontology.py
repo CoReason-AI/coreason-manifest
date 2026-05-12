@@ -340,9 +340,7 @@ type SemanticVersionState = Annotated[
         examples=["1.0.0", "0.1.0", "2.12.5"],
     ),
 ]
-# DEPRECATED: SpanKindProfile is deprecated in favor of standard OpenTelemetry SDK span kind enumeration.
-# This will be removed in a future minor version.
-type SpanKindProfile = Literal["client", "server", "producer", "consumer", "internal"]
+
 # DEPRECATED: SpanStatusCodeProfile is deprecated in favor of standard OpenTelemetry SDK status code enumeration.
 # This will be removed in a future minor version.
 type SpanStatusCodeProfile = Literal["unset", "ok", "error"]
