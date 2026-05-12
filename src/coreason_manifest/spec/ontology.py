@@ -2122,13 +2122,13 @@ class SaeFeatureActivationState(CoreasonBaseState):
 
 class ActivationSteeringContract(CoreasonBaseState):
     r"""
-    AGENT INSTRUCTION: Establishes a hardware-level Representation Engineering (RepE) directive to mechanically manipulate latent dimensions via forward-pass tensor injection.
+    AGENT INSTRUCTION: Establishes a hardware-level Representation Engineering (RepE) directive to mechanically manipulate latent dimensions via forward-pass tensor injection. Execution of this policy is strictly delegated to the external `TransformerLens` substrate to preserve the Hollow Data Plane constraints.
 
-    CAUSAL AFFORDANCE: Physically forces an additive, ablation, or clamping operation onto the model's residual stream at specific `injection_layers`, steering the generator away from unstable hallucination geometries prior to token projection.
+    CAUSAL AFFORDANCE: Physically forces an additive, ablation, or clamping operation onto the model's residual stream at specific `target_hook_points`, steering the generator away from unstable hallucination geometries prior to token projection.
 
-    EPISTEMIC BOUNDS: Cryptographically locked by `steering_vector_hash` (SHA-256 pattern `^[a-f0-9]{64}$`). `scaling_factor` is bounded above (`le=100.0`) but unbounded below, permitting negative magnitudes for ablation. The `@model_validator` deterministically sorts `injection_layers` (each `ge=0`).
+    EPISTEMIC BOUNDS: Cryptographically locked by `steering_vector_hash` (SHA-256 pattern `^[a-f0-9]{64}$`). `scaling_factor` is bounded above (`le=100.0`) but unbounded below, permitting negative magnitudes for ablation. The `@model_validator` deterministically sorts `target_hook_points`.
 
-    MCP ROUTING TRIGGERS: Representation Engineering, RepE, Activation Steering, Residual Stream Ablation, Concept Vectors
+    MCP ROUTING TRIGGERS: Representation Engineering, RepE, Activation Steering, Residual Stream Ablation, Concept Vectors, TransformerLens, SAELens
 
     """
 
@@ -2137,8 +2137,8 @@ class ActivationSteeringContract(CoreasonBaseState):
             description="The SHA-256 hash of the extracted RepE control tensor (e.g., the 'caution' vector).",
         )
     )
-    injection_layers: list[Annotated[int, Field(ge=0)]] = Field(
-        min_length=1, description="The specific transformer layer indices where this vector must be applied."
+    target_hook_points: list[Annotated[str, StringConstraints(min_length=1, max_length=256, pattern="^[a-zA-Z0-9_.]+$")]] = Field(
+        min_length=1, description="The specific TransformerLens hook points (e.g., 'blocks.12.hook_resid_post') where this vector must be applied."
     )
     scaling_factor: float = Field(
         le=100.0, description="The mathematical magnitude/strength of the injection (can be negative for ablation)."
@@ -2149,7 +2149,7 @@ class ActivationSteeringContract(CoreasonBaseState):
 
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
-        object.__setattr__(self, "injection_layers", sorted(self.injection_layers))
+        object.__setattr__(self, "target_hook_points", sorted(self.target_hook_points))
         return self
 
 
@@ -2637,13 +2637,13 @@ class RedactionPolicy(CoreasonBaseState):
 
 class SaeLatentPolicy(CoreasonBaseState):
     r"""
-    AGENT INSTRUCTION: Implements Sparse Dictionary Learning and Mechanistic Interpretability to actively monitor and steer monosemantic neural circuits during the model's forward pass.
+    AGENT INSTRUCTION: Implements Sparse Dictionary Learning and Mechanistic Interpretability to actively monitor and steer monosemantic neural circuits during the model's forward pass. Execution of this policy is strictly delegated to the external `TransformerLens` substrate to preserve the Hollow Data Plane constraints.
 
     CAUSAL AFFORDANCE: Executes real-time tensor remediation—clamping, halting, quarantining, or smoothly decaying residual stream activations—when specific features diverge toward adversarial or hallucinated geometries.
 
     EPISTEMIC BOUNDS: The `max_activation_threshold` (`ge=0.0, le=18446744073709551615.0`) physically bounds the continuous Euclidean magnitude of the `target_feature_index`. Topologically locked to SAE matrix via `sae_dictionary_hash` (SHA-256). The `@model_validator` `validate_smooth_decay` mathematically enforces asymptotic bounds.
 
-    MCP ROUTING TRIGGERS: Mechanistic Interpretability, Sparse Autoencoders, Residual Stream Steering, Tensor Remediation, Monosemantic Features
+    MCP ROUTING TRIGGERS: Mechanistic Interpretability, Sparse Autoencoders, Residual Stream Steering, Tensor Remediation, Monosemantic Features, TransformerLens, SAELens
 
     """
 
@@ -2652,9 +2652,9 @@ class SaeLatentPolicy(CoreasonBaseState):
         ge=0,
         description="The exact dimensional index of the monosemantic feature in the Sparse Autoencoder dictionary.",
     )
-    monitored_layers: list[Annotated[int, Field(ge=0)]] = Field(
+    monitored_hook_points: list[Annotated[str, StringConstraints(min_length=1, max_length=256, pattern="^[a-zA-Z0-9_.]+$")]] = Field(
         min_length=1,
-        description="The specific transformer layer indices where this feature activation must be monitored.",
+        description="The specific TransformerLens hook points where this feature activation must be monitored.",
     )
     max_activation_threshold: float = Field(
         le=18446744073709551615.0,
@@ -2679,7 +2679,7 @@ class SaeLatentPolicy(CoreasonBaseState):
 
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
-        object.__setattr__(self, "monitored_layers", sorted(self.monitored_layers))
+        object.__setattr__(self, "monitored_hook_points", sorted(self.monitored_hook_points))
         return self
 
     @model_validator(mode="after")
@@ -8583,13 +8583,13 @@ class MarketResolutionState(CoreasonBaseState):
 
 class MechanisticAuditContract(CoreasonBaseState):
     r"""
-    AGENT INSTRUCTION: Establishes a rigorous Mechanistic Interpretability brain-scan protocol, executing real-time latent state extraction across targeted neural circuits.
+    AGENT INSTRUCTION: Establishes a rigorous Mechanistic Interpretability brain-scan protocol, executing real-time latent state extraction across targeted neural circuits. Execution of this policy is strictly delegated to the external `TransformerLens` substrate to preserve the Hollow Data Plane constraints.
 
-    CAUSAL AFFORDANCE: Authorizes the orchestrator to halt token generation upon specific `trigger_conditions` to physically slice, quantify, and export the top-k SAE features from the designated `target_layers`.
+    CAUSAL AFFORDANCE: Authorizes the orchestrator to halt token generation upon specific `trigger_conditions` to physically slice, quantify, and export the top-k SAE features from the designated `target_hook_points`.
 
-    EPISTEMIC BOUNDS: GPU VRAM exhaustion is mathematically prevented by capping `max_features_per_layer` (`gt=0, le=18446744073709551615`). The `@model_validator` deterministically sorts conditions and layers for RFC 8785 hashing. System integrity enforced via `require_zk_commitments`.
+    EPISTEMIC BOUNDS: GPU VRAM exhaustion is mathematically prevented by capping `max_features_per_layer` (`gt=0, le=18446744073709551615`). The `@model_validator` deterministically sorts conditions and hook points for RFC 8785 hashing. System integrity enforced via `require_zk_commitments`.
 
-    MCP ROUTING TRIGGERS: Latent State Extraction, Mechanistic Interpretability, Sparse Autoencoder, Zero-Knowledge Commitments, VRAM Optimization
+    MCP ROUTING TRIGGERS: Latent State Extraction, Mechanistic Interpretability, Sparse Autoencoder, Zero-Knowledge Commitments, VRAM Optimization, TransformerLens, SAELens
 
     """
 
@@ -8599,8 +8599,8 @@ class MechanisticAuditContract(CoreasonBaseState):
             description="The specific architectural events that authorize the orchestrator to halt generation and extract internal activations.",
         )
     )
-    target_layers: list[Annotated[int, Field(ge=0)]] = Field(
-        min_length=1, description="The specific transformer block indices the execution engine must extract from."
+    target_hook_points: list[Annotated[str, StringConstraints(min_length=1, max_length=256, pattern="^[a-zA-Z0-9_.]+$")]] = Field(
+        min_length=1, description="The specific TransformerLens hook points the execution engine must extract from."
     )
     max_features_per_layer: int = Field(
         le=18446744073709551615, gt=0, description="The top-k features to extract, preventing VRAM exhaustion."
@@ -8613,7 +8613,7 @@ class MechanisticAuditContract(CoreasonBaseState):
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "trigger_conditions", sorted(self.trigger_conditions))
-        object.__setattr__(self, "target_layers", sorted(self.target_layers))
+        object.__setattr__(self, "target_hook_points", sorted(self.target_hook_points))
         return self
 
 
@@ -8793,19 +8793,19 @@ class NeuralAuditAttestationReceipt(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: An append-only, cryptographically frozen coordinate representing the verifiable output of a MechanisticAuditContract.
 
-    CAUSAL AFFORDANCE: Commits the extracted `SaeFeatureActivationState` matrix (`layer_activations`) to the Merkle-DAG. The `causal_scrubbing_applied` boolean mathematically proves that the orchestrator actively resampled or ablated the circuit to confirm direct causal responsibility.
+    CAUSAL AFFORDANCE: Commits the extracted `SaeFeatureActivationState` matrix (`hook_activations`) to the Merkle-DAG. The `causal_scrubbing_applied` boolean mathematically proves that the orchestrator actively resampled or ablated the circuit to confirm direct causal responsibility.
 
-    EPISTEMIC BOUNDS: Cryptographic integrity structurally anchored by `audit_cid` (128-char CID regex). The `@model_validator` sorts each `SaeFeatureActivationState` list within `layer_activations` by `feature_index`, guaranteeing zero-variance RFC 8785 Merkle-DAG hashing.
+    EPISTEMIC BOUNDS: Cryptographic integrity structurally anchored by `audit_cid` (128-char CID regex). The `@model_validator` sorts each `SaeFeatureActivationState` list within `hook_activations` by `feature_index`, guaranteeing zero-variance RFC 8785 Merkle-DAG hashing.
 
-    MCP ROUTING TRIGGERS: Causal Scrubbing, Epistemic Provenance, Mechanistic Audit, RFC 8785 Canonicalization, Cryptographic Brain-Scan
+    MCP ROUTING TRIGGERS: Causal Scrubbing, Epistemic Provenance, Mechanistic Audit, RFC 8785 Canonicalization, Cryptographic Brain-Scan, TransformerLens, SAELens
 
     """
 
     audit_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
     )
-    layer_activations: dict[int, list[SaeFeatureActivationState]] = Field(
-        description="A mapping of specific transformer layer indices to their top-k activated SAE features."
+    hook_activations: dict[str, list[SaeFeatureActivationState]] = Field(
+        description="A mapping of specific TransformerLens hook points to their top-k activated SAE features."
     )
     causal_scrubbing_applied: bool = Field(
         default=False,
@@ -8816,12 +8816,12 @@ class NeuralAuditAttestationReceipt(CoreasonBaseState):
     def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(
             self,
-            "layer_activations",
-            {k: sorted(v, key=operator.attrgetter("feature_index")) for k, v in self.layer_activations.items()},
+            "hook_activations",
+            {k: sorted(v, key=operator.attrgetter("feature_index")) for k, v in self.hook_activations.items()},
         )
-        if getattr(self, "layer_activations", None) is not None:
+        if getattr(self, "hook_activations", None) is not None:
             object.__setattr__(
-                self, "layer_activations", sorted(self.layer_activations, key=operator.attrgetter("layer_index"))
+                self, "hook_activations", {k: self.hook_activations[k] for k in sorted(self.hook_activations.keys())}
             )
         return self
 
