@@ -53,11 +53,11 @@ export type TimeDerivativeVector = string | null;
  */
 export type SteeringVectorHash = string;
 /**
- * The specific transformer layer indices where this vector must be applied.
+ * The specific TransformerLens hook points (e.g., 'blocks.12.hook_resid_post') where this vector must be applied.
  *
  * @minItems 1
  */
-export type InjectionLayers = [number, ...number[]];
+export type TargetHookPoints = [string, ...string[]];
 /**
  * The mathematical magnitude/strength of the injection (can be negative for ablation).
  */
@@ -2181,9 +2181,9 @@ export type PermittedClassificationTiers = [SemanticClassificationProfile, ...Se
 /**
  * AGENT INSTRUCTION: Implements SPIFFE/SPIRE workload identity bounds and Service Mesh data sensitivity labels, establishing the foundational mathematical axis for Information Flow Control across the distributed swarm via Envoy delegation.
  *
- * CAUSAL AFFORDANCE: Physically authorizes or severs the projection of semantic payloads. By exposing rich comparison operators (e.g., `<=`), it enables the orchestrator's verification engine to natively execute mathematical dominance checks between a payload's classification and an agent's SPIFFE Verifiable Identity Document (SVID).
+ * CAUSAL AFFORDANCE: Physically authorizes or severs the projection of semantic payloads. In an Envoy-native OPA policy enforcement model, this label acts as the primary metadata selector for decentralized identity verification between a payload and an agent's SPIFFE Verifiable Identity Document (SVID).
  *
- * EPISTEMIC BOUNDS: Constrained to a strict, 4-dimensional string literal space to prevent the hallucination of unauthorized clearance levels. The internal `clearance_level` property maps these strings to an immutable integer hierarchy [0, 1, 2, 3], guaranteeing deterministic threshold evaluation for mTLS delegation.
+ * EPISTEMIC BOUNDS: Constrained to a strict, 4-dimensional string literal space to prevent the hallucination of unauthorized workload labels. The platform delegating to mTLS and OPA for enforcement, removing the requirement for scalar manifest-level dominance checks.
  *
  * MCP ROUTING TRIGGERS: SPIFFE/SPIRE, Envoy Service Mesh, Workload Identity, mTLS Delegation, Epistemic Quarantine
  */
@@ -2296,11 +2296,11 @@ export type TriggerConditions = [
   ...("on_tool_call" | "on_belief_mutation" | "on_quarantine" | "on_falsification")[]
 ];
 /**
- * The specific transformer block indices the execution engine must extract from.
+ * The specific TransformerLens hook points the execution engine must extract from.
  *
  * @minItems 1
  */
-export type TargetLayers = [number, ...number[]];
+export type TargetHookPoints1 = [string, ...string[]];
 /**
  * The top-k features to extract, preventing VRAM exhaustion.
  */
@@ -2514,9 +2514,9 @@ export type RuleCid = string;
 /**
  * AGENT INSTRUCTION: Implements SPIFFE/SPIRE workload identity bounds and Service Mesh data sensitivity labels, establishing the foundational mathematical axis for Information Flow Control across the distributed swarm via Envoy delegation.
  *
- * CAUSAL AFFORDANCE: Physically authorizes or severs the projection of semantic payloads. By exposing rich comparison operators (e.g., `<=`), it enables the orchestrator's verification engine to natively execute mathematical dominance checks between a payload's classification and an agent's SPIFFE Verifiable Identity Document (SVID).
+ * CAUSAL AFFORDANCE: Physically authorizes or severs the projection of semantic payloads. In an Envoy-native OPA policy enforcement model, this label acts as the primary metadata selector for decentralized identity verification between a payload and an agent's SPIFFE Verifiable Identity Document (SVID).
  *
- * EPISTEMIC BOUNDS: Constrained to a strict, 4-dimensional string literal space to prevent the hallucination of unauthorized clearance levels. The internal `clearance_level` property maps these strings to an immutable integer hierarchy [0, 1, 2, 3], guaranteeing deterministic threshold evaluation for mTLS delegation.
+ * EPISTEMIC BOUNDS: Constrained to a strict, 4-dimensional string literal space to prevent the hallucination of unauthorized workload labels. The platform delegating to mTLS and OPA for enforcement, removing the requirement for scalar manifest-level dominance checks.
  *
  * MCP ROUTING TRIGGERS: SPIFFE/SPIRE, Envoy Service Mesh, Workload Identity, mTLS Delegation, Epistemic Quarantine
  */
@@ -2558,11 +2558,11 @@ export type ActionOnViolation = "drop" | "quarantine" | "redact";
  */
 export type TargetFeatureIndex = number;
 /**
- * The specific transformer layer indices where this feature activation must be monitored.
+ * The specific TransformerLens hook points where this feature activation must be monitored.
  *
  * @minItems 1
  */
-export type MonitoredLayers = [number, ...number[]];
+export type MonitoredHookPoints = [string, ...string[]];
 /**
  * The mathematical magnitude limit. If the feature activates beyond this, the firewall trips.
  */
@@ -6174,17 +6174,17 @@ export interface VectorEmbeddingState {
 /**
  * CoReason Shared Kernel Ontology
  *
- * AGENT INSTRUCTION: Establishes a hardware-level Representation Engineering (RepE) directive to mechanically manipulate latent dimensions via forward-pass tensor injection.
+ * AGENT INSTRUCTION: Establishes a hardware-level Representation Engineering (RepE) directive to mechanically manipulate latent dimensions via forward-pass tensor injection. Execution of this policy is strictly delegated to the external `TransformerLens` substrate to preserve the Hollow Data Plane constraints.
  *
- * CAUSAL AFFORDANCE: Physically forces an additive, ablation, or clamping operation onto the model's residual stream at specific `injection_layers`, steering the generator away from unstable hallucination geometries prior to token projection.
+ * CAUSAL AFFORDANCE: Physically forces an additive, ablation, or clamping operation onto the model's residual stream at specific `target_hook_points`, steering the generator away from unstable hallucination geometries prior to token projection.
  *
- * EPISTEMIC BOUNDS: Cryptographically locked by `steering_vector_hash` (SHA-256 pattern `^[a-f0-9]{64}$`). `scaling_factor` is bounded above (`le=100.0`) but unbounded below, permitting negative magnitudes for ablation. The `@model_validator` deterministically sorts `injection_layers` (each `ge=0`).
+ * EPISTEMIC BOUNDS: Cryptographically locked by `steering_vector_hash` (SHA-256 pattern `^[a-f0-9]{64}$`). `scaling_factor` is bounded above (`le=100.0`) but unbounded below, permitting negative magnitudes for ablation. The `@model_validator` deterministically sorts `target_hook_points`.
  *
- * MCP ROUTING TRIGGERS: Representation Engineering, RepE, Activation Steering, Residual Stream Ablation, Concept Vectors
+ * MCP ROUTING TRIGGERS: Representation Engineering, RepE, Activation Steering, Residual Stream Ablation, Concept Vectors, TransformerLens, SAELens
  */
 export interface ActivationSteeringContract {
   steering_vector_hash: SteeringVectorHash;
-  injection_layers: InjectionLayers;
+  target_hook_points: TargetHookPoints;
   scaling_factor: ScalingFactor;
   vector_modality: VectorModality;
 }
@@ -9238,17 +9238,17 @@ export interface NeuroSymbolicHandoffContract {
 /**
  * CoReason Shared Kernel Ontology
  *
- * AGENT INSTRUCTION: Establishes a rigorous Mechanistic Interpretability brain-scan protocol, executing real-time latent state extraction across targeted neural circuits.
+ * AGENT INSTRUCTION: Establishes a rigorous Mechanistic Interpretability brain-scan protocol, executing real-time latent state extraction across targeted neural circuits. Execution of this policy is strictly delegated to the external `TransformerLens` substrate to preserve the Hollow Data Plane constraints.
  *
- * CAUSAL AFFORDANCE: Authorizes the orchestrator to halt token generation upon specific `trigger_conditions` to physically slice, quantify, and export the top-k SAE features from the designated `target_layers`.
+ * CAUSAL AFFORDANCE: Authorizes the orchestrator to halt token generation upon specific `trigger_conditions` to physically slice, quantify, and export the top-k SAE features from the designated `target_hook_points`.
  *
- * EPISTEMIC BOUNDS: GPU VRAM exhaustion is mathematically prevented by capping `max_features_per_layer` (`gt=0, le=18446744073709551615`). The `@model_validator` deterministically sorts conditions and layers for RFC 8785 hashing. System integrity enforced via `require_zk_commitments`.
+ * EPISTEMIC BOUNDS: GPU VRAM exhaustion is mathematically prevented by capping `max_features_per_layer` (`gt=0, le=18446744073709551615`). The `@model_validator` deterministically sorts conditions and hook points for RFC 8785 hashing. System integrity enforced via `require_zk_commitments`.
  *
- * MCP ROUTING TRIGGERS: Latent State Extraction, Mechanistic Interpretability, Sparse Autoencoder, Zero-Knowledge Commitments, VRAM Optimization
+ * MCP ROUTING TRIGGERS: Latent State Extraction, Mechanistic Interpretability, Sparse Autoencoder, Zero-Knowledge Commitments, VRAM Optimization, TransformerLens, SAELens
  */
 export interface MechanisticAuditContract {
   trigger_conditions: TriggerConditions;
-  target_layers: TargetLayers;
+  target_hook_points: TargetHookPoints1;
   max_features_per_layer: MaxFeaturesPerLayer;
   require_zk_commitments?: RequireZkCommitments;
 }
@@ -9682,17 +9682,17 @@ export interface SemanticFirewallPolicy {
 /**
  * CoReason Shared Kernel Ontology
  *
- * AGENT INSTRUCTION: Implements Sparse Dictionary Learning and Mechanistic Interpretability to actively monitor and steer monosemantic neural circuits during the model's forward pass.
+ * AGENT INSTRUCTION: Implements Sparse Dictionary Learning and Mechanistic Interpretability to actively monitor and steer monosemantic neural circuits during the model's forward pass. Execution of this policy is strictly delegated to the external `TransformerLens` substrate to preserve the Hollow Data Plane constraints.
  *
  * CAUSAL AFFORDANCE: Executes real-time tensor remediation—clamping, halting, quarantining, or smoothly decaying residual stream activations—when specific features diverge toward adversarial or hallucinated geometries.
  *
  * EPISTEMIC BOUNDS: The `max_activation_threshold` (`ge=0.0, le=18446744073709551615.0`) physically bounds the continuous Euclidean magnitude of the `target_feature_index`. Topologically locked to SAE matrix via `sae_dictionary_hash` (SHA-256). The `@model_validator` `validate_smooth_decay` mathematically enforces asymptotic bounds.
  *
- * MCP ROUTING TRIGGERS: Mechanistic Interpretability, Sparse Autoencoders, Residual Stream Steering, Tensor Remediation, Monosemantic Features
+ * MCP ROUTING TRIGGERS: Mechanistic Interpretability, Sparse Autoencoders, Residual Stream Steering, Tensor Remediation, Monosemantic Features, TransformerLens, SAELens
  */
 export interface SaeLatentPolicy {
   target_feature_index: TargetFeatureIndex;
-  monitored_layers: MonitoredLayers;
+  monitored_hook_points: MonitoredHookPoints;
   max_activation_threshold: MaxActivationThreshold;
   violation_action: ViolationAction1;
   clamp_value?: ClampValue;
@@ -11524,21 +11524,21 @@ export interface EmbodiedSensoryVectorProfile {
  *
  * AGENT INSTRUCTION: An append-only, cryptographically frozen coordinate representing the verifiable output of a MechanisticAuditContract.
  *
- * CAUSAL AFFORDANCE: Commits the extracted `SaeFeatureActivationState` matrix (`layer_activations`) to the Merkle-DAG. The `causal_scrubbing_applied` boolean mathematically proves that the orchestrator actively resampled or ablated the circuit to confirm direct causal responsibility.
+ * CAUSAL AFFORDANCE: Commits the extracted `SaeFeatureActivationState` matrix (`hook_activations`) to the Merkle-DAG. The `causal_scrubbing_applied` boolean mathematically proves that the orchestrator actively resampled or ablated the circuit to confirm direct causal responsibility.
  *
- * EPISTEMIC BOUNDS: Cryptographic integrity structurally anchored by `audit_cid` (128-char CID regex). The `@model_validator` sorts each `SaeFeatureActivationState` list within `layer_activations` by `feature_index`, guaranteeing zero-variance RFC 8785 Merkle-DAG hashing.
+ * EPISTEMIC BOUNDS: Cryptographic integrity structurally anchored by `audit_cid` (128-char CID regex). The `@model_validator` sorts each `SaeFeatureActivationState` list within `hook_activations` by `feature_index`, guaranteeing zero-variance RFC 8785 Merkle-DAG hashing.
  *
- * MCP ROUTING TRIGGERS: Causal Scrubbing, Epistemic Provenance, Mechanistic Audit, RFC 8785 Canonicalization, Cryptographic Brain-Scan
+ * MCP ROUTING TRIGGERS: Causal Scrubbing, Epistemic Provenance, Mechanistic Audit, RFC 8785 Canonicalization, Cryptographic Brain-Scan, TransformerLens, SAELens
  */
 export interface NeuralAuditAttestationReceipt {
   audit_cid: AuditCid;
-  layer_activations: LayerActivations;
+  hook_activations: HookActivations;
   causal_scrubbing_applied?: CausalScrubbingApplied;
 }
 /**
- * A mapping of specific transformer layer indices to their top-k activated SAE features.
+ * A mapping of specific TransformerLens hook points to their top-k activated SAE features.
  */
-export interface LayerActivations {
+export interface HookActivations {
   [k: string]: SaeFeatureActivationState[];
 }
 /**
