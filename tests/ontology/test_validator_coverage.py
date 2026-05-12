@@ -17,7 +17,6 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    ActiveInferenceEpochStateState,
     AdversarialSimulationProfile,
     AgentBidIntent,
     AnchoringPolicy,
@@ -58,17 +57,6 @@ class TestSecureSubSessionState:
             description="test session",
         )
         assert obj.session_cid == "sess-1"
-
-
-class TestActiveInferenceEpochStateState:
-    """Exercise epoch state construction."""
-
-    def test_basic_epoch(self) -> None:
-        obj = ActiveInferenceEpochStateState(
-            epoch_cid="ep-1",
-            current_free_energy=0.5,
-        )
-        assert obj.current_free_energy == 0.5
 
 
 class TestVectorEmbeddingState:

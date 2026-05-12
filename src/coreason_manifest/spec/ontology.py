@@ -637,7 +637,6 @@ def _inject_thermodynamic_cluster(schema: dict[str, Any]) -> None:
     _inject_topological_lock(schema)
     schema["x-domain-cluster"] = "thermodynamic_orchestration"
     schema["x-synergistic-classes"] = [
-        "ComputationalThermodynamicsProfileProfile",
         "ComputeRateContract",
         "FreeEnergyExhaustion",
     ]
@@ -966,39 +965,6 @@ class CryptographicProvenancePolicy(CoreasonBaseState):
     provenance_trace_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")] | None = Field(default=None)
 
 
-class ActiveInferenceEpochStateState(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: A macroscopic container tracking the directed graph of evolutionary retries across an entire task lifecycle.
-
-    CAUSAL AFFORDANCE: Aggregates free energy across multiple EpistemicRejectionReceipts to trigger thermodynamic circuit breakers when convergence fails.
-
-    EPISTEMIC BOUNDS: Aggregated free energy must be non-negative. Rejection history is deterministically sorted by receipt_cid for immutable hashing.
-
-    MCP ROUTING TRIGGERS: Active Inference Loop, Thermodynamic Circuit Breaker, Epistemic Aggregation, Retry Ledger
-    """
-
-    epoch_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
-    target_objective_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")] | None = Field(default=None)
-    rejection_history: list[EpistemicRejectionReceipt] = Field(default_factory=list)
-    current_free_energy: float
-    epoch_status: Literal["active_inference_loop"] = Field(default="active_inference_loop")
-
-    @model_validator(mode="after")
-    def _enforce_canonical_sort(self) -> Self:
-        object.__setattr__(
-            self, "rejection_history", sorted(self.rejection_history, key=operator.attrgetter("receipt_cid"))
-        )
-        return self
-
-    @model_validator(mode="after")
-    def validate_free_energy_aggregation(self) -> Self:
-        if math.isnan(self.current_free_energy) or math.isinf(self.current_free_energy):
-            raise ValueError(f"Mathematical paradox: Free Energy cannot be {self.current_free_energy}")
-        if self.current_free_energy < 0.0:
-            raise ValueError(f"Mathematical paradox: Negative free energy detected (v={self.current_free_energy}).")
-        return self
-
-
 class ThermodynamicState(StrEnum):
     """
     AGENT INSTRUCTION: A rigid string enumeration mapping the kinetic liveness of the computational budget.
@@ -1012,58 +978,6 @@ class ThermodynamicState(StrEnum):
 
     ACTIVE_DIFFUSION = "ACTIVE_DIFFUSION"
     ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION = "ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION"
-
-
-class ComputationalThermodynamicsProfileProfile(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: The macroscopic envelope that tracks the thermodynamic cost of stochastic ideation and violently halts execution when energy budgets or spatial limits are depleted.
-
-    CAUSAL AFFORDANCE: Operates as the absolute mathematical circuit breaker for MCTS DAG expansion, physically revoking generative privileges if thresholds are breached.
-
-    EPISTEMIC BOUNDS: Bounded by strict topological limits: max_stochastic_diffusions (ge=1) and computational_free_energy_budget (ge=0.0). current_diffusions must be strictly <= max_stochastic_diffusions.
-
-    MCP ROUTING TRIGGERS: Computational Thermodynamics, Spatial Circuit Breaker, MCTS Halting, Epistemic Bounding, Thermodynamic Cost
-    """
-
-    thermodynamics_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
-    target_topology_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
-    max_stochastic_diffusions: int = Field(ge=1)
-    computational_free_energy_budget: float = Field(ge=0.0)
-    current_diffusions: int = Field(default=0, ge=0)
-    remaining_free_energy: float
-    entropy_derivative_delta: float | None = Field(default=None)
-    stagnation_tolerance_epsilon: float = Field(default=0.001, ge=0.0)
-    system_state: ThermodynamicState = Field(default=ThermodynamicState.ACTIVE_DIFFUSION)
-
-    @model_validator(mode="after")
-    def validate_thermodynamic_circuit_breaker(self) -> Self:
-        import math
-
-        if self.current_diffusions > self.max_stochastic_diffusions:
-            raise ValueError("Topological Fracture: current_diffusions strictly exceeds max_stochastic_diffusions.")
-
-        # Trap NaN / Infinity to prevent circuit breaker bypass
-        if math.isnan(self.remaining_free_energy) or math.isinf(self.remaining_free_energy):
-            raise ValueError("Mathematical Paradox: remaining_free_energy cannot be NaN or Infinity.")
-
-        if self.entropy_derivative_delta is not None and (
-            math.isnan(self.entropy_derivative_delta) or math.isinf(self.entropy_derivative_delta)
-        ):
-            raise ValueError("Mathematical Paradox: entropy_derivative_delta cannot be NaN or Infinity.")
-
-        # Circuit Breaker 1: Absolute Energy Depletion
-        if self.remaining_free_energy <= 0.0:
-            object.__setattr__(self, "system_state", ThermodynamicState.ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION)
-            return self
-
-        # Circuit Breaker 2: Thermodynamic Stagnation (Flat Loss Gradient)
-        if (
-            self.entropy_derivative_delta is not None
-            and abs(self.entropy_derivative_delta) < self.stagnation_tolerance_epsilon
-        ):
-            object.__setattr__(self, "system_state", ThermodynamicState.ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION)
-
-        return self
 
 
 class TraceContextState(CoreasonBaseState):
@@ -4552,45 +4466,6 @@ class CrystallizationPolicy(CoreasonBaseState):
     )
     target_cognitive_tier: Literal["semantic", "working"] = Field(
         description="The destination tier where the compressed rule will be stored."
-    )
-
-
-class DimensionalProjectionContract(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Formalizes a linear algebraic transformation (e.g.,
-    Singular Value Decomposition) mapping one embedding manifold to another,
-    grounded in the Johnson-Lindenstrauss Lemma. As a ...Contract suffix, this
-    enforces rigid mathematical boundaries globally.
-
-    CAUSAL AFFORDANCE: Authorizes the orchestrator to translate latent vectors
-    across zero-trust network boundaries, bridging incompatible LLM spaces. The
-    source_matrix_name and target_matrix_name (both max_length=2000) identify the
-    origin and destination geometries.
-
-    EPISTEMIC BOUNDS: Translation fidelity is physically proven by the
-    isometry_preservation_score (ge=0.0, le=1.0), ensuring Earth Mover's Distance
-    preservation. Cryptographic integrity is locked via projection_matrix_hash
-    (SHA-256 regex ^[a-f0-9]{64}$).
-
-    MCP ROUTING TRIGGERS: Singular Value Decomposition, Johnson-Lindenstrauss
-    Lemma, Tensor Projection, Earth Mover's Distance, Latent Translation
-    """
-
-    source_matrix_name: Annotated[str, StringConstraints(max_length=2000)] = Field(
-        description="The native embedding model of the origin agent."
-    )
-    target_matrix_name: Annotated[str, StringConstraints(max_length=2000)] = Field(
-        description="The native embedding model of the destination agent."
-    )
-    projection_matrix_hash: Annotated[
-        str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")
-    ] = Field(
-        description="The SHA-256 hash of the exact mathematical matrix used to compress or translate the latent dimensions."
-    )
-    isometry_preservation_score: float = Field(
-        ge=0.0,
-        le=1.0,
-        description="Mathematical proof (e.g., Earth Mover's Distance preservation) of how accurately relative semantic distances were maintained during projection.",
     )
 
 
@@ -15085,8 +14960,6 @@ StochasticTopologyManifestManifest.model_rebuild()
 CryptographicProvenancePolicy.model_rebuild()
 TopologicalProjectionIntent.model_rebuild()
 EpistemicRejectionReceipt.model_rebuild()
-ActiveInferenceEpochStateState.model_rebuild()
-ComputationalThermodynamicsProfileProfile.model_rebuild()
 CognitiveSwarmDeploymentManifest.model_rebuild()
 
 DocumentKnowledgeGraphManifest.model_rebuild()
