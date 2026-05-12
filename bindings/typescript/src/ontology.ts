@@ -5293,14 +5293,13 @@ export type MutableMatrix = {
  */
 export type IsDelta = boolean;
 export type FaultCategoryProfile =
-  | "context_overload"
-  | "incorrect_context"
-  | "format_corruption"
-  | "latency_spike"
-  | "token_throttle"
-  | "network_degradation"
-  | "temporal_dilation"
-  | "dependency_blackout";
+  | "pod_kill"
+  | "network_delay"
+  | "cpu_burn"
+  | "time_shift"
+  | "io_fault"
+  | "dns_fault"
+  | "kernel_panic";
 /**
  * The mathematical dialect and theorem prover used to compile the proof.
  */
@@ -8302,15 +8301,7 @@ export interface FaultInjectionProfile {
   /**
    * The specific type of fault to inject.
    */
-  fault_category:
-    | "context_overload"
-    | "incorrect_context"
-    | "format_corruption"
-    | "latency_spike"
-    | "token_throttle"
-    | "network_degradation"
-    | "temporal_dilation"
-    | "dependency_blackout";
+  fault_category: "pod_kill" | "network_delay" | "cpu_burn" | "time_shift" | "io_fault" | "dns_fault" | "kernel_panic";
   target_node_cid?: TargetNodeCid1;
   intensity: Intensity;
 }

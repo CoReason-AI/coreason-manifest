@@ -257,14 +257,13 @@ class SemanticClassificationProfile(StrEnum):
 
 
 type FaultCategoryProfile = Literal[
-    "context_overload",
-    "incorrect_context",
-    "format_corruption",
-    "latency_spike",
-    "token_throttle",
-    "network_degradation",
-    "temporal_dilation",
-    "dependency_blackout",
+    "pod_kill",
+    "network_delay",
+    "cpu_burn",
+    "time_shift",
+    "io_fault",
+    "dns_fault",
+    "kernel_panic",
 ]
 type CognitiveTierProfile = Literal["working", "episodic", "semantic"]
 type NodeCIDState = Annotated[
