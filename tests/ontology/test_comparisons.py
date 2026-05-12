@@ -3,10 +3,10 @@ from coreason_manifest.spec.ontology import RiskLevelPolicy, SemanticClassificat
 
 def test_semantic_classification_profile_exists() -> None:
     # Verify the profile members exist
-    assert SemanticClassificationProfile.PUBLIC == "public"
-    assert SemanticClassificationProfile.INTERNAL == "internal"
-    assert SemanticClassificationProfile.CONFIDENTIAL == "confidential"
-    assert SemanticClassificationProfile.RESTRICTED == "restricted"
+    assert SemanticClassificationProfile.PUBLIC.value == "public"
+    assert SemanticClassificationProfile.INTERNAL.value == "internal"
+    assert SemanticClassificationProfile.CONFIDENTIAL.value == "confidential"
+    assert SemanticClassificationProfile.RESTRICTED.value == "restricted"
 
 
 def test_risk_level_policy_comparisons() -> None:
