@@ -213,7 +213,7 @@ class TabularEncodingProfile(StrEnum):
     GRAPH_CONVOLUTIONAL_FLATTENING = "graph_convolutional_flattening"
 
 
-class ManifoldAlignmentMetricProfile(StrEnum):
+class ManifoldAlignmentMetricProfileProfile(StrEnum):
     """AGENT INSTRUCTION: Defines the linear algebraic or optimal transport function used to mathematically measure the geometric distance between the telemetry vector and the standard ontology index."""
 
     GROMOV_WASSERSTEIN = "gromov_wasserstein"
@@ -242,13 +242,13 @@ class RhetoricalStructureProfile(StrEnum):
 
 class SemanticClassificationProfile(StrEnum):
     """
-    AGENT INSTRUCTION: Implements the Bell-LaPadula Model and Lattice-Based Access Control (LBAC), establishing the foundational mathematical axis for Information Flow Control across the distributed swarm.
+    AGENT INSTRUCTION: Implements SPIFFE/SPIRE workload identity bounds and Service Mesh data sensitivity labels, establishing the foundational mathematical axis for Information Flow Control across the distributed swarm via Envoy delegation.
 
-    CAUSAL AFFORDANCE: Physically authorizes or severs the projection of semantic payloads. By exposing rich comparison operators (e.g., `<=`), it enables the orchestrator's verification engine to natively execute mathematical dominance checks between a payload's classification and an agent's clearance partition.
+    CAUSAL AFFORDANCE: Physically authorizes or severs the projection of semantic payloads. By exposing rich comparison operators (e.g., `<=`), it enables the orchestrator's verification engine to natively execute mathematical dominance checks between a payload's classification and an agent's SPIFFE Verifiable Identity Document (SVID).
 
-    EPISTEMIC BOUNDS: Constrained to a strict, 4-dimensional string literal space to prevent the hallucination of unauthorized clearance levels. The internal `clearance_level` property maps these strings to an immutable integer hierarchy [0, 1, 2, 3], guaranteeing deterministic threshold evaluation.
+    EPISTEMIC BOUNDS: Constrained to a strict, 4-dimensional string literal space to prevent the hallucination of unauthorized clearance levels. The internal `clearance_level` property maps these strings to an immutable integer hierarchy [0, 1, 2, 3], guaranteeing deterministic threshold evaluation for mTLS delegation.
 
-    MCP ROUTING TRIGGERS: Bell-LaPadula Model, Lattice-Based Access Control, Mandatory Access Control, Information Flow Control, Epistemic Quarantine
+    MCP ROUTING TRIGGERS: SPIFFE/SPIRE, Envoy Service Mesh, Workload Identity, mTLS Delegation, Epistemic Quarantine
     """
 
     PUBLIC = "public"
@@ -637,7 +637,6 @@ def _inject_thermodynamic_cluster(schema: dict[str, Any]) -> None:
     _inject_topological_lock(schema)
     schema["x-domain-cluster"] = "thermodynamic_orchestration"
     schema["x-synergistic-classes"] = [
-        "ComputationalThermodynamicsProfile",
         "ComputeRateContract",
         "FreeEnergyExhaustion",
     ]
@@ -646,7 +645,7 @@ def _inject_thermodynamic_cluster(schema: dict[str, Any]) -> None:
 def _inject_security_cluster(schema: dict[str, Any]) -> None:
     _inject_topological_lock(schema)
     schema["x-domain-cluster"] = "zero_trust_security"
-    schema["x-synergistic-classes"] = ["FederatedBilateralSLA", "HardwareEnclaveReceipt", "TransportSSRFBoundary"]
+    schema["x-synergistic-classes"] = ["HardwareEnclaveReceipt", "TransportSSRFBoundary"]
 
 
 def _inject_diff_examples_and_epistemic_cluster(schema: dict[str, Any]) -> None:
@@ -658,7 +657,7 @@ def _inject_diff_examples_and_epistemic_cluster(schema: dict[str, Any]) -> None:
 def _inject_sim_examples_and_security_cluster(schema: dict[str, Any]) -> None:
     _inject_sim_examples(schema)
     schema["x-domain-cluster"] = "zero_trust_security"
-    schema["x-synergistic-classes"] = ["FederatedBilateralSLA", "HardwareEnclaveReceipt", "TransportSSRFBoundary"]
+    schema["x-synergistic-classes"] = ["HardwareEnclaveReceipt", "TransportSSRFBoundary"]
 
 
 def _inject_dag_examples_and_routing_cluster(schema: dict[str, Any]) -> None:
@@ -876,7 +875,7 @@ class StochasticNodeState(CoreasonBaseState):
         return v
 
 
-class HypothesisSuperpositionState(CoreasonBaseState):
+class HypothesisSuperpositionStateState(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Maintains the quantum-like probability mass of mutually exclusive semantic manifolds, delaying wave collapse until deterministically evaluated.
 
@@ -909,7 +908,7 @@ class HypothesisSuperpositionState(CoreasonBaseState):
         return self
 
 
-class StochasticTopologyManifest(CoreasonBaseState):
+class StochasticTopologyManifestManifest(CoreasonBaseState):
     """
     AGENT INSTRUCTION: The structurally unbounded root container modeling multi-agent generative reasoning as a Topological DAG.
 
@@ -924,7 +923,7 @@ class StochasticTopologyManifest(CoreasonBaseState):
     topology_class: Literal["stochastic_ensemble"] = Field(default="stochastic_ensemble")
     phase: IdeationPhaseProfile = Field()
     stochastic_graph: list[StochasticNodeState] = Field()
-    superposition: HypothesisSuperpositionState | None = Field(default=None)
+    superposition: HypothesisSuperpositionStateState | None = Field(default=None)
     epistemic_status: Literal["stochastically_unbounded"] = Field(default="stochastically_unbounded")
 
     @model_validator(mode="after")
@@ -966,39 +965,6 @@ class CryptographicProvenancePolicy(CoreasonBaseState):
     provenance_trace_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")] | None = Field(default=None)
 
 
-class ActiveInferenceEpochState(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: A macroscopic container tracking the directed graph of evolutionary retries across an entire task lifecycle.
-
-    CAUSAL AFFORDANCE: Aggregates free energy across multiple EpistemicRejectionReceipts to trigger thermodynamic circuit breakers when convergence fails.
-
-    EPISTEMIC BOUNDS: Aggregated free energy must be non-negative. Rejection history is deterministically sorted by receipt_cid for immutable hashing.
-
-    MCP ROUTING TRIGGERS: Active Inference Loop, Thermodynamic Circuit Breaker, Epistemic Aggregation, Retry Ledger
-    """
-
-    epoch_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
-    target_objective_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")] | None = Field(default=None)
-    rejection_history: list[EpistemicRejectionReceipt] = Field(default_factory=list)
-    current_free_energy: float
-    epoch_status: Literal["active_inference_loop"] = Field(default="active_inference_loop")
-
-    @model_validator(mode="after")
-    def _enforce_canonical_sort(self) -> Self:
-        object.__setattr__(
-            self, "rejection_history", sorted(self.rejection_history, key=operator.attrgetter("receipt_cid"))
-        )
-        return self
-
-    @model_validator(mode="after")
-    def validate_free_energy_aggregation(self) -> Self:
-        if math.isnan(self.current_free_energy) or math.isinf(self.current_free_energy):
-            raise ValueError(f"Mathematical paradox: Free Energy cannot be {self.current_free_energy}")
-        if self.current_free_energy < 0.0:
-            raise ValueError(f"Mathematical paradox: Negative free energy detected (v={self.current_free_energy}).")
-        return self
-
-
 class ThermodynamicState(StrEnum):
     """
     AGENT INSTRUCTION: A rigid string enumeration mapping the kinetic liveness of the computational budget.
@@ -1012,58 +978,6 @@ class ThermodynamicState(StrEnum):
 
     ACTIVE_DIFFUSION = "ACTIVE_DIFFUSION"
     ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION = "ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION"
-
-
-class ComputationalThermodynamicsProfile(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: The macroscopic envelope that tracks the thermodynamic cost of stochastic ideation and violently halts execution when energy budgets or spatial limits are depleted.
-
-    CAUSAL AFFORDANCE: Operates as the absolute mathematical circuit breaker for MCTS DAG expansion, physically revoking generative privileges if thresholds are breached.
-
-    EPISTEMIC BOUNDS: Bounded by strict topological limits: max_stochastic_diffusions (ge=1) and computational_free_energy_budget (ge=0.0). current_diffusions must be strictly <= max_stochastic_diffusions.
-
-    MCP ROUTING TRIGGERS: Computational Thermodynamics, Spatial Circuit Breaker, MCTS Halting, Epistemic Bounding, Thermodynamic Cost
-    """
-
-    thermodynamics_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
-    target_topology_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
-    max_stochastic_diffusions: int = Field(ge=1)
-    computational_free_energy_budget: float = Field(ge=0.0)
-    current_diffusions: int = Field(default=0, ge=0)
-    remaining_free_energy: float
-    entropy_derivative_delta: float | None = Field(default=None)
-    stagnation_tolerance_epsilon: float = Field(default=0.001, ge=0.0)
-    system_state: ThermodynamicState = Field(default=ThermodynamicState.ACTIVE_DIFFUSION)
-
-    @model_validator(mode="after")
-    def validate_thermodynamic_circuit_breaker(self) -> Self:
-        import math
-
-        if self.current_diffusions > self.max_stochastic_diffusions:
-            raise ValueError("Topological Fracture: current_diffusions strictly exceeds max_stochastic_diffusions.")
-
-        # Trap NaN / Infinity to prevent circuit breaker bypass
-        if math.isnan(self.remaining_free_energy) or math.isinf(self.remaining_free_energy):
-            raise ValueError("Mathematical Paradox: remaining_free_energy cannot be NaN or Infinity.")
-
-        if self.entropy_derivative_delta is not None and (
-            math.isnan(self.entropy_derivative_delta) or math.isinf(self.entropy_derivative_delta)
-        ):
-            raise ValueError("Mathematical Paradox: entropy_derivative_delta cannot be NaN or Infinity.")
-
-        # Circuit Breaker 1: Absolute Energy Depletion
-        if self.remaining_free_energy <= 0.0:
-            object.__setattr__(self, "system_state", ThermodynamicState.ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION)
-            return self
-
-        # Circuit Breaker 2: Thermodynamic Stagnation (Flat Loss Gradient)
-        if (
-            self.entropy_derivative_delta is not None
-            and abs(self.entropy_derivative_delta) < self.stagnation_tolerance_epsilon
-        ):
-            object.__setattr__(self, "system_state", ThermodynamicState.ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION)
-
-        return self
 
 
 class TraceContextState(CoreasonBaseState):
@@ -2180,7 +2094,7 @@ class EpistemicRigidityPolicy(CoreasonBaseState):
     )
     required_epistemic_security: EpistemicSecurityPolicy = Field(
         default=EpistemicSecurityPolicy.PUBLIC,
-        description="The minimum Lattice-Based Access Control (LBAC) network perimeter required for the hardware.",
+        description="The minimum SPIFFE/SPIRE workload identity perimeter required for the hardware.",
     )
     minimum_vram_gb: int | None = Field(
         default=None,
@@ -3313,7 +3227,8 @@ class ThoughtBranchState(CoreasonBaseState):
 
 
 type AnyExplorationBranch = Annotated[
-    ThoughtBranchState | StochasticTopologyManifest | StrategicThoughtNodeIntent, Field(discriminator="topology_class")
+    ThoughtBranchState | StochasticTopologyManifestManifest | StrategicThoughtNodeIntent,
+    Field(discriminator="topology_class"),
 ]
 
 
@@ -3486,96 +3401,6 @@ class SpatialToolManifest(CoreasonBaseState):
         default=False,
         description="If True, the orchestrator is authorized to send a SIGINT to abort this tool's execution mid-flight if a BargeInInterruptEvent occurs.",
     )
-
-
-class FederatedBilateralSLA(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Defines the zero-trust structural boundary for multi-tenant federation,
-    securing cross-boundary graph traversal against Shor's algorithm via an optional
-    PostQuantumSignatureReceipt. As an ...SLA suffix, this object enforces rigid mathematical
-    boundaries that the orchestrator must respect globally.
-
-    CAUSAL AFFORDANCE: Unlocks cross-swarm graph bridging by enforcing strict liability,
-    physical location routing, semantic data classification constraints via
-    max_permitted_classification, and ESG carbon intensity limits.
-
-    EPISTEMIC BOUNDS: Economically constrained by liability_limit_magnitude (ge=0,
-    le=18446744073709551615). ESG limits physically bind the node grid to the optional
-    max_permitted_grid_carbon_intensity (ge=0.0, le=18446744073709551615.0). The permitted_geographic_regions
-    array is deterministically sorted via @model_validator for RFC 8785 canonical hashing.
-
-    MCP ROUTING TRIGGERS: Zero-Trust Architecture, Post-Quantum Cryptography, Federated
-    Learning, Bilateral SLA, Data Residency
-    """
-
-    receiving_tenant_cid: Annotated[
-        str, StringConstraints(min_length=1, max_length=255, pattern="^[a-zA-Z0-9_.:-]+$")
-    ] = Field(description="The strict enterprise identifier of the foreign B2B tenant receiving this payload.")
-    max_permitted_classification: SemanticClassificationProfile = Field(
-        description="The absolute highest semantic sensitivity allowed to cross this federated boundary."
-    )
-    liability_limit_magnitude: int = Field(
-        le=18446744073709551615, ge=0, description="The strict magnitude cap on cross-tenant economic liability."
-    )
-    permitted_geographic_regions: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
-        default_factory=list,
-        description="Explicit whitelist of geographic regions or cloud enclaves where execution is structurally permitted (Payload Residency Pinning).",
-    )
-    require_temporal_provenance_proofs: bool = Field(
-        default=False,
-        description="If True, incoming payloads from foreign tenants MUST be accompanied by a ZeroKnowledgeReceipt containing a valid temporal_interval_proof.",
-    )
-    max_permitted_grid_carbon_intensity: float | None = Field(
-        le=18446744073709551615.0,
-        default=None,
-        ge=0.0,
-        description="Absolute structural ESG mandate. The execution graph will quarantine any federated node operating on a grid exceeding this gCO2eq/kWh threshold.",
-    )
-    pq_signature: PostQuantumSignatureReceipt | None = Field(
-        default=None, description="The quantum-resistant signature securing the multi-tenant structural boundary."
-    )
-
-    @model_validator(mode="after")
-    def _enforce_canonical_sort(self) -> Self:
-        object.__setattr__(self, "permitted_geographic_regions", sorted(self.permitted_geographic_regions))
-        return self
-
-
-class FederatedDiscoveryManifest(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Governs the B2B Multi-Swarm Gossip Protocol, establishing the initial
-    Model Context Protocol (MCP) broadcast endpoints for external discovery. As a ...Manifest
-    suffix, this is a declarative, frozen snapshot of N-dimensional geometry at a specific
-    point in time.
-
-    CAUSAL AFFORDANCE: Emits a structured tensor beacon to neighboring swarms, authorizing
-    the initiation of an OntologicalHandshakeReceipt if the supported_ontologies hashes
-    mathematically overlap.
-
-    EPISTEMIC BOUNDS: Geometrically capped by broadcast_endpoints and supported_ontologies
-    string arrays (each max_length=1000). Both are explicitly sorted by the
-    @model_validator (broadcast_endpoints by str key, supported_ontologies alphabetically)
-    to guarantee invariant canonical RFC 8785 hashing across distinct environments.
-
-    MCP ROUTING TRIGGERS: Gossip Protocol, Peer-to-Peer Discovery, Decentralized Federation,
-    Semantic Broadcasting, Tensor Beacon
-    """
-
-    broadcast_endpoints: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
-        max_length=1000, description="The explicit array of strictly bounded MCP URI broadcast endpoints."
-    )
-    supported_ontologies: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
-        max_length=1000,
-        description="The explicit array of cryptographic hashes defining acceptable domain ontologies.",
-    )
-
-    @model_validator(mode="after")
-    def _enforce_canonical_sort(self) -> Self:
-        object.__setattr__(self, "broadcast_endpoints", sorted(self.broadcast_endpoints, key=str))
-        object.__setattr__(self, "supported_ontologies", sorted(self.supported_ontologies))
-        if getattr(self, "supported_ontologies", None) is not None:
-            object.__setattr__(self, "supported_ontologies", sorted(self.supported_ontologies))
-        return self
 
 
 class ActiveInferenceContract(CoreasonBaseState):
@@ -4395,7 +4220,7 @@ class CausalDirectedEdgeState(CoreasonBaseState):
     predicate_curie: Annotated[str, StringConstraints(pattern=r"^[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$")] = Field(
         json_schema_extra={"rdf_edge_property": True}
     )
-    belief_vector: DempsterShaferBeliefVector | None = Field(default=None)
+    belief_vector: DempsterShaferBeliefState | None = Field(default=None)
     grounding_sla: EvidentiaryGroundingSLA | None = Field(default=None)
 
     @model_validator(mode="after")
@@ -4582,41 +4407,6 @@ class CounterfactualRegretEvent(CoreasonBaseState):
     )
 
 
-class CrossSwarmHandshakeState(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Tracks the non-monotonic state transition of a Byzantine-tolerant B2B
-    negotiation between two distinct enterprise tenant CID identifiers (initiating_tenant_cid
-    and receiving_tenant_cid). As a ...State suffix, this is a declarative, frozen snapshot of
-    N-dimensional geometry at a specific point in time.
-
-    CAUSAL AFFORDANCE: Transitions the federated network from a proposed capability swap into
-    an active OntologicalHandshakeReceipt, forcing the execution of the strict offered_sla
-    (FederatedBilateralSLA).
-
-    EPISTEMIC BOUNDS: Cryptographically bounded by handshake_cid (CID regex
-    ^[a-zA-Z0-9_.:-]+$). The negotiation lifecycle is physically constrained to the strict
-    Literal automaton ["proposed", "negotiating", "aligned", "rejected"] via FSM Logit
-    Masking, preventing execution deadlocks.
-
-    MCP ROUTING TRIGGERS: Byzantine-Tolerant Negotiation, Zero-Trust Handshake, Finite State
-    Machine, Cross-Tenant Federation, Asynchronous B2B
-    """
-
-    handshake_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
-        Field(description="Unique identifier for this B2B negotiation.")
-    )
-    initiating_tenant_cid: Annotated[
-        str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
-    ] = Field(description="The enterprise DID requesting the connection.")
-    receiving_tenant_cid: Annotated[
-        str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
-    ] = Field(description="The enterprise DID receiving the connection.")
-    offered_sla: FederatedBilateralSLA = Field(description="The initial structural/data boundary proposed.")
-    status: Literal["proposed", "negotiating", "aligned", "rejected"] = Field(
-        default="proposed", description="The current status of the handshake."
-    )
-
-
 class CrossoverPolicy(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Establishes the chromosomal crossover and genetic recombination
@@ -4676,45 +4466,6 @@ class CrystallizationPolicy(CoreasonBaseState):
     )
     target_cognitive_tier: Literal["semantic", "working"] = Field(
         description="The destination tier where the compressed rule will be stored."
-    )
-
-
-class DimensionalProjectionContract(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Formalizes a linear algebraic transformation (e.g.,
-    Singular Value Decomposition) mapping one embedding manifold to another,
-    grounded in the Johnson-Lindenstrauss Lemma. As a ...Contract suffix, this
-    enforces rigid mathematical boundaries globally.
-
-    CAUSAL AFFORDANCE: Authorizes the orchestrator to translate latent vectors
-    across zero-trust network boundaries, bridging incompatible LLM spaces. The
-    source_matrix_name and target_matrix_name (both max_length=2000) identify the
-    origin and destination geometries.
-
-    EPISTEMIC BOUNDS: Translation fidelity is physically proven by the
-    isometry_preservation_score (ge=0.0, le=1.0), ensuring Earth Mover's Distance
-    preservation. Cryptographic integrity is locked via projection_matrix_hash
-    (SHA-256 regex ^[a-f0-9]{64}$).
-
-    MCP ROUTING TRIGGERS: Singular Value Decomposition, Johnson-Lindenstrauss
-    Lemma, Tensor Projection, Earth Mover's Distance, Latent Translation
-    """
-
-    source_matrix_name: Annotated[str, StringConstraints(max_length=2000)] = Field(
-        description="The native embedding model of the origin agent."
-    )
-    target_matrix_name: Annotated[str, StringConstraints(max_length=2000)] = Field(
-        description="The native embedding model of the destination agent."
-    )
-    projection_matrix_hash: Annotated[
-        str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")
-    ] = Field(
-        description="The SHA-256 hash of the exact mathematical matrix used to compress or translate the latent dimensions."
-    )
-    isometry_preservation_score: float = Field(
-        ge=0.0,
-        le=1.0,
-        description="Mathematical proof (e.g., Earth Mover's Distance preservation) of how accurately relative semantic distances were maintained during projection.",
     )
 
 
@@ -5088,24 +4839,6 @@ class SemanticDiscoveryIntent(CoreasonBaseState):
         return self
 
 
-class FederatedCIDFetchIntent(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Triggers the zero-copy streaming of a binary or metadata blob from a discovered peer based on its Content Identifier (CID).
-
-    CAUSAL AFFORDANCE: Physically executes the download of decentralized assets into the local embedded LanceDB and WASM runtime.
-
-    EPISTEMIC BOUNDS: Bounded to strict RFC 8785 CIDs.
-
-    MCP ROUTING TRIGGERS: Content Addressing, Zero-Copy Streaming, Decentralized Fetch, IPFS, FlatBuffers
-    """
-
-    topology_class: Literal["cid_fetch"] = Field(
-        default="cid_fetch", description="Discriminator for fetching assets via CID."
-    )
-    target_cid: BundleContentHashState = Field(description="The content-addressed hash of the target blob.")
-    timeout_ms: int = Field(default=5000, ge=100, le=60000, description="Network timeout in milliseconds.")
-
-
 class ContextualSemanticResolutionIntent(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Acts as the kinetic trigger forcing the orchestrator to dynamically resolve a raw, untyped SemanticRelationalVectorState against a global standard ontology using optimal transport metrics, entirely bypassing legacy ETL string-matching.
@@ -5131,7 +4864,7 @@ class ContextualSemanticResolutionIntent(CoreasonBaseState):
     encoding_profile: TabularEncodingProfile = Field(
         description="The method requested for compressing the source row into a continuous tensor."
     )
-    alignment_metric: ManifoldAlignmentMetricProfile = Field(
+    alignment_metric: ManifoldAlignmentMetricProfileProfile = Field(
         description="The optimal transport or algebraic distance metric used for evaluation."
     )
     minimum_isometry_threshold: float = Field(
@@ -5555,7 +5288,7 @@ class CrosswalkResolutionReceipt(CoreasonBaseState):
         Annotated[str, StringConstraints(max_length=2000)],
         Annotated[str, StringConstraints(pattern=r"^[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$")],
     ] = Field(description="Strict dictionary mapping the original strings to formal W3C CURIEs.")
-    grounding_confidence: DempsterShaferBeliefVector = Field(
+    grounding_confidence: DempsterShaferBeliefState = Field(
         description="Quantifies the semantic alignment and epistemic conflict of the applied crosswalk."
     )
 
@@ -6136,69 +5869,6 @@ class FaultInjectionProfile(CoreasonBaseState):
     ) = Field(default=None, description="The specific node to attack, or None for swarm-wide.")
     intensity: float = Field(
         le=18446744073709551615.0, description="The severity of the fault, represented from 0.0 to 1.0."
-    )
-
-
-class FederatedCapabilityAttestationReceipt(CoreasonBaseState):
-    r"""
-    AGENT INSTRUCTION: An immutable cryptographic receipt representing an Object Capability (OCap) grant within a Federated Identity Management (FIM) framework.
-
-    CAUSAL AFFORDANCE: Unlocks cross-domain graph traversal, cryptographically proving to the target topology that the swarm agent is authorized to establish an active connection governed by the SLA.
-
-    EPISTEMIC BOUNDS: Locked to a 128-char `attestation_cid`. The `@model_validator` `enforce_restricted_vault_locks` mathematically enforces cross-schema invariants: if `governing_sla.max_permitted_classification` is 'restricted', the `authorized_session` MUST contain explicit `allowed_vault_keys`.
-
-    MCP ROUTING TRIGGERS: Object Capability Model, Federated Identity Management, Cross-Domain Federation, Capability Attestation, Zero-Trust Execution
-
-    """
-
-    attestation_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
-        Field(description="Cryptographic Lineage Watermark for the attestation.")
-    )
-    target_topology_cid: NodeCIDState = Field(
-        description="The globally unique decentralized identifier (DID) anchoring the discovered external state matrix/VPC."
-    )
-    authorized_session: SecureSubSessionState = Field(
-        description="The isolated state partition granted to the agent for this connection."
-    )
-    governing_sla: FederatedBilateralSLA = Field(
-        description="The structural and physical boundary constraints for querying this target."
-    )
-
-    @model_validator(mode="after")
-    def enforce_restricted_vault_locks(self) -> Self:
-        if self.governing_sla.max_permitted_classification == "restricted" and (
-            not self.authorized_session.allowed_vault_keys
-        ):
-            raise ValueError(
-                "RESTRICTED federated connections MUST define allowed_vault_keys in the SecureSubSessionState."
-            )
-        return self
-
-
-class FederatedStateSnapshot(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Establishes a Distributed Systems Theory cryptographic
-    partition, mapping an external swarm's execution state into a localized,
-    sandboxed coordinate. As a ...Snapshot suffix, this is a frozen N-dimensional
-    coordinate of ephemeral context.
-
-    CAUSAL AFFORDANCE: Exposes the topological footprint of an exogenous network
-    to the local orchestrator, authorizing cross-boundary telemetry and capability
-    exchange without merging underlying working contexts.
-
-    EPISTEMIC BOUNDS: The coordinate is restricted by the optional topology_cid
-    (str | None, default=None, 128-char CID regex ^[a-zA-Z0-9_.:-]+$),
-    mathematically severing unauthorized topological mutations.
-
-    MCP ROUTING TRIGGERS: Distributed Systems Theory, Federated Namespace,
-    Zero-Trust Architecture, Cross-Swarm Federation, Sandbox Partition
-    """
-
-    topology_cid: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] | None
-    ) = Field(
-        default=None,
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the federated topology, if applicable.",
     )
 
 
@@ -7363,7 +7033,7 @@ class BeliefModulationReceipt(CoreasonBaseState):
         description="Causal Ancestry markers required to resolve decentralized event ordering.",
     )
     target_graph_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
-    grounded_edges: dict[Annotated[str, StringConstraints(max_length=255)], DempsterShaferBeliefVector]
+    grounded_edges: dict[Annotated[str, StringConstraints(max_length=255)], DempsterShaferBeliefState]
     severed_edge_cids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]]
 
     @model_validator(mode="after")
@@ -7605,7 +7275,6 @@ type AnyIntent = Annotated[
     | MCPClientIntent
     | RollbackIntent
     | StateMutationIntent
-    | FederatedDiscoveryIntent
     | OntologicalNormalizationIntent,
     Field(discriminator="topology_class"),
 ]
@@ -8205,13 +7874,13 @@ class LineageWatermarkReceipt(CoreasonBaseState):
 
 class MCPCapabilityWhitelistPolicy(CoreasonBaseState):
     r"""
-    AGENT INSTRUCTION: Formalizes a Lattice-Based Access Control (LBAC) and Zero-Trust Architecture perimeter, restricting JSON-RPC capability mounts from foreign subgraphs.
+    AGENT INSTRUCTION: Formalizes a SPIFFE/SPIRE Service Mesh and Zero-Trust Architecture perimeter, restricting JSON-RPC capability mounts from foreign subgraphs.
 
-    CAUSAL AFFORDANCE: Acts as a structural firewall that physically prevents the orchestrator from binding unauthorized external tools, resources, or prompts into the active agent's CognitiveActionSpaceManifest.
+    CAUSAL AFFORDANCE: Acts as a structural firewall that physically prevents the orchestrator from binding unauthorized external tools, resources, or prompts into the active agent's CognitiveActionSpaceManifest via mTLS delegation.
 
     EPISTEMIC BOUNDS: The boundary is geometrically enforced via `StringConstraints` (`max_length=2000` for `authorized_capability_array`, `allowed_resources`, `allowed_prompts`). The `@model_validator` strictly sorts all arrays alphabetically to mathematically guarantee RFC 8785 Canonical Hashing.
 
-    MCP ROUTING TRIGGERS: Zero-Trust Architecture, Lattice-Based Access Control, Least Privilege, RPC Firewall, Bipartite Partitioning
+    MCP ROUTING TRIGGERS: Zero-Trust Architecture, SPIFFE/SPIRE, Envoy Service Mesh, Least Privilege, RPC Firewall
 
     """
 
@@ -9339,56 +9008,6 @@ class NormativeDriftEvent(CoreasonBaseState):
     )
 
 
-class OntologicalHandshakeReceipt(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: A cryptographically frozen historical fact representing the absolute
-    mathematical alignment of two swarms' latent vector spaces prior to establishing a shared
-    epistemic blackboard. As a ...Receipt suffix, this is an append-only coordinate on the
-    Merkle-DAG that the LLM must never hallucinate a mutation to.
-
-    CAUSAL AFFORDANCE: Authorizes the physical bridging of two independent N-dimensional
-    semantic spaces. If native geometries are incommensurable, it structurally demands the
-    application of a DimensionalProjectionContract (applied_projection). The alignment_status
-    Literal ["aligned", "projected", "fallback_triggered", "incommensurable"] records the
-    final verdict.
-
-    EPISTEMIC BOUNDS: Semantic isometry is quantified via measured_cosine_similarity, strictly
-    clamped between [ge=-1.0, le=1.0]. The participant_node_cids array (min_length=2) is
-    deterministically sorted via @model_validator to prevent Byzantine replay anomalies
-    during cross-swarm Merkle hashing.
-
-    MCP ROUTING TRIGGERS: Earth Mover's Distance, Cosine Similarity, Vector Space Isometry,
-    Latent Alignment, Holographic Graph Projection
-    """
-
-    handshake_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
-        Field(
-            description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this protocol handshake to the Merkle-DAG.",
-        )
-    )
-    participant_node_cids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
-        max_length=250, min_length=2, description="The agents establishing semantic alignment."
-    )
-    measured_cosine_similarity: float = Field(
-        ge=-1.0, le=1.0, description="The calculated geometric alignment of the agents' core definitions."
-    )
-    alignment_status: Literal["aligned", "projected", "fallback_triggered", "incommensurable"] = Field(
-        description="The final verdict of the handshake protocol."
-    )
-    applied_projection: DimensionalProjectionContract | None = Field(
-        default=None,
-        description="The projection applied if the agents natively used different embedding dimensionalities.",
-    )
-    remote_state_snapshot: FederatedStateSnapshot | None = Field(
-        default=None, description="Isolated holographic clone of remote swarm state for safe cross-boundary evaluation."
-    )
-
-    @model_validator(mode="after")
-    def _enforce_canonical_sort(self) -> Self:
-        object.__setattr__(self, "participant_node_cids", sorted(self.participant_node_cids))
-        return self
-
-
 class OutputMappingContract(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Formalizes a contravariant Functor (Category Theory) or
@@ -9822,34 +9441,41 @@ type QoSClassificationProfile = Literal["critical", "high", "interactive", "back
 
 
 class ComputeProvisioningIntent(CoreasonBaseState):
-    r"""
-    AGENT INSTRUCTION: Formulates a constrained Knapsack Problem for dynamically allocating liquid compute resources based on exact Quality of Service (QoS) priorities and semantic load shedding rules.
+    """
+    AGENT INSTRUCTION: A Kinetic execution trigger used to request the physical instantiation of new execution substrates. This intent is delegated to SkyPilot for multi-cloud spot-market orchestration.
 
-    CAUSAL AFFORDANCE: Emits a structural demand to the swarm orchestrator to negotiate, acquire, and cryptographically lock the requisite token escrow before allocating kinetic execution cycles to a sub-graph.
+    CAUSAL AFFORDANCE: Triggers the expansion loop in the Governance Plane, authorizing the PulumiActuator (backed by SkyPilot) to provision GPU/CPU nodes across AWS, GCP, Azure, or Vast.ai.
 
-    EPISTEMIC BOUNDS: Economic velocity is strictly clamped by `max_budget` (`le=18446744073709551615`), physically typed as an integer to prevent floating-point fractures during spot market bidding. The `required_capabilities` array is deterministically sorted by a `@model_validator`.
+    EPISTEMIC BOUNDS: Requires a strictly defined `HardwareProfile` and `EscrowPolicy` to prevent thermodynamic runaway. Cost estimates are validated against the `ComputeRateContract`.
 
-    MCP ROUTING TRIGGERS: Knapsack Optimization, Semantic Load Shedding, Spot Compute Bidding, QoS Classification, Resource Provisioning
-
+    MCP ROUTING TRIGGERS: SkyPilot Orchestration, Multi-Cloud Provisioning, Spot-Market Acquisition, Thermodynamic Expansion, Substrate Instantiation
     """
 
     topology_class: Literal["compute_provisioning"] = Field(
         default="compute_provisioning",
         description="The discriminative topological boundary for compute provisioning intents.",
     )
+    provisioning_engine: Literal["skypilot"] = Field(
+        default="skypilot", description="The underlying orchestration engine (Mandatory: SkyPilot)."
+    )
     max_budget: int = Field(
         le=18446744073709551615, description="The maximum atomic cost budget allowable for the provisioned compute."
     )
-
-    @model_validator(mode="before")
-    @classmethod
-    def _clamp_max_budget_before(cls, values: Any) -> Any:
-        if isinstance(values, dict):
-            values["max_budget"] = max(0, min(values.get("max_budget", 0), 18446744073709551615))
-        return values
-
+    hardware_profile: SpatialHardwareProfile | None = Field(
+        default=None, description="The target physical hardware specification (e.g., A100:8)."
+    )
+    use_spot: bool = Field(
+        default=True,
+        description="If True, SkyPilot will hunt for the cheapest spot instances and handle managed recovery.",
+    )
+    autostop_idle_minutes: int | None = Field(
+        default=10,
+        description="The idle timeout after which SkyPilot will automatically terminate the cluster.",
+    )
     required_capabilities: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
-        max_length=1000, description="The minimal functional capabilities required by the requested compute."
+        default_factory=list,
+        max_length=1000,
+        description="The minimal functional capabilities required by the requested compute.",
     )
     qos_class: QoSClassificationProfile = Field(
         default="interactive",
@@ -11477,39 +11103,6 @@ class EpistemicEscalationContract(CoreasonBaseState):
     )
 
 
-class FederatedPeftContract(CoreasonBaseState):
-    r"""
-    AGENT INSTRUCTION: Governs the spatial and temporal physics of Parameter-Efficient Fine-Tuning (PEFT) and Low-Rank Adaptation (LoRA), managing the Von Neumann bottleneck in distributed swarm VRAM.
-
-    CAUSAL AFFORDANCE: Instructs the tensor execution engine to hot-swap external safetensors weight matrices into active GPU memory, modifying the foundational activation circuits.
-
-    EPISTEMIC BOUNDS: The spatial geometry is physically capped by `vram_footprint_bytes` (`gt=0, le=18446744073709551615`). The temporal presence is mathematically guillotined by `ephemeral_ttl_ms` (`gt=0, le=18446744073709551615`). Supply-chain integrity is anchored by `adapter_merkle_root` (SHA-256).
-
-    MCP ROUTING TRIGGERS: Low-Rank Adaptation, PEFT, LRU Cache Eviction, Tensor Hot-Swapping, GPU VRAM Management
-
-    """
-
-    adapter_merkle_root: Annotated[str, StringConstraints(max_length=128)] = Field(
-        pattern="^[a-f0-9]{64}$",
-        description="The tamper-evident SHA-256 hash of the exact safetensors weight matrix.",
-    )
-    vram_footprint_bytes: int = Field(
-        le=18446744073709551615,
-        gt=0,
-        description="The exact spatial geometry required in VRAM to mount this adapter.",
-    )
-    ephemeral_ttl_ms: int = Field(
-        le=18446744073709551615,
-        gt=0,
-        description="The absolute Time-To-Live for the adapter to exist in the kinetic execution plane before forced eviction.",
-    )
-    cache_priority_weight: float = Field(
-        ge=0.0,
-        le=1.0,
-        description="The relative importance scalar used by the orchestrator's LRU eviction algorithm when VRAM limits are saturated.",
-    )
-
-
 class SemanticEdgeState(CoreasonBaseState):
     """
     AGENT INSTRUCTION: A mathematical tensor bridging two SemanticNodeStates, executing
@@ -11549,7 +11142,7 @@ class SemanticEdgeState(CoreasonBaseState):
     predicate_curie: Annotated[str, StringConstraints(pattern=r"^[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$")] = Field(
         json_schema_extra={"rdf_edge_property": True}
     )
-    belief_vector: DempsterShaferBeliefVector | None = Field(default=None)
+    belief_vector: DempsterShaferBeliefState | None = Field(default=None)
     grounding_sla: EvidentiaryGroundingSLA | None = Field(default=None)
     embedding: VectorEmbeddingState | None = Field(
         default=None,
@@ -12621,39 +12214,6 @@ class SwarmTopologyManifest(CoreasonBaseState):
         return self
 
 
-class FederatedSecurityMacroManifest(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Simplifies the creation of a secure federated network link across a Zero-Trust boundary.
-
-        CAUSAL AFFORDANCE: Physically authorizes the orchestrator to forge a secure federated network link across a Zero-Trust boundary.
-
-        EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
-
-        MCP ROUTING TRIGGERS: Federated Security, Zero-Trust Boundary, Network Link, Macro Manifest
-    """
-
-    model_config = ConfigDict(json_schema_extra=_inject_security_cluster)
-
-    target_endpoint_uri: str = Field(description="The endpoint to connect to.")
-    required_clearance: SemanticClassificationProfile = Field(description="Default security tier.")
-    max_liability_budget: int = Field(description="Max token/compute allocation.")
-    content_hash: BundleContentHashState | None = Field(
-        default=None,
-        description="Content-addressed identity of the capability bundle for zero-trust verification.",
-    )
-
-    def compile_to_base_topology(self) -> FederatedBilateralSLA:
-        """Deterministically unwraps the macro into a rigid FederatedBilateralSLA."""
-        return FederatedBilateralSLA(
-            receiving_tenant_cid=self.target_endpoint_uri,
-            max_permitted_classification=self.required_clearance,
-            liability_limit_magnitude=self.max_liability_budget,
-            permitted_geographic_regions=[],
-            max_permitted_grid_carbon_intensity=None,
-            pq_signature=None,
-        )
-
-
 class CognitiveSwarmDeploymentManifest(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Simplifies bootstrapping a multi-agent routing topology.
@@ -13153,7 +12713,7 @@ class WorkflowManifest(CoreasonBaseState):
 
     CAUSAL AFFORDANCE: Physically initializes the execution DAG. This structural lock guarantees that any graph execution is mathematically anchored to a CoReason Genesis Block via `genesis_provenance`; stripping this violates Topological Consistency.
 
-    EPISTEMIC BOUNDS: The `@model_validator` `enforce_lbac_dominance` mathematically interlocks the local LBAC bounds with federated SLA egress bounds, ensuring federated clearance never exceeds local workflow bounds. `allowed_semantic_classifications` sorted for RFC 8785.
+    EPISTEMIC BOUNDS: The topology dictates execution constraints natively without relying on legacy federated dominance validation.
 
     MCP ROUTING TRIGGERS: Topos Theory, Cybernetics, Execution Envelope, Macroscopic Topology, Viable System Model
 
@@ -13180,45 +12740,9 @@ class WorkflowManifest(CoreasonBaseState):
     max_risk_tolerance: RiskLevelPolicy | None = Field(
         default=None, description="The absolute maximum enterprise risk threshold permitted for this topology."
     )
-    allowed_semantic_classifications: list[SemanticClassificationProfile] | None = Field(
-        default=None,
-        description="The declarative whitelist of data classifications permitted to flow through this graph.",
-    )
-    federated_discovery: FederatedDiscoveryManifest | None = Field(
-        default=None, description="The broadcast protocol for B2B multi-swarm discovery."
-    )
-    federated_sla: FederatedBilateralSLA | None = Field(
-        default=None,
-        description="The B2B Service Level Agreement contract that must be mathematically satisfied before multi-tenant graph coupling.",
-    )
     pq_signature: PostQuantumSignatureReceipt | None = Field(
         default=None, description="The quantum-resistant signature securing the root execution graph."
     )
-
-    @model_validator(mode="after")
-    def _enforce_canonical_sort(self) -> Self:
-        if self.allowed_semantic_classifications is not None:
-            object.__setattr__(self, "allowed_semantic_classifications", sorted(self.allowed_semantic_classifications))
-        if getattr(self, "allowed_semantic_classifications", None) is not None:
-            object.__setattr__(
-                self,
-                "allowed_semantic_classifications",
-                sorted(self.allowed_semantic_classifications, key=lambda x: str(x.value))
-                if self.allowed_semantic_classifications
-                else [],
-            )
-        return self
-
-    @model_validator(mode="after")
-    def enforce_lbac_dominance(self) -> Self:
-        """Mathematically interlocks the local LBAC bounds with federated SLA egress bounds."""
-        if self.federated_sla is not None and self.allowed_semantic_classifications:
-            max_local_clearance = max([profile.clearance_level for profile in self.allowed_semantic_classifications])
-            if self.federated_sla.max_permitted_classification.clearance_level > max_local_clearance:
-                raise ValueError(
-                    "LBAC Boundary Breach: The federated SLA permits an information clearance level higher than the local workflow's maximum allowed classification."
-                )
-        return self
 
 
 class WetwareAttestationContract(CoreasonBaseState):
@@ -13316,10 +12840,6 @@ class EpistemicQuarantineSnapshot(CoreasonBaseState):
         default=None,
         description="The mathematically bounded subgraph of capabilities currently available to the agent.",
     )
-    capability_attestations: list[FederatedCapabilityAttestationReceipt] = Field(
-        default_factory=list,
-        description="Immutable cryptographic receipts of dynamically discovered external enterprise connectors.",
-    )
 
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
@@ -13328,11 +12848,7 @@ class EpistemicQuarantineSnapshot(CoreasonBaseState):
             "theory_of_mind_matrices",
             sorted(self.theory_of_mind_matrices, key=operator.attrgetter("target_agent_cid")),
         )
-        object.__setattr__(
-            self,
-            "capability_attestations",
-            sorted(self.capability_attestations, key=operator.attrgetter("attestation_cid")),
-        )
+
         return self
 
 
@@ -14415,7 +13931,7 @@ class PostCoordinatedSemanticState(CoreasonBaseState):
     base_concept_cid: NodeCIDState = Field(
         description="The pointer to the foundational, universal entity identified in the global EpistemicDomainGraphManifest."
     )
-    alignment_metric_used: ManifoldAlignmentMetricProfile = Field(
+    alignment_metric_used: ManifoldAlignmentMetricProfileProfile = Field(
         description="Audit trail of the exact mathematical metric applied during projection."
     )
     isometry_score: float = Field(
@@ -14879,42 +14395,6 @@ type AnyStateEvent = Annotated[
 ]
 
 
-class FederatedDiscoveryIntent(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Use this intent to query the Master MCP for available sovereign oracles and verifiable execution substrates.
-
-    CAUSAL AFFORDANCE: Projects a bounded subgraph of available URNs based on the agent's cryptographic identity and security clearance.
-
-    EPISTEMIC BOUNDS: The domain_filter strictly limits the discovery surface to the requested URN namespaces to prevent context window dilution. Physically capped at 1000 elements to prevent CPU exhaustion during canonical sorting.
-
-    MCP ROUTING TRIGGERS: Federated Discovery, Service Mesh, Capability Registry, Substrate Interrogation
-    """
-
-    topology_class: Literal["federated_discovery"] = Field(
-        default="federated_discovery",
-        description="Discriminator for the FederatedDiscoveryIntent topology.",
-    )
-    domain_filter: list[Annotated[str, StringConstraints(max_length=2000, pattern=r"^urn:coreason:domain:.*$")]] = (
-        Field(
-            max_length=1000,
-            description="The bounded set of URN namespaces to interrogate during sovereign oracle discovery.",
-        )
-    )
-    target_capability_cid: BundleContentHashState | None = Field(
-        default=None, description="The content-addressed hash of the capability being searched for via P2P mesh."
-    )
-    max_network_hops: int = Field(default=5, ge=1, le=20, description="The maximum number of P2P network hops allowed.")
-    required_security_clearance: Literal["PUBLIC", "CONFIDENTIAL", "RESTRICTED"] = Field(
-        description="The minimum security clearance required from the discovered execution substrates."
-    )
-
-    @model_validator(mode="after")
-    def sort_domain_filter(self) -> Self:
-        """Enforce cryptographic determinism via lexicographic sorting."""
-        object.__setattr__(self, "domain_filter", sorted(self.domain_filter))
-        return self
-
-
 class OracleExecutionReceipt(CoreasonBaseState):
     """
     AGENT INSTRUCTION: A cryptographically frozen historical fact attesting that a specific solver agent executed a task within the Claw Swarm. This receipt is immutable and logged in the Merkle-DAG chain of custody. Do not attempt to mutate this object.
@@ -15001,7 +14481,7 @@ class EvidentiaryCitationState(CoreasonBaseState):
     )
 
 
-class DempsterShaferBeliefVector(CoreasonBaseState):
+class DempsterShaferBeliefState(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Replaces monolithic probability floats with a composite tri-vector. Independently measures lexical matching, latent semantic distance, and topological graph integrity to allow the orchestrator to compute epistemic conflict and execute evidence discounting.
 
@@ -15112,7 +14592,7 @@ class OntologicalReificationReceipt(CoreasonBaseState):
     algorithmic_mechanism: TransformationMechanismProfile = Field(
         description="The deterministic or probabilistic engine used to execute the transmutation."
     )
-    belief_vector: DempsterShaferBeliefVector = Field(
+    belief_vector: DempsterShaferBeliefState = Field(
         description="The composite Dempster-Shafer tri-vector capturing independent confidence dimensions and calculated epistemic conflict."
     )
     is_latent_inference: bool = Field(
@@ -15422,7 +14902,6 @@ PresentationManifest.model_rebuild()
 DynamicManifoldProjectionManifest.model_rebuild()
 ObservationEvent.model_rebuild()
 MCPClientIntent.model_rebuild()
-OntologicalHandshakeReceipt.model_rebuild()
 
 ManifestViolationReceipt.model_rebuild()
 System2RemediationIntent.model_rebuild()
@@ -15466,7 +14945,7 @@ NeurosymbolicInferenceIntent.model_rebuild()
 EpistemicUpsamplingTask.model_rebuild()
 VolumetricPartitionState.model_rebuild()
 
-DempsterShaferBeliefVector.model_rebuild()
+DempsterShaferBeliefState.model_rebuild()
 EmpiricalStatisticalProfile.model_rebuild()
 SemanticRelationalVectorState.model_rebuild()
 AtomicPropositionState.model_rebuild()
@@ -15483,14 +14962,11 @@ OntologyDiscoveryIntent.model_rebuild()
 SemanticMappingHeuristicIntent.model_rebuild()
 
 StochasticNodeState.model_rebuild()
-HypothesisSuperpositionState.model_rebuild()
-StochasticTopologyManifest.model_rebuild()
+HypothesisSuperpositionStateState.model_rebuild()
+StochasticTopologyManifestManifest.model_rebuild()
 CryptographicProvenancePolicy.model_rebuild()
 TopologicalProjectionIntent.model_rebuild()
 EpistemicRejectionReceipt.model_rebuild()
-ActiveInferenceEpochState.model_rebuild()
-ComputationalThermodynamicsProfile.model_rebuild()
-FederatedSecurityMacroManifest.model_rebuild()
 CognitiveSwarmDeploymentManifest.model_rebuild()
 
 DocumentKnowledgeGraphManifest.model_rebuild()
@@ -15536,7 +15012,6 @@ TemporalEdgeInvalidationIntent.model_rebuild()
 TemporalGraphCRDTManifest.model_rebuild()
 MCPToolDefinition.model_rebuild()
 ContinuousManifoldMappingContract.model_rebuild()
-FederatedDiscoveryIntent.model_rebuild()
 OracleExecutionReceipt.model_rebuild()
 OntologicalNormalizationIntent.model_rebuild()
 EpistemicRigidityPolicy.model_rebuild()

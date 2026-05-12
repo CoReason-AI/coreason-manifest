@@ -8,7 +8,7 @@
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
-"""Hypothesis property tests for StochasticTopologyManifest, HypothesisSuperpositionState, and StochasticNodeState."""
+"""Hypothesis property tests for StochasticTopologyManifestManifest, HypothesisSuperpositionStateState, and StochasticNodeState."""
 
 import pytest
 from hypothesis import given, settings
@@ -16,10 +16,10 @@ from hypothesis import strategies as st
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    HypothesisSuperpositionState,
+    HypothesisSuperpositionStateState,
     IdeationPhaseProfile,
     StochasticNodeState,
-    StochasticTopologyManifest,
+    StochasticTopologyManifestManifest,
 )
 
 CID_ST = st.from_regex(r"[a-zA-Z0-9_.:-]{1,30}", fullmatch=True)
@@ -59,11 +59,11 @@ class TestStochasticNodeState:
             )
 
 
-class TestHypothesisSuperpositionState:
+class TestHypothesisSuperpositionStateState:
     """Exercise probability conservation and canonical sort validators."""
 
     def test_valid_superposition(self) -> None:
-        hss = HypothesisSuperpositionState(
+        hss = HypothesisSuperpositionStateState(
             superposition_cid="sp1",
             competing_manifolds={"a": 0.5, "b": 0.3},
             wave_collapse_function="plurality_vote",
@@ -72,14 +72,14 @@ class TestHypothesisSuperpositionState:
 
     def test_probability_exceeds_one(self) -> None:
         with pytest.raises(ValidationError, match="Conservation of Probability"):
-            HypothesisSuperpositionState(
+            HypothesisSuperpositionStateState(
                 superposition_cid="sp2",
                 competing_manifolds={"a": 0.6, "b": 0.5},
                 wave_collapse_function="highest_confidence",
             )
 
     def test_residual_entropy_vectors_sorted(self) -> None:
-        hss = HypothesisSuperpositionState(
+        hss = HypothesisSuperpositionStateState(
             superposition_cid="sp3",
             competing_manifolds={"x": 0.2},
             wave_collapse_function="deterministic_compiler",
@@ -97,7 +97,7 @@ class TestHypothesisSuperpositionState:
     )
     @settings(max_examples=20, deadline=None)
     def test_low_probabilities_always_valid(self, probs: dict[str, float]) -> None:
-        hss = HypothesisSuperpositionState(
+        hss = HypothesisSuperpositionStateState(
             superposition_cid="sp-gen",
             competing_manifolds=probs,
             wave_collapse_function="plurality_vote",
@@ -105,7 +105,7 @@ class TestHypothesisSuperpositionState:
         assert sum(hss.competing_manifolds.values()) <= 1.0 + 1e-9
 
 
-class TestStochasticTopologyManifest:
+class TestStochasticTopologyManifestManifest:
     """Exercise acyclic DAG integrity and canonical sort validators."""
 
     def _make_node(self, cid: str, parent: str | None = None) -> StochasticNodeState:
@@ -118,7 +118,7 @@ class TestStochasticTopologyManifest:
         )
 
     def test_valid_dag(self) -> None:
-        stm = StochasticTopologyManifest(
+        stm = StochasticTopologyManifestManifest(
             topology_cid="t1",
             phase=IdeationPhaseProfile.STOCHASTIC_DIFFUSION,
             stochastic_graph=[
@@ -130,7 +130,7 @@ class TestStochasticTopologyManifest:
 
     def test_parent_before_child_ordering(self) -> None:
         with pytest.raises(ValidationError, match="must appear before child"):
-            StochasticTopologyManifest(
+            StochasticTopologyManifestManifest(
                 topology_cid="t2",
                 phase=IdeationPhaseProfile.MANIFOLD_COLLAPSE,
                 stochastic_graph=[
@@ -140,7 +140,7 @@ class TestStochasticTopologyManifest:
             )
 
     def test_single_root_node(self) -> None:
-        stm = StochasticTopologyManifest(
+        stm = StochasticTopologyManifestManifest(
             topology_cid="t3",
             phase=IdeationPhaseProfile.STOCHASTIC_DIFFUSION,
             stochastic_graph=[self._make_node("root")],
@@ -148,7 +148,7 @@ class TestStochasticTopologyManifest:
         assert len(stm.stochastic_graph) == 1
 
     def test_canonical_sort_applied(self) -> None:
-        stm = StochasticTopologyManifest(
+        stm = StochasticTopologyManifestManifest(
             topology_cid="t4",
             phase=IdeationPhaseProfile.STOCHASTIC_DIFFUSION,
             stochastic_graph=[
