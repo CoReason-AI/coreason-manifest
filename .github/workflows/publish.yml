@@ -98,7 +98,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write # Required for npm Trusted Publishing (OIDC provenance)
+      id-token: write # Required for npm Trusted Publishing
     steps:
       - name: Harden Runner (Endpoint Network Security)
         uses: step-security/harden-runner@v2
@@ -138,7 +138,9 @@ jobs:
           cd bindings/typescript
           npm ci
           npm run build
-          npm publish --provenance --access public --verbose
+          # NOTE: npm provenance verification only supports public repositories.
+          # Re-enable when the repository is made public.
+          npm publish --access public --verbose
 
   publish-crate:
     needs: release
