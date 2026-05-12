@@ -11,7 +11,6 @@ class_names = [
     "CausalDirectedEdgeState",
     "DistributionProfile",
     "DocumentLayoutManifest",
-    "ExecutionNodeReceipt",
     "DelegatedCapabilityManifest",
     "GlobalGovernancePolicy",
     "DynamicRoutingManifest",
