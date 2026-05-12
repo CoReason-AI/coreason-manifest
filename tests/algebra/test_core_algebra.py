@@ -541,8 +541,6 @@ def test_compute_topology_hash() -> None:
     assert len(h) == 64
 
 
-
-
 def test_verify_ast_safety() -> None:
     assert verify_ast_safety("1 + 1")
     with pytest.raises(ValueError, match="Kinetic execution bleed"):
