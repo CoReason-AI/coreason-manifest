@@ -8,7 +8,7 @@
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
-"""Hypothesis property tests for ComputationalThermodynamicsProfile and ActiveInferenceEpochState."""
+"""Hypothesis property tests for ComputationalThermodynamicsProfileProfile and ActiveInferenceEpochStateState."""
 
 import pytest
 from hypothesis import given, settings
@@ -16,8 +16,8 @@ from hypothesis import strategies as st
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    ActiveInferenceEpochState,
-    ComputationalThermodynamicsProfile,
+    ActiveInferenceEpochStateState,
+    ComputationalThermodynamicsProfileProfile,
     ThermodynamicState,
 )
 
@@ -25,14 +25,14 @@ CID_ST = st.from_regex(r"[a-zA-Z0-9_.:-]{1,30}", fullmatch=True)
 
 
 # ---------------------------------------------------------------------------
-# ComputationalThermodynamicsProfile
+# ComputationalThermodynamicsProfileProfile
 # ---------------------------------------------------------------------------
 
 
-class TestComputationalThermodynamicsProfile:
+class TestComputationalThermodynamicsProfileProfile:
     """Exercise thermodynamic circuit breakers and NaN/Inf traps."""
 
-    def _make(self, **overrides) -> ComputationalThermodynamicsProfile:  # type: ignore[no-untyped-def]
+    def _make(self, **overrides) -> ComputationalThermodynamicsProfileProfile:  # type: ignore[no-untyped-def]
         defaults = {
             "thermodynamics_cid": "th-1",
             "target_topology_cid": "topo-1",
@@ -42,7 +42,7 @@ class TestComputationalThermodynamicsProfile:
             "remaining_free_energy": 50.0,
         }
         defaults.update(overrides)
-        return ComputationalThermodynamicsProfile(**defaults)  # type: ignore[arg-type]
+        return ComputationalThermodynamicsProfileProfile(**defaults)  # type: ignore[arg-type]
 
     def test_valid_construction(self) -> None:
         obj = self._make()
@@ -109,15 +109,15 @@ class TestComputationalThermodynamicsProfile:
 
 
 # ---------------------------------------------------------------------------
-# ActiveInferenceEpochState
+# ActiveInferenceEpochStateState
 # ---------------------------------------------------------------------------
 
 
-class TestActiveInferenceEpochState:
+class TestActiveInferenceEpochStateState:
     """Exercise free energy aggregation validator."""
 
     def test_valid_construction(self) -> None:
-        obj = ActiveInferenceEpochState(
+        obj = ActiveInferenceEpochStateState(
             epoch_cid="ep-1",
             current_free_energy=5.0,
         )
@@ -125,18 +125,18 @@ class TestActiveInferenceEpochState:
 
     def test_nan_free_energy_rejected(self) -> None:
         with pytest.raises(ValidationError, match="Free Energy cannot be"):
-            ActiveInferenceEpochState(epoch_cid="ep-2", current_free_energy=float("nan"))
+            ActiveInferenceEpochStateState(epoch_cid="ep-2", current_free_energy=float("nan"))
 
     def test_inf_free_energy_rejected(self) -> None:
         with pytest.raises(ValidationError, match="Free Energy cannot be"):
-            ActiveInferenceEpochState(epoch_cid="ep-3", current_free_energy=float("inf"))
+            ActiveInferenceEpochStateState(epoch_cid="ep-3", current_free_energy=float("inf"))
 
     def test_negative_free_energy_rejected(self) -> None:
         with pytest.raises(ValidationError, match="Negative free energy"):
-            ActiveInferenceEpochState(epoch_cid="ep-4", current_free_energy=-1.0)
+            ActiveInferenceEpochStateState(epoch_cid="ep-4", current_free_energy=-1.0)
 
     @given(fe=st.floats(min_value=0.0, max_value=1e6, allow_nan=False, allow_infinity=False))
     @settings(max_examples=20, deadline=None)
     def test_non_negative_energy_accepted(self, fe: float) -> None:
-        obj = ActiveInferenceEpochState(epoch_cid="ep-gen", current_free_energy=fe)
+        obj = ActiveInferenceEpochStateState(epoch_cid="ep-gen", current_free_energy=fe)
         assert obj.current_free_energy >= 0.0

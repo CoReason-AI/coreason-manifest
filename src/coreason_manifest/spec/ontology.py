@@ -213,7 +213,7 @@ class TabularEncodingProfile(StrEnum):
     GRAPH_CONVOLUTIONAL_FLATTENING = "graph_convolutional_flattening"
 
 
-class ManifoldAlignmentMetricProfile(StrEnum):
+class ManifoldAlignmentMetricProfileProfile(StrEnum):
     """AGENT INSTRUCTION: Defines the linear algebraic or optimal transport function used to mathematically measure the geometric distance between the telemetry vector and the standard ontology index."""
 
     GROMOV_WASSERSTEIN = "gromov_wasserstein"
@@ -637,7 +637,7 @@ def _inject_thermodynamic_cluster(schema: dict[str, Any]) -> None:
     _inject_topological_lock(schema)
     schema["x-domain-cluster"] = "thermodynamic_orchestration"
     schema["x-synergistic-classes"] = [
-        "ComputationalThermodynamicsProfile",
+        "ComputationalThermodynamicsProfileProfile",
         "ComputeRateContract",
         "FreeEnergyExhaustion",
     ]
@@ -832,7 +832,7 @@ class StrategicThoughtNodeIntent(CoreasonBaseState):
     )
 
 
-class IdeationPhaseProfile(StrEnum):
+class IdeationPhaseProfileProfile(StrEnum):
     """
     AGENT INSTRUCTION: Categorizes the thermodynamic phase of the generative ensemble's exploration.
 
@@ -876,7 +876,7 @@ class StochasticNodeState(CoreasonBaseState):
         return v
 
 
-class HypothesisSuperpositionState(CoreasonBaseState):
+class HypothesisSuperpositionStateState(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Maintains the quantum-like probability mass of mutually exclusive semantic manifolds, delaying wave collapse until deterministically evaluated.
 
@@ -909,7 +909,7 @@ class HypothesisSuperpositionState(CoreasonBaseState):
         return self
 
 
-class StochasticTopologyManifest(CoreasonBaseState):
+class StochasticTopologyManifestManifest(CoreasonBaseState):
     """
     AGENT INSTRUCTION: The structurally unbounded root container modeling multi-agent generative reasoning as a Topological DAG.
 
@@ -922,9 +922,9 @@ class StochasticTopologyManifest(CoreasonBaseState):
 
     topology_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
     topology_class: Literal["stochastic_ensemble"] = Field(default="stochastic_ensemble")
-    phase: IdeationPhaseProfile = Field()
+    phase: IdeationPhaseProfileProfile = Field()
     stochastic_graph: list[StochasticNodeState] = Field()
-    superposition: HypothesisSuperpositionState | None = Field(default=None)
+    superposition: HypothesisSuperpositionStateState | None = Field(default=None)
     epistemic_status: Literal["stochastically_unbounded"] = Field(default="stochastically_unbounded")
 
     @model_validator(mode="after")
@@ -966,7 +966,7 @@ class CryptographicProvenancePolicy(CoreasonBaseState):
     provenance_trace_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")] | None = Field(default=None)
 
 
-class ActiveInferenceEpochState(CoreasonBaseState):
+class ActiveInferenceEpochStateState(CoreasonBaseState):
     """
     AGENT INSTRUCTION: A macroscopic container tracking the directed graph of evolutionary retries across an entire task lifecycle.
 
@@ -1014,7 +1014,7 @@ class ThermodynamicState(StrEnum):
     ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION = "ENTROPIC_EXHAUSTION_ORACLE_INTERVENTION"
 
 
-class ComputationalThermodynamicsProfile(CoreasonBaseState):
+class ComputationalThermodynamicsProfileProfile(CoreasonBaseState):
     """
     AGENT INSTRUCTION: The macroscopic envelope that tracks the thermodynamic cost of stochastic ideation and violently halts execution when energy budgets or spatial limits are depleted.
 
@@ -3313,7 +3313,7 @@ class ThoughtBranchState(CoreasonBaseState):
 
 
 type AnyExplorationBranch = Annotated[
-    ThoughtBranchState | StochasticTopologyManifest | StrategicThoughtNodeIntent, Field(discriminator="topology_class")
+    ThoughtBranchState | StochasticTopologyManifestManifest | StrategicThoughtNodeIntent, Field(discriminator="topology_class")
 ]
 
 
@@ -4305,7 +4305,7 @@ class CausalDirectedEdgeState(CoreasonBaseState):
     predicate_curie: Annotated[str, StringConstraints(pattern=r"^[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$")] = Field(
         json_schema_extra={"rdf_edge_property": True}
     )
-    belief_vector: DempsterShaferBeliefVector | None = Field(default=None)
+    belief_vector: DempsterShaferBeliefState | None = Field(default=None)
     grounding_sla: EvidentiaryGroundingSLA | None = Field(default=None)
 
     @model_validator(mode="after")
@@ -4988,7 +4988,7 @@ class ContextualSemanticResolutionIntent(CoreasonBaseState):
     encoding_profile: TabularEncodingProfile = Field(
         description="The method requested for compressing the source row into a continuous tensor."
     )
-    alignment_metric: ManifoldAlignmentMetricProfile = Field(
+    alignment_metric: ManifoldAlignmentMetricProfileProfile = Field(
         description="The optimal transport or algebraic distance metric used for evaluation."
     )
     minimum_isometry_threshold: float = Field(
@@ -5412,7 +5412,7 @@ class CrosswalkResolutionReceipt(CoreasonBaseState):
         Annotated[str, StringConstraints(max_length=2000)],
         Annotated[str, StringConstraints(pattern=r"^[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$")],
     ] = Field(description="Strict dictionary mapping the original strings to formal W3C CURIEs.")
-    grounding_confidence: DempsterShaferBeliefVector = Field(
+    grounding_confidence: DempsterShaferBeliefState = Field(
         description="Quantifies the semantic alignment and epistemic conflict of the applied crosswalk."
     )
 
@@ -7157,7 +7157,7 @@ class BeliefModulationReceipt(CoreasonBaseState):
         description="Causal Ancestry markers required to resolve decentralized event ordering.",
     )
     target_graph_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
-    grounded_edges: dict[Annotated[str, StringConstraints(max_length=255)], DempsterShaferBeliefVector]
+    grounded_edges: dict[Annotated[str, StringConstraints(max_length=255)], DempsterShaferBeliefState]
     severed_edge_cids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]]
 
     @model_validator(mode="after")
@@ -11259,7 +11259,7 @@ class SemanticEdgeState(CoreasonBaseState):
     predicate_curie: Annotated[str, StringConstraints(pattern=r"^[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$")] = Field(
         json_schema_extra={"rdf_edge_property": True}
     )
-    belief_vector: DempsterShaferBeliefVector | None = Field(default=None)
+    belief_vector: DempsterShaferBeliefState | None = Field(default=None)
     grounding_sla: EvidentiaryGroundingSLA | None = Field(default=None)
     embedding: VectorEmbeddingState | None = Field(
         default=None,
@@ -14049,7 +14049,7 @@ class PostCoordinatedSemanticState(CoreasonBaseState):
     base_concept_cid: NodeCIDState = Field(
         description="The pointer to the foundational, universal entity identified in the global EpistemicDomainGraphManifest."
     )
-    alignment_metric_used: ManifoldAlignmentMetricProfile = Field(
+    alignment_metric_used: ManifoldAlignmentMetricProfileProfile = Field(
         description="Audit trail of the exact mathematical metric applied during projection."
     )
     isometry_score: float = Field(
@@ -14599,7 +14599,7 @@ class EvidentiaryCitationState(CoreasonBaseState):
     )
 
 
-class DempsterShaferBeliefVector(CoreasonBaseState):
+class DempsterShaferBeliefState(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Replaces monolithic probability floats with a composite tri-vector. Independently measures lexical matching, latent semantic distance, and topological graph integrity to allow the orchestrator to compute epistemic conflict and execute evidence discounting.
 
@@ -14710,7 +14710,7 @@ class OntologicalReificationReceipt(CoreasonBaseState):
     algorithmic_mechanism: TransformationMechanismProfile = Field(
         description="The deterministic or probabilistic engine used to execute the transmutation."
     )
-    belief_vector: DempsterShaferBeliefVector = Field(
+    belief_vector: DempsterShaferBeliefState = Field(
         description="The composite Dempster-Shafer tri-vector capturing independent confidence dimensions and calculated epistemic conflict."
     )
     is_latent_inference: bool = Field(
@@ -15063,7 +15063,7 @@ NeurosymbolicInferenceIntent.model_rebuild()
 EpistemicUpsamplingTask.model_rebuild()
 VolumetricPartitionState.model_rebuild()
 
-DempsterShaferBeliefVector.model_rebuild()
+DempsterShaferBeliefState.model_rebuild()
 EmpiricalStatisticalProfile.model_rebuild()
 SemanticRelationalVectorState.model_rebuild()
 AtomicPropositionState.model_rebuild()
@@ -15080,13 +15080,13 @@ OntologyDiscoveryIntent.model_rebuild()
 SemanticMappingHeuristicIntent.model_rebuild()
 
 StochasticNodeState.model_rebuild()
-HypothesisSuperpositionState.model_rebuild()
-StochasticTopologyManifest.model_rebuild()
+HypothesisSuperpositionStateState.model_rebuild()
+StochasticTopologyManifestManifest.model_rebuild()
 CryptographicProvenancePolicy.model_rebuild()
 TopologicalProjectionIntent.model_rebuild()
 EpistemicRejectionReceipt.model_rebuild()
-ActiveInferenceEpochState.model_rebuild()
-ComputationalThermodynamicsProfile.model_rebuild()
+ActiveInferenceEpochStateState.model_rebuild()
+ComputationalThermodynamicsProfileProfile.model_rebuild()
 CognitiveSwarmDeploymentManifest.model_rebuild()
 
 DocumentKnowledgeGraphManifest.model_rebuild()

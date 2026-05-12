@@ -17,7 +17,7 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    ActiveInferenceEpochState,
+    ActiveInferenceEpochStateState,
     AdversarialSimulationProfile,
     AgentBidIntent,
     AnchoringPolicy,
@@ -27,7 +27,6 @@ from coreason_manifest.spec.ontology import (
     CognitiveRewardEvaluationReceipt,
     MarketContract,
     SecureSubSessionState,
-    SemanticClassificationProfile,
     VectorEmbeddingState,
 )
 
@@ -61,11 +60,11 @@ class TestSecureSubSessionState:
         assert obj.session_cid == "sess-1"
 
 
-class TestActiveInferenceEpochState:
+class TestActiveInferenceEpochStateState:
     """Exercise epoch state construction."""
 
     def test_basic_epoch(self) -> None:
-        obj = ActiveInferenceEpochState(
+        obj = ActiveInferenceEpochStateState(
             epoch_cid="ep-1",
             current_free_energy=0.5,
         )
@@ -136,18 +135,6 @@ class TestAgentBidIntent:
         )
         assert obj.confidence_score == 0.9
 
-
-class TestFederatedBilateralSLA:
-    """Exercise bilateral SLA construction."""
-
-    def test_basic_sla(self) -> None:
-        obj = FederatedBilateralSLA(
-            receiving_tenant_cid="tenant-1",
-            max_permitted_classification=SemanticClassificationProfile.CONFIDENTIAL,
-            liability_limit_magnitude=5000,
-            permitted_geographic_regions=["us-east-1"],
-        )
-        assert obj.receiving_tenant_cid == "tenant-1"
 
 
 class TestCognitivePredictionReceipt:

@@ -110,17 +110,4 @@ class TestDocumentKnowledgeGraphManifestDAG:
         assert len(obj.causal_edges) == 0
 
 
-# ---------------------------------------------------------------------------
-# FederatedDiscoveryManifest — sort with theory_of_mind (11 lines)
-# ---------------------------------------------------------------------------
 
-
-class TestFederatedDiscoveryManifest:
-    """Exercise FederatedDiscoveryManifest canonical sort."""
-
-    def test_basic(self) -> None:
-        obj = FederatedDiscoveryManifest(
-            broadcast_endpoints=["https://example.com/mcp"],
-            supported_ontologies=["ontology_b", "ontology_a"],
-        )
-        assert len(obj.broadcast_endpoints) == 1
