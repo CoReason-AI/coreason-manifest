@@ -832,7 +832,7 @@ class StrategicThoughtNodeIntent(CoreasonBaseState):
     )
 
 
-class IdeationPhaseProfileProfile(StrEnum):
+class IdeationPhaseProfile(StrEnum):
     """
     AGENT INSTRUCTION: Categorizes the thermodynamic phase of the generative ensemble's exploration.
 
@@ -922,7 +922,7 @@ class StochasticTopologyManifestManifest(CoreasonBaseState):
 
     topology_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
     topology_class: Literal["stochastic_ensemble"] = Field(default="stochastic_ensemble")
-    phase: IdeationPhaseProfileProfile = Field()
+    phase: IdeationPhaseProfile = Field()
     stochastic_graph: list[StochasticNodeState] = Field()
     superposition: HypothesisSuperpositionStateState | None = Field(default=None)
     epistemic_status: Literal["stochastically_unbounded"] = Field(default="stochastically_unbounded")

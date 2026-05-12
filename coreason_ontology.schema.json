@@ -11827,7 +11827,7 @@
       "title": "HypothesisSuperpositionStateState",
       "type": "object"
     },
-    "IdeationPhaseProfileProfile": {
+    "IdeationPhaseProfile": {
       "description": "AGENT INSTRUCTION: Categorizes the thermodynamic phase of the generative ensemble's exploration.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator on the execution status of the topology, governing state transitions.\n\nEPISTEMIC BOUNDS: Strictly bounded to the predefined string enumeration values.\n\nMCP ROUTING TRIGGERS: Phase Tracking, Thermodynamic Orchestration, State Machine",
       "enum": [
         "STOCHASTIC_DIFFUSION",
@@ -11835,7 +11835,7 @@
         "TOPOLOGICAL_CRITIQUE",
         "MANIFOLD_COLLAPSE"
       ],
-      "title": "IdeationPhaseProfileProfile",
+      "title": "IdeationPhaseProfile",
       "type": "string"
     },
     "IllocutionaryForceProfile": {
@@ -19097,7 +19097,7 @@
           "type": "string"
         },
         "phase": {
-          "$ref": "#/$defs/IdeationPhaseProfileProfile"
+          "$ref": "#/$defs/IdeationPhaseProfile"
         },
         "stochastic_graph": {
           "items": {

@@ -17,7 +17,7 @@ from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
     HypothesisSuperpositionStateState,
-    IdeationPhaseProfileProfile,
+    IdeationPhaseProfile,
     StochasticNodeState,
     StochasticTopologyManifestManifest,
 )
@@ -120,7 +120,7 @@ class TestStochasticTopologyManifestManifest:
     def test_valid_dag(self) -> None:
         stm = StochasticTopologyManifestManifest(
             topology_cid="t1",
-            phase=IdeationPhaseProfileProfile.STOCHASTIC_DIFFUSION,
+            phase=IdeationPhaseProfile.STOCHASTIC_DIFFUSION,
             stochastic_graph=[
                 self._make_node("a"),
                 self._make_node("b", "a"),
@@ -132,7 +132,7 @@ class TestStochasticTopologyManifestManifest:
         with pytest.raises(ValidationError, match="must appear before child"):
             StochasticTopologyManifestManifest(
                 topology_cid="t2",
-                phase=IdeationPhaseProfileProfile.MANIFOLD_COLLAPSE,
+                phase=IdeationPhaseProfile.MANIFOLD_COLLAPSE,
                 stochastic_graph=[
                     self._make_node("b", "a"),
                     self._make_node("a"),
@@ -142,7 +142,7 @@ class TestStochasticTopologyManifestManifest:
     def test_single_root_node(self) -> None:
         stm = StochasticTopologyManifestManifest(
             topology_cid="t3",
-            phase=IdeationPhaseProfileProfile.STOCHASTIC_DIFFUSION,
+            phase=IdeationPhaseProfile.STOCHASTIC_DIFFUSION,
             stochastic_graph=[self._make_node("root")],
         )
         assert len(stm.stochastic_graph) == 1
@@ -150,7 +150,7 @@ class TestStochasticTopologyManifestManifest:
     def test_canonical_sort_applied(self) -> None:
         stm = StochasticTopologyManifestManifest(
             topology_cid="t4",
-            phase=IdeationPhaseProfileProfile.STOCHASTIC_DIFFUSION,
+            phase=IdeationPhaseProfile.STOCHASTIC_DIFFUSION,
             stochastic_graph=[
                 self._make_node("c"),
                 self._make_node("a"),

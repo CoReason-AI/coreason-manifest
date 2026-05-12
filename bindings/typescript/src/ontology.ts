@@ -697,7 +697,7 @@ export type TopologyClass14 = "stochastic_ensemble";
  *
  * MCP ROUTING TRIGGERS: Phase Tracking, Thermodynamic Orchestration, State Machine
  */
-export type IdeationPhaseProfileProfile =
+export type IdeationPhaseProfile =
   | "STOCHASTIC_DIFFUSION"
   | "ENTROPIC_EXPLORATION"
   | "TOPOLOGICAL_CRITIQUE"
@@ -6039,7 +6039,7 @@ export interface CoReasonSharedKernelOntology {
   HypothesisGenerationEvent?: HypothesisGenerationEvent;
   HypothesisStakeReceipt?: HypothesisStakeReceipt;
   HypothesisSuperpositionStateState?: HypothesisSuperpositionStateState;
-  IdeationPhaseProfileProfile?: IdeationPhaseProfileProfile;
+  IdeationPhaseProfile?: IdeationPhaseProfile;
   IllocutionaryForceProfile?: IllocutionaryForceProfile1;
   InputMappingContract?: InputMappingContract;
   InsightCardProfile?: InsightCardProfile;
@@ -7087,7 +7087,7 @@ export interface ThoughtBranchState {
 export interface StochasticTopologyManifestManifest {
   topology_cid: TopologyCid;
   topology_class?: TopologyClass14;
-  phase: IdeationPhaseProfileProfile;
+  phase: IdeationPhaseProfile;
   stochastic_graph: StochasticGraph;
   superposition?: HypothesisSuperpositionStateState | null;
   epistemic_status?: EpistemicStatus;
