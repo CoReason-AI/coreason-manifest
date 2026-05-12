@@ -95,7 +95,7 @@ class TestSaeLatentPolicy:
     def test_smooth_decay_requires_profile(self) -> None:
         with pytest.raises(ValidationError, match="smoothing_profile"):
             SaeLatentPolicy(
-                monitored_layers=[1, 2, 3],
+                monitored_hook_points=["blocks.0.hook_resid_post"],
                 target_feature_index=42,
                 max_activation_threshold=1.0,
                 violation_action="smooth_decay",
@@ -107,7 +107,7 @@ class TestSaeLatentPolicy:
     def test_smooth_decay_requires_clamp_value(self) -> None:
         with pytest.raises(ValidationError, match="clamp_value"):
             SaeLatentPolicy(
-                monitored_layers=[1, 2, 3],
+                monitored_hook_points=["blocks.0.hook_resid_post"],
                 target_feature_index=42,
                 max_activation_threshold=1.0,
                 violation_action="smooth_decay",
