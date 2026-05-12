@@ -240,12 +240,12 @@ class RhetoricalStructureProfile(StrEnum):
 
 
 class SemanticClassificationProfile(StrEnum):
-    """
+    r"""
     AGENT INSTRUCTION: Implements SPIFFE/SPIRE workload identity bounds and Service Mesh data sensitivity labels, establishing the foundational mathematical axis for Information Flow Control across the distributed swarm via Envoy delegation.
 
-    CAUSAL AFFORDANCE: Physically authorizes or severs the projection of semantic payloads. By exposing rich comparison operators (e.g., `<=`), it enables the orchestrator's verification engine to natively execute mathematical dominance checks between a payload's classification and an agent's SPIFFE Verifiable Identity Document (SVID).
+    CAUSAL AFFORDANCE: Physically authorizes or severs the projection of semantic payloads. In an Envoy-native OPA policy enforcement model, this label acts as the primary metadata selector for decentralized identity verification between a payload and an agent's SPIFFE Verifiable Identity Document (SVID).
 
-    EPISTEMIC BOUNDS: Constrained to a strict, 4-dimensional string literal space to prevent the hallucination of unauthorized clearance levels. The internal `clearance_level` property maps these strings to an immutable integer hierarchy [0, 1, 2, 3], guaranteeing deterministic threshold evaluation for mTLS delegation.
+    EPISTEMIC BOUNDS: Constrained to a strict, 4-dimensional string literal space to prevent the hallucination of unauthorized workload labels. The platform delegating to mTLS and OPA for enforcement, removing the requirement for scalar manifest-level dominance checks.
 
     MCP ROUTING TRIGGERS: SPIFFE/SPIRE, Envoy Service Mesh, Workload Identity, mTLS Delegation, Epistemic Quarantine
     """
@@ -255,30 +255,6 @@ class SemanticClassificationProfile(StrEnum):
     CONFIDENTIAL = "confidential"
     RESTRICTED = "restricted"
 
-    @property
-    def clearance_level(self) -> int:
-        """Map the semantic string to a discrete scalar magnitude for lattice dominance checks."""
-        return _CLEARANCE_MAPPING[self.value]
-
-    def __lt__(self, other: Any) -> bool:
-        if not isinstance(other, SemanticClassificationProfile):
-            return NotImplemented
-        return self.clearance_level < other.clearance_level
-
-    def __le__(self, other: Any) -> bool:
-        if not isinstance(other, SemanticClassificationProfile):
-            return NotImplemented
-        return self.clearance_level <= other.clearance_level
-
-    def __gt__(self, other: Any) -> bool:
-        if not isinstance(other, SemanticClassificationProfile):
-            return NotImplemented
-        return self.clearance_level > other.clearance_level
-
-    def __ge__(self, other: Any) -> bool:
-        if not isinstance(other, SemanticClassificationProfile):
-            return NotImplemented
-        return self.clearance_level >= other.clearance_level
 
 
 type FaultCategoryProfile = Literal[
@@ -366,8 +342,13 @@ type SemanticVersionState = Annotated[
         examples=["1.0.0", "0.1.0", "2.12.5"],
     ),
 ]
+# DEPRECATED: SpanKindProfile is deprecated in favor of standard OpenTelemetry SDK span kind enumeration.
+# This will be removed in a future minor version.
 type SpanKindProfile = Literal["client", "server", "producer", "consumer", "internal"]
+# DEPRECATED: SpanStatusCodeProfile is deprecated in favor of standard OpenTelemetry SDK status code enumeration.
+# This will be removed in a future minor version.
 type SpanStatusCodeProfile = Literal["unset", "ok", "error"]
+
 
 
 _BYTES_MAPPING: dict[str, int] = {"float32": 4, "float64": 8, "int8": 1, "uint8": 1, "int32": 4, "int64": 8}
