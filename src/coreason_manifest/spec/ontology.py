@@ -12,10 +12,12 @@ from __future__ import annotations
 
 import ast
 import hashlib
+import ipaddress
 import math
 import operator
 import re
 import typing
+import urllib.parse
 from enum import StrEnum
 from typing import Annotated, Any, Literal, Self
 
@@ -157,6 +159,37 @@ def _canonicalize_payload(obj: Any) -> Any:
     if typ is list:
         return [_canonicalize_payload(v) for v in obj]
     return obj
+
+
+def _validate_ssrf_safety(v: AnyUrl | str) -> AnyUrl | str:
+    """
+    AGENT INSTRUCTION: Mathematically prevents Server-Side Request Forgery (SSRF) and lateral movement attacks.
+
+    CAUSAL AFFORDANCE: Physically severs outbound HTTP connection requests directed at internal network infrastructure, Bogon space, or loopback interfaces.
+
+    EPISTEMIC BOUNDS: Operates purely on string literals to avoid dynamic DNS resolution timing attacks.
+
+    MCP ROUTING TRIGGERS: SSRF Prevention, Network Guillotine, Lateral Movement, IP Address Bounding
+    """
+    url_str = str(v)
+    parsed = urllib.parse.urlparse(url_str)
+    hostname = parsed.hostname
+
+    if not hostname:
+        return v
+
+    if hostname.lower() in ("localhost", "metadata.google.internal", "169.254.169.254"):
+        raise ValueError(f"SSRF Quarantine: Target hostname '{hostname}' is restricted.")
+
+    try:
+        ip = ipaddress.ip_address(hostname)
+        if ip.is_loopback or ip.is_private or ip.is_link_local or ip.is_multicast or ip.is_reserved:
+            raise ValueError(f"SSRF Quarantine: Target IP '{hostname}' resolves to a restricted space.")
+    except ValueError as e:
+        if "SSRF Quarantine" in str(e):
+            raise
+
+    return v
 
 
 type AuctionMechanismProfile = Literal["sealed_bid", "dutch", "vickrey"]
@@ -4079,6 +4112,12 @@ class OntologyDiscoveryIntent(BoundedJSONRPCIntent):
     target_registry_uri: HttpUrl = Field(
         description="The standard ontology registry endpoint (e.g., EBI-OLS, BioPortal)."
     )
+
+    @field_validator("target_registry_uri", mode="after")
+    @classmethod
+    def validate_ssrf(cls, v: Any) -> Any:
+        return _validate_ssrf_safety(v)
+
     query_concept_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
         Field(description="The internal standard CID the agent is checking for deprecation or semantic drift.")
     )
@@ -5498,6 +5537,11 @@ class LinkMLValidationSLA(CoreasonBaseState):
 
     linkml_schema_uri: AnyUrl
 
+    @field_validator("linkml_schema_uri", mode="after")
+    @classmethod
+    def validate_ssrf(cls, v: Any) -> Any:
+        return _validate_ssrf_safety(v)
+
 
 class OntologicalCrosswalkIntent(CoreasonBaseState):
     """
@@ -6727,6 +6771,12 @@ class HTTPTransportProfile(CoreasonBaseState):
 
     topology_class: Literal["http"] = Field(default="http", description="Type of transport.")
     uri: HttpUrl = Field(..., description="The HTTP URL endpoint for the stateless connection.")
+
+    @field_validator("uri", mode="after")
+    @classmethod
+    def validate_ssrf(cls, v: Any) -> Any:
+        return _validate_ssrf_safety(v)
+
     headers: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=2000)]
     ] = Field(default_factory=dict, description="HTTP headers, strictly bounded for zero-trust credentials.")
@@ -7384,6 +7434,12 @@ class SHACLValidationSLA(CoreasonBaseState):
     """
 
     shacl_shape_graph_uri: AnyUrl
+
+    @field_validator("shacl_shape_graph_uri", mode="after")
+    @classmethod
+    def validate_ssrf(cls, v: Any) -> Any:
+        return _validate_ssrf_safety(v)
+
     violation_action: Literal["DROP_GRAPH", "STRIP_TRIPLES", "HALT_EXECUTION"]
 
 
@@ -7400,6 +7456,12 @@ class SPARQLQueryIntent(CoreasonBaseState):
 
     query_string: str
     target_endpoint: HttpUrl
+
+    @field_validator("target_endpoint", mode="after")
+    @classmethod
+    def validate_ssrf(cls, v: Any) -> Any:
+        return _validate_ssrf_safety(v)
+
     topology_class: Literal["sparql_query"] = "sparql_query"
 
 
@@ -7446,6 +7508,12 @@ class RDFSerializationIntent(CoreasonBaseState):
     target_graph_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
     target_format: Literal["turtle", "xml", "json-ld", "ntriples"] = "turtle"
     base_uri_namespace: AnyUrl
+
+    @field_validator("base_uri_namespace", mode="after")
+    @classmethod
+    def validate_ssrf(cls, v: Any) -> Any:
+        return _validate_ssrf_safety(v)
+
     shacl_governance: SHACLValidationSLA | None = Field(
         default=None, description="The structural shape constraints governing the exported RDF graph."
     )
@@ -7880,6 +7948,12 @@ class InterventionPolicy(CoreasonBaseState):
     async_observation_port: AnyUrl | None = Field(
         default=None, max_length=2000, description="The endpoint for emitting non-blocking shadow telemetry."
     )
+
+    @field_validator("async_observation_port", mode="after")
+    @classmethod
+    def validate_ssrf(cls, v: Any) -> Any:
+        return _validate_ssrf_safety(v)
+
     emit_telemetry_on_revision: bool = Field(
         default=False, description="The toggle to enable shadow monitoring on revision loops."
     )
@@ -9904,6 +9978,12 @@ class SSETransportProfile(CoreasonBaseState):
 
     topology_class: Literal["sse"] = Field(default="sse", description="Type of transport.")
     uri: HttpUrl = Field(..., description="The HTTP URL endpoint for the SSE connection.")
+
+    @field_validator("uri", mode="after")
+    @classmethod
+    def validate_ssrf(cls, v: Any) -> Any:
+        return _validate_ssrf_safety(v)
+
     headers: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=2000)]
     ] = Field(default_factory=dict, description="HTTP headers, e.g., for authentication.")
@@ -11604,6 +11684,12 @@ class SemanticNodeState(CoreasonBaseState):
         json_schema_extra={"rdf_subject": True},
     )
     canonical_uri: AnyUrl | None = Field(default=None, json_schema_extra={"rdf_predicate": "owl:sameAs"})
+
+    @field_validator("canonical_uri", mode="after")
+    @classmethod
+    def validate_ssrf(cls, v: Any) -> Any:
+        return _validate_ssrf_safety(v)
+
     label: Annotated[str, StringConstraints(max_length=2000)] = Field(
         description="The categorical label of the node (e.g., 'Person', 'Concept').",
         json_schema_extra={"rdf_predicate": "rdfs:label"},
@@ -14987,6 +15073,12 @@ class EvidentiaryCitationState(CoreasonBaseState):
         description="Cryptographic anchor for the specific piece of evidence."
     )
     source_url: HttpUrl = Field(description="The canonical origin of the evidence.")
+
+    @field_validator("source_url", mode="after")
+    @classmethod
+    def validate_ssrf(cls, v: Any) -> Any:
+        return _validate_ssrf_safety(v)
+
     extracted_snippet: Annotated[str, StringConstraints(max_length=10000)] = Field(
         description="The exact text evaluated by the NLI model."
     )
