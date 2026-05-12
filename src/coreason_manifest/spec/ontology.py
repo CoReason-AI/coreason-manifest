@@ -2137,8 +2137,11 @@ class ActivationSteeringContract(CoreasonBaseState):
             description="The SHA-256 hash of the extracted RepE control tensor (e.g., the 'caution' vector).",
         )
     )
-    target_hook_points: list[Annotated[str, StringConstraints(min_length=1, max_length=256, pattern="^[a-zA-Z0-9_.]+$")]] = Field(
-        min_length=1, description="The specific TransformerLens hook points (e.g., 'blocks.12.hook_resid_post') where this vector must be applied."
+    target_hook_points: list[
+        Annotated[str, StringConstraints(min_length=1, max_length=256, pattern="^[a-zA-Z0-9_.]+$")]
+    ] = Field(
+        min_length=1,
+        description="The specific TransformerLens hook points (e.g., 'blocks.12.hook_resid_post') where this vector must be applied.",
     )
     scaling_factor: float = Field(
         le=100.0, description="The mathematical magnitude/strength of the injection (can be negative for ablation)."
@@ -2652,7 +2655,9 @@ class SaeLatentPolicy(CoreasonBaseState):
         ge=0,
         description="The exact dimensional index of the monosemantic feature in the Sparse Autoencoder dictionary.",
     )
-    monitored_hook_points: list[Annotated[str, StringConstraints(min_length=1, max_length=256, pattern="^[a-zA-Z0-9_.]+$")]] = Field(
+    monitored_hook_points: list[
+        Annotated[str, StringConstraints(min_length=1, max_length=256, pattern="^[a-zA-Z0-9_.]+$")]
+    ] = Field(
         min_length=1,
         description="The specific TransformerLens hook points where this feature activation must be monitored.",
     )
@@ -8599,7 +8604,9 @@ class MechanisticAuditContract(CoreasonBaseState):
             description="The specific architectural events that authorize the orchestrator to halt generation and extract internal activations.",
         )
     )
-    target_hook_points: list[Annotated[str, StringConstraints(min_length=1, max_length=256, pattern="^[a-zA-Z0-9_.]+$")]] = Field(
+    target_hook_points: list[
+        Annotated[str, StringConstraints(min_length=1, max_length=256, pattern="^[a-zA-Z0-9_.]+$")]
+    ] = Field(
         min_length=1, description="The specific TransformerLens hook points the execution engine must extract from."
     )
     max_features_per_layer: int = Field(
