@@ -12,7 +12,7 @@ import json
 
 from coreason_manifest.spec.ontology import (
     ExecutionEnvelopeState,
-    FYIIntent,
+    FederatedCIDFetchIntent,
     StateVectorProfile,
     TraceContextState,
 )
@@ -48,8 +48,8 @@ def test_canonicalize_payload_tuple() -> None:
 
 
 def test_serialize_envelope_with_trace_context() -> None:
-    intent = FYIIntent()
-    envelope = ExecutionEnvelopeState[FYIIntent].model_construct(
+    intent = FederatedCIDFetchIntent(target_cid="sha256:" + "a" * 64, timeout_ms=1000)
+    envelope = ExecutionEnvelopeState[FederatedCIDFetchIntent].model_construct(
         state_vector=StateVectorProfile.model_construct(immutable_matrix={}, mutable_matrix={}, is_delta=False),
         payload=intent,
         trace_context=TraceContextState.model_construct(trace_cid="a" * 64, span_cid="b" * 64),
@@ -67,8 +67,8 @@ def test_serialize_envelope_with_trace_context() -> None:
 
 
 def test_serialize_envelope_missing_trace_cid() -> None:
-    intent = FYIIntent()
-    envelope = ExecutionEnvelopeState[FYIIntent].model_construct(
+    intent = FederatedCIDFetchIntent(target_cid="sha256:" + "b" * 64, timeout_ms=1000)
+    envelope = ExecutionEnvelopeState[FederatedCIDFetchIntent].model_construct(
         state_vector=StateVectorProfile.model_construct(immutable_matrix={}, mutable_matrix={}, is_delta=False),
         payload=intent,
         trace_context=TraceContextState.model_construct(  # type: ignore[call-arg]
@@ -83,8 +83,8 @@ def test_serialize_envelope_missing_trace_cid() -> None:
 
 
 def test_serialize_envelope_missing_trace_context() -> None:
-    intent = FYIIntent()
-    envelope = ExecutionEnvelopeState[FYIIntent].model_construct(  # type: ignore[call-arg]
+    intent = FederatedCIDFetchIntent(target_cid="sha256:" + "c" * 64, timeout_ms=1000)
+    envelope = ExecutionEnvelopeState[FederatedCIDFetchIntent].model_construct(  # type: ignore[call-arg]
         state_vector=StateVectorProfile.model_construct(immutable_matrix={}, mutable_matrix={}, is_delta=False),
         payload=intent,
         # No trace_context provided

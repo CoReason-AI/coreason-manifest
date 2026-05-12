@@ -20,6 +20,7 @@ from coreason_manifest.spec.ontology import (
     EpistemicAxiomState,
     # EpistemicDomainGraphManifest — lines 13590-13599 (10 lines)
     EpistemicDomainGraphManifest,
+    FederatedDiscoveryManifest,
     SemanticClassificationProfile,
     # SemanticSlicingPolicy — lines 2052-2065 (14 lines)
     SemanticSlicingPolicy,
@@ -108,3 +109,19 @@ class TestDocumentKnowledgeGraphManifestDAG:
             isomorphism_hash="b" * 64,
         )
         assert len(obj.causal_edges) == 0
+
+
+# ---------------------------------------------------------------------------
+# FederatedDiscoveryManifest — sort with theory_of_mind (11 lines)
+# ---------------------------------------------------------------------------
+
+
+class TestFederatedDiscoveryManifest:
+    """Exercise FederatedDiscoveryManifest canonical sort."""
+
+    def test_basic(self) -> None:
+        obj = FederatedDiscoveryManifest(
+            broadcast_endpoints=["https://example.com/mcp"],
+            supported_ontologies=["ontology_b", "ontology_a"],
+        )
+        assert len(obj.broadcast_endpoints) == 1

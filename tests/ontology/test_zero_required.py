@@ -19,6 +19,7 @@ from coreason_manifest.spec.ontology import (
     CryptographicProvenancePolicy,
     EpistemicSecurityProfile,
     FacetMatrixProfile,
+    FederatedStateSnapshot,
     FYIIntent,
     MCPCapabilityWhitelistPolicy,
     MultimodalTokenAnchorState,
@@ -51,6 +52,10 @@ class TestZeroRequiredFieldModels:
 
     def test_facet_matrix_profile(self) -> None:
         obj = FacetMatrixProfile()
+        assert obj is not None
+
+    def test_federated_state_snapshot(self) -> None:
+        obj = FederatedStateSnapshot()
         assert obj is not None
 
     def test_mcp_capability_whitelist_policy(self) -> None:
