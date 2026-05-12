@@ -20,7 +20,6 @@ from coreason_manifest.spec.ontology import (
     EpistemicAxiomState,
     # EpistemicDomainGraphManifest — lines 13590-13599 (10 lines)
     EpistemicDomainGraphManifest,
-    FederatedDiscoveryManifest,
     SemanticClassificationProfile,
     # SemanticSlicingPolicy — lines 2052-2065 (14 lines)
     SemanticSlicingPolicy,

@@ -12,7 +12,6 @@ import json
 
 from coreason_manifest.spec.ontology import (
     ExecutionEnvelopeState,
-    FederatedCIDFetchIntent,
     StateVectorProfile,
     TraceContextState,
 )

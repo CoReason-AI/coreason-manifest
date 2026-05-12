@@ -19,7 +19,6 @@ from coreason_manifest.spec.ontology import (
     CryptographicProvenancePolicy,
     EpistemicSecurityProfile,
     FacetMatrixProfile,
-    FederatedStateSnapshot,
     FYIIntent,
     MCPCapabilityWhitelistPolicy,
     MultimodalTokenAnchorState,

@@ -14,8 +14,6 @@ from pydantic import ValidationError
 from coreason_manifest.spec.ontology import (
     DiscourseTreeManifest,
     EpistemicZeroTrustReceipt,
-    FederatedCIDFetchIntent,
-    FederatedDiscoveryIntent,
     InterventionReceipt,
     OntologicalAlignmentPolicy,
     RedactionPolicy,

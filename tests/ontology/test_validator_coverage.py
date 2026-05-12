@@ -25,7 +25,6 @@ from coreason_manifest.spec.ontology import (
     BudgetExhaustionEvent,
     CognitivePredictionReceipt,
     CognitiveRewardEvaluationReceipt,
-    FederatedBilateralSLA,
     MarketContract,
     SecureSubSessionState,
     SemanticClassificationProfile,
