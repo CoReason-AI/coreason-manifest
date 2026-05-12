@@ -9441,34 +9441,41 @@ type QoSClassificationProfile = Literal["critical", "high", "interactive", "back
 
 
 class ComputeProvisioningIntent(CoreasonBaseState):
-    r"""
-    AGENT INSTRUCTION: Formulates a constrained Knapsack Problem for dynamically allocating liquid compute resources based on exact Quality of Service (QoS) priorities and semantic load shedding rules.
+    """
+    AGENT INSTRUCTION: A Kinetic execution trigger used to request the physical instantiation of new execution substrates. This intent is delegated to SkyPilot for multi-cloud spot-market orchestration.
 
-    CAUSAL AFFORDANCE: Emits a structural demand to the swarm orchestrator to negotiate, acquire, and cryptographically lock the requisite token escrow before allocating kinetic execution cycles to a sub-graph.
+    CAUSAL AFFORDANCE: Triggers the expansion loop in the Governance Plane, authorizing the PulumiActuator (backed by SkyPilot) to provision GPU/CPU nodes across AWS, GCP, Azure, or Vast.ai.
 
-    EPISTEMIC BOUNDS: Economic velocity is strictly clamped by `max_budget` (`le=18446744073709551615`), physically typed as an integer to prevent floating-point fractures during spot market bidding. The `required_capabilities` array is deterministically sorted by a `@model_validator`.
+    EPISTEMIC BOUNDS: Requires a strictly defined `HardwareProfile` and `EscrowPolicy` to prevent thermodynamic runaway. Cost estimates are validated against the `ComputeRateContract`.
 
-    MCP ROUTING TRIGGERS: Knapsack Optimization, Semantic Load Shedding, Spot Compute Bidding, QoS Classification, Resource Provisioning
-
+    MCP ROUTING TRIGGERS: SkyPilot Orchestration, Multi-Cloud Provisioning, Spot-Market Acquisition, Thermodynamic Expansion, Substrate Instantiation
     """
 
     topology_class: Literal["compute_provisioning"] = Field(
         default="compute_provisioning",
         description="The discriminative topological boundary for compute provisioning intents.",
     )
+    provisioning_engine: Literal["skypilot"] = Field(
+        default="skypilot", description="The underlying orchestration engine (Mandatory: SkyPilot)."
+    )
     max_budget: int = Field(
         le=18446744073709551615, description="The maximum atomic cost budget allowable for the provisioned compute."
     )
-
-    @model_validator(mode="before")
-    @classmethod
-    def _clamp_max_budget_before(cls, values: Any) -> Any:
-        if isinstance(values, dict):
-            values["max_budget"] = max(0, min(values.get("max_budget", 0), 18446744073709551615))
-        return values
-
+    hardware_profile: SpatialHardwareProfile | None = Field(
+        default=None, description="The target physical hardware specification (e.g., A100:8)."
+    )
+    use_spot: bool = Field(
+        default=True,
+        description="If True, SkyPilot will hunt for the cheapest spot instances and handle managed recovery.",
+    )
+    autostop_idle_minutes: int | None = Field(
+        default=10,
+        description="The idle timeout after which SkyPilot will automatically terminate the cluster.",
+    )
     required_capabilities: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
-        max_length=1000, description="The minimal functional capabilities required by the requested compute."
+        default_factory=list,
+        max_length=1000,
+        description="The minimal functional capabilities required by the requested compute.",
     )
     qos_class: QoSClassificationProfile = Field(
         default="interactive",

@@ -1221,9 +1221,41 @@ export type LamportClock = number;
  */
 export type TopologyClass31 = "compute_provisioning";
 /**
+ * The underlying orchestration engine (Mandatory: SkyPilot).
+ */
+export type ProvisioningEngine = "skypilot";
+/**
  * The maximum atomic cost budget allowable for the provisioned compute.
  */
 export type MaxBudget = number;
+/**
+ * The discrete architectural boundary of the node.
+ */
+export type ComputeTier = string;
+/**
+ * The absolute physical minimum Video RAM required to load this node's latent space.
+ */
+export type MinVramGb = number;
+/**
+ * The networking mode defining the P2P boundary for enterprise compliance.
+ */
+export type CoreasonNetworkMode = "P2P" | "STRICT_GENESIS";
+/**
+ * The rigid silicon precision format required to execute this node's neural circuits.
+ */
+export type AcceleratorType = string;
+/**
+ * The explicit array of cloud infrastructure providers authorized to run this node.
+ */
+export type ProviderWhitelist = string[];
+/**
+ * If True, SkyPilot will hunt for the cheapest spot instances and handle managed recovery.
+ */
+export type UseSpot = boolean;
+/**
+ * The idle timeout after which SkyPilot will automatically terminate the cluster.
+ */
+export type AutostopIdleMinutes = number | null;
 /**
  * The minimal functional capabilities required by the requested compute.
  *
@@ -1957,26 +1989,6 @@ export type Description3 = string;
  * Discriminator for an Agent node.
  */
 export type TopologyClass62 = "agent";
-/**
- * The discrete architectural boundary of the node.
- */
-export type ComputeTier = string;
-/**
- * The absolute physical minimum Video RAM required to load this node's latent space.
- */
-export type MinVramGb = number;
-/**
- * The networking mode defining the P2P boundary for enterprise compliance.
- */
-export type CoreasonNetworkMode = "P2P" | "STRICT_GENESIS";
-/**
- * The rigid silicon precision format required to execute this node's neural circuits.
- */
-export type AcceleratorType = string;
-/**
- * The explicit array of cloud infrastructure providers authorized to run this node.
- */
-export type ProviderWhitelist = string[];
 /**
  * The level of hardware-enforced cryptographic isolation required.
  */
@@ -6120,7 +6132,7 @@ export interface CoReasonSharedKernelOntology {
   SpanKindProfile?: SpanKindProfile;
   SpanStatusCodeProfile?: SpanStatusCodeProfile;
   SpatialBillboardContract?: SpatialBillboardContract;
-  SpatialHardwareProfile?: SpatialHardwareProfile1;
+  SpatialHardwareProfile?: SpatialHardwareProfile;
   SpatialKinematicActionIntent?: SpatialKinematicActionIntent;
   SpatialReferenceFrameManifest?: SpatialReferenceFrameManifest;
   SpatialRenderMaterial?: SpatialRenderMaterial;
@@ -7653,22 +7665,47 @@ export interface KinematicDerivativeProfile {
 /**
  * CoReason Shared Kernel Ontology
  *
- * AGENT INSTRUCTION: Formulates a constrained Knapsack Problem for dynamically allocating liquid compute resources based on exact Quality of Service (QoS) priorities and semantic load shedding rules.
+ * AGENT INSTRUCTION: A Kinetic execution trigger used to request the physical instantiation of new execution substrates. This intent is delegated to SkyPilot for multi-cloud spot-market orchestration.
  *
- * CAUSAL AFFORDANCE: Emits a structural demand to the swarm orchestrator to negotiate, acquire, and cryptographically lock the requisite token escrow before allocating kinetic execution cycles to a sub-graph.
+ * CAUSAL AFFORDANCE: Triggers the expansion loop in the Governance Plane, authorizing the PulumiActuator (backed by SkyPilot) to provision GPU/CPU nodes across AWS, GCP, Azure, or Vast.ai.
  *
- * EPISTEMIC BOUNDS: Economic velocity is strictly clamped by `max_budget` (`le=18446744073709551615`), physically typed as an integer to prevent floating-point fractures during spot market bidding. The `required_capabilities` array is deterministically sorted by a `@model_validator`.
+ * EPISTEMIC BOUNDS: Requires a strictly defined `HardwareProfile` and `EscrowPolicy` to prevent thermodynamic runaway. Cost estimates are validated against the `ComputeRateContract`.
  *
- * MCP ROUTING TRIGGERS: Knapsack Optimization, Semantic Load Shedding, Spot Compute Bidding, QoS Classification, Resource Provisioning
+ * MCP ROUTING TRIGGERS: SkyPilot Orchestration, Multi-Cloud Provisioning, Spot-Market Acquisition, Thermodynamic Expansion, Substrate Instantiation
  */
 export interface ComputeProvisioningIntent {
   topology_class?: TopologyClass31;
+  provisioning_engine?: ProvisioningEngine;
   max_budget: MaxBudget;
-  required_capabilities: RequiredCapabilities;
+  /**
+   * The target physical hardware specification (e.g., A100:8).
+   */
+  hardware_profile?: SpatialHardwareProfile | null;
+  use_spot?: UseSpot;
+  autostop_idle_minutes?: AutostopIdleMinutes;
+  required_capabilities?: RequiredCapabilities;
   /**
    * The Quality of Service priority, used by the compute spot market for semantic load shedding.
    */
   qos_class?: "critical" | "high" | "interactive" | "background_batch";
+}
+/**
+ * CoReason Shared Kernel Ontology
+ *
+ * AGENT INSTRUCTION: A declarative, frozen snapshot of the physical hardware boundaries and thermodynamic constraints required to instantiate this node. As a ...Profile suffix, this defines a rigid mathematical boundary.
+ *
+ * CAUSAL AFFORDANCE: Instructs the orchestrator's provisioning layer to allocate exact silicon resources (Compute Tier, VRAM, and Accelerator Type) before allowing the node to execute generative operations.
+ *
+ * EPISTEMIC BOUNDS: VRAM allocation is physically bounded by min_vram_gb (gt=0.0). The URN-patterned compute_tier and accelerator_type fields provide extensible silicon identification without ephemeral enumeration coupling. The provider_whitelist is deterministically sorted for invariant RFC 8785 hashing.
+ *
+ * MCP ROUTING TRIGGERS: Thermodynamic Bounding, VRAM Allocation, Spot Market Routing, Hardware Provisioning, Silicon Constraints
+ */
+export interface SpatialHardwareProfile {
+  compute_tier?: ComputeTier;
+  min_vram_gb?: MinVramGb;
+  coreason_network_mode?: CoreasonNetworkMode;
+  accelerator_type?: AcceleratorType;
+  provider_whitelist?: ProviderWhitelist;
 }
 /**
  * CoReason Shared Kernel Ontology
@@ -8738,7 +8775,7 @@ export interface CognitiveAgentNodeProfile {
   render_material?: SpatialRenderMaterial | null;
   description: Description3;
   topology_class?: TopologyClass62;
-  hardware?: SpatialHardwareProfile;
+  hardware?: SpatialHardwareProfile1;
   security?: EpistemicSecurityProfile;
   /**
    * The cryptographic contract forcing this agent to embed an undeniable provenance signature into its generative token stream.
@@ -8906,9 +8943,17 @@ export interface MarkovBlanketRenderingPolicy {
   occlude_internal_mechanistics?: OccludeInternalMechanistics;
 }
 /**
- * The physical constraints binding this agent to a specific thermodynamic deployment topology.
+ * CoReason Shared Kernel Ontology
+ *
+ * AGENT INSTRUCTION: A declarative, frozen snapshot of the physical hardware boundaries and thermodynamic constraints required to instantiate this node. As a ...Profile suffix, this defines a rigid mathematical boundary.
+ *
+ * CAUSAL AFFORDANCE: Instructs the orchestrator's provisioning layer to allocate exact silicon resources (Compute Tier, VRAM, and Accelerator Type) before allowing the node to execute generative operations.
+ *
+ * EPISTEMIC BOUNDS: VRAM allocation is physically bounded by min_vram_gb (gt=0.0). The URN-patterned compute_tier and accelerator_type fields provide extensible silicon identification without ephemeral enumeration coupling. The provider_whitelist is deterministically sorted for invariant RFC 8785 hashing.
+ *
+ * MCP ROUTING TRIGGERS: Thermodynamic Bounding, VRAM Allocation, Spot Market Routing, Hardware Provisioning, Silicon Constraints
  */
-export interface SpatialHardwareProfile {
+export interface SpatialHardwareProfile1 {
   compute_tier?: ComputeTier;
   min_vram_gb?: MinVramGb;
   coreason_network_mode?: CoreasonNetworkMode;
@@ -14986,24 +15031,6 @@ export interface SimulationConvergenceSLA1 {
  */
 export interface SimulationEscrowContract1 {
   locked_magnitude: LockedMagnitude;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
- * AGENT INSTRUCTION: A declarative, frozen snapshot of the physical hardware boundaries and thermodynamic constraints required to instantiate this node. As a ...Profile suffix, this defines a rigid mathematical boundary.
- *
- * CAUSAL AFFORDANCE: Instructs the orchestrator's provisioning layer to allocate exact silicon resources (Compute Tier, VRAM, and Accelerator Type) before allowing the node to execute generative operations.
- *
- * EPISTEMIC BOUNDS: VRAM allocation is physically bounded by min_vram_gb (gt=0.0). The URN-patterned compute_tier and accelerator_type fields provide extensible silicon identification without ephemeral enumeration coupling. The provider_whitelist is deterministically sorted for invariant RFC 8785 hashing.
- *
- * MCP ROUTING TRIGGERS: Thermodynamic Bounding, VRAM Allocation, Spot Market Routing, Hardware Provisioning, Silicon Constraints
- */
-export interface SpatialHardwareProfile1 {
-  compute_tier?: ComputeTier;
-  min_vram_gb?: MinVramGb;
-  coreason_network_mode?: CoreasonNetworkMode;
-  accelerator_type?: AcceleratorType;
-  provider_whitelist?: ProviderWhitelist;
 }
 /**
  * CoReason Shared Kernel Ontology

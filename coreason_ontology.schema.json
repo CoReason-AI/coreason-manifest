@@ -4509,7 +4509,7 @@
     },
     "ComputeProvisioningIntent": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formulates a constrained Knapsack Problem for dynamically allocating liquid compute resources based on exact Quality of Service (QoS) priorities and semantic load shedding rules.\n\nCAUSAL AFFORDANCE: Emits a structural demand to the swarm orchestrator to negotiate, acquire, and cryptographically lock the requisite token escrow before allocating kinetic execution cycles to a sub-graph.\n\nEPISTEMIC BOUNDS: Economic velocity is strictly clamped by `max_budget` (`le=18446744073709551615`), physically typed as an integer to prevent floating-point fractures during spot market bidding. The `required_capabilities` array is deterministically sorted by a `@model_validator`.\n\nMCP ROUTING TRIGGERS: Knapsack Optimization, Semantic Load Shedding, Spot Compute Bidding, QoS Classification, Resource Provisioning",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A Kinetic execution trigger used to request the physical instantiation of new execution substrates. This intent is delegated to SkyPilot for multi-cloud spot-market orchestration.\n\nCAUSAL AFFORDANCE: Triggers the expansion loop in the Governance Plane, authorizing the PulumiActuator (backed by SkyPilot) to provision GPU/CPU nodes across AWS, GCP, Azure, or Vast.ai.\n\nEPISTEMIC BOUNDS: Requires a strictly defined `HardwareProfile` and `EscrowPolicy` to prevent thermodynamic runaway. Cost estimates are validated against the `ComputeRateContract`.\n\nMCP ROUTING TRIGGERS: SkyPilot Orchestration, Multi-Cloud Provisioning, Spot-Market Acquisition, Thermodynamic Expansion, Substrate Instantiation",
       "properties": {
         "topology_class": {
           "const": "compute_provisioning",
@@ -4518,11 +4518,49 @@
           "title": "Topology Class",
           "type": "string"
         },
+        "provisioning_engine": {
+          "const": "skypilot",
+          "default": "skypilot",
+          "description": "The underlying orchestration engine (Mandatory: SkyPilot).",
+          "title": "Provisioning Engine",
+          "type": "string"
+        },
         "max_budget": {
           "description": "The maximum atomic cost budget allowable for the provisioned compute.",
           "maximum": 18446744073709551615,
           "title": "Max Budget",
           "type": "integer"
+        },
+        "hardware_profile": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SpatialHardwareProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The target physical hardware specification (e.g., A100:8)."
+        },
+        "use_spot": {
+          "default": true,
+          "description": "If True, SkyPilot will hunt for the cheapest spot instances and handle managed recovery.",
+          "title": "Use Spot",
+          "type": "boolean"
+        },
+        "autostop_idle_minutes": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 10,
+          "description": "The idle timeout after which SkyPilot will automatically terminate the cluster.",
+          "title": "Autostop Idle Minutes"
         },
         "required_capabilities": {
           "description": "The minimal functional capabilities required by the requested compute.",
@@ -4541,8 +4579,7 @@
         }
       },
       "required": [
-        "max_budget",
-        "required_capabilities"
+        "max_budget"
       ],
       "title": "ComputeProvisioningIntent",
       "type": "object"
