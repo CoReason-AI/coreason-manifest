@@ -59,7 +59,6 @@ from coreason_manifest.utils.algebra import (
     transmute_state_differential,
     verify_ast_safety,
     verify_manifold_bounds,
-    verify_merkle_proof,
 )
 
 __all__ = [
@@ -186,9 +185,7 @@ __all__ = [
     "EvidentiaryWarrantState",
     "EvolutionaryTopologyManifest",
     "ExecutionEnvelopeState",
-    "ExecutionNodeReceipt",
     "ExecutionSLA",
-    "ExecutionSpanReceipt",
     "ExogenousEpistemicEvent",
     "FYIIntent",
     "FacetMatrixProfile",
@@ -292,7 +289,6 @@ __all__ = [
     "SideEffectProfile",
     "SimulationConvergenceSLA",
     "SimulationEscrowContract",
-    "SpanEvent",
     "SpanKindProfile",
     "SpanStatusCodeProfile",
     "SpatialKinematicActionIntent",
@@ -330,7 +326,6 @@ __all__ = [
     "TopologicalRewardContract",
     "TopologyHashReceipt",
     "TraceContextState",
-    "TraceExportManifest",
     "TruthMaintenancePolicy",
     "UtilityJustificationGraphReceipt",
     "VectorEmbeddingState",
@@ -351,5 +346,4 @@ __all__ = [
     "transmute_state_differential",
     "verify_ast_safety",
     "verify_manifold_bounds",
-    "verify_merkle_proof",
 ]
