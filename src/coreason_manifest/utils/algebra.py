@@ -24,6 +24,7 @@ import ast
 import base64
 import copy
 import hashlib
+import math
 import typing
 from collections.abc import Sequence
 from typing import Any, Literal, cast
@@ -285,15 +286,17 @@ def calculate_latent_alignment(
     if len(arr1) != v1.dimensionality or len(arr2) != v2.dimensionality:
         raise ValueError("Byte length does not match declared dimensionality.")
 
+    # ⚡ Bolt Reversion: Direct np.dot causes float32 underflow for small vectors (ZeroDivisionError)
+    # and overflow for large vectors (yielding 0.0 similarity instead of 1.0).
+    # We MUST use np.linalg.norm to ensure BLAS-level scaling (snrm2) for mathematical correctness.
     with np.errstate(all="ignore"):
         norm1 = float(np.linalg.norm(arr1))
         norm2 = float(np.linalg.norm(arr2))
         similarity = 0.0 if norm1 == 0.0 or norm2 == 0.0 else float(np.dot(arr1, arr2) / (norm1 * norm2))
 
-    if np.isnan(similarity):
+    if math.isnan(similarity):
         similarity = 0.0
-
-    if similarity > 1.0:
+    elif similarity > 1.0:
         similarity = 1.0
     elif similarity < -1.0:
         similarity = -1.0
