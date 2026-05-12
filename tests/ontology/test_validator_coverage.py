@@ -136,7 +136,6 @@ class TestAgentBidIntent:
         assert obj.confidence_score == 0.9
 
 
-
 class TestCognitivePredictionReceipt:
     """Exercise prediction receipt."""
 

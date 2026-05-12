@@ -108,6 +108,3 @@ class TestDocumentKnowledgeGraphManifestDAG:
             isomorphism_hash="b" * 64,
         )
         assert len(obj.causal_edges) == 0
-
-
-

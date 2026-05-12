@@ -3313,7 +3313,8 @@ class ThoughtBranchState(CoreasonBaseState):
 
 
 type AnyExplorationBranch = Annotated[
-    ThoughtBranchState | StochasticTopologyManifestManifest | StrategicThoughtNodeIntent, Field(discriminator="topology_class")
+    ThoughtBranchState | StochasticTopologyManifestManifest | StrategicThoughtNodeIntent,
+    Field(discriminator="topology_class"),
 ]
 
 
@@ -12957,7 +12958,6 @@ class EpistemicQuarantineSnapshot(CoreasonBaseState):
         default=None,
         description="The mathematically bounded subgraph of capabilities currently available to the agent.",
     )
-
 
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
