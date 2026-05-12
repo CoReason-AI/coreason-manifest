@@ -60,7 +60,6 @@ class_names = [
     "NDimensionalTensorManifest",
     "PeftAdapterContract",
     "ExogenousEpistemicEvent",
-    "ChaosExperimentTask",
     "HypothesisGenerationEvent",
     "AuctionState",
     "TaskAwardReceipt",

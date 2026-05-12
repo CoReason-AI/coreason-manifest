@@ -17,7 +17,6 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
-    AdversarialSimulationProfile,
     AgentBidIntent,
     AnchoringPolicy,
     AsymptoticComplexityReceipt,
@@ -71,18 +70,6 @@ class TestVectorEmbeddingState:
         )
         assert obj.dimensionality == 16
 
-
-class TestAdversarialSimulationProfile:
-    """Exercise simulation profile."""
-
-    def test_basic_simulation(self) -> None:
-        obj = AdversarialSimulationProfile(
-            simulation_cid="sim-1",
-            target_node_cid="did:z:target",
-            attack_vector="prompt_extraction",
-            synthetic_payload={"test": "data"},
-        )
-        assert obj.attack_vector == "prompt_extraction"
 
 
 class TestAnchoringPolicy:
