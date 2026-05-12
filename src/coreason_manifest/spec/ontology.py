@@ -11,7 +11,6 @@
 from __future__ import annotations
 
 import ast
-import hashlib
 import math
 import operator
 import re
@@ -213,7 +212,7 @@ class TabularEncodingProfile(StrEnum):
     GRAPH_CONVOLUTIONAL_FLATTENING = "graph_convolutional_flattening"
 
 
-class ManifoldAlignmentMetricProfileProfile(StrEnum):
+class ManifoldAlignmentMetricProfile(StrEnum):
     """AGENT INSTRUCTION: Defines the linear algebraic or optimal transport function used to mathematically measure the geometric distance between the telemetry vector and the standard ontology index."""
 
     GROMOV_WASSERSTEIN = "gromov_wasserstein"
@@ -875,7 +874,7 @@ class StochasticNodeState(CoreasonBaseState):
         return v
 
 
-class HypothesisSuperpositionStateState(CoreasonBaseState):
+class HypothesisSuperpositionState(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Maintains the quantum-like probability mass of mutually exclusive semantic manifolds, delaying wave collapse until deterministically evaluated.
 
@@ -908,7 +907,7 @@ class HypothesisSuperpositionStateState(CoreasonBaseState):
         return self
 
 
-class StochasticTopologyManifestManifest(CoreasonBaseState):
+class StochasticTopologyManifest(CoreasonBaseState):
     """
     AGENT INSTRUCTION: The structurally unbounded root container modeling multi-agent generative reasoning as a Topological DAG.
 
@@ -923,7 +922,7 @@ class StochasticTopologyManifestManifest(CoreasonBaseState):
     topology_class: Literal["stochastic_ensemble"] = Field(default="stochastic_ensemble")
     phase: IdeationPhaseProfile = Field()
     stochastic_graph: list[StochasticNodeState] = Field()
-    superposition: HypothesisSuperpositionStateState | None = Field(default=None)
+    superposition: HypothesisSuperpositionState | None = Field(default=None)
     epistemic_status: Literal["stochastically_unbounded"] = Field(default="stochastically_unbounded")
 
     @model_validator(mode="after")
@@ -3227,7 +3226,7 @@ class ThoughtBranchState(CoreasonBaseState):
 
 
 type AnyExplorationBranch = Annotated[
-    ThoughtBranchState | StochasticTopologyManifestManifest | StrategicThoughtNodeIntent,
+    ThoughtBranchState | StochasticTopologyManifest | StrategicThoughtNodeIntent,
     Field(discriminator="topology_class"),
 ]
 
@@ -4220,7 +4219,7 @@ class CausalDirectedEdgeState(CoreasonBaseState):
     predicate_curie: Annotated[str, StringConstraints(pattern=r"^[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$")] = Field(
         json_schema_extra={"rdf_edge_property": True}
     )
-    belief_vector: DempsterShaferBeliefState | None = Field(default=None)
+    belief_vector: DempsterShaferBeliefVector | None = Field(default=None)
     grounding_sla: EvidentiaryGroundingSLA | None = Field(default=None)
 
     @model_validator(mode="after")
@@ -4864,7 +4863,7 @@ class ContextualSemanticResolutionIntent(CoreasonBaseState):
     encoding_profile: TabularEncodingProfile = Field(
         description="The method requested for compressing the source row into a continuous tensor."
     )
-    alignment_metric: ManifoldAlignmentMetricProfileProfile = Field(
+    alignment_metric: ManifoldAlignmentMetricProfile = Field(
         description="The optimal transport or algebraic distance metric used for evaluation."
     )
     minimum_isometry_threshold: float = Field(
@@ -5288,7 +5287,7 @@ class CrosswalkResolutionReceipt(CoreasonBaseState):
         Annotated[str, StringConstraints(max_length=2000)],
         Annotated[str, StringConstraints(pattern=r"^[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$")],
     ] = Field(description="Strict dictionary mapping the original strings to formal W3C CURIEs.")
-    grounding_confidence: DempsterShaferBeliefState = Field(
+    grounding_confidence: DempsterShaferBeliefVector = Field(
         description="Quantifies the semantic alignment and epistemic conflict of the applied crosswalk."
     )
 
@@ -5654,86 +5653,6 @@ class EpistemicArgumentGraphState(CoreasonBaseState):
     attacks: dict[Annotated[str, StringConstraints(max_length=255)], DefeasibleAttackEvent] = Field(
         default_factory=dict, max_length=10000, description="Geometric matrices of undercutting defeaters."
     )
-
-
-class ExecutionNodeReceipt(CoreasonBaseState):
-    r"""
-    AGENT INSTRUCTION: Formalizes a discrete computational vertex within a Merkle-DAG execution trace, binding raw data inputs to deterministic outputs. As an append-only coordinate, it guarantees algorithmic reproducibility.
-
-    CAUSAL AFFORDANCE: Permits the orchestrator to cryptographically re-evaluate, replay, or slash execution branches by guaranteeing all computational inputs, outputs, and parent pointers are deterministically serialized.
-
-    EPISTEMIC BOUNDS: The `@model_validator` mathematically guarantees the `node_hash` via RFC 8785 canonical JSON serialization, trapping any non-deterministic dictionary properties. Orphaned lineages are structurally blocked.
-
-    MCP ROUTING TRIGGERS: Merkle-DAG, RFC 8785 Canonicalization, Execution Trace, Cryptographic Determinism, Directed Acyclic Graph
-
-    """
-
-    model_config = ConfigDict(frozen=True)
-    request_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="The unique ID for this specific execution."
-    )
-    parent_request_cid: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] | None
-    ) = Field(default=None, description="The deterministic capability pointer anchoring the parent request manifold.")
-    root_request_cid: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] | None
-    ) = Field(default=None, description="The deterministic capability pointer anchoring the trace root manifold.")
-    inputs: JsonPrimitiveState = Field(
-        description="The inputs provided to the execution node. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion."
-    )
-    outputs: JsonPrimitiveState = Field(
-        description="The outputs generated by the execution node. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion."
-    )
-
-    @field_validator("inputs", "outputs", mode="before")
-    @classmethod
-    def enforce_payload_topology(cls, v: Any) -> Any:
-        """
-        AGENT INSTRUCTION: Mathematically bound recursive dictionary payloads to prevent OOM/CPU exhaustion during EpistemicLedgerState hashing.
-        EPISTEMIC BOUNDS: Physically guillotines evaluation the millisecond the absolute volume exceeds total_nodes <= 10000.
-        """
-        return _validate_payload_bounds(v)
-
-    parent_hashes: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
-        json_schema_extra={"coreason_topological_exemption": True},
-        # Note: parent_hashes is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
-        default_factory=list,
-        description="The strict array of cryptographic hashes of parent execution nodes.",
-    )
-    node_hash: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None = Field(
-        default=None, description="The cryptographic SHA-256 hash of this node."
-    )
-
-    @model_validator(mode="after")
-    def validate_lineage(self) -> Self:
-        if self.parent_request_cid is not None and self.root_request_cid is None:
-            raise ValueError("Orphaned Lineage: parent_request_cid is set but root_request_cid is None")
-        return self
-
-    def generate_node_hash(self) -> str:
-        """
-        Generate a strictly deterministic SHA-256 hash for the node via RFC 8785 canonicalization.
-        Ensures identical hashes across varying architectures and thread-states (NoGIL).
-        """
-        payload = {
-            "request_cid": self.request_cid,
-            "parent_request_cid": self.parent_request_cid,
-            "root_request_cid": self.root_request_cid,
-            "inputs": self.inputs,
-            "outputs": self.outputs,
-            "parent_hashes": self.parent_hashes,
-        }
-
-        canonical_payload = _canonicalize_payload(payload)
-        json_bytes = canonicaljson.encode_canonical_json(canonical_payload)
-        return hashlib.sha256(json_bytes).hexdigest()
-
-    @model_validator(mode="after")
-    def populate_hash(self) -> Self:
-        """Automatically populate node_hash if not explicitly provided."""
-        if not self.node_hash:
-            object.__setattr__(self, "node_hash", self.generate_node_hash())
-        return self
 
 
 class FYIIntent(CoreasonBaseState):
@@ -7033,7 +6952,7 @@ class BeliefModulationReceipt(CoreasonBaseState):
         description="Causal Ancestry markers required to resolve decentralized event ordering.",
     )
     target_graph_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
-    grounded_edges: dict[Annotated[str, StringConstraints(max_length=255)], DempsterShaferBeliefState]
+    grounded_edges: dict[Annotated[str, StringConstraints(max_length=255)], DempsterShaferBeliefVector]
     severed_edge_cids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]]
 
     @model_validator(mode="after")
@@ -9787,7 +9706,6 @@ class ExogenousEpistemicEvent(CoreasonBaseState):
         return self
 
 
-
 class SpatialKinematicActionIntent(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Employs Mathematical Kinematics and Fitts's Law to project precise, non-linear physical interactions across an exogenous UI manifold.
@@ -10635,7 +10553,6 @@ class ToolInvocationEvent(CoreasonBaseState):
         return _validate_payload_bounds(v)
 
 
-
 class TruthMaintenancePolicy(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Implements a Non-Monotonic Truth Maintenance System (TMS) governing belief retraction across the Merkle-DAG. As a ...Policy suffix, this object defines rigid mathematical boundaries that the orchestrator must enforce globally.
@@ -11036,7 +10953,7 @@ class SemanticEdgeState(CoreasonBaseState):
     predicate_curie: Annotated[str, StringConstraints(pattern=r"^[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$")] = Field(
         json_schema_extra={"rdf_edge_property": True}
     )
-    belief_vector: DempsterShaferBeliefState | None = Field(default=None)
+    belief_vector: DempsterShaferBeliefVector | None = Field(default=None)
     grounding_sla: EvidentiaryGroundingSLA | None = Field(default=None)
     embedding: VectorEmbeddingState | None = Field(
         default=None,
@@ -13825,7 +13742,7 @@ class PostCoordinatedSemanticState(CoreasonBaseState):
     base_concept_cid: NodeCIDState = Field(
         description="The pointer to the foundational, universal entity identified in the global EpistemicDomainGraphManifest."
     )
-    alignment_metric_used: ManifoldAlignmentMetricProfileProfile = Field(
+    alignment_metric_used: ManifoldAlignmentMetricProfile = Field(
         description="Audit trail of the exact mathematical metric applied during projection."
     )
     isometry_score: float = Field(
@@ -14375,7 +14292,7 @@ class EvidentiaryCitationState(CoreasonBaseState):
     )
 
 
-class DempsterShaferBeliefState(CoreasonBaseState):
+class DempsterShaferBeliefVector(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Replaces monolithic probability floats with a composite tri-vector. Independently measures lexical matching, latent semantic distance, and topological graph integrity to allow the orchestrator to compute epistemic conflict and execute evidence discounting.
 
@@ -14486,7 +14403,7 @@ class OntologicalReificationReceipt(CoreasonBaseState):
     algorithmic_mechanism: TransformationMechanismProfile = Field(
         description="The deterministic or probabilistic engine used to execute the transmutation."
     )
-    belief_vector: DempsterShaferBeliefState = Field(
+    belief_vector: DempsterShaferBeliefVector = Field(
         description="The composite Dempster-Shafer tri-vector capturing independent confidence dimensions and calculated epistemic conflict."
     )
     is_latent_inference: bool = Field(
@@ -14839,7 +14756,7 @@ NeurosymbolicInferenceIntent.model_rebuild()
 EpistemicUpsamplingTask.model_rebuild()
 VolumetricPartitionState.model_rebuild()
 
-DempsterShaferBeliefState.model_rebuild()
+DempsterShaferBeliefVector.model_rebuild()
 EmpiricalStatisticalProfile.model_rebuild()
 SemanticRelationalVectorState.model_rebuild()
 AtomicPropositionState.model_rebuild()
@@ -14856,8 +14773,8 @@ OntologyDiscoveryIntent.model_rebuild()
 SemanticMappingHeuristicIntent.model_rebuild()
 
 StochasticNodeState.model_rebuild()
-HypothesisSuperpositionStateState.model_rebuild()
-StochasticTopologyManifestManifest.model_rebuild()
+HypothesisSuperpositionState.model_rebuild()
+StochasticTopologyManifest.model_rebuild()
 CryptographicProvenancePolicy.model_rebuild()
 TopologicalProjectionIntent.model_rebuild()
 EpistemicRejectionReceipt.model_rebuild()

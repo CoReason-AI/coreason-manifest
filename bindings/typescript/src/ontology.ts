@@ -645,7 +645,7 @@ export type StructuralPostConditions = EpistemicConstraintPolicy[];
  * Thermodynamic cap on SymbolicAI DbC retries.
  */
 export type MaxPlanningRemediationEpochs = number;
-export type AnyExplorationBranch = ThoughtBranchState | StochasticTopologyManifestManifest | StrategicThoughtNodeIntent;
+export type AnyExplorationBranch = ThoughtBranchState | StochasticTopologyManifest | StrategicThoughtNodeIntent;
 /**
  * A deterministic capability pointer bounding this specific topological divergence in the Latent Scratchpad Trace.
  */
@@ -1070,10 +1070,7 @@ export type TabularEncodingProfile =
 /**
  * The optimal transport or algebraic distance metric used for evaluation.
  */
-export type ManifoldAlignmentMetricProfileProfile =
-  | "gromov_wasserstein"
-  | "earth_movers_distance"
-  | "cosine_similarity";
+export type ManifoldAlignmentMetricProfile = "gromov_wasserstein" | "earth_movers_distance" | "cosine_similarity";
 /**
  * Mathematical circuit breaker. If the distance evaluates below this threshold, resolution is aborted to prevent semantic hallucination.
  */
@@ -3785,10 +3782,7 @@ export type ConceptCid = string;
 /**
  * Audit trail of the exact mathematical metric applied during projection.
  */
-export type ManifoldAlignmentMetricProfileProfile1 =
-  | "gromov_wasserstein"
-  | "earth_movers_distance"
-  | "cosine_similarity";
+export type ManifoldAlignmentMetricProfile1 = "gromov_wasserstein" | "earth_movers_distance" | "cosine_similarity";
 /**
  * The exact mathematical fidelity achieved during projection.
  */
@@ -5298,64 +5292,6 @@ export type MutableMatrix = {
  * A flag allowing the output to only return the keys in mutable_matrix that changed, rather than forcing the entire array back up the network.
  */
 export type IsDelta = boolean;
-/**
- * The unique ID for this specific execution.
- */
-export type RequestCid1 = string;
-/**
- * The deterministic capability pointer anchoring the parent request manifold.
- */
-export type ParentRequestCid = string | null;
-/**
- * The deterministic capability pointer anchoring the trace root manifold.
- */
-export type RootRequestCid = string | null;
-/**
- * The strict array of cryptographic hashes of parent execution nodes.
- */
-export type ParentHashes = string[];
-/**
- * The cryptographic SHA-256 hash of this node.
- */
-export type NodeHash = string | null;
-/**
- * The global identifier for the entire execution causal tree.
- */
-export type TraceCid3 = string;
-/**
- * The unique identifier for this specific operation.
- */
-export type SpanCid1 = string;
-/**
- * The causal edge to the invoking node.
- */
-export type ParentSpanCid1 = string | null;
-/**
- * The semantic identifier for the operation.
- */
-export type Name1 = string;
-/**
- * Temporal start bound.
- */
-export type StartTimeUnixNano = number;
-/**
- * Temporal end bound, if completed.
- */
-export type EndTimeUnixNano = number | null;
-/**
- * The semantic name of the event.
- */
-export type Name2 = string;
-/**
- * The precise temporal execution point.
- */
-export type TimestampUnixNano = number;
-/**
- * Structured log records emitted during the span.
- *
- * @maxItems 10000
- */
-export type Events = SpanEvent[];
 export type FaultCategoryProfile =
   | "context_overload"
   | "incorrect_context"
@@ -5554,10 +5490,7 @@ export type Panels = AnyPanelProfile[];
 /**
  * AGENT INSTRUCTION: Defines the linear algebraic or optimal transport function used to mathematically measure the geometric distance between the telemetry vector and the standard ontology index.
  */
-export type ManifoldAlignmentMetricProfileProfile2 =
-  | "gromov_wasserstein"
-  | "earth_movers_distance"
-  | "cosine_similarity";
+export type ManifoldAlignmentMetricProfile2 = "gromov_wasserstein" | "earth_movers_distance" | "cosine_similarity";
 /**
  * The minimum atomic token collateral held in escrow.
  */
@@ -5667,8 +5600,6 @@ export type CausalRelationship = "causes" | "confounds" | "correlates_with" | "u
  * An Immutable structural checkpoint.
  */
 export type SemanticVersionState = string;
-export type SpanKindProfile = "client" | "server" | "producer" | "consumer" | "internal";
-export type SpanStatusCodeProfile = "unset" | "ok" | "error";
 /**
  * The unique cryptographic identifier for this local spatial volume.
  */
@@ -5747,18 +5678,6 @@ export type TieBreakerPolicy = "lowest_cost" | "lowest_latency" | "highest_confi
  * A strictly typed SHA-256 hash pointing to a historically executed topological state.
  */
 export type TopologyHashReceipt = string;
-/**
- * Unique identifier for this telemetry snapshot.
- */
-export type BatchCid = string;
-/**
- * A collection of execution spans to be serialized.
- */
-export type Spans = ExecutionSpanReceipt[];
-/**
- * The array of strictly typed trace executions.
- */
-export type ExecutionNodes = ExecutionNodeReceipt[];
 /**
  * AGENT INSTRUCTION: Dictates the exact algorithmic or logical mechanism utilized to forge a semantic connection or transmute a bimodal data state, allowing downstream agents to weigh epistemic reliability.
  */
@@ -5905,7 +5824,7 @@ export interface CoReasonSharedKernelOntology {
   DefeasibleCascadeEvent?: DefeasibleCascadeEvent;
   DelegatedCapabilityManifest?: DelegatedCapabilityManifest;
   DeliberativeEnvelope?: DeliberativeEnvelope;
-  DempsterShaferBeliefState?: DempsterShaferBeliefState;
+  DempsterShaferBeliefVector?: DempsterShaferBeliefVector;
   DerivationModeProfile?: DerivationModeProfile;
   DifferentiableLogicPolicy?: DifferentiableLogicPolicy;
   DigitalTwinTopologyManifest?: DigitalTwinTopologyManifest;
@@ -5975,9 +5894,7 @@ export interface CoReasonSharedKernelOntology {
   EvidentiaryWarrantState?: EvidentiaryWarrantState;
   EvolutionaryTopologyManifest?: EvolutionaryTopologyManifest;
   ExecutionEnvelopeState?: ExecutionEnvelopeState;
-  ExecutionNodeReceipt?: ExecutionNodeReceipt;
   ExecutionSLA?: ExecutionSLA;
-  ExecutionSpanReceipt?: ExecutionSpanReceipt;
   ExecutionSubstrateProfile?: ExecutionSubstrateProfile1;
   ExogenousEpistemicEvent?: ExogenousEpistemicEvent;
   FYIIntent?: FYIIntent;
@@ -6008,7 +5925,7 @@ export interface CoReasonSharedKernelOntology {
   HumanDirectiveIntent?: HumanDirectiveIntent;
   HypothesisGenerationEvent?: HypothesisGenerationEvent;
   HypothesisStakeReceipt?: HypothesisStakeReceipt;
-  HypothesisSuperpositionStateState?: HypothesisSuperpositionStateState;
+  HypothesisSuperpositionState?: HypothesisSuperpositionState;
   IdeationPhaseProfile?: IdeationPhaseProfile;
   IllocutionaryForceProfile?: IllocutionaryForceProfile1;
   InputMappingContract?: InputMappingContract;
@@ -6044,7 +5961,7 @@ export interface CoReasonSharedKernelOntology {
   MCPTransportProfile?: MCPTransportProfile;
   MacroGridProfile?: MacroGridProfile;
   ManifestViolationReceipt?: ManifestViolationReceipt;
-  ManifoldAlignmentMetricProfileProfile?: ManifoldAlignmentMetricProfileProfile2;
+  ManifoldAlignmentMetricProfile?: ManifoldAlignmentMetricProfile2;
   MarketContract?: MarketContract;
   MarketResolutionState?: MarketResolutionState;
   MarkovBlanketRenderingPolicy?: MarkovBlanketRenderingPolicy;
@@ -6128,9 +6045,6 @@ export interface CoReasonSharedKernelOntology {
   SideEffectProfile?: SideEffectProfile1;
   SimulationConvergenceSLA?: SimulationConvergenceSLA1;
   SimulationEscrowContract?: SimulationEscrowContract1;
-  SpanEvent?: SpanEvent;
-  SpanKindProfile?: SpanKindProfile;
-  SpanStatusCodeProfile?: SpanStatusCodeProfile;
   SpatialBillboardContract?: SpatialBillboardContract;
   SpatialHardwareProfile?: SpatialHardwareProfile;
   SpatialKinematicActionIntent?: SpatialKinematicActionIntent;
@@ -6146,7 +6060,7 @@ export interface CoReasonSharedKernelOntology {
   StdioTransportProfile?: StdioTransportProfile;
   SteadyStateHypothesisState?: SteadyStateHypothesisState1;
   StochasticNodeState?: StochasticNodeState;
-  StochasticTopologyManifestManifest?: StochasticTopologyManifestManifest;
+  StochasticTopologyManifest?: StochasticTopologyManifest;
   StrategicThoughtNodeIntent?: StrategicThoughtNodeIntent;
   StreamingDisfluencyContract?: StreamingDisfluencyContract;
   StructuralCausalGraphProfile?: StructuralCausalGraphProfile;
@@ -6189,7 +6103,6 @@ export interface CoReasonSharedKernelOntology {
   TopologicalRewardContract?: TopologicalRewardContract;
   TopologyHashReceipt?: TopologyHashReceipt;
   TraceContextState?: TraceContextState1;
-  TraceExportManifest?: TraceExportManifest;
   TransformationMechanismProfile?: TransformationMechanismProfile1;
   TransitionEdgeProfile?: TransitionEdgeProfile;
   TruthMaintenancePolicy?: TruthMaintenancePolicy;
@@ -7013,12 +6926,12 @@ export interface ThoughtBranchState {
  *
  * MCP ROUTING TRIGGERS: Directed Acyclic Graphs, Topological MCTS Container, Epistemic Immutability, Acyclic Integrity
  */
-export interface StochasticTopologyManifestManifest {
+export interface StochasticTopologyManifest {
   topology_cid: TopologyCid;
   topology_class?: TopologyClass13;
   phase: IdeationPhaseProfile;
   stochastic_graph: StochasticGraph;
-  superposition?: HypothesisSuperpositionStateState | null;
+  superposition?: HypothesisSuperpositionState | null;
   epistemic_status?: EpistemicStatus;
 }
 /**
@@ -7050,7 +6963,7 @@ export interface StochasticNodeState {
  *
  * MCP ROUTING TRIGGERS: Hypothesis Superposition, Wave Collapse, Probability Mass, Defeasible Superposition
  */
-export interface HypothesisSuperpositionStateState {
+export interface HypothesisSuperpositionState {
   superposition_cid: SuperpositionCid;
   competing_manifolds: CompetingManifolds;
   wave_collapse_function: WaveCollapseFunction;
@@ -7569,7 +7482,7 @@ export interface ContextualSemanticResolutionIntent {
   source_record_cid: SourceRecordCid;
   target_ontology_graph_cid: TargetOntologyGraphCid;
   encoding_profile: TabularEncodingProfile;
-  alignment_metric: ManifoldAlignmentMetricProfileProfile;
+  alignment_metric: ManifoldAlignmentMetricProfile;
   minimum_isometry_threshold: MinimumIsometryThreshold1;
 }
 /**
@@ -8236,7 +8149,7 @@ export interface CausalDirectedEdgeState {
   volumetric_geometry?: VolumetricEdgeProfile | null;
   edge_class: EdgeClass;
   predicate_curie: PredicateCurie;
-  belief_vector?: DempsterShaferBeliefState | null;
+  belief_vector?: DempsterShaferBeliefVector | null;
   grounding_sla?: EvidentiaryGroundingSLA | null;
 }
 /**
@@ -8268,7 +8181,7 @@ export interface VolumetricEdgeProfile {
  *
  *     MCP ROUTING TRIGGERS: Dempster-Shafer, Epistemic Conflict, Evidence Discounting, Composite Tri-Vector
  */
-export interface DempsterShaferBeliefState {
+export interface DempsterShaferBeliefVector {
   lexical_confidence: LexicalConfidence;
   semantic_distance: SemanticDistance;
   structural_graph_confidence: StructuralGraphConfidence;
@@ -11431,7 +11344,7 @@ export interface CrosswalkResolutionReceipt {
   receipt_cid: ReceiptCid;
   target_graph_cid: TargetGraphCid3;
   resolved_curies: ResolvedCuries;
-  grounding_confidence: DempsterShaferBeliefState1;
+  grounding_confidence: DempsterShaferBeliefVector1;
 }
 /**
  * Strict dictionary mapping the original strings to formal W3C CURIEs.
@@ -11450,7 +11363,7 @@ export interface ResolvedCuries {
  *
  *     MCP ROUTING TRIGGERS: Dempster-Shafer, Epistemic Conflict, Evidence Discounting, Composite Tri-Vector
  */
-export interface DempsterShaferBeliefState1 {
+export interface DempsterShaferBeliefVector1 {
   lexical_confidence: LexicalConfidence;
   semantic_distance: SemanticDistance;
   structural_graph_confidence: StructuralGraphConfidence;
@@ -11877,7 +11790,7 @@ export interface PostCoordinatedSemanticState {
    * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
    */
   base_concept_cid: string;
-  alignment_metric_used: ManifoldAlignmentMetricProfileProfile1;
+  alignment_metric_used: ManifoldAlignmentMetricProfile1;
   isometry_score: IsometryScore;
   contextual_modifiers?: ContextualModifiers;
 }
@@ -12470,7 +12383,7 @@ export interface OntologicalReificationReceipt {
   source_data_hash: SourceDataHash;
   target_namespace: TargetNamespace;
   algorithmic_mechanism: TransformationMechanismProfile;
-  belief_vector: DempsterShaferBeliefState2;
+  belief_vector: DempsterShaferBeliefVector2;
   is_latent_inference?: IsLatentInference;
 }
 /**
@@ -12484,7 +12397,7 @@ export interface OntologicalReificationReceipt {
  *
  *     MCP ROUTING TRIGGERS: Dempster-Shafer, Epistemic Conflict, Evidence Discounting, Composite Tri-Vector
  */
-export interface DempsterShaferBeliefState2 {
+export interface DempsterShaferBeliefVector2 {
   lexical_confidence: LexicalConfidence;
   semantic_distance: SemanticDistance;
   structural_graph_confidence: StructuralGraphConfidence;
@@ -12712,7 +12625,7 @@ export interface BeliefModulationReceipt {
   severed_edge_cids: SeveredEdgeCids;
 }
 export interface GroundedEdges {
-  [k: string]: DempsterShaferBeliefState;
+  [k: string]: DempsterShaferBeliefVector;
 }
 /**
  * CoReason Shared Kernel Ontology
@@ -14199,100 +14112,6 @@ export interface Payload3 {
 /**
  * CoReason Shared Kernel Ontology
  *
- * AGENT INSTRUCTION: Formalizes a discrete computational vertex within a Merkle-DAG execution trace, binding raw data inputs to deterministic outputs. As an append-only coordinate, it guarantees algorithmic reproducibility.
- *
- * CAUSAL AFFORDANCE: Permits the orchestrator to cryptographically re-evaluate, replay, or slash execution branches by guaranteeing all computational inputs, outputs, and parent pointers are deterministically serialized.
- *
- * EPISTEMIC BOUNDS: The `@model_validator` mathematically guarantees the `node_hash` via RFC 8785 canonical JSON serialization, trapping any non-deterministic dictionary properties. Orphaned lineages are structurally blocked.
- *
- * MCP ROUTING TRIGGERS: Merkle-DAG, RFC 8785 Canonicalization, Execution Trace, Cryptographic Determinism, Directed Acyclic Graph
- */
-export interface ExecutionNodeReceipt {
-  request_cid: RequestCid1;
-  parent_request_cid?: ParentRequestCid;
-  root_request_cid?: RootRequestCid;
-  /**
-   * The inputs provided to the execution node. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.
-   */
-  inputs:
-    | string
-    | number
-    | boolean
-    | JsonPrimitiveState[]
-    | {
-        [k: string]: JsonPrimitiveState;
-      }
-    | EpistemicProxyStateAny
-    | null;
-  /**
-   * The outputs generated by the execution node. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.
-   */
-  outputs:
-    | string
-    | number
-    | boolean
-    | JsonPrimitiveState[]
-    | {
-        [k: string]: JsonPrimitiveState;
-      }
-    | EpistemicProxyStateAny
-    | null;
-  parent_hashes?: ParentHashes;
-  node_hash?: NodeHash;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
- * AGENT INSTRUCTION: Implements the Dapper distributed tracing model to deterministically map the causal execution DAG of the swarm. As an append-only coordinate on the Merkle-DAG, it mathematically binds parent-child RPC calls.
- *
- * CAUSAL AFFORDANCE: Unlocks global observability by mapping causal edges across the zero-trust network, enabling exact bottleneck detection and graph reconstruction.
- *
- * EPISTEMIC BOUNDS: Temporal boundaries are rigidly constrained by `start_time_unix_nano` (`ge=0`). The `@model_validator` enforces Allen's Interval Algebra to physically guarantee `end_time` cannot precede `start_time`. `events` array sorted by time.
- *
- * MCP ROUTING TRIGGERS: Dapper Tracing Model, Distributed Causal DAG, Allen's Interval Algebra, OpenTelemetry, Execution Provenance
- */
-export interface ExecutionSpanReceipt {
-  trace_cid: TraceCid3;
-  span_cid: SpanCid1;
-  parent_span_cid?: ParentSpanCid1;
-  name: Name1;
-  /**
-   * The role of the span.
-   */
-  kind?: "client" | "server" | "producer" | "consumer" | "internal";
-  start_time_unix_nano: StartTimeUnixNano;
-  end_time_unix_nano?: EndTimeUnixNano;
-  /**
-   * The execution health flag.
-   */
-  status?: "unset" | "ok" | "error";
-  events?: Events;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
- * AGENT INSTRUCTION: Represents a discrete, point-in-time OpenTelemetry annotation within a broader Dapper-style `ExecutionSpanReceipt`.
- *
- * CAUSAL AFFORDANCE: Provides fine-grained, localized state-machine logging within an active span, anchoring semantic attributes to a precise nanosecond coordinate without spawning a new causal branch.
- *
- * EPISTEMIC BOUNDS: `timestamp_unix_nano` physically bounded `[0, 253402300799000000000]`. The `attributes` payload strictly constrained by a dictionary with string keys (`max_length=255`) to prevent dictionary bombing.
- *
- * MCP ROUTING TRIGGERS: Span Annotation, Point-in-Time Event, Micro-State Logging, OpenTelemetry, Telemetry Serialization
- */
-export interface SpanEvent {
-  name: Name2;
-  timestamp_unix_nano: TimestampUnixNano;
-  attributes?: Attributes;
-}
-/**
- * Typed metadata bound to the event.
- */
-export interface Attributes {
-  [k: string]: JsonPrimitiveState;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
  * AGENT INSTRUCTION: Leverages Automated Theorem Proving and the Curry-Howard
  * Correspondence to bind the causal graph to a mathematically verified safety
  * invariant. As a ...Contract suffix, this enforces rigid mathematical
@@ -14935,7 +14754,7 @@ export interface SemanticEdgeState {
   subject_node_cid: SubjectNodeCid;
   object_node_cid: ObjectNodeCid;
   predicate_curie: PredicateCurie1;
-  belief_vector?: DempsterShaferBeliefState | null;
+  belief_vector?: DempsterShaferBeliefVector | null;
   grounding_sla?: EvidentiaryGroundingSLA | null;
   /**
    * Topologically Bounded Latent Spaces used to calculate exact geometric distance and preserve structural Isometry.
@@ -15296,22 +15115,6 @@ export interface TraceContextState1 {
   span_cid: SpanCid;
   parent_span_cid?: ParentSpanCid;
   causal_clock?: CausalClock;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
- * AGENT INSTRUCTION: Functions as a deterministic serialization envelope for flushing Dapper-style trace subgraphs to external observability sinks.
- *
- * CAUSAL AFFORDANCE: Authorizes the mass export of `ExecutionSpanReceipt` objects across the network boundary, structurally binding disconnected spans into a coherent `batch_cid` for downstream reconstruction.
- *
- * EPISTEMIC BOUNDS: Bounded by a rigid `batch_cid` (CID regex `^[a-zA-Z0-9_.:-]+$`). The `spans` array is deterministically sorted by `span_cid` via a `@model_validator` to mathematically prevent Byzantine replay anomalies.
- *
- * MCP ROUTING TRIGGERS: Trace Serialization, Telemetry Export, Batch Flushing, DAG Reconstruction, Canonical Egress
- */
-export interface TraceExportManifest {
-  batch_cid: BatchCid;
-  spans?: Spans;
-  execution_nodes?: ExecutionNodes;
 }
 /**
  * CoReason Shared Kernel Ontology

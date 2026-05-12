@@ -814,7 +814,7 @@
     "AnyExplorationBranch": {
       "discriminator": {
         "mapping": {
-          "stochastic_ensemble": "#/$defs/StochasticTopologyManifestManifest",
+          "stochastic_ensemble": "#/$defs/StochasticTopologyManifest",
           "strategic_thought_node": "#/$defs/StrategicThoughtNodeIntent",
           "thought_branch": "#/$defs/ThoughtBranchState"
         },
@@ -825,7 +825,7 @@
           "$ref": "#/$defs/ThoughtBranchState"
         },
         {
-          "$ref": "#/$defs/StochasticTopologyManifestManifest"
+          "$ref": "#/$defs/StochasticTopologyManifest"
         },
         {
           "$ref": "#/$defs/StrategicThoughtNodeIntent"
@@ -1943,7 +1943,7 @@
         },
         "grounded_edges": {
           "additionalProperties": {
-            "$ref": "#/$defs/DempsterShaferBeliefState"
+            "$ref": "#/$defs/DempsterShaferBeliefVector"
           },
           "propertyNames": {
             "maxLength": 255
@@ -2662,7 +2662,7 @@
         "belief_vector": {
           "anyOf": [
             {
-              "$ref": "#/$defs/DempsterShaferBeliefState"
+              "$ref": "#/$defs/DempsterShaferBeliefVector"
             },
             {
               "type": "null"
@@ -4959,7 +4959,7 @@
           "description": "The method requested for compressing the source row into a continuous tensor."
         },
         "alignment_metric": {
-          "$ref": "#/$defs/ManifoldAlignmentMetricProfileProfile",
+          "$ref": "#/$defs/ManifoldAlignmentMetricProfile",
           "description": "The optimal transport or algebraic distance metric used for evaluation."
         },
         "minimum_isometry_threshold": {
@@ -5548,7 +5548,7 @@
           "type": "object"
         },
         "grounding_confidence": {
-          "$ref": "#/$defs/DempsterShaferBeliefState",
+          "$ref": "#/$defs/DempsterShaferBeliefVector",
           "description": "Quantifies the semantic alignment and epistemic conflict of the applied crosswalk."
         }
       },
@@ -6231,7 +6231,7 @@
       "title": "DeliberativeEnvelope",
       "type": "object"
     },
-    "DempsterShaferBeliefState": {
+    "DempsterShaferBeliefVector": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Replaces monolithic probability floats with a composite tri-vector. Independently measures lexical matching, latent semantic distance, and topological graph integrity to allow the orchestrator to compute epistemic conflict and execute evidence discounting.\n\n    CAUSAL AFFORDANCE: Instructs the orchestrator to independently measure lexical matching, latent semantic distance, and topological graph integrity.\n\n    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.\n\n    MCP ROUTING TRIGGERS: Dempster-Shafer, Epistemic Conflict, Evidence Discounting, Composite Tri-Vector",
       "properties": {
@@ -6279,7 +6279,7 @@
         "structural_graph_confidence",
         "epistemic_conflict_mass"
       ],
-      "title": "DempsterShaferBeliefState",
+      "title": "DempsterShaferBeliefVector",
       "type": "object"
     },
     "DerivationModeProfile": {
@@ -10016,94 +10016,6 @@
       "title": "ExecutionEnvelopeState",
       "type": "object"
     },
-    "ExecutionNodeReceipt": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes a discrete computational vertex within a Merkle-DAG execution trace, binding raw data inputs to deterministic outputs. As an append-only coordinate, it guarantees algorithmic reproducibility.\n\nCAUSAL AFFORDANCE: Permits the orchestrator to cryptographically re-evaluate, replay, or slash execution branches by guaranteeing all computational inputs, outputs, and parent pointers are deterministically serialized.\n\nEPISTEMIC BOUNDS: The `@model_validator` mathematically guarantees the `node_hash` via RFC 8785 canonical JSON serialization, trapping any non-deterministic dictionary properties. Orphaned lineages are structurally blocked.\n\nMCP ROUTING TRIGGERS: Merkle-DAG, RFC 8785 Canonicalization, Execution Trace, Cryptographic Determinism, Directed Acyclic Graph",
-      "properties": {
-        "request_cid": {
-          "description": "The unique ID for this specific execution.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Request Cid",
-          "type": "string"
-        },
-        "parent_request_cid": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-zA-Z0-9_.:-]+$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The deterministic capability pointer anchoring the parent request manifold.",
-          "title": "Parent Request Cid"
-        },
-        "root_request_cid": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-zA-Z0-9_.:-]+$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The deterministic capability pointer anchoring the trace root manifold.",
-          "title": "Root Request Cid"
-        },
-        "inputs": {
-          "$ref": "#/$defs/JsonPrimitiveState",
-          "description": "The inputs provided to the execution node. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion."
-        },
-        "outputs": {
-          "$ref": "#/$defs/JsonPrimitiveState",
-          "description": "The outputs generated by the execution node. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion."
-        },
-        "parent_hashes": {
-          "coreason_topological_exemption": true,
-          "description": "The strict array of cryptographic hashes of parent execution nodes.",
-          "items": {
-            "maxLength": 128,
-            "minLength": 1,
-            "type": "string"
-          },
-          "title": "Parent Hashes",
-          "type": "array"
-        },
-        "node_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The cryptographic SHA-256 hash of this node.",
-          "title": "Node Hash"
-        }
-      },
-      "required": [
-        "request_cid",
-        "inputs",
-        "outputs"
-      ],
-      "title": "ExecutionNodeReceipt",
-      "type": "object"
-    },
     "ExecutionSLA": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The rigid physical boundary dictating the absolute time and memory limits for kinetic execution, practically bounding the Halting Problem within the swarm.\n\nCAUSAL AFFORDANCE: Acts as the hardware guillotine. Instructs the orchestrator's C++/Rust runtime to physically sever the thread, drop the VRAM context, or kill the WASM container if an agent exceeds its footprint, preventing Denial of Service (DoS).\n\nEPISTEMIC BOUNDS: Absolute physical limits are clamped via intrinsic Pydantic limits: `max_execution_time_ms` (`le=18446744073709551615`, `gt=0`) and `max_compute_footprint_mb` (`le=18446744073709551615`, `gt=0`).\n\nMCP ROUTING TRIGGERS: Hardware Guillotine, Halting Problem Bounding, VRAM Allocation, Process Termination, Resource Exhaustion",
@@ -10135,99 +10047,6 @@
         "max_execution_time_ms"
       ],
       "title": "ExecutionSLA",
-      "type": "object"
-    },
-    "ExecutionSpanReceipt": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements the Dapper distributed tracing model to deterministically map the causal execution DAG of the swarm. As an append-only coordinate on the Merkle-DAG, it mathematically binds parent-child RPC calls.\n\nCAUSAL AFFORDANCE: Unlocks global observability by mapping causal edges across the zero-trust network, enabling exact bottleneck detection and graph reconstruction.\n\nEPISTEMIC BOUNDS: Temporal boundaries are rigidly constrained by `start_time_unix_nano` (`ge=0`). The `@model_validator` enforces Allen's Interval Algebra to physically guarantee `end_time` cannot precede `start_time`. `events` array sorted by time.\n\nMCP ROUTING TRIGGERS: Dapper Tracing Model, Distributed Causal DAG, Allen's Interval Algebra, OpenTelemetry, Execution Provenance",
-      "properties": {
-        "trace_cid": {
-          "description": "The global identifier for the entire execution causal tree.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Trace Cid",
-          "type": "string"
-        },
-        "span_cid": {
-          "description": "The unique identifier for this specific operation.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Span Cid",
-          "type": "string"
-        },
-        "parent_span_cid": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-zA-Z0-9_.:-]+$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The causal edge to the invoking node.",
-          "title": "Parent Span Cid"
-        },
-        "name": {
-          "description": "The semantic identifier for the operation.",
-          "maxLength": 2000,
-          "title": "Name",
-          "type": "string"
-        },
-        "kind": {
-          "$ref": "#/$defs/SpanKindProfile",
-          "default": "internal",
-          "description": "The role of the span."
-        },
-        "start_time_unix_nano": {
-          "description": "Temporal start bound.",
-          "maximum": 253402300799000000000,
-          "minimum": 0,
-          "title": "Start Time Unix Nano",
-          "type": "integer"
-        },
-        "end_time_unix_nano": {
-          "anyOf": [
-            {
-              "maximum": 253402300799000000000,
-              "minimum": 0,
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Temporal end bound, if completed.",
-          "title": "End Time Unix Nano"
-        },
-        "status": {
-          "$ref": "#/$defs/SpanStatusCodeProfile",
-          "default": "unset",
-          "description": "The execution health flag."
-        },
-        "events": {
-          "description": "Structured log records emitted during the span.",
-          "items": {
-            "$ref": "#/$defs/SpanEvent"
-          },
-          "maxItems": 10000,
-          "title": "Events",
-          "type": "array"
-        }
-      },
-      "required": [
-        "trace_cid",
-        "span_cid",
-        "name",
-        "start_time_unix_nano"
-      ],
-      "title": "ExecutionSpanReceipt",
       "type": "object"
     },
     "ExecutionSubstrateProfile": {
@@ -11662,7 +11481,7 @@
       "title": "HypothesisStakeReceipt",
       "type": "object"
     },
-    "HypothesisSuperpositionStateState": {
+    "HypothesisSuperpositionState": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Maintains the quantum-like probability mass of mutually exclusive semantic manifolds, delaying wave collapse until deterministically evaluated.\n\nCAUSAL AFFORDANCE: Delays premature wave collapse by preserving competing hypotheses and their precise statistical probability mass.\n\nEPISTEMIC BOUNDS: Mathematically asserts that the sum of competing_manifolds probabilities is <= 1.0. Enforces deterministic sorting of residual_entropy_vectors for RFC 8785 compliance.\n\nMCP ROUTING TRIGGERS: Hypothesis Superposition, Wave Collapse, Probability Mass, Defeasible Superposition",
       "properties": {
@@ -11706,7 +11525,7 @@
         "competing_manifolds",
         "wave_collapse_function"
       ],
-      "title": "HypothesisSuperpositionStateState",
+      "title": "HypothesisSuperpositionState",
       "type": "object"
     },
     "IdeationPhaseProfile": {
@@ -13568,14 +13387,14 @@
       "title": "ManifestViolationReceipt",
       "type": "object"
     },
-    "ManifoldAlignmentMetricProfileProfile": {
+    "ManifoldAlignmentMetricProfile": {
       "description": "AGENT INSTRUCTION: Defines the linear algebraic or optimal transport function used to mathematically measure the geometric distance between the telemetry vector and the standard ontology index.",
       "enum": [
         "gromov_wasserstein",
         "earth_movers_distance",
         "cosine_similarity"
       ],
-      "title": "ManifoldAlignmentMetricProfileProfile",
+      "title": "ManifoldAlignmentMetricProfile",
       "type": "string"
     },
     "MarketContract": {
@@ -15074,7 +14893,7 @@
           "description": "The deterministic or probabilistic engine used to execute the transmutation."
         },
         "belief_vector": {
-          "$ref": "#/$defs/DempsterShaferBeliefState",
+          "$ref": "#/$defs/DempsterShaferBeliefVector",
           "description": "The composite Dempster-Shafer tri-vector capturing independent confidence dimensions and calculated epistemic conflict."
         },
         "is_latent_inference": {
@@ -15703,7 +15522,7 @@
           "description": "The pointer to the foundational, universal entity identified in the global EpistemicDomainGraphManifest."
         },
         "alignment_metric_used": {
-          "$ref": "#/$defs/ManifoldAlignmentMetricProfileProfile",
+          "$ref": "#/$defs/ManifoldAlignmentMetricProfile",
           "description": "Audit trail of the exact mathematical metric applied during projection."
         },
         "isometry_score": {
@@ -17345,7 +17164,7 @@
         "belief_vector": {
           "anyOf": [
             {
-              "$ref": "#/$defs/DempsterShaferBeliefState"
+              "$ref": "#/$defs/DempsterShaferBeliefVector"
             },
             {
               "type": "null"
@@ -18021,61 +17840,6 @@
       ],
       "title": "SimulationEscrowContract",
       "type": "object"
-    },
-    "SpanEvent": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents a discrete, point-in-time OpenTelemetry annotation within a broader Dapper-style `ExecutionSpanReceipt`.\n\nCAUSAL AFFORDANCE: Provides fine-grained, localized state-machine logging within an active span, anchoring semantic attributes to a precise nanosecond coordinate without spawning a new causal branch.\n\nEPISTEMIC BOUNDS: `timestamp_unix_nano` physically bounded `[0, 253402300799000000000]`. The `attributes` payload strictly constrained by a dictionary with string keys (`max_length=255`) to prevent dictionary bombing.\n\nMCP ROUTING TRIGGERS: Span Annotation, Point-in-Time Event, Micro-State Logging, OpenTelemetry, Telemetry Serialization",
-      "properties": {
-        "name": {
-          "description": "The semantic name of the event.",
-          "maxLength": 2000,
-          "title": "Name",
-          "type": "string"
-        },
-        "timestamp_unix_nano": {
-          "description": "The precise temporal execution point.",
-          "maximum": 253402300799000000000,
-          "minimum": 0,
-          "title": "Timestamp Unix Nano",
-          "type": "integer"
-        },
-        "attributes": {
-          "additionalProperties": {
-            "$ref": "#/$defs/JsonPrimitiveState"
-          },
-          "description": "Typed metadata bound to the event.",
-          "maxProperties": 1000,
-          "propertyNames": {
-            "maxLength": 255
-          },
-          "title": "Attributes",
-          "type": "object"
-        }
-      },
-      "required": [
-        "name",
-        "timestamp_unix_nano"
-      ],
-      "title": "SpanEvent",
-      "type": "object"
-    },
-    "SpanKindProfile": {
-      "enum": [
-        "client",
-        "server",
-        "producer",
-        "consumer",
-        "internal"
-      ],
-      "type": "string"
-    },
-    "SpanStatusCodeProfile": {
-      "enum": [
-        "unset",
-        "ok",
-        "error"
-      ],
-      "type": "string"
     },
     "SpatialBillboardContract": {
       "additionalProperties": false,
@@ -18963,7 +18727,7 @@
       "title": "StochasticNodeState",
       "type": "object"
     },
-    "StochasticTopologyManifestManifest": {
+    "StochasticTopologyManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The structurally unbounded root container modeling multi-agent generative reasoning as a Topological DAG.\n\nCAUSAL AFFORDANCE: Holds unverified, high-variance semantic coordinates and manages MCTS execution.\n\nEPISTEMIC BOUNDS: Inherently enforces referential integrity for acyclic DAG sorting via `verify_acyclic_dag_integrity`. `epistemic_status` is locked strictly to 'stochastically_unbounded'.\n\nMCP ROUTING TRIGGERS: Directed Acyclic Graphs, Topological MCTS Container, Epistemic Immutability, Acyclic Integrity",
       "properties": {
@@ -18991,7 +18755,7 @@
         "superposition": {
           "anyOf": [
             {
-              "$ref": "#/$defs/HypothesisSuperpositionStateState"
+              "$ref": "#/$defs/HypothesisSuperpositionState"
             },
             {
               "type": "null"
@@ -19011,7 +18775,7 @@
         "phase",
         "stochastic_graph"
       ],
-      "title": "StochasticTopologyManifestManifest",
+      "title": "StochasticTopologyManifest",
       "type": "object"
     },
     "StrategicThoughtNodeIntent": {
@@ -20889,41 +20653,6 @@
         "span_cid"
       ],
       "title": "TraceContextState",
-      "type": "object"
-    },
-    "TraceExportManifest": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Functions as a deterministic serialization envelope for flushing Dapper-style trace subgraphs to external observability sinks.\n\nCAUSAL AFFORDANCE: Authorizes the mass export of `ExecutionSpanReceipt` objects across the network boundary, structurally binding disconnected spans into a coherent `batch_cid` for downstream reconstruction.\n\nEPISTEMIC BOUNDS: Bounded by a rigid `batch_cid` (CID regex `^[a-zA-Z0-9_.:-]+$`). The `spans` array is deterministically sorted by `span_cid` via a `@model_validator` to mathematically prevent Byzantine replay anomalies.\n\nMCP ROUTING TRIGGERS: Trace Serialization, Telemetry Export, Batch Flushing, DAG Reconstruction, Canonical Egress",
-      "properties": {
-        "batch_cid": {
-          "description": "Unique identifier for this telemetry snapshot.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Batch Cid",
-          "type": "string"
-        },
-        "spans": {
-          "description": "A collection of execution spans to be serialized.",
-          "items": {
-            "$ref": "#/$defs/ExecutionSpanReceipt"
-          },
-          "title": "Spans",
-          "type": "array"
-        },
-        "execution_nodes": {
-          "description": "The array of strictly typed trace executions.",
-          "items": {
-            "$ref": "#/$defs/ExecutionNodeReceipt"
-          },
-          "title": "Execution Nodes",
-          "type": "array"
-        }
-      },
-      "required": [
-        "batch_cid"
-      ],
-      "title": "TraceExportManifest",
       "type": "object"
     },
     "TransformationMechanismProfile": {

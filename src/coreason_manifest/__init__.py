@@ -59,7 +59,6 @@ from coreason_manifest.utils.algebra import (
     transmute_state_differential,
     verify_ast_safety,
     verify_manifold_bounds,
-    verify_merkle_proof,
 )
 
 __all__ = [
@@ -186,7 +185,6 @@ __all__ = [
     "EvidentiaryWarrantState",
     "EvolutionaryTopologyManifest",
     "ExecutionEnvelopeState",
-    "ExecutionNodeReceipt",
     "ExecutionSLA",
     "ExogenousEpistemicEvent",
     "FYIIntent",
@@ -348,5 +346,4 @@ __all__ = [
     "transmute_state_differential",
     "verify_ast_safety",
     "verify_manifold_bounds",
-    "verify_merkle_proof",
 ]

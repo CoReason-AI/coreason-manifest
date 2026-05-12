@@ -39,7 +39,6 @@ class_names = [
     "DocumentLayoutManifest",
     "TopologicalRetrievalContract",
     "EnsembleTopologyProfile",
-    "ExecutionNodeReceipt",
     "GlobalGovernancePolicy",
     "DynamicRoutingManifest",
     "GovernancePolicy",
