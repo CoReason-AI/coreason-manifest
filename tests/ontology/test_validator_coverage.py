@@ -22,7 +22,6 @@ from coreason_manifest.spec.ontology import (
     AsymptoticComplexityReceipt,
     BudgetExhaustionEvent,
     CognitivePredictionReceipt,
-    CognitiveRewardEvaluationReceipt,
     MarketContract,
     SecureSubSessionState,
     VectorEmbeddingState,
@@ -122,20 +121,6 @@ class TestCognitivePredictionReceipt:
             predicted_top_k_tokens=["token_a", "token_b"],
         )
         assert len(obj.predicted_top_k_tokens) == 2
-
-
-class TestCognitiveRewardEvaluationReceipt:
-    """Exercise reward evaluation receipt."""
-
-    def test_basic_reward(self) -> None:
-        obj = CognitiveRewardEvaluationReceipt(
-            event_cid="cr-1",
-            timestamp=time.time(),
-            source_generation_cid="gen-1",
-            calculated_r_path=0.85,
-            total_advantage_score=0.7,
-        )
-        assert obj.calculated_r_path == 0.85
 
 
 class TestBudgetExhaustionEvent:

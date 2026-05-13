@@ -15,7 +15,6 @@ and model_validators that only run during actual construction.
 """
 
 from coreason_manifest.spec.ontology import (
-    AdversarialEmulationProfile,
     # Simple models with minimal required fields
     AmbientState,
     BoundedInterventionScopePolicy,
@@ -44,7 +43,6 @@ from coreason_manifest.spec.ontology import (
     DistributionProfile,
     DiversityPolicy,
     DocumentLayoutRegionState,
-    DynamicConvergenceSLA,
     EdgeMappingContract,
     EmbodiedSensoryVectorProfile,
     # Facet
@@ -53,8 +51,6 @@ from coreason_manifest.spec.ontology import (
     FYIIntent,
     # Multi-modal token anchor
     MultimodalTokenAnchorState,
-    # Process Reward
-    ProcessRewardContract,
 )
 
 
@@ -64,10 +60,6 @@ class TestSimpleModels:
     def test_ambient_state(self) -> None:
         obj = AmbientState(status_message="active")
         assert obj.status_message == "active"
-
-    def test_adversarial_emulation(self) -> None:
-        obj = AdversarialEmulationProfile(emulation_fidelity_target=0.95)
-        assert obj.emulation_fidelity_target == 0.95
 
     def test_causal_attribution(self) -> None:
         obj = CausalAttributionState(source_event_cid="ev-1", influence_weight=0.7)
@@ -144,14 +136,6 @@ class TestSimpleModels:
     def test_diversity_policy(self) -> None:
         obj = DiversityPolicy(min_adversaries=2, model_variance_required=True)
         assert obj.min_adversaries == 2
-
-    def test_dynamic_convergence_sla(self) -> None:
-        obj = DynamicConvergenceSLA(
-            convergence_delta_epsilon=0.001,
-            lookback_window_steps=10,
-            minimum_reasoning_steps=5,
-        )
-        assert obj.lookback_window_steps == 10
 
     def test_edge_mapping_contract(self) -> None:
         obj = EdgeMappingContract(source_pointer="/input", target_pointer="/output")
@@ -238,11 +222,3 @@ class TestDocumentModels:
         for dtype in ["preamble", "methodology", "argumentation", "findings", "conclusion", "addendum"]:
             obj = DiscourseNodeState(node_cid=f"did:z:{dtype}", discourse_type=dtype)  # type: ignore[arg-type]
             assert obj.discourse_type == dtype
-
-
-class TestProcessAndSOP:
-    """Exercise process reward and SOP models."""
-
-    def test_process_reward(self) -> None:
-        obj = ProcessRewardContract(pruning_threshold=0.5, max_backtracks_allowed=10)
-        assert obj.pruning_threshold == 0.5

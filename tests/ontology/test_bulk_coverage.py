@@ -41,7 +41,6 @@ from coreason_manifest.spec.ontology import (
     # Agents
     CognitiveAgentNodeProfile,
     # Format
-    CognitiveFormatContract,
     CognitiveHumanNodeProfile,
     # Routing
     CognitiveRoutingContract,
@@ -206,13 +205,6 @@ class TestBulkInstantiation:
     def test_auction_policy(self) -> None:
         obj = AuctionPolicy(auction_type="sealed_bid", tie_breaker="random", max_bidding_window_ms=5000)
         assert obj.auction_type == "sealed_bid"
-
-    def test_cognitive_format_contract(self) -> None:
-        from coreason_manifest.spec.ontology import ConstrainedDecodingPolicy
-
-        policy = ConstrainedDecodingPolicy(compiler_backend="urn:coreason:outlines")
-        obj = CognitiveFormatContract(decoding_policy=policy)
-        assert obj.require_think_tags is True
 
     def test_cognitive_sampling_policy(self) -> None:
         obj = CognitiveSamplingPolicy(max_complexity_hops=5)

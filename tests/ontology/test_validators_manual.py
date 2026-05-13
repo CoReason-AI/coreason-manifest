@@ -64,7 +64,6 @@ class_names = [
     "CognitiveDualVerificationReceipt",
     "EpistemicCurriculumManifest",
     "ConstrainedDecodingPolicy",
-    "CognitiveFormatContract",
     "EmpiricalStatisticalProfile",
     "EpistemicZeroTrustReceipt",
     "EpistemicLedgerState",

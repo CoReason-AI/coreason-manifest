@@ -126,7 +126,6 @@ class TestEpistemicSOPManifestGhostNodes:
             },
             structural_grammar_hashes={"step1": "hash1"},
             chronological_flow_edges=[("step1", "step2")],
-            prm_evaluations=[],
         )
         assert len(obj.cognitive_steps) == 2
 
@@ -138,7 +137,6 @@ class TestEpistemicSOPManifestGhostNodes:
                 cognitive_steps={"step1": self._make_step()},
                 structural_grammar_hashes={},
                 chronological_flow_edges=[("missing", "step1")],
-                prm_evaluations=[],
             )
 
     def test_ghost_target_in_edges(self) -> None:
@@ -149,7 +147,6 @@ class TestEpistemicSOPManifestGhostNodes:
                 cognitive_steps={"step1": self._make_step()},
                 structural_grammar_hashes={},
                 chronological_flow_edges=[("step1", "missing")],
-                prm_evaluations=[],
             )
 
     def test_ghost_grammar_hash(self) -> None:
@@ -160,7 +157,6 @@ class TestEpistemicSOPManifestGhostNodes:
                 cognitive_steps={"step1": self._make_step()},
                 structural_grammar_hashes={"missing_step": "hash1"},
                 chronological_flow_edges=[],
-                prm_evaluations=[],
             )
 
 
