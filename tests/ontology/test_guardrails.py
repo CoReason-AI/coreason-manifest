@@ -1,6 +1,6 @@
-import pytest
-from coreason_manifest.spec.ontology import GuardrailViolationEvent
 from datetime import datetime
+
+from coreason_manifest.spec.ontology import GuardrailViolationEvent
 
 
 def test_guardrail_violation_event_instantiation():

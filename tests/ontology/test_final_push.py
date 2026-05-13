@@ -21,8 +21,6 @@ from coreason_manifest.spec.ontology import (
     # EpistemicDomainGraphManifest — lines 13590-13599 (10 lines)
     EpistemicDomainGraphManifest,
     SemanticSlicingPolicy,
-    # SemanticSlicingPolicy — lines 2052-2065 (14 lines)
-    SemanticSlicingPolicy,
 )
 
 # ---------------------------------------------------------------------------
