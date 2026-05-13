@@ -225,11 +225,11 @@ class TestBulkInstantiation:
     def test_activation_steering(self) -> None:
         obj = ActivationSteeringContract(
             steering_vector_hash="a" * 64,
-            injection_layers=[0, 1, 2],
+            target_hook_points=["blocks.0.hook_resid_post"],
             scaling_factor=1.0,
             vector_modality="additive",
         )
-        assert len(obj.injection_layers) == 3
+        assert len(obj.target_hook_points) == 1
 
     def test_belief_mutation_event(self) -> None:
         obj = BeliefMutationEvent(

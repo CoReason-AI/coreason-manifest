@@ -42,7 +42,6 @@ from coreason_manifest.spec.ontology import (
     DocumentLayoutManifest,
     DynamicRoutingManifest,
     EpistemicTransmutationTask,
-    ExecutionNodeReceipt,
     ManifestViolationReceipt,
     MCPToolDefinition,
     OntologicalAlignmentPolicy,
@@ -347,29 +346,6 @@ def compute_topology_hash(topology: "AnyTopologyManifest") -> str:
     Deterministically computes the SOTA Merkle-DAG SHA-256 fingerprint of a given topology.
     """
     return hashlib.sha256(topology.model_dump_canonical()).hexdigest()
-
-
-def verify_merkle_proof(trace: list[ExecutionNodeReceipt]) -> bool:
-    """
-    Verifies a Merkle DAG trace of execution nodes.
-    Ensures that every node's hash is computationally valid and mathematically
-    sound (matching canonical inputs/outputs) and topologically links correctly
-    via Kahn's concept of parent hashes regardless of the temporal array index order.
-
-    Returns True if validation succeeds, False otherwise.
-    """
-    node_map: dict[str, ExecutionNodeReceipt] = {}
-    for node in trace:
-        if node.node_hash is None:
-            return False
-        node_map[node.node_hash] = node
-    for node in trace:
-        if node.generate_node_hash() != node.node_hash:
-            raise TamperFaultEvent(f"Node hash mismatch for request {node.request_cid}")
-        for parent_hash in node.parent_hashes:
-            if parent_hash not in node_map:
-                raise TamperFaultEvent(f"Missing parent hash {parent_hash} in trace")
-    return True
 
 
 _AST_ALLOWLIST: tuple[type, ...] = (

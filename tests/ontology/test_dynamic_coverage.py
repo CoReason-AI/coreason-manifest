@@ -14,8 +14,6 @@ from pydantic import ValidationError
 from coreason_manifest.spec.ontology import (
     DiscourseTreeManifest,
     EpistemicZeroTrustReceipt,
-    FederatedCIDFetchIntent,
-    FederatedDiscoveryIntent,
     InterventionReceipt,
     OntologicalAlignmentPolicy,
     RedactionPolicy,
@@ -25,18 +23,6 @@ from coreason_manifest.spec.ontology import (
     WetwareAttestationContract,
 )
 from coreason_manifest.utils.algebra import calculate_latent_alignment, compute_merkle_directory_cid
-
-
-def test_federated_discovery_intent() -> None:
-    intent = FederatedDiscoveryIntent(
-        domain_filter=["urn:coreason:domain:healthcare"], required_security_clearance="PUBLIC"
-    )
-    assert intent.topology_class == "federated_discovery"
-
-
-def test_cid_fetch_intent() -> None:
-    intent = FederatedCIDFetchIntent(target_cid="sha256:" + "a" * 64, timeout_ms=1000)
-    assert intent.topology_class == "cid_fetch"
 
 
 def test_intervention_receipt_attestation_nonce_failure() -> None:

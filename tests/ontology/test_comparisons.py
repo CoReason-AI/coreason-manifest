@@ -1,23 +1,22 @@
+# Copyright (c) 2026 CoReason, Inc
+#
+# This software is proprietary and dual-licensed
+# Licensed under the Prosperity Public License 3.0 (the "License")
+# A copy of the license is available at <https://prosperitylicense.com/versions/3.0.0>
+# For details, see the LICENSE file
+# Commercial use beyond a 30-day trial requires a separate license
+#
+# Source Code: <https://github.com/CoReason-AI/coreason-manifest>
+
 from coreason_manifest.spec.ontology import RiskLevelPolicy, SemanticClassificationProfile
 
 
-def test_semantic_classification_comparisons() -> None:
-    p = SemanticClassificationProfile.PUBLIC
-    i = SemanticClassificationProfile.INTERNAL
-    c = SemanticClassificationProfile.CONFIDENTIAL
-    r = SemanticClassificationProfile.RESTRICTED
-
-    assert p < i
-    assert i <= c
-    assert r > c
-    assert r >= p
-    assert p.clearance_level == 0
-    assert r.clearance_level == 3
-
-    assert p.__lt__(123) is NotImplemented
-    assert p.__le__(123) is NotImplemented
-    assert r.__gt__(123) is NotImplemented
-    assert r.__ge__(123) is NotImplemented
+def test_semantic_classification_profile_exists() -> None:
+    # Verify the profile members exist
+    assert SemanticClassificationProfile.PUBLIC.value == "public"
+    assert SemanticClassificationProfile.INTERNAL.value == "internal"
+    assert SemanticClassificationProfile.CONFIDENTIAL.value == "confidential"
+    assert SemanticClassificationProfile.RESTRICTED.value == "restricted"
 
 
 def test_risk_level_policy_comparisons() -> None:

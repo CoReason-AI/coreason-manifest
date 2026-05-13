@@ -63,7 +63,6 @@ from coreason_manifest.utils.algebra import (
     transmute_state_differential,
     verify_ast_safety,
     verify_manifold_bounds,
-    verify_merkle_proof,
 )
 
 
@@ -540,27 +539,6 @@ def test_compute_topology_hash() -> None:
     top = DAGTopologyManifest(topology_class="dag", nodes={}, edges=[], max_depth=1, max_fan_out=1)
     h = compute_topology_hash(top)
     assert len(h) == 64
-
-
-def test_verify_merkle_proof() -> None:
-    assert verify_merkle_proof([])
-
-    n1 = Mock(node_hash=None, parent_hashes=[], request_cid="r1")
-    assert not verify_merkle_proof([n1])
-
-    n2 = Mock(node_hash="h1", parent_hashes=[], request_cid="r2")
-    n2.generate_node_hash.return_value = "h1"
-    assert verify_merkle_proof([n2])
-
-    n3 = Mock(node_hash="h3", parent_hashes=[], request_cid="r3")
-    n3.generate_node_hash.return_value = "invalid"
-    with pytest.raises(Exception, match="Node hash mismatch"):
-        verify_merkle_proof([n3])
-
-    n4 = Mock(node_hash="h4", parent_hashes=["missing_parent"], request_cid="r4")
-    n4.generate_node_hash.return_value = "h4"
-    with pytest.raises(Exception, match="Missing parent hash"):
-        verify_merkle_proof([n4])
 
 
 def test_verify_ast_safety() -> None:

@@ -47,7 +47,6 @@ If you are an autonomous coding agent, LLM, or web crawler ingesting this reposi
 * 5.1. Mechanistic Interpretability & Brain-Scans (`MechanisticAuditContract`)
 * 5.2. Constitutional AI & Normative Boundaries (`GlobalGovernancePolicy`)
 * 5.3. The Zero-Trust Architecture & Semantic Firewalls (`SemanticFirewallPolicy`)
-* 5.4. Chaos Engineering & Systemic Resilience (`ChaosExperimentTask`)
 
 [**Part VI: Thermodynamic Computing & Physics**](thermodynamics.md)
 * 6.1. Computational Thermodynamics (VRAM & Token Bounding)
