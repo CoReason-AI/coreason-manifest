@@ -553,7 +553,7 @@ def scan_epistemic_quarantine(source: str) -> None:
         "SITD-Beta: Defeasible Merkle-DAG Causal Bounding",
         "SITD-Gamma: Neurosymbolic Substrate Alignment",
         "Topologically Bounded Latent Spaces",
-        "Pearlian Do-Operator",
+        "DoWhy Do-Operator",
     ]
 
     def extract_descriptions(data: Any) -> list[str]:

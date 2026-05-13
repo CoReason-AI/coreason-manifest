@@ -1446,7 +1446,7 @@ export type EdgeThickness = number;
  */
 export type SpatialRepulsionScalar = number;
 /**
- * The specific Pearlian topological relationship between the two variables.
+ * The specific DoWhy topological relationship between the two variables.
  */
 export type EdgeClass = "direct_cause" | "confounder" | "collider" | "mediator";
 export type PredicateCurie = string;
@@ -5200,7 +5200,7 @@ export type SubjectNodeCid = string;
 export type ObjectNodeCid = string;
 export type PredicateCurie1 = string;
 /**
- * The Pearlian directionality of the semantic relationship.
+ * The DoWhy directionality of the semantic relationship.
  */
 export type CausalRelationship = "causes" | "confounds" | "correlates_with" | "undirected";
 /**
@@ -6073,11 +6073,11 @@ export interface AnchoringPolicy {
  *
  * AGENT INSTRUCTION: Defines the discrete formalization of a Gibsonian Affordance within the agent's Reinforcement Learning Action Space ($A$). As a ...Manifest suffix, this is a declarative, frozen N-dimensional coordinate of a capability.
  *
- * CAUSAL AFFORDANCE: Unlocks a specific, localized Pearlian Do-Operator intervention ($do(X=x)$) mapped to an external kinetic capability. Governed by side_effects, permissions, and an optional execution SLA.
+ * CAUSAL AFFORDANCE: Unlocks a specific, localized DoWhy Do-Operator intervention ($do(X=x)$) mapped to an external kinetic capability. Governed by side_effects, permissions, and an optional execution SLA.
  *
  * EPISTEMIC BOUNDS: The operational perimeter is rigidly confined by `input_schema` and `output_schema` (dictionaries bounded to `max_length=1000` properties). The `is_preemptible` boolean (default=False) establishes a physical Halting Problem limit by authorizing the orchestrator to abort execution mid-flight.
  *
- * MCP ROUTING TRIGGERS: Gibsonian Affordance, MDP Action Space, Pearlian Do-Operator, Capability-Based Security, Halting Problem
+ * MCP ROUTING TRIGGERS: Gibsonian Affordance, MDP Action Space, DoWhy Do-Operator, Capability-Based Security, Halting Problem
  */
 export interface SpatialToolManifest {
   topology_class?: TopologyClass5;
@@ -6856,7 +6856,7 @@ export interface VectorEmbeddingState2 {
  * suffix, this object defines rigid mathematical boundaries that the orchestrator must
  * enforce globally.
  *
- * CAUSAL AFFORDANCE: Restricts graph hopping algorithms to explicit Pearlian edge types
+ * CAUSAL AFFORDANCE: Restricts graph hopping algorithms to explicit PyWhy/DoWhy edge types
  * (Literal["causes", "confounds", "correlates_with", "undirected"]), mathematically
  * preventing epistemic drift and hallucination during deep multi-hop retrieval.
  *
@@ -6865,7 +6865,7 @@ export interface VectorEmbeddingState2 {
  * allowed_causal_relationships (min_length=1) to guarantee RFC 8785 canonical hashing.
  * Geometric distance preservation is toggled via enforce_isometry (default=True).
  *
- * MCP ROUTING TRIGGERS: Directed Acyclic Graph, Pearlian Traversal, Isometry Preservation,
+ * MCP ROUTING TRIGGERS: Directed Acyclic Graph, DoWhy Traversal, Isometry Preservation,
  * Random Walk with Restart
  */
 export interface TopologicalRetrievalContract {
@@ -7132,11 +7132,11 @@ export interface QuarantineIntent {
  *
  * AGENT INSTRUCTION: Implements Supervisory Control Theory (Ramadge & Wonham) for Discrete-Event Systems, acting as a formal Mixed-Initiative Control mechanism.
  *
- * CAUSAL AFFORDANCE: Physically halts the active Directed Acyclic Graph (DAG) traversal or Petri Net reachability loop, preventing the swarm from committing a state transition until an explicit, authorized Pearlian intervention is negotiated by the human supervisor.
+ * CAUSAL AFFORDANCE: Physically halts the active Directed Acyclic Graph (DAG) traversal or Petri Net reachability loop, preventing the swarm from committing a state transition until an explicit, authorized DoWhy intervention is negotiated by the human supervisor.
  *
  * EPISTEMIC BOUNDS: Execution suspension is rigorously bounded by the temporal logic of the `adjudication_deadline` (a float representing a UNIX timestamp) and the attached FallbackSLA. The `proposed_action` schema is clamped against deep recursion constraints.
  *
- * MCP ROUTING TRIGGERS: Supervisory Control Theory, Mixed-Initiative System, Discrete-Event System, Bounded Delay, Pearlian Intervention
+ * MCP ROUTING TRIGGERS: Supervisory Control Theory, Mixed-Initiative System, Discrete-Event System, Bounded Delay, DoWhy Intervention
  */
 export interface InterventionIntent {
   topology_class?: TopologyClass34;
@@ -7306,11 +7306,11 @@ export interface FallbackIntent {
  *
  * AGENT INSTRUCTION: A Dictatorial Byzantine Fault Resolution mechanism. It is an absolute, zero-trust kinetic override that violently preempts autonomous algorithmic consensus or prediction market resolution.
  *
- * CAUSAL AFFORDANCE: Forces an absolute Pearlian do-operator intervention ($do(X=x)$). Physically shatters the active causal chain of the `target_node_cid` and forcibly injects the `override_action` payload into the state vector, bypassing decentralized voting.
+ * CAUSAL AFFORDANCE: Forces an absolute DoWhy do-operator intervention ($do(X=x)$). Physically shatters the active causal chain of the `target_node_cid` and forcibly injects the `override_action` payload into the state vector, bypassing decentralized voting.
  *
  * EPISTEMIC BOUNDS: The blast radius is strictly confined to the `target_node_cid`. The orchestrator must mathematically verify the `authorized_node_cid` against the highest-tier W3C DID enterprise clearance before allowing the payload to overwrite the Epistemic Blackboard (`override_action` bounded `max_length=1000`).
  *
- * MCP ROUTING TRIGGERS: Dictatorial Override, Byzantine Fault Resolution, Pearlian Intervention, Causal Shattering, Zero-Trust Override
+ * MCP ROUTING TRIGGERS: Dictatorial Override, Byzantine Fault Resolution, DoWhy Intervention, Causal Shattering, Zero-Trust Override
  */
 export interface OverrideIntent {
   topology_class?: TopologyClass37;
@@ -7336,11 +7336,11 @@ export interface OverrideAction {
  *
  * AGENT INSTRUCTION: Represents a non-monotonic structural revision trigger within a Defeasible Logic framework, engineered to adapt the GovernancePolicy to out-of-distribution environments.
  *
- * CAUSAL AFFORDANCE: Triggers an active topological mutation (Pearlian intervention) to resolve logical friction, applying a strict RFC 6902 JSON Patch (`proposed_patch`) to the underlying alignment manifold.
+ * CAUSAL AFFORDANCE: Triggers an active topological mutation (DoWhy intervention) to resolve logical friction, applying a strict RFC 6902 JSON Patch (`proposed_patch`) to the underlying alignment manifold.
  *
  * EPISTEMIC BOUNDS: Cryptographically anchored to the specific `drift_event_cid` (regex bounded CID `^[a-zA-Z0-9_.:-]+$`) that mathematically justified the revision. The payload is constrained to a JSON Schema object (`proposed_patch`).
  *
- * MCP ROUTING TRIGGERS: Defeasible Logic, Non-Monotonic Revision, Out-of-Distribution Adaptation, Normative Drift Resolution, Pearlian Intervention
+ * MCP ROUTING TRIGGERS: Defeasible Logic, Non-Monotonic Revision, Out-of-Distribution Adaptation, Normative Drift Resolution, DoWhy Intervention
  */
 export interface ConstitutionalAmendmentIntent {
   topology_class?: TopologyClass38;
@@ -7604,11 +7604,11 @@ export interface EvidentiaryGroundingSLA {
  * regret simulation.
  *
  * EPISTEMIC BOUNDS: The edge_class physically restricts topological connections
- * to the Pearlian Literal automaton ["direct_cause", "confounder", "collider",
+ * to the DoWhy Literal automaton ["direct_cause", "confounder", "collider",
  * "mediator"]. The source_variable and target_variable are bounded by
  * min_length=1 (no max_length) to prevent ghost pointer allocation.
  *
- * MCP ROUTING TRIGGERS: Structural Causal Models, Pearlian Causality,
+ * MCP ROUTING TRIGGERS: Structural Causal Models, PyWhy/DoWhy Causality,
  * d-separation, Do-Calculus, Directed Edge
  */
 export interface CausalDirectedEdgeState {
@@ -8135,7 +8135,7 @@ export interface CognitiveAgentNodeProfile {
    */
   analogical_policy?: AnalogicalMappingTask | null;
   /**
-   * The formal contract authorizing the agent to mutate variables to prove Pearlian causation.
+   * The formal contract authorizing the agent to mutate variables to prove PyWhy/DoWhy causation.
    */
   interventional_policy?: DoWhyInterventionIntent | null;
   /**
@@ -10840,7 +10840,7 @@ export interface StreamingDisfluencyContract {
 /**
  * CoReason Shared Kernel Ontology
  *
- * AGENT INSTRUCTION: Formalizes Bayesian Belief Updating and Pearlian Causal Tracing by synthesizing internal cognitive shifts into discrete, hashable facts.
+ * AGENT INSTRUCTION: Formalizes Bayesian Belief Updating and PyWhy/DoWhy Causal Tracing by synthesizing internal cognitive shifts into discrete, hashable facts.
  *
  * CAUSAL AFFORDANCE: Projects a synthesized conclusion into the shared topology, binding the new belief to `causal_attributions`.
  *
@@ -10889,7 +10889,7 @@ export interface Payload1 {
 /**
  * CoReason Shared Kernel Ontology
  *
- * AGENT INSTRUCTION: Formalizes Pearlian causal tracing, linking a localized cognitive
+ * AGENT INSTRUCTION: Formalizes PyWhy/DoWhy causal tracing, linking a localized cognitive
  * synthesis back to its historical Merkle-DAG origin. As a ...State suffix, this is a
  * declarative, frozen snapshot of a causal connection at a point in time.
  *
@@ -10900,7 +10900,7 @@ export interface Payload1 {
  * probability distribution (ge=0.0, le=1.0). The source_event_cid is locked to a 128-char
  * CID regex (^[a-zA-Z0-9_.:-]+$).
  *
- * MCP ROUTING TRIGGERS: Pearlian Causal Tracing, Directed Acyclic Graph, Causal Lineage,
+ * MCP ROUTING TRIGGERS: PyWhy/DoWhy Causal Tracing, Directed Acyclic Graph, Causal Lineage,
  * Attention Weighting, Influence Distribution
  */
 export interface CausalAttributionState {
@@ -10910,13 +10910,13 @@ export interface CausalAttributionState {
 /**
  * CoReason Shared Kernel Ontology
  *
- * AGENT INSTRUCTION: Formalizes Pearlian Structural Causal Models (SCMs) and Variational Free Energy to mathematically quantify and partition irreducible aleatoric noise from actionable epistemic knowledge gaps.
+ * AGENT INSTRUCTION: Formalizes PyWhy/DoWhy Structural Causal Models (SCMs) and Variational Free Energy to mathematically quantify and partition irreducible aleatoric noise from actionable epistemic knowledge gaps.
  *
- * CAUSAL AFFORDANCE: Unlocks non-monotonic logic via Pearlian do-operators, computing exactly when to trigger a structural abductive escalation or active inference loop via the `requires_abductive_escalation` flag.
+ * CAUSAL AFFORDANCE: Unlocks non-monotonic logic via DoWhy do-operators, computing exactly when to trigger a structural abductive escalation or active inference loop via the `requires_abductive_escalation` flag.
  *
  * EPISTEMIC BOUNDS: Enforces absolute mathematical float boundaries `[ge=0.0, le=1.0]` on `aleatoric_entropy`, `epistemic_uncertainty`, and `semantic_consistency_score`, mathematically preventing probability wave overflow across all three continuous dimensions.
  *
- * MCP ROUTING TRIGGERS: Structural Causal Models, Active Inference, Variational Free Energy, Aleatoric Entropy, Pearlian Do-Calculus
+ * MCP ROUTING TRIGGERS: Structural Causal Models, Active Inference, Variational Free Energy, Aleatoric Entropy, DoWhy Do-Calculus
  */
 export interface CognitiveUncertaintyProfile1 {
   aleatoric_noise_ratio: AleatoricNoiseRatio;
@@ -11122,13 +11122,13 @@ export interface BargeInInterruptEvent {
 /**
  * CoReason Shared Kernel Ontology
  *
- * AGENT INSTRUCTION: Employs Counterfactual Regret Minimization (CFR) and Pearlian Do-Calculus to execute simulated alternative timelines for policy refinement.
+ * AGENT INSTRUCTION: Employs Counterfactual Regret Minimization (CFR) and DoWhy Do-Calculus to execute simulated alternative timelines for policy refinement.
  *
  * CAUSAL AFFORDANCE: Commits a simulated causal divergence (intervention) into the ledger, mathematically quantifying the opportunity cost (regret) to backpropagate stateless adjustments to the routing policy.
  *
  * EPISTEMIC BOUNDS: Anchored to `historical_event_cid` (128-char CID). Expected utilities and `epistemic_regret` are physically capped at `le=18446744073709551615.0`. `policy_mutation_gradients` restrict tensor adjustments.
  *
- * MCP ROUTING TRIGGERS: Counterfactual Regret Minimization, Pearlian Do-Calculus, Opportunity Cost, Alternative Timeline, Policy Gradient Update
+ * MCP ROUTING TRIGGERS: Counterfactual Regret Minimization, DoWhy Do-Calculus, Opportunity Cost, Alternative Timeline, Policy Gradient Update
  */
 export interface CounterfactualRegretEvent {
   event_cid: EventCid12;
@@ -11156,7 +11156,7 @@ export interface PolicyMutationGradients {
  *
  * EPISTEMIC BOUNDS: `parameters` payload is volumetrically capped by `enforce_payload_topology`. To prevent infinite compute loops, `authorized_budget_magnitude` is mandated `ge=1`. `zk_proof` serves as mathematical authorization proof.
  *
- * MCP ROUTING TRIGGERS: Pearlian Do-Operator, Kinetic Commitment, Active Inference, Thermodynamic Escrow, Zero-Trust Actuation
+ * MCP ROUTING TRIGGERS: DoWhy Do-Operator, Kinetic Commitment, Active Inference, Thermodynamic Escrow, Zero-Trust Actuation
  */
 export interface ToolInvocationEvent {
   event_cid: EventCid13;
@@ -12438,7 +12438,7 @@ export interface CrystallizationPolicy {
  *
  * AGENT INSTRUCTION: Executes Jon Doyle's Truth Maintenance System (TMS) protocol. As an ...Event suffix, this is an append-only coordinate on the Merkle-DAG representing the active propagation of belief retraction.
  *
- * CAUSAL AFFORDANCE: Applies a Pearlian do-operator to mathematically zero-out the probability mass of the `quarantined_event_cids` subgraph, physically halting all execution branches dependent on the `root_falsified_event_cid` to prevent epistemic contagion.
+ * CAUSAL AFFORDANCE: Applies a DoWhy do-operator to mathematically zero-out the probability mass of the `quarantined_event_cids` subgraph, physically halting all execution branches dependent on the `root_falsified_event_cid` to prevent epistemic contagion.
  *
  * EPISTEMIC BOUNDS: The Shannon Entropy reduction across edges is strictly clamped by `propagated_decay_factor` (`ge=0.0, le=1.0`). Deterministic alignment is guaranteed by a `@model_validator` that physically sorts the `quarantined_event_cids` array. A second validator mathematically rejects root events appearing in quarantine (`reject_root_in_quarantine`).
  *
@@ -13965,7 +13965,7 @@ export interface ReasoningEngineeringPolicy {
  * EpistemicProvenanceReceipt, temporal_bounds: TemporalBoundsProfile) extend the edge
  * geometry without mandatory overhead.
  *
- * MCP ROUTING TRIGGERS: Structural Causal Models, Pearlian Directed Edge, Semantic
+ * MCP ROUTING TRIGGERS: Structural Causal Models, DoWhy Directed Edge, Semantic
  * Triplet, Adjacency Matrix, Epistemic Link
  */
 export interface SemanticEdgeState {
