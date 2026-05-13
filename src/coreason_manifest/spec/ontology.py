@@ -6869,7 +6869,8 @@ type AnyIntent = Annotated[
     | MCPClientIntent
     | RollbackIntent
     | StateMutationIntent
-    | OntologicalNormalizationIntent,
+    | OntologicalNormalizationIntent
+    | FederatedDiscoveryIntent,
     Field(discriminator="topology_class"),
 ]
 
@@ -13622,7 +13623,39 @@ class OntologicalNormalizationIntent(CoreasonBaseState):
     )
 
 
+
+class FederatedDiscoveryIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Encapsulates the geometric parameters for a cross-authority capability discovery query.
+    Used by the Federated Gateway to route semantic search intents across zero-trust network boundaries.
+
+    CAUSAL AFFORDANCE: Enables the discovery of URN-addressable capabilities that match specific topological and status filters.
+
+    EPISTEMIC BOUNDS: Strictly bounded by the domain_filter array and the minimum_epistemic_status enum.
+
+    MCP ROUTING TRIGGERS: Federated Discovery, Semantic Search, Capability Routing, Zero-Trust Discovery.
+    """
+
+    topology_class: Literal["federated_discovery_intent"] = Field(
+        default="federated_discovery_intent",
+        description="Discriminator for the FederatedDiscoveryIntent topology.",
+    )
+    domain_filter: list[str] = Field(
+        ...,
+        description="The strict array of strings defining topological limits on the discovered capabilities.",
+    )
+    minimum_epistemic_status: str = Field(
+        default="DRAFT",
+        description=(
+            "The minimum SRB governance lifecycle phase required for "
+            "projected capabilities "
+            "(DRAFT / SRB_APPROVED / CLIENT_APPROVED / PUBLISHED)."
+        ),
+    )
+
+
 class EvidentiaryCitationState(CoreasonBaseState):
+
     """
     AGENT INSTRUCTION: A declarative coordinate representing an immutable, localized snippet of external evidence retrieved by an oracle, coupled with its calculated Natural Language Inference (NLI) score.
 
@@ -14216,6 +14249,7 @@ MCPToolDefinition.model_rebuild()
 ContinuousManifoldMappingContract.model_rebuild()
 OracleExecutionReceipt.model_rebuild()
 OntologicalNormalizationIntent.model_rebuild()
+FederatedDiscoveryIntent.model_rebuild()
 EpistemicRigidityPolicy.model_rebuild()
 DeliberativeEnvelope.model_rebuild()
 StrategicThoughtNodeIntent.model_rebuild()

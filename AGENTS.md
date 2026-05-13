@@ -324,6 +324,22 @@ Time is not metadata; it is a mandatory physical coordinate. You are STRICTLY FO
 
 ### **2. Structured Consolidation (The OntoMem Invariant)**
 Unstructured `text_chunks` are lossy and prone to LLM hallucination during cross-reference. You are STRICTLY FORBIDDEN from relying on plain strings as the sole representation of a `SemanticNodeState`. Consolidated knowledge MUST be stored in volumetrically bounded, strictly typed Pydantic property matrices (`dict[str, JsonPrimitiveState]`) to allow for deterministic, programmatic diffing and heuristic consolidation.
+
+---
+
+## **0.12 Ontological Stabilization & Model Rebuilding**
+
+To maintain the absolute integrity of the Tripartite Manifold during high-velocity schema updates, you must adhere to the **Pydantic Model Rebuilding Mandate**.
+
+### **1. The Polymorphic Union Guillotine**
+When expanding the global polymorphic unions (e.g., `AnyIntent`, `AnyStateEvent`, `AnyReceipt`), you are strictly forbidden from simply appending the new class name. 
+
+**The Mandate:** You MUST explicitly invoke `[ClassName].model_rebuild()` at the physical bottom of `ontology.py` for every intent, event, or receipt involved in a forward-reference union. This mathematically forces Pydantic to re-evaluate the type hints and resolve the polymorphic discriminators, preventing `AttributeError` and `ImportError` regressions in the downstream `coreason-runtime` orchestrator.
+
+### **2. The Top-Level Export Directive**
+To simplify the dependency graph and prevent "Import Hell" in the Kinetic Plane, all new ontological structures MUST be exported at the package root.
+* Ensure `from .spec.ontology import *` exists in both `coreason_manifest/__init__.py` and `coreason_manifest/spec/__init__.py`.
+* Downstream agents MUST favor `from coreason_manifest import [ClassName]` to maintain a clean, standardized API surface.
 </memory_directive>
 
 ## **0.11 The Zero-Trust Security & Hardware Limits Doctrine**
