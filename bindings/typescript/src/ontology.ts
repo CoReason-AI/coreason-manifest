@@ -5574,18 +5574,6 @@ export type CrystallizedLedgerCids = string[];
  */
 export type MaxRetainedTokens1 = number;
 /**
- * The expected maximum latency under normal conditions.
- */
-export type ExpectedMaxLatency = number;
-/**
- * The maximum allowed loops for the swarm to reach a conclusion.
- */
-export type MaxLoopsAllowed = number;
-/**
- * The strict array of required tools that must be utilized.
- */
-export type RequiredToolUsage = string[] | null;
-/**
  * Unique identifier for this simulation profile.
  */
 export type ProfileCid = string;
@@ -5999,7 +5987,6 @@ export interface CoReasonSharedKernelOntology {
   StateMutationIntent?: StateMutationIntent;
   StateVectorProfile?: StateVectorProfile1;
   StdioTransportProfile?: StdioTransportProfile;
-  SteadyStateHypothesisState?: SteadyStateHypothesisState;
   StochasticNodeState?: StochasticNodeState;
   StochasticTopologyManifest?: StochasticTopologyManifest;
   StrategicThoughtNodeIntent?: StrategicThoughtNodeIntent;
@@ -14823,33 +14810,6 @@ export interface StateVectorProfile1 {
   immutable_matrix?: ImmutableMatrix;
   mutable_matrix?: MutableMatrix;
   is_delta?: IsDelta;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
- * AGENT INSTRUCTION: Formalizes the baseline control group definition within
- * Chaos Engineering, leveraging Queueing Theory to model the expected systemic
- * equilibrium. As a ...State suffix, this is a declarative, frozen snapshot of
- * N-dimensional geometry.
- *
- * CAUSAL AFFORDANCE: Provides the deterministic baseline against which chaotic
- * perturbations (e.g., CNCF Chaos Mesh) are measured, establishing temporal
- * and procedural expectations for standard execution loops.
- *
- * EPISTEMIC BOUNDS: Latency expectations are continuously bounded by
- * expected_max_latency (ge=0.0, le=18446744073709551615.0). The max_loops_allowed
- * (le=18446744073709551615) physically caps algorithmic cycles. The optional
- * required_tool_usage (list[str] | None, default=None,
- * max_length=1000) is deterministically sorted via @model_validator
- * sort_arrays to preserve RFC 8785 canonical hashing.
- *
- * MCP ROUTING TRIGGERS: Chaos Engineering, Queueing Theory, Steady-State
- * Equilibrium, Control Group Baseline, Systemic Perturbation
- */
-export interface SteadyStateHypothesisState {
-  expected_max_latency: ExpectedMaxLatency;
-  max_loops_allowed: MaxLoopsAllowed;
-  required_tool_usage?: RequiredToolUsage;
 }
 /**
  * CoReason Shared Kernel Ontology

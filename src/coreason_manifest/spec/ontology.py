@@ -9766,45 +9766,6 @@ class StdioTransportProfile(CoreasonBaseState):
 type MCPTransportProfile = StdioTransportProfile | SSETransportProfile | HTTPTransportProfile
 
 
-class SteadyStateHypothesisState(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Formalizes the baseline control group definition within
-    Chaos Engineering, leveraging Queueing Theory to model the expected systemic
-    equilibrium. As a ...State suffix, this is a declarative, frozen snapshot of
-    N-dimensional geometry.
-
-    CAUSAL AFFORDANCE: Provides the deterministic baseline against which chaotic
-    perturbations (e.g., CNCF Chaos Mesh) are measured, establishing temporal
-    and procedural expectations for standard execution loops.
-
-    EPISTEMIC BOUNDS: Latency expectations are continuously bounded by
-    expected_max_latency (ge=0.0, le=18446744073709551615.0). The max_loops_allowed
-    (le=18446744073709551615) physically caps algorithmic cycles. The optional
-    required_tool_usage (list[str] | None, default=None,
-    max_length=1000) is deterministically sorted via @model_validator
-    sort_arrays to preserve RFC 8785 canonical hashing.
-
-    MCP ROUTING TRIGGERS: Chaos Engineering, Queueing Theory, Steady-State
-    Equilibrium, Control Group Baseline, Systemic Perturbation
-    """
-
-    expected_max_latency: float = Field(
-        le=18446744073709551615.0, ge=0.0, description="The expected maximum latency under normal conditions."
-    )
-    max_loops_allowed: int = Field(
-        le=18446744073709551615, description="The maximum allowed loops for the swarm to reach a conclusion."
-    )
-    required_tool_usage: list[Annotated[str, StringConstraints(max_length=2000)]] | None = Field(
-        max_length=1000, default=None, description="The strict array of required tools that must be utilized."
-    )
-
-    @model_validator(mode="after")
-    def _enforce_canonical_sort(self) -> Self:
-        if self.required_tool_usage is not None:
-            object.__setattr__(self, "required_tool_usage", sorted(self.required_tool_usage))
-        return self
-
-
 class StructuralCausalGraphProfile(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Formalizes Judea Pearl's Structural Causal Models (SCMs) by mapping the causal topology of observed and latent variables.
