@@ -11,9 +11,9 @@
 import base64
 import struct
 import unittest.mock
-from typing import Any
 
 import pytest
+
 from coreason_manifest.spec.ontology import (
     OntologicalAlignmentPolicy,
     VectorEmbeddingState,
