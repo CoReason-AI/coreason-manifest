@@ -3,7 +3,7 @@ from datetime import datetime
 from coreason_manifest.spec.ontology import GuardrailViolationEvent
 
 
-def test_guardrail_violation_event_instantiation():
+def test_guardrail_violation_event_instantiation() -> None:
     """Tests the basic instantiation and validation of GuardrailViolationEvent."""
     event = GuardrailViolationEvent(
         violation_id="viol_123",
@@ -18,7 +18,7 @@ def test_guardrail_violation_event_instantiation():
     assert isinstance(event.timestamp, datetime)
 
 
-def test_guardrail_violation_event_json_isomorphism():
+def test_guardrail_violation_event_json_isomorphism() -> None:
     """Tests that the event correctly serializes and deserializes."""
     event = GuardrailViolationEvent(
         violation_id="viol_456",
