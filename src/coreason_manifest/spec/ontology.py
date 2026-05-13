@@ -8841,25 +8841,94 @@ class PresentationManifest(CoreasonBaseState):
     )
 
 
+class DynamicConvergenceSLA(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Defines the mathematical Optimal Stopping Theory boundaries for Monte
+    Carlo Tree Search (MCTS) and test-time compute scaling. As an ...SLA suffix, this object
+    enforces rigid mathematical boundaries that the orchestrator must respect globally.
+
+    CAUSAL AFFORDANCE: Triggers an early termination circuit breaker on reasoning trajectories
+    when the gradient of the Process Reward Model (PRM) score falls below the epsilon delta,
+    halting unnecessary probability wave expansion and preserving VRAM.
+
+    EPISTEMIC BOUNDS: Mathematically constrained by convergence_delta_epsilon (ge=0.0, le=1.0)
+    over a strictly positive lookback_window_steps (gt=0, le=18446744073709551615). Physically mandates
+    a minimum_reasoning_steps burn-in period (gt=0, le=18446744073709551615) to prevent premature
+    collapse before the latent space is adequately explored.
+
+    MCP ROUTING TRIGGERS: Optimal Stopping Theory, MCTS, PRM Convergence, Circuit Breaker,
+    Bellman Equation
+    """
+
+    convergence_delta_epsilon: float = Field(
+        le=1.0,
+        ge=0.0,
+        description="The minimal required PRM score improvement across the lookback window to justify continued compute.",
+    )
+    lookback_window_steps: int = Field(
+        le=18446744073709551615,
+        gt=0,
+        description="The N-step temporal window over which the PRM gradient is calculated.",
+    )
+    minimum_reasoning_steps: int = Field(
+        le=18446744073709551615,
+        gt=0,
+        description="The burn-in period before convergence logic is activated.",
+    )
+
+
+class ProcessRewardContract(CoreasonBaseState):
+    r"""
+    AGENT INSTRUCTION: Enforces the Step-Level Verification heuristics for Process Reward Models (PRMs) during non-monotonic reasoning searches and test-time compute.
+
+    CAUSAL AFFORDANCE: Authorizes the orchestrator to physically prune hallucinating ThoughtBranchState vectors from the LatentScratchpadReceipt if their logit probabilities drop below the viable threshold, emulating rigorous Beam Search pruning.
+
+    EPISTEMIC BOUNDS: Strictly bounds the search space geometry via `pruning_threshold` (`ge=0.0, le=1.0`) and mechanically caps State-Space Explosion through `max_backtracks_allowed` (`ge=0, le=18446744073709551615`).
+
+    MCP ROUTING TRIGGERS: Process Reward Model, Beam Search Pruning, Latent Trajectory, State-Space Explosion, A* Search
+
+    """
+
+    convergence_sla: DynamicConvergenceSLA | None = Field(
+        default=None,
+        description="The dynamic circuit breaker that halts the search when PRM variance converges, preventing VRAM waste.",
+    )
+    pruning_threshold: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="If a ThoughtBranchState's prm_score falls below this threshold, the orchestrator MUST halt its generation.",
+    )
+    max_backtracks_allowed: int = Field(
+        le=18446744073709551615,
+        ge=0,
+        description="The absolute limit on how many times the agent can start a new branch before throwing a SystemFaultEvent.",
+    )
+    evaluator_matrix_name: Annotated[str, StringConstraints(max_length=2000)] | None = Field(
+        default=None,
+        description="The specific PRM model used to score the logic (e.g., 'math-prm-v2').",
+    )
+
+
 class EpistemicSOPManifest(CoreasonBaseState):
     """
-     AGENT INSTRUCTION: Encodes a macroscopic Petri net or Directed Acyclic Graph (DAG)
-     formalizing standard operating procedures into mathematically traversable state
-     transitions. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate
-     state.
+    AGENT INSTRUCTION: Encodes a macroscopic Petri net or Directed Acyclic Graph (DAG)
+    formalizing standard operating procedures into mathematically traversable state
+    transitions. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate
+    state.
 
-     CAUSAL AFFORDANCE: Physically bounds the executing agent (target_persona:
-     ProfileCIDState) to a deterministic sequence of CognitiveStateProfiles, unlocking
-     the ability for the orchestrator to dynamically evaluate execution via Process Reward
-    .
+    CAUSAL AFFORDANCE: Physically bounds the executing agent (target_persona:
+    ProfileCIDState) to a deterministic sequence of CognitiveStateProfiles, unlocking
+    the ability for the orchestrator to dynamically evaluate execution
+    via Process Reward Models (prm_evaluations: list[ProcessRewardContract]) at each
+    topological node.
 
-     EPISTEMIC BOUNDS: The cognitive_steps dictionary is constrained to max_length=1000
-     to cap memory footprint. The @model_validator reject_ghost_nodes mathematically enforces
-     referential integrity, guaranteeing that no chronological_flow_edges AND no
-     structural_grammar_hashes point to an undefined state.
+    EPISTEMIC BOUNDS: The cognitive_steps dictionary is constrained to max_length=1000
+    to cap memory footprint. The @model_validator reject_ghost_nodes mathematically enforces
+    referential integrity, guaranteeing that no chronological_flow_edges AND no
+    structural_grammar_hashes point to an undefined state.
 
-     MCP ROUTING TRIGGERS: Petri Net, Directed Acyclic Graph, Process Reward Model,
-     Topological Flow, Referential Integrity
+    MCP ROUTING TRIGGERS: Petri Net, Directed Acyclic Graph, Process Reward Model,
+    Topological Flow, Referential Integrity
     """
 
     sop_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
@@ -8879,6 +8948,12 @@ class EpistemicSOPManifest(CoreasonBaseState):
         description="The exact topological flow between step_cids.",
     )
     # Note: chronological_flow_edges is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
+    prm_evaluations: list[ProcessRewardContract] = Field(
+        default_factory=list,
+        json_schema_extra={"coreason_topological_exemption": True},
+        description="The strict array of Process Reward Contracts evaluating the logic.",
+        # Note: prm_evaluations is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
+    )
 
     @model_validator(mode="after")
     def reject_ghost_nodes(self) -> Self:
