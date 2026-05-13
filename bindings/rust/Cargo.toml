@@ -1,6 +1,6 @@
 [package]
 name = "coreason-manifest"
-version = "1.0.0"
+version = "0.54.0"
 edition = "2021"
 description = "Rust bindings for the CoReason Hollow Data Plane."
 license-file = "LICENSE"
