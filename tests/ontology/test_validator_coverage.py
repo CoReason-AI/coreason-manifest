@@ -71,7 +71,6 @@ class TestVectorEmbeddingState:
         assert obj.dimensionality == 16
 
 
-
 class TestAnchoringPolicy:
     """Exercise anchoring policy."""
 

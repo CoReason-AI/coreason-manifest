@@ -3461,8 +3461,6 @@ class AdjudicationIntent(CoreasonBaseState):
         return self
 
 
-
-
 class AdversarialEmulationProfile(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Aggregates the full Adversarial Emulation geometry, composing
@@ -5710,8 +5708,6 @@ class EmpiricalFalsificationContract(CoreasonBaseState):
     falsifying_observation_signature: Annotated[str, StringConstraints(max_length=2000)] = Field(
         description="The expected data schema or regex pattern that, if returned by the tool, kills the hypothesis."
     )
-
-
 
 
 class FitnessObjectiveProfile(CoreasonBaseState):
@@ -9807,8 +9803,6 @@ class SteadyStateHypothesisState(CoreasonBaseState):
         if self.required_tool_usage is not None:
             object.__setattr__(self, "required_tool_usage", sorted(self.required_tool_usage))
         return self
-
-
 
 
 class StructuralCausalGraphProfile(CoreasonBaseState):
