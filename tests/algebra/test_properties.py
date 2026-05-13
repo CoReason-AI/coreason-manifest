@@ -42,7 +42,6 @@ from coreason_manifest.utils.algebra import (
         st.builds(
             TokenBurnReceipt,
             event_cid=st.from_regex(r"^[a-zA-Z0-9_.:-]+$", fullmatch=True),
-            prior_event_hash=st.from_regex(r"^[a-f0-9]{64}$", fullmatch=True),
             timestamp=st.floats(min_value=0.0, max_value=253402300799.0),
             burn_magnitude=st.integers(min_value=0, max_value=10000),
             tool_invocation_cid=st.from_regex(r"^[a-zA-Z0-9_.:-]+$", fullmatch=True),
