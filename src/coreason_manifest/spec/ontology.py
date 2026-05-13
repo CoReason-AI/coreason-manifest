@@ -13485,7 +13485,8 @@ type AnyStateEvent = Annotated[
     | RDFExportReceipt
     | EpistemicStarvationEvent
     | SPARQLQueryResultReceipt
-    | OracleExecutionReceipt,
+    | OracleExecutionReceipt
+    | GuardrailViolationEvent,
     Field(discriminator="topology_class", description="A discriminated union of state events."),
 ]
 
@@ -13951,6 +13952,23 @@ class GuardrailViolationEvent(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Security, Guardrails, Data Loss Prevention, Policy Violation, Telemetry
     """
 
+    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+    )
+    prior_event_hash: (
+        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
+    ) = Field(
+        default=None,
+        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+    )
+    timestamp: float = Field(
+        ge=0.0,
+        le=253402300799.0,
+        description="Causal Ancestry markers required to resolve decentralized event ordering.",
+    )
+    topology_class: Literal["guardrail_violation_event"] = Field(
+        default="guardrail_violation_event", description="The type of the security violation payload."
+    )
     violation_id: str = Field(..., description="Unique identifier for the violation event.")
     status_code: int = Field(..., description="The HTTP status code returned by the Guardrails proxy.")
     violation_type: str = Field(
@@ -13959,7 +13977,6 @@ class GuardrailViolationEvent(CoreasonBaseState):
     violation_details: dict[str, Any] = Field(
         default_factory=dict, description="Detailed manifest from the Guardrails proxy."
     )
-    timestamp: datetime = Field(default_factory=datetime.now, description="The ISO-8601 timestamp of the violation.")
 
 
 GuardrailViolationEvent.model_rebuild()
