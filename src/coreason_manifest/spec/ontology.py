@@ -13623,7 +13623,6 @@ class OntologicalNormalizationIntent(CoreasonBaseState):
     )
 
 
-
 class FederatedDiscoveryIntent(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Encapsulates the geometric parameters for a cross-authority capability discovery query.
@@ -13653,9 +13652,13 @@ class FederatedDiscoveryIntent(CoreasonBaseState):
         ),
     )
 
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "domain_filter", sorted(self.domain_filter))
+        return self
+
 
 class EvidentiaryCitationState(CoreasonBaseState):
-
     """
     AGENT INSTRUCTION: A declarative coordinate representing an immutable, localized snippet of external evidence retrieved by an oracle, coupled with its calculated Natural Language Inference (NLI) score.
 
