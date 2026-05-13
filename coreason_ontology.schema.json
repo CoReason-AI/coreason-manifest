@@ -6466,6 +6466,40 @@
       "title": "DraftingIntent",
       "type": "object"
     },
+    "DynamicConvergenceSLA": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the mathematical Optimal Stopping Theory boundaries for Monte\nCarlo Tree Search (MCTS) and test-time compute scaling. As an ...SLA suffix, this object\nenforces rigid mathematical boundaries that the orchestrator must respect globally.\n\nCAUSAL AFFORDANCE: Triggers an early termination circuit breaker on reasoning trajectories\nwhen the gradient of the Process Reward Model (PRM) score falls below the epsilon delta,\nhalting unnecessary probability wave expansion and preserving VRAM.\n\nEPISTEMIC BOUNDS: Mathematically constrained by convergence_delta_epsilon (ge=0.0, le=1.0)\nover a strictly positive lookback_window_steps (gt=0, le=18446744073709551615). Physically mandates\na minimum_reasoning_steps burn-in period (gt=0, le=18446744073709551615) to prevent premature\ncollapse before the latent space is adequately explored.\n\nMCP ROUTING TRIGGERS: Optimal Stopping Theory, MCTS, PRM Convergence, Circuit Breaker,\nBellman Equation",
+      "properties": {
+        "convergence_delta_epsilon": {
+          "description": "The minimal required PRM score improvement across the lookback window to justify continued compute.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Convergence Delta Epsilon",
+          "type": "number"
+        },
+        "lookback_window_steps": {
+          "description": "The N-step temporal window over which the PRM gradient is calculated.",
+          "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
+          "title": "Lookback Window Steps",
+          "type": "integer"
+        },
+        "minimum_reasoning_steps": {
+          "description": "The burn-in period before convergence logic is activated.",
+          "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
+          "title": "Minimum Reasoning Steps",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "convergence_delta_epsilon",
+        "lookback_window_steps",
+        "minimum_reasoning_steps"
+      ],
+      "title": "DynamicConvergenceSLA",
+      "type": "object"
+    },
     "DynamicLayoutManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Encapsulates a Python 3.14 t-string template as an Abstract Syntax Tree (AST) artifact for declarative, zero-trust UI evaluation.\n\nCAUSAL AFFORDANCE: Projects dynamic visual grids onto the UI plane while physically suffocating any capability for Arbitrary Code Execution (ACE) during runtime string interpolation.\n\nEPISTEMIC BOUNDS: The `layout_tstring` is physically clamped at `max_length=2000`. The `@field_validator` `validate_tstring` mathematically proves execution safety by traversing the AST and explicitly quarantining forbidden kinetic nodes (e.g., Call, Import), restricting to declarative operations.\n\nMCP ROUTING TRIGGERS: Abstract Syntax Tree Validation, Zero-Trust UI Projection, Arbitrary Code Execution Prevention, Declarative Templating",
@@ -8175,7 +8209,7 @@
     },
     "EpistemicSOPManifest": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\n AGENT INSTRUCTION: Encodes a macroscopic Petri net or Directed Acyclic Graph (DAG)\n formalizing standard operating procedures into mathematically traversable state\n transitions. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate\n state.\n\n CAUSAL AFFORDANCE: Physically bounds the executing agent (target_persona:\n ProfileCIDState) to a deterministic sequence of CognitiveStateProfiles, unlocking\n the ability for the orchestrator to dynamically evaluate execution via Process Reward\n.\n\n EPISTEMIC BOUNDS: The cognitive_steps dictionary is constrained to max_length=1000\n to cap memory footprint. The @model_validator reject_ghost_nodes mathematically enforces\n referential integrity, guaranteeing that no chronological_flow_edges AND no\n structural_grammar_hashes point to an undefined state.\n\n MCP ROUTING TRIGGERS: Petri Net, Directed Acyclic Graph, Process Reward Model,\n Topological Flow, Referential Integrity",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Encodes a macroscopic Petri net or Directed Acyclic Graph (DAG)\nformalizing standard operating procedures into mathematically traversable state\ntransitions. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate\nstate.\n\nCAUSAL AFFORDANCE: Physically bounds the executing agent (target_persona:\nProfileCIDState) to a deterministic sequence of CognitiveStateProfiles, unlocking\nthe ability for the orchestrator to dynamically evaluate execution\nvia Process Reward Models (prm_evaluations: list[ProcessRewardContract]) at each\ntopological node.\n\nEPISTEMIC BOUNDS: The cognitive_steps dictionary is constrained to max_length=1000\nto cap memory footprint. The @model_validator reject_ghost_nodes mathematically enforces\nreferential integrity, guaranteeing that no chronological_flow_edges AND no\nstructural_grammar_hashes point to an undefined state.\n\nMCP ROUTING TRIGGERS: Petri Net, Directed Acyclic Graph, Process Reward Model,\nTopological Flow, Referential Integrity",
       "properties": {
         "sop_cid": {
           "description": "A Content Identifier (CID) for the Standard Operating Procedure.",
@@ -8229,6 +8263,15 @@
             "type": "array"
           },
           "title": "Chronological Flow Edges",
+          "type": "array"
+        },
+        "prm_evaluations": {
+          "coreason_topological_exemption": true,
+          "description": "The strict array of Process Reward Contracts evaluating the logic.",
+          "items": {
+            "$ref": "#/$defs/ProcessRewardContract"
+          },
+          "title": "Prm Evaluations",
           "type": "array"
         }
       },
@@ -15094,6 +15137,58 @@
         "trigger_description"
       ],
       "title": "ProceduralMetadataManifest",
+      "type": "object"
+    },
+    "ProcessRewardContract": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Enforces the Step-Level Verification heuristics for Process Reward Models (PRMs) during non-monotonic reasoning searches and test-time compute.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator to physically prune hallucinating ThoughtBranchState vectors from the LatentScratchpadReceipt if their logit probabilities drop below the viable threshold, emulating rigorous Beam Search pruning.\n\nEPISTEMIC BOUNDS: Strictly bounds the search space geometry via `pruning_threshold` (`ge=0.0, le=1.0`) and mechanically caps State-Space Explosion through `max_backtracks_allowed` (`ge=0, le=18446744073709551615`).\n\nMCP ROUTING TRIGGERS: Process Reward Model, Beam Search Pruning, Latent Trajectory, State-Space Explosion, A* Search",
+      "properties": {
+        "convergence_sla": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DynamicConvergenceSLA"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The dynamic circuit breaker that halts the search when PRM variance converges, preventing VRAM waste."
+        },
+        "pruning_threshold": {
+          "description": "If a ThoughtBranchState's prm_score falls below this threshold, the orchestrator MUST halt its generation.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Pruning Threshold",
+          "type": "number"
+        },
+        "max_backtracks_allowed": {
+          "description": "The absolute limit on how many times the agent can start a new branch before throwing a SystemFaultEvent.",
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Max Backtracks Allowed",
+          "type": "integer"
+        },
+        "evaluator_matrix_name": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The specific PRM model used to score the logic (e.g., 'math-prm-v2').",
+          "title": "Evaluator Matrix Name"
+        }
+      },
+      "required": [
+        "pruning_threshold",
+        "max_backtracks_allowed"
+      ],
+      "title": "ProcessRewardContract",
       "type": "object"
     },
     "ProfileCIDState": {

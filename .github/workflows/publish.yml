@@ -25,12 +25,12 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Install uv
-        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
+        uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
           python-version: "3.14"
@@ -55,14 +55,14 @@ jobs:
       #       dist/*.tar.gz
 
       - name: Generate SBOM
-        uses: anchore/sbom-action@bb716408e75840bab848af0a4e0a969df8b46e4b # v0.17.6
+        uses: anchore/sbom-action@v0
         with:
           format: spdx-json
           output-file: sbom.spdx.json
           upload-release-assets: false
 
       - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@15c56dba361d8335944d31a2ecd17d700fd7ece1 # release/v1
+        uses: pypa/gh-action-pypi-publish@release/v1 # release/v1
         with:
           attestations: false  # Requires Enterprise Cloud or public repo
 
@@ -76,7 +76,7 @@ jobs:
           source: false
 
       - name: Create Release
-        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             dist/*.whl
@@ -89,7 +89,7 @@ jobs:
         run: uv run zensical build --clean
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
+        uses: actions/upload-pages-artifact@v3
         with:
           path: site
 
@@ -105,7 +105,7 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
@@ -113,7 +113,7 @@ jobs:
           node-version: '24.x'
           registry-url: 'https://registry.npmjs.org'
       - name: Install uv
-        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
+        uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
           python-version: "3.14"
@@ -154,12 +154,12 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: dtolnay/rust-toolchain@stable
       - name: Install uv
-        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
+        uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
           python-version: "3.14"
@@ -206,4 +206,4 @@ jobs:
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5
+        uses: actions/deploy-pages@v4

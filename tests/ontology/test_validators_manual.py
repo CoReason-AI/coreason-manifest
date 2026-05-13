@@ -67,6 +67,8 @@ class_names = [
     "EmpiricalStatisticalProfile",
     "EpistemicZeroTrustReceipt",
     "EpistemicLedgerState",
+    "ProcessRewardContract",
+    "DynamicConvergenceSLA",
 ]
 
 
