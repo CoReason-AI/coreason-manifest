@@ -8911,24 +8911,24 @@ class ProcessRewardContract(CoreasonBaseState):
 
 class EpistemicSOPManifest(CoreasonBaseState):
     """
-     AGENT INSTRUCTION: Encodes a macroscopic Petri net or Directed Acyclic Graph (DAG)
-     formalizing standard operating procedures into mathematically traversable state
-     transitions. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate
-     state.
+    AGENT INSTRUCTION: Encodes a macroscopic Petri net or Directed Acyclic Graph (DAG)
+    formalizing standard operating procedures into mathematically traversable state
+    transitions. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate
+    state.
 
-     CAUSAL AFFORDANCE: Physically bounds the executing agent (target_persona:
-     ProfileCIDState) to a deterministic sequence of CognitiveStateProfiles, unlocking
-     the ability for the orchestrator to dynamically evaluate execution
-     via Process Reward Models (prm_evaluations: list[ProcessRewardContract]) at each
-     topological node.
+    CAUSAL AFFORDANCE: Physically bounds the executing agent (target_persona:
+    ProfileCIDState) to a deterministic sequence of CognitiveStateProfiles, unlocking
+    the ability for the orchestrator to dynamically evaluate execution
+    via Process Reward Models (prm_evaluations: list[ProcessRewardContract]) at each
+    topological node.
 
-     EPISTEMIC BOUNDS: The cognitive_steps dictionary is constrained to max_length=1000
-     to cap memory footprint. The @model_validator reject_ghost_nodes mathematically enforces
-     referential integrity, guaranteeing that no chronological_flow_edges AND no
-     structural_grammar_hashes point to an undefined state.
+    EPISTEMIC BOUNDS: The cognitive_steps dictionary is constrained to max_length=1000
+    to cap memory footprint. The @model_validator reject_ghost_nodes mathematically enforces
+    referential integrity, guaranteeing that no chronological_flow_edges AND no
+    structural_grammar_hashes point to an undefined state.
 
-     MCP ROUTING TRIGGERS: Petri Net, Directed Acyclic Graph, Process Reward Model,
-     Topological Flow, Referential Integrity
+    MCP ROUTING TRIGGERS: Petri Net, Directed Acyclic Graph, Process Reward Model,
+    Topological Flow, Referential Integrity
     """
 
     sop_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
