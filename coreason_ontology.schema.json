@@ -953,6 +953,8 @@
           "belief_modulation": "#/$defs/BeliefModulationReceipt",
           "belief_mutation": "#/$defs/BeliefMutationEvent",
           "budget_exhaustion": "#/$defs/BudgetExhaustionEvent",
+          "causal_discovery_intent": "#/$defs/CausalDiscoveryIntent",
+          "causal_discovery_receipt": "#/$defs/CausalDiscoveryReceipt",
           "causal_explanation": "#/$defs/CausalExplanationEvent",
           "circuit_breaker_event": "#/$defs/CircuitBreakerEvent",
           "cognitive_prediction": "#/$defs/CognitivePredictionReceipt",
@@ -960,6 +962,9 @@
           "crosswalk_resolution": "#/$defs/CrosswalkResolutionReceipt",
           "custody_receipt": "#/$defs/CustodyReceipt",
           "defeasible_attack": "#/$defs/DefeasibleAttackEvent",
+          "dowhy_estimation_intent": "#/$defs/DoWhyEstimationIntent",
+          "dowhy_estimation_receipt": "#/$defs/DoWhyEstimationReceipt",
+          "econml_cate_intent": "#/$defs/EconMLCATEIntent",
           "epistemic_axiom_verification": "#/$defs/EpistemicAxiomVerificationReceipt",
           "epistemic_flow_state": "#/$defs/EpistemicFlowStateReceipt",
           "epistemic_log": "#/$defs/EpistemicLogEvent",
@@ -970,6 +975,7 @@
           "exogenous_event": "#/$defs/ExogenousEpistemicEvent",
           "formal_verification_receipt": "#/$defs/FormalVerificationReceipt",
           "guardrail_violation_event": "#/$defs/GuardrailViolationEvent",
+          "hte_estimation_receipt": "#/$defs/HTEEstimationReceipt",
           "hypothesis": "#/$defs/HypothesisGenerationEvent",
           "intent_classification": "#/$defs/IntentClassificationReceipt",
           "mcp_tool_definition": "#/$defs/MCPToolDefinition",
@@ -1113,6 +1119,24 @@
         },
         {
           "$ref": "#/$defs/GuardrailViolationEvent"
+        },
+        {
+          "$ref": "#/$defs/CausalDiscoveryIntent"
+        },
+        {
+          "$ref": "#/$defs/CausalDiscoveryReceipt"
+        },
+        {
+          "$ref": "#/$defs/DoWhyEstimationIntent"
+        },
+        {
+          "$ref": "#/$defs/DoWhyEstimationReceipt"
+        },
+        {
+          "$ref": "#/$defs/EconMLCATEIntent"
+        },
+        {
+          "$ref": "#/$defs/HTEEstimationReceipt"
         }
       ]
     },
@@ -2440,6 +2464,13 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A test-time hypothesis representing the intent to discover a causal graph from observational data.\nCAUSAL AFFORDANCE: Unlocks the ability to execute SCM construction via PC or FCI algorithms.\nEPISTEMIC BOUNDS: Bounded by max_discrete_bins (le=100) to prevent combinatorial explosion.\nMCP ROUTING TRIGGERS: Causal Inference, Structural Causal Models, PyWhy, Directed Acyclic Graph, causallearn",
       "properties": {
+        "topology_class": {
+          "const": "causal_discovery_intent",
+          "default": "causal_discovery_intent",
+          "description": "Discriminator for the CausalDiscoveryIntent topology.",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "dataset_uri": {
           "description": "The URI of the observational dataset.",
           "title": "Dataset Uri",
@@ -2473,6 +2504,13 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing the result of a causal discovery execution.\nCAUSAL AFFORDANCE: Confirms the successful generation of a causal graph from observational data.\nEPISTEMIC BOUNDS: Requires a strict causal graph representation.\nMCP ROUTING TRIGGERS: Causal Inference, Structural Causal Models, PyWhy, Directed Acyclic Graph, causallearn",
       "properties": {
+        "topology_class": {
+          "const": "causal_discovery_receipt",
+          "default": "causal_discovery_receipt",
+          "description": "Discriminator for the CausalDiscoveryReceipt topology.",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "causal_graph": {
           "$ref": "#/$defs/StructuralCausalGraphProfile",
           "description": "The structural causal graph discovered."
@@ -6135,6 +6173,13 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A test-time hypothesis to estimate the causal effect of a treatment on an outcome.\nCAUSAL AFFORDANCE: Unlocks back-door/front-door adjustments and returns the Average Treatment Effect (ATE).\nEPISTEMIC BOUNDS: Requires a strict causal graph representation and identified treatment/outcome variables.\nMCP ROUTING TRIGGERS: Causal Inference, Average Treatment Effect, DoWhy, Causal Estimand",
       "properties": {
+        "topology_class": {
+          "const": "dowhy_estimation_intent",
+          "default": "dowhy_estimation_intent",
+          "description": "Discriminator for the DoWhyEstimationIntent topology.",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "causal_graph": {
           "$ref": "#/$defs/StructuralCausalGraphProfile",
           "description": "The structural causal graph to use for estimation."
@@ -6162,6 +6207,13 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing the result of a DoWhy estimation.\nCAUSAL AFFORDANCE: Confirms the identified estimand and the estimated Average Treatment Effect (ATE).\nEPISTEMIC BOUNDS: The refutation_p_value must be mathematically bounded between 0.0 and 1.0.\nMCP ROUTING TRIGGERS: Causal Inference, Average Treatment Effect, DoWhy, Causal Estimand",
       "properties": {
+        "topology_class": {
+          "const": "dowhy_estimation_receipt",
+          "default": "dowhy_estimation_receipt",
+          "description": "Discriminator for the DoWhyEstimationReceipt topology.",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "identified_estimand": {
           "description": "The identified causal estimand.",
           "title": "Identified Estimand",
@@ -6608,6 +6660,13 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A test-time hypothesis to explore varying causal effects across diverse sub-populations.\nCAUSAL AFFORDANCE: Unlocks Double Machine Learning (DML) to estimate Conditional Average Treatment Effects (CATE).\nEPISTEMIC BOUNDS: Requires a DoWhyEstimationReceipt to guarantee the presence of a validated ATE estimation.\nMCP ROUTING TRIGGERS: Causal Inference, Heterogeneous Treatment Effect, Double Machine Learning, EconML",
       "properties": {
+        "topology_class": {
+          "const": "econml_cate_intent",
+          "default": "econml_cate_intent",
+          "description": "Discriminator for the EconMLCATEIntent topology.",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "base_estimation_receipt": {
           "$ref": "#/$defs/DoWhyEstimationReceipt",
           "description": "The base ATE estimation receipt."
@@ -10426,6 +10485,13 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing the result of an EconML CATE estimation.\nCAUSAL AFFORDANCE: Confirms the identified conditional average treatment effect.\nEPISTEMIC BOUNDS: The cate_estimate must be mathematically valid.\nMCP ROUTING TRIGGERS: Causal Inference, Heterogeneous Treatment Effect, Double Machine Learning, EconML",
       "properties": {
+        "topology_class": {
+          "const": "hte_estimation_receipt",
+          "default": "hte_estimation_receipt",
+          "description": "Discriminator for the HTEEstimationReceipt topology.",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "features": {
           "description": "The features conditioned on.",
           "items": {
@@ -17724,6 +17790,13 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative, frozen snapshot of an N-dimensional coordinate representing a causal graph.\nCAUSAL AFFORDANCE: Provides the structural geometry required for back-door and front-door adjustment estimations.\nEPISTEMIC BOUNDS: Mathematically defines a Directed Acyclic Graph (DAG) or Acyclic Directed Mixed Graph (ADMG).\nMCP ROUTING TRIGGERS: Causal Inference, Structural Causal Models, PyWhy, Directed Acyclic Graph, causallearn",
       "properties": {
+        "topology_class": {
+          "const": "structural_causal_graph",
+          "default": "structural_causal_graph",
+          "description": "Discriminator for the StructuralCausalGraphProfile topology.",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "edges": {
           "description": "The directed edges of the causal graph.",
           "items": {

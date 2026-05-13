@@ -3160,7 +3160,13 @@ export type AnyStateEvent =
   | EpistemicStarvationEvent
   | SPARQLQueryResultReceipt
   | OracleExecutionReceipt
-  | GuardrailViolationEvent;
+  | GuardrailViolationEvent
+  | CausalDiscoveryIntent
+  | CausalDiscoveryReceipt
+  | DoWhyEstimationIntent
+  | DoWhyEstimationReceipt
+  | EconMLCATEIntent
+  | HTEEstimationReceipt;
 /**
  * Discriminator for temporal graph crdt.
  */
@@ -4239,6 +4245,90 @@ export type StatusCode = number;
  */
 export type ViolationType = string;
 /**
+ * Discriminator for the CausalDiscoveryIntent topology.
+ */
+export type TopologyClass124 = "causal_discovery_intent";
+/**
+ * The URI of the observational dataset.
+ */
+export type DatasetUri = string;
+/**
+ * The algorithm to use for causal discovery.
+ */
+export type DiscoveryAlgorithm = "PC" | "FCI";
+/**
+ * The maximum number of bins for continuous variables.
+ */
+export type MaxDiscreteBins = number;
+/**
+ * Discriminator for the CausalDiscoveryReceipt topology.
+ */
+export type TopologyClass125 = "causal_discovery_receipt";
+/**
+ * Discriminator for the StructuralCausalGraphProfile topology.
+ */
+export type TopologyClass126 = "structural_causal_graph";
+/**
+ * The directed edges of the causal graph.
+ */
+export type Edges1 = [unknown, unknown][];
+/**
+ * The nodes of the causal graph.
+ */
+export type Nodes13 = string[];
+/**
+ * The algorithm that was used.
+ */
+export type DiscoveryAlgorithmUsed = string;
+/**
+ * Discriminator for the DoWhyEstimationIntent topology.
+ */
+export type TopologyClass127 = "dowhy_estimation_intent";
+/**
+ * The treatment variable.
+ */
+export type Treatment = string;
+/**
+ * The outcome variable.
+ */
+export type Outcome = string;
+/**
+ * Discriminator for the DoWhyEstimationReceipt topology.
+ */
+export type TopologyClass128 = "dowhy_estimation_receipt";
+/**
+ * The identified causal estimand.
+ */
+export type IdentifiedEstimand = string;
+/**
+ * The estimated average treatment effect.
+ */
+export type AverageTreatmentEffect = number;
+/**
+ * The p-value of the refutation test.
+ */
+export type RefutationPValue = number;
+/**
+ * Discriminator for the EconMLCATEIntent topology.
+ */
+export type TopologyClass129 = "econml_cate_intent";
+/**
+ * The features to condition the treatment effect on.
+ */
+export type Features = string[];
+/**
+ * Discriminator for the HTEEstimationReceipt topology.
+ */
+export type TopologyClass130 = "hte_estimation_receipt";
+/**
+ * The features conditioned on.
+ */
+export type Features1 = string[];
+/**
+ * The conditional average treatment effect.
+ */
+export type CateEstimate = number;
+/**
  * A discriminated union of workflow topologies.
  */
 export type AnyTopologyManifest =
@@ -4262,7 +4352,7 @@ export type AnyTransitionEdge = TransitionEdgeProfile | CyclicEdgeProfile;
 /**
  * Discriminator type for an acyclic edge.
  */
-export type TopologyClass124 = "acyclic";
+export type TopologyClass131 = "acyclic";
 /**
  * The coinductive pointer to the destination capability.
  */
@@ -4294,7 +4384,7 @@ export type ComputeWeightMagnitude = number;
 /**
  * Discriminator type for a cyclic edge.
  */
-export type TopologyClass125 = "cyclic";
+export type TopologyClass132 = "cyclic";
 /**
  * The coinductive pointer to the destination capability.
  */
@@ -4369,30 +4459,6 @@ export type CryptographicNullHash = string;
  * A cryptographically deterministic capability pointer binding the agent to a verifiable spatial environment.
  */
 export type CapabilityPointerState = string;
-/**
- * The URI of the observational dataset.
- */
-export type DatasetUri = string;
-/**
- * The algorithm to use for causal discovery.
- */
-export type DiscoveryAlgorithm = "PC" | "FCI";
-/**
- * The maximum number of bins for continuous variables.
- */
-export type MaxDiscreteBins = number;
-/**
- * The directed edges of the causal graph.
- */
-export type Edges1 = [unknown, unknown][];
-/**
- * The nodes of the causal graph.
- */
-export type Nodes13 = string[];
-/**
- * The algorithm that was used.
- */
-export type DiscoveryAlgorithmUsed = string;
 /**
  * The unique identifier for this curated environment of tools.
  */
@@ -4591,26 +4657,6 @@ export type Variance = number | null;
 export type ConfidenceInterval95 = [unknown, unknown, ...unknown[]] | null;
 export type DistributionShapeProfile = "gaussian" | "uniform" | "beta";
 /**
- * The treatment variable.
- */
-export type Treatment = string;
-/**
- * The outcome variable.
- */
-export type Outcome = string;
-/**
- * The identified causal estimand.
- */
-export type IdentifiedEstimand = string;
-/**
- * The estimated average treatment effect.
- */
-export type AverageTreatmentEffect = number;
-/**
- * The p-value of the refutation test.
- */
-export type RefutationPValue = number;
-/**
  * Directed edges defining the topological sort (chronological flow) of the document.
  */
 export type ChronologicalFlowEdges = [unknown, unknown][];
@@ -4660,10 +4706,6 @@ export type TokenDensity = number;
  * The declarative array of steps the orchestrator is mandated to skip.
  */
 export type BypassedSteps = BypassReceipt[];
-/**
- * The features to condition the treatment effect on.
- */
-export type Features = string[];
 /**
  * The strict array of strict W3C DIDs (NodeIdentifierStates) representing concurrent topology branches.
  *
@@ -5037,14 +5079,6 @@ export type EdgeProjectionMode = "adjacency_matrix" | "map_array";
  * Forces the inclusion of MultimodalTokenAnchorState hashes in the flattened row.
  */
 export type PreserveCryptographicLineage = boolean;
-/**
- * The features conditioned on.
- */
-export type Features1 = string[];
-/**
- * The conditional average treatment effect.
- */
-export type CateEstimate = number;
 /**
  * AGENT INSTRUCTION: Mathematically categorizes the structural intent of a proposition to prevent reasoning agents from hallucinating contextual truth values. Dictates whether the swarm evaluates the node as an empirical fact, a normative constraint, a guaranteed promise, or a simulation.
  */
@@ -11980,6 +12014,117 @@ export interface ViolationDetails {
 /**
  * CoReason Shared Kernel Ontology
  *
+ * AGENT INSTRUCTION: A test-time hypothesis representing the intent to discover a causal graph from observational data.
+ * CAUSAL AFFORDANCE: Unlocks the ability to execute SCM construction via PC or FCI algorithms.
+ * EPISTEMIC BOUNDS: Bounded by max_discrete_bins (le=100) to prevent combinatorial explosion.
+ * MCP ROUTING TRIGGERS: Causal Inference, Structural Causal Models, PyWhy, Directed Acyclic Graph, causallearn
+ */
+export interface CausalDiscoveryIntent {
+  topology_class?: TopologyClass124;
+  dataset_uri: DatasetUri;
+  discovery_algorithm: DiscoveryAlgorithm;
+  max_discrete_bins?: MaxDiscreteBins;
+}
+/**
+ * CoReason Shared Kernel Ontology
+ *
+ * AGENT INSTRUCTION: A cryptographically frozen historical fact representing the result of a causal discovery execution.
+ * CAUSAL AFFORDANCE: Confirms the successful generation of a causal graph from observational data.
+ * EPISTEMIC BOUNDS: Requires a strict causal graph representation.
+ * MCP ROUTING TRIGGERS: Causal Inference, Structural Causal Models, PyWhy, Directed Acyclic Graph, causallearn
+ */
+export interface CausalDiscoveryReceipt {
+  topology_class?: TopologyClass125;
+  causal_graph: StructuralCausalGraphProfile;
+  discovery_algorithm_used: DiscoveryAlgorithmUsed;
+}
+/**
+ * The structural causal graph discovered.
+ */
+export interface StructuralCausalGraphProfile {
+  topology_class?: TopologyClass126;
+  edges?: Edges1;
+  nodes?: Nodes13;
+}
+/**
+ * CoReason Shared Kernel Ontology
+ *
+ * AGENT INSTRUCTION: A test-time hypothesis to estimate the causal effect of a treatment on an outcome.
+ * CAUSAL AFFORDANCE: Unlocks back-door/front-door adjustments and returns the Average Treatment Effect (ATE).
+ * EPISTEMIC BOUNDS: Requires a strict causal graph representation and identified treatment/outcome variables.
+ * MCP ROUTING TRIGGERS: Causal Inference, Average Treatment Effect, DoWhy, Causal Estimand
+ */
+export interface DoWhyEstimationIntent {
+  topology_class?: TopologyClass127;
+  causal_graph: StructuralCausalGraphProfile1;
+  treatment: Treatment;
+  outcome: Outcome;
+}
+/**
+ * The structural causal graph to use for estimation.
+ */
+export interface StructuralCausalGraphProfile1 {
+  topology_class?: TopologyClass126;
+  edges?: Edges1;
+  nodes?: Nodes13;
+}
+/**
+ * CoReason Shared Kernel Ontology
+ *
+ * AGENT INSTRUCTION: A cryptographically frozen historical fact representing the result of a DoWhy estimation.
+ * CAUSAL AFFORDANCE: Confirms the identified estimand and the estimated Average Treatment Effect (ATE).
+ * EPISTEMIC BOUNDS: The refutation_p_value must be mathematically bounded between 0.0 and 1.0.
+ * MCP ROUTING TRIGGERS: Causal Inference, Average Treatment Effect, DoWhy, Causal Estimand
+ */
+export interface DoWhyEstimationReceipt {
+  topology_class?: TopologyClass128;
+  identified_estimand: IdentifiedEstimand;
+  average_treatment_effect: AverageTreatmentEffect;
+  refutation_p_value: RefutationPValue;
+}
+/**
+ * CoReason Shared Kernel Ontology
+ *
+ * AGENT INSTRUCTION: A test-time hypothesis to explore varying causal effects across diverse sub-populations.
+ * CAUSAL AFFORDANCE: Unlocks Double Machine Learning (DML) to estimate Conditional Average Treatment Effects (CATE).
+ * EPISTEMIC BOUNDS: Requires a DoWhyEstimationReceipt to guarantee the presence of a validated ATE estimation.
+ * MCP ROUTING TRIGGERS: Causal Inference, Heterogeneous Treatment Effect, Double Machine Learning, EconML
+ */
+export interface EconMLCATEIntent {
+  topology_class?: TopologyClass129;
+  base_estimation_receipt: DoWhyEstimationReceipt1;
+  features?: Features;
+}
+/**
+ * CoReason Shared Kernel Ontology
+ *
+ * AGENT INSTRUCTION: A cryptographically frozen historical fact representing the result of a DoWhy estimation.
+ * CAUSAL AFFORDANCE: Confirms the identified estimand and the estimated Average Treatment Effect (ATE).
+ * EPISTEMIC BOUNDS: The refutation_p_value must be mathematically bounded between 0.0 and 1.0.
+ * MCP ROUTING TRIGGERS: Causal Inference, Average Treatment Effect, DoWhy, Causal Estimand
+ */
+export interface DoWhyEstimationReceipt1 {
+  topology_class?: TopologyClass128;
+  identified_estimand: IdentifiedEstimand;
+  average_treatment_effect: AverageTreatmentEffect;
+  refutation_p_value: RefutationPValue;
+}
+/**
+ * CoReason Shared Kernel Ontology
+ *
+ * AGENT INSTRUCTION: A cryptographically frozen historical fact representing the result of an EconML CATE estimation.
+ * CAUSAL AFFORDANCE: Confirms the identified conditional average treatment effect.
+ * EPISTEMIC BOUNDS: The cate_estimate must be mathematically valid.
+ * MCP ROUTING TRIGGERS: Causal Inference, Heterogeneous Treatment Effect, Double Machine Learning, EconML
+ */
+export interface HTEEstimationReceipt {
+  topology_class?: TopologyClass130;
+  features?: Features1;
+  cate_estimate: CateEstimate;
+}
+/**
+ * CoReason Shared Kernel Ontology
+ *
  * AGENT INSTRUCTION: Represents a directed acyclic Markov edge for traversing the Action Space topology. As a ...Profile suffix, this is a declarative, frozen snapshot of a routing geometry.
  *
  * CAUSAL AFFORDANCE: Unlocks stochastic pathfinding and graph traversal by projecting a probabilistic weight and thermodynamic cost required to advance to the next state node in the DCG.
@@ -11989,7 +12134,7 @@ export interface ViolationDetails {
  * MCP ROUTING TRIGGERS: Markov Decision Process, Acyclic Edge, Stochastic Routing, Transition Probability, Directed Graph
  */
 export interface TransitionEdgeProfile {
-  topology_class?: TopologyClass124;
+  topology_class?: TopologyClass131;
   target_node_cid?: TargetNodeCid1;
   /**
    * Dynamic discovery intent for bridging nodes.
@@ -12033,7 +12178,7 @@ export interface EdgeMappingContract {
  * MCP ROUTING TRIGGERS: Markov Decision Process, Cyclic Edge, Bellman Equation, Thermodynamic Discounting, Recursive Traversal
  */
 export interface CyclicEdgeProfile {
-  topology_class?: TopologyClass125;
+  topology_class?: TopologyClass132;
   target_node_cid?: TargetNodeCid2;
   /**
    * Dynamic discovery intent for bridging nodes.
@@ -12147,38 +12292,6 @@ export interface BypassReceipt {
   bypassed_node_cid: string;
   justification: Justification18;
   cryptographic_null_hash: CryptographicNullHash;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
- * AGENT INSTRUCTION: A test-time hypothesis representing the intent to discover a causal graph from observational data.
- * CAUSAL AFFORDANCE: Unlocks the ability to execute SCM construction via PC or FCI algorithms.
- * EPISTEMIC BOUNDS: Bounded by max_discrete_bins (le=100) to prevent combinatorial explosion.
- * MCP ROUTING TRIGGERS: Causal Inference, Structural Causal Models, PyWhy, Directed Acyclic Graph, causallearn
- */
-export interface CausalDiscoveryIntent {
-  dataset_uri: DatasetUri;
-  discovery_algorithm: DiscoveryAlgorithm;
-  max_discrete_bins?: MaxDiscreteBins;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
- * AGENT INSTRUCTION: A cryptographically frozen historical fact representing the result of a causal discovery execution.
- * CAUSAL AFFORDANCE: Confirms the successful generation of a causal graph from observational data.
- * EPISTEMIC BOUNDS: Requires a strict causal graph representation.
- * MCP ROUTING TRIGGERS: Causal Inference, Structural Causal Models, PyWhy, Directed Acyclic Graph, causallearn
- */
-export interface CausalDiscoveryReceipt {
-  causal_graph: StructuralCausalGraphProfile;
-  discovery_algorithm_used: DiscoveryAlgorithmUsed;
-}
-/**
- * The structural causal graph discovered.
- */
-export interface StructuralCausalGraphProfile {
-  edges?: Edges1;
-  nodes?: Nodes13;
 }
 /**
  * CoReason Shared Kernel Ontology
@@ -12639,39 +12752,6 @@ export interface DistributionProfile {
 /**
  * CoReason Shared Kernel Ontology
  *
- * AGENT INSTRUCTION: A test-time hypothesis to estimate the causal effect of a treatment on an outcome.
- * CAUSAL AFFORDANCE: Unlocks back-door/front-door adjustments and returns the Average Treatment Effect (ATE).
- * EPISTEMIC BOUNDS: Requires a strict causal graph representation and identified treatment/outcome variables.
- * MCP ROUTING TRIGGERS: Causal Inference, Average Treatment Effect, DoWhy, Causal Estimand
- */
-export interface DoWhyEstimationIntent {
-  causal_graph: StructuralCausalGraphProfile1;
-  treatment: Treatment;
-  outcome: Outcome;
-}
-/**
- * The structural causal graph to use for estimation.
- */
-export interface StructuralCausalGraphProfile1 {
-  edges?: Edges1;
-  nodes?: Nodes13;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
- * AGENT INSTRUCTION: A cryptographically frozen historical fact representing the result of a DoWhy estimation.
- * CAUSAL AFFORDANCE: Confirms the identified estimand and the estimated Average Treatment Effect (ATE).
- * EPISTEMIC BOUNDS: The refutation_p_value must be mathematically bounded between 0.0 and 1.0.
- * MCP ROUTING TRIGGERS: Causal Inference, Average Treatment Effect, DoWhy, Causal Estimand
- */
-export interface DoWhyEstimationReceipt {
-  identified_estimand: IdentifiedEstimand;
-  average_treatment_effect: AverageTreatmentEffect;
-  refutation_p_value: RefutationPValue;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
  * AGENT INSTRUCTION: Instantiates a Directed Acyclic Graph (DAG) to represent
  * the strictly chronological reading flow of a complex 2D multimodal manifold.
  * As a ...Manifest suffix, this is a frozen N-dimensional coordinate state.
@@ -12796,31 +12876,6 @@ export interface ActiveSubgraphs {
  */
 export interface BranchBudgetsMagnitude {
   [k: string]: number;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
- * AGENT INSTRUCTION: A test-time hypothesis to explore varying causal effects across diverse sub-populations.
- * CAUSAL AFFORDANCE: Unlocks Double Machine Learning (DML) to estimate Conditional Average Treatment Effects (CATE).
- * EPISTEMIC BOUNDS: Requires a DoWhyEstimationReceipt to guarantee the presence of a validated ATE estimation.
- * MCP ROUTING TRIGGERS: Causal Inference, Heterogeneous Treatment Effect, Double Machine Learning, EconML
- */
-export interface EconMLCATEIntent {
-  base_estimation_receipt: DoWhyEstimationReceipt1;
-  features?: Features;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
- * AGENT INSTRUCTION: A cryptographically frozen historical fact representing the result of a DoWhy estimation.
- * CAUSAL AFFORDANCE: Confirms the identified estimand and the estimated Average Treatment Effect (ATE).
- * EPISTEMIC BOUNDS: The refutation_p_value must be mathematically bounded between 0.0 and 1.0.
- * MCP ROUTING TRIGGERS: Causal Inference, Average Treatment Effect, DoWhy, Causal Estimand
- */
-export interface DoWhyEstimationReceipt1 {
-  identified_estimand: IdentifiedEstimand;
-  average_treatment_effect: AverageTreatmentEffect;
-  refutation_p_value: RefutationPValue;
 }
 /**
  * CoReason Shared Kernel Ontology
@@ -13750,18 +13805,6 @@ export interface GraphFlatteningPolicy {
 /**
  * CoReason Shared Kernel Ontology
  *
- * AGENT INSTRUCTION: A cryptographically frozen historical fact representing the result of an EconML CATE estimation.
- * CAUSAL AFFORDANCE: Confirms the identified conditional average treatment effect.
- * EPISTEMIC BOUNDS: The cate_estimate must be mathematically valid.
- * MCP ROUTING TRIGGERS: Causal Inference, Heterogeneous Treatment Effect, Double Machine Learning, EconML
- */
-export interface HTEEstimationReceipt {
-  features?: Features1;
-  cate_estimate: CateEstimate;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
  * AGENT INSTRUCTION: The definitive top-level envelope for transmitting a
  * JSONRPCErrorState across a Zero-Trust Architecture boundary. As a ...State suffix,
  * this is a frozen N-dimensional coordinate.
@@ -14347,6 +14390,7 @@ export interface StateVectorProfile1 {
  * MCP ROUTING TRIGGERS: Causal Inference, Structural Causal Models, PyWhy, Directed Acyclic Graph, causallearn
  */
 export interface StructuralCausalGraphProfile2 {
+  topology_class?: TopologyClass126;
   edges?: Edges1;
   nodes?: Nodes13;
 }
