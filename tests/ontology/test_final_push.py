@@ -20,7 +20,7 @@ from coreason_manifest.spec.ontology import (
     EpistemicAxiomState,
     # EpistemicDomainGraphManifest — lines 13590-13599 (10 lines)
     EpistemicDomainGraphManifest,
-    SemanticClassificationProfile,
+    SemanticSlicingPolicy,
     # SemanticSlicingPolicy — lines 2052-2065 (14 lines)
     SemanticSlicingPolicy,
 )
@@ -36,8 +36,8 @@ class TestSemanticSlicingPolicy:
     def test_with_labels(self) -> None:
         obj = SemanticSlicingPolicy(
             permitted_classification_tiers=[
-                SemanticClassificationProfile.RESTRICTED,
-                SemanticClassificationProfile.CONFIDENTIAL,
+                "restricted",
+                "confidential",
             ],
             required_semantic_labels=["zebra", "apple"],
             context_window_token_ceiling=1000,
@@ -47,7 +47,7 @@ class TestSemanticSlicingPolicy:
 
     def test_without_labels(self) -> None:
         obj = SemanticSlicingPolicy(
-            permitted_classification_tiers=[SemanticClassificationProfile.CONFIDENTIAL],
+            permitted_classification_tiers=["confidential"],
             context_window_token_ceiling=500,
         )
         assert obj.required_semantic_labels is None

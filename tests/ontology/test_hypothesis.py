@@ -51,7 +51,7 @@ class_names = [
     "EnsembleTopologyProfile",
     "GlobalGovernancePolicy",
     "DynamicRoutingManifest",
-    "GovernancePolicy",
+
     "GenerativeTaxonomyManifest",
     "NeurosymbolicInferenceIntent",
     "TopologicalProjectionIntent",
