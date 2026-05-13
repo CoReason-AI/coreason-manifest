@@ -123,7 +123,7 @@ class TestHTEEstimationReceipt:
         )
         assert receipt.features == ["age", "income"]
         assert receipt.cate_estimate == 0.25
-        
+
         receipt_unsorted = HTEEstimationReceipt(
             features=["income", "age"],
             cate_estimate=0.25,
