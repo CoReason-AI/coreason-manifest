@@ -13309,7 +13309,6 @@ class MCPToolDefinition(CoreasonBaseState):
     )
 
 
-
 class CausalDiscoveryIntent(CoreasonBaseState):
     """
     AGENT INSTRUCTION: A test-time hypothesis representing the intent to discover a causal graph from observational data.
@@ -14173,4 +14172,3 @@ FederatedDiscoveryIntent.model_rebuild()
 EpistemicRigidityPolicy.model_rebuild()
 DeliberativeEnvelope.model_rebuild()
 StrategicThoughtNodeIntent.model_rebuild()
-
