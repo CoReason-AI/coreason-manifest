@@ -20,3 +20,8 @@
 #    Submit 100% schema-compliant AST differentials to the Forge for deterministic "etching."
 
 # Copyright (c) 2026 CoReason, Inc. Licensed under the Prosperity Public License 3.0.
+
+# The Anti-Mocking "Real Test" Directive
+I expect real tests. No mocks.
+You are strictly forbidden from using unittest.mock, pytest.MonkeyPatch, responses, or any other mocking library to simulate environment variables, network calls, or API responses.
+All tests MUST execute against real local servers, real environment state, or deterministic string/file inputs.

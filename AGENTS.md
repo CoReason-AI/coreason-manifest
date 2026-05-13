@@ -463,7 +463,7 @@ You are strictly bound to the **"God Context" Monolith Directive**. You are EXPL
 * **Behavioral over Unit:** Favor integration and BDD-style tests over micro-tests that check class initialization.
 * **Property-Based Edge Cases:** Use `hypothesis` for generating randomized data payloads.
 * **Schema Contracts:** Changes to Pydantic models must not break the generated `model_json_schema()`.
-* **Targeted Mocking:** Mock all stateful or network-based external interactions. **DO NOT MOCK** authoritative mathematical or algorithmic dependencies (e.g., `networkx`).
+* **Real Tests Only (No Mocks):** Do not mock any stateful or network-based external interactions. **DO NOT MOCK** authoritative mathematical or algorithmic dependencies (e.g., `networkx`). I expect real tests. No mocks. Use real local endpoints or configurations.
 
 ## **6. Human-in-the-Loop Triggers**
 
