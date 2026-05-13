@@ -14050,8 +14050,8 @@ class StructuralCausalGraphProfile(CoreasonBaseState):
 
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> "StructuralCausalGraphProfile":
-        self.edges = sorted(self.edges)
-        self.nodes = sorted(self.nodes)
+        object.__setattr__(self, "edges", sorted(self.edges))
+        object.__setattr__(self, "nodes", sorted(self.nodes))
         return self
 
 
@@ -14096,7 +14096,7 @@ class EconMLCATEIntent(CoreasonBaseState):
 
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> "EconMLCATEIntent":
-        self.features = sorted(self.features)
+        object.__setattr__(self, "features", sorted(self.features))
         return self
 
 
@@ -14132,7 +14132,7 @@ class HTEEstimationReceipt(CoreasonBaseState):
 
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> "HTEEstimationReceipt":
-        self.features = sorted(self.features)
+        object.__setattr__(self, "features", sorted(self.features))
         return self
 
 
