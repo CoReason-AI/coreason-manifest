@@ -334,59 +334,6 @@
       "title": "AdjudicationRubricProfile",
       "type": "object"
     },
-    "AdversarialEmulationProfile": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Aggregates the full Adversarial Emulation geometry, composing\nKinematicNoiseProfile (pointer perturbation) and EnvironmentalSpoofingProfile\n(browser fingerprint masking) into a unified anti-detection manifold governed by\na generative imitation learning persona. As a ...Profile suffix, this is a\ndeclarative, frozen snapshot of an N-dimensional emulation coordinate.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator's Spatial Kinematics engine to\nsimultaneously inject stochastic pointer noise and spoof environmental telemetry,\nachieving a target emulation_fidelity_target score against anti-bot heuristics\nwhile behaviorally mimicking the selected generative_persona.\n\nEPISTEMIC BOUNDS: The emulation_fidelity_target is strictly clamped to the\nnormalized probability range (ge=0.0, le=1.0). Both sub-profiles are optional\n(default=None), allowing partial emulation geometries. The generative_persona\nis locked to a Literal automaton [\"hesitant_novice\", \"fast_expert\",\n\"distracted_browser\"].\n\nMCP ROUTING TRIGGERS: Adversarial Emulation, Anti-Bot Evasion, Imitation\nLearning, Browser Fingerprint Spoofing, Emulation Fidelity",
-      "properties": {
-        "generative_persona": {
-          "default": "fast_expert",
-          "description": "The imitation learning persona governing the behavioral emulation profile.",
-          "enum": [
-            "hesitant_novice",
-            "fast_expert",
-            "distracted_browser"
-          ],
-          "title": "Generative Persona",
-          "type": "string"
-        },
-        "kinematic_noise": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/KinematicNoiseProfile"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The stochastic pointer trajectory perturbation profile for human-like motor control emulation."
-        },
-        "environmental_spoofing": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/EnvironmentalSpoofingProfile"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The browser fingerprint and environmental telemetry spoofing geometry."
-        },
-        "emulation_fidelity_target": {
-          "description": "The target normalized score for human-likeness against anti-bot heuristic classifiers.",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "Emulation Fidelity Target",
-          "type": "number"
-        }
-      },
-      "required": [
-        "emulation_fidelity_target"
-      ],
-      "title": "AdversarialEmulationProfile",
-      "type": "object"
-    },
     "AdversarialMarketTopologyManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A Zero-Cost Macro abstraction that mathematically projects a Zero-Sum Minimax game into a rigid Red/Blue team CouncilTopologyManifest. As a ...Manifest suffix, this defines a frozen coordinate of a topological structure.\n\nCAUSAL AFFORDANCE: Deterministically compiles into a fully bounded Council topology, forcing the generative router to evaluate claims through adversarial debate before the orchestrator resolves equilibrium via the designated market rules.\n\nEPISTEMIC BOUNDS: The @model_validator verify_disjoint_sets mathematically guarantees that blue_team_cids, red_team_cids, and the adjudicator_cid are strictly disjoint to prevent self-dealing or topological paradoxes. Arrays are deterministically sorted to preserve RFC 8785 canonical hashes.\n\nMCP ROUTING TRIGGERS: Zero-Sum Minimax Game, Red Team vs Blue Team, Macro Abstraction, Generative Adversarial Networks, Topological Compilation",
@@ -1021,7 +968,6 @@
           "causal_explanation": "#/$defs/CausalExplanationEvent",
           "circuit_breaker_event": "#/$defs/CircuitBreakerEvent",
           "cognitive_prediction": "#/$defs/CognitivePredictionReceipt",
-          "cognitive_reward_evaluation": "#/$defs/CognitiveRewardEvaluationReceipt",
           "counterfactual_regret": "#/$defs/CounterfactualRegretEvent",
           "crosswalk_resolution": "#/$defs/CrosswalkResolutionReceipt",
           "custody_receipt": "#/$defs/CustodyReceipt",
@@ -1122,9 +1068,6 @@
         },
         {
           "$ref": "#/$defs/EpistemicAxiomVerificationReceipt"
-        },
-        {
-          "$ref": "#/$defs/CognitiveRewardEvaluationReceipt"
         },
         {
           "$ref": "#/$defs/EpistemicFlowStateReceipt"
@@ -3168,18 +3111,6 @@
           "default": null,
           "description": "The mathematical boundary authorizing the agent to spin up Test-Time Compute."
         },
-        "prm_policy": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/ProcessRewardContract"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The ruleset governing how intermediate thoughts are scored and pruned."
-        },
         "active_inference_policy": {
           "anyOf": [
             {
@@ -3251,30 +3182,6 @@
           ],
           "default": null,
           "description": "The declarative contract mathematically binding this agent to a core altruistic objective."
-        },
-        "grpo_reward_policy": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/EpistemicRewardGradientPolicy"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The RL post-training contract forcing the agent to evaluate traces against an implicit graph reward."
-        },
-        "emulation_profile": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/AdversarialEmulationProfile"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The adversarial emulation geometry composing kinematic noise and environmental spoofing for anti-bot trajectory evasion."
         },
         "gflownet_balance_policy": {
           "anyOf": [
@@ -3684,87 +3591,6 @@
         "trace_payload"
       ],
       "title": "CognitiveReasoningTraceState",
-      "type": "object"
-    },
-    "CognitiveRewardEvaluationReceipt": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The immutable cryptographic receipt of a GRPO Advantage Actor-Critic\nevaluation step, permanently logging the mathematically verified advantage score of a\nspecific generation trajectory. As a ...Receipt suffix, this is an append-only coordinate\non the Merkle-DAG that the LLM must never hallucinate a mutation to.\n\nCAUSAL AFFORDANCE: Unlocks policy gradient updates by providing the deterministic advantage\nsignal derived from the extracted_axioms of the source_generation_cid.\n\nEPISTEMIC BOUNDS: The calculated_r_path is strictly clamped between [ge=0.0, le=1.0], and\nthe total_advantage_score is capped at le=100.0. The @model_validator physically guarantees\nthat the extracted_axioms array is deterministically sorted by the composite key\n(source_concept_cid, directed_edge_class, target_concept_cid) to preserve RFC 8785 canonical\nhashing across the distributed swarm.\n\nMCP ROUTING TRIGGERS: Advantage Actor-Critic, Policy Gradient Update, Epistemic Reward,\nBaseline Normalization, Reinforcement Learning",
-      "properties": {
-        "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Event Cid",
-          "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
-        },
-        "timestamp": {
-          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
-          "maximum": 253402300799.0,
-          "minimum": 0.0,
-          "title": "Timestamp",
-          "type": "number"
-        },
-        "topology_class": {
-          "const": "cognitive_reward_evaluation",
-          "default": "cognitive_reward_evaluation",
-          "title": "Topology Class",
-          "type": "string"
-        },
-        "source_generation_cid": {
-          "description": "The globally unique decentralized identifier (DID) anchoring the LLM's raw generated text trajectory.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Source Generation Cid",
-          "type": "string"
-        },
-        "extracted_axioms": {
-          "description": "The specific axiomatic claims extracted exclusively from the bounded reasoning block.",
-          "items": {
-            "$ref": "#/$defs/EpistemicAxiomState"
-          },
-          "title": "Extracted Axioms",
-          "type": "array"
-        },
-        "calculated_r_path": {
-          "description": "The dense reasoning reward signal derived from the verified axioms.",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "Calculated R Path",
-          "type": "number"
-        },
-        "total_advantage_score": {
-          "description": "The final computed GRPO advantage signal used to update the policy gradients.",
-          "maximum": 100.0,
-          "title": "Total Advantage Score",
-          "type": "number"
-        }
-      },
-      "required": [
-        "event_cid",
-        "timestamp",
-        "source_generation_cid",
-        "calculated_r_path",
-        "total_advantage_score"
-      ],
-      "title": "CognitiveRewardEvaluationReceipt",
       "type": "object"
     },
     "CognitiveRoutingContract": {
@@ -7113,78 +6939,6 @@
       "title": "EnsembleTopologyProfile",
       "type": "object"
     },
-    "EnvironmentalSpoofingProfile": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the deterministic Browser Fingerprint Entropy geometry\nfor spoofing environmental telemetry vectors (WebGL canvas hashes, User-Agent\nstrings, timezone offsets, TLS Client Hello fingerprints, and display resolution).\nAs a ...Profile suffix, this is a declarative, frozen snapshot of a spoofed\nenvironmental coordinate.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's Spatial Kinematics engine to\nproject a synthetic browser identity, masking the true computational substrate\nfrom exogenous anti-bot fingerprinting oracles including JA3/JA4 TLS analysis.\n\nEPISTEMIC BOUNDS: The webgl_entropy_seed_hash is constrained to a 128-char CID\npattern. The user_agent_template is clamped to max_length=2000. The\ntimezone_offset_minutes is mathematically bounded to the valid UTC range\n(ge=-720, le=840). Screen resolution components are bounded (ge=1, le=15360).\nThe tls_cipher_permutation is locked to a Literal automaton. The\nhardware_concurrency_mask is bounded (gt=0, le=256).\n\nMCP ROUTING TRIGGERS: Browser Fingerprinting, WebGL Canvas Entropy, User-Agent\nSpoofing, JA3 TLS Fingerprint, Anti-Fingerprint Evasion",
-      "properties": {
-        "tls_cipher_permutation": {
-          "anyOf": [
-            {
-              "pattern": "^urn:coreason:.*$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The JA3/JA4 TLS Client Hello fingerprint URN to project during handshake emulation.",
-          "title": "Tls Cipher Permutation"
-        },
-        "webgl_entropy_seed_hash": {
-          "description": "The Content Identifier (CID) of the WebGL canvas entropy seed used to generate a deterministic spoofed fingerprint.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Webgl Entropy Seed Hash",
-          "type": "string"
-        },
-        "user_agent_template": {
-          "description": "The User-Agent string template projected to exogenous web servers to mask the true computational substrate.",
-          "maxLength": 2000,
-          "title": "User Agent Template",
-          "type": "string"
-        },
-        "hardware_concurrency_mask": {
-          "default": 8,
-          "description": "The spoofed CPU core count projected to the DOM via navigator.hardwareConcurrency.",
-          "exclusiveMinimum": 0,
-          "maximum": 256,
-          "title": "Hardware Concurrency Mask",
-          "type": "integer"
-        },
-        "timezone_offset_minutes": {
-          "description": "The spoofed UTC timezone offset in minutes, bounded to the valid terrestrial range.",
-          "maximum": 840,
-          "minimum": -720,
-          "title": "Timezone Offset Minutes",
-          "type": "integer"
-        },
-        "screen_resolution_width": {
-          "description": "The spoofed horizontal display resolution in pixels.",
-          "maximum": 15360,
-          "minimum": 1,
-          "title": "Screen Resolution Width",
-          "type": "integer"
-        },
-        "screen_resolution_height": {
-          "description": "The spoofed vertical display resolution in pixels.",
-          "maximum": 15360,
-          "minimum": 1,
-          "title": "Screen Resolution Height",
-          "type": "integer"
-        }
-      },
-      "required": [
-        "webgl_entropy_seed_hash",
-        "user_agent_template",
-        "timezone_offset_minutes",
-        "screen_resolution_width",
-        "screen_resolution_height"
-      ],
-      "title": "EnvironmentalSpoofingProfile",
-      "type": "object"
-    },
     "EphemeralNamespacePartitionState": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements a hardware-level Sandboxing and Trusted Execution Environment (TEE) paradigm, utilizing WASI, eBPF, or zkVMs to safely execute exogenous bytecode.\n\nCAUSAL AFFORDANCE: Physically isolates kinetic execution from the host OS via `execution_runtime` Literal `[\"wasm32-wasi\", \"riscv32-zkvm\", \"bpf\"]`, authorizing the orchestrator to instantiate a temporary virtual machine strictly conforming to bounded network egress and subprocess rules.\n\nEPISTEMIC BOUNDS: The Halting Problem is managed via `max_ttl_seconds` (`le=18446744073709551615, gt=0`), and memory exhaustion is prevented via `max_vram_mb` (`le=18446744073709551615, gt=0`). The `@model_validator` enforces SHA-256 regex on `authorized_bytecode_hashes` and sorts them deterministically.\n\nMCP ROUTING TRIGGERS: WebAssembly System Interface, Zero-Knowledge Virtual Machine, eBPF, Execution Sandbox, Arbitrary Code Execution Mitigation",
@@ -8432,59 +8186,6 @@
       "title": "EpistemicRejectionReceipt",
       "type": "object"
     },
-    "EpistemicRewardGradientPolicy": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes the Group Relative Policy Optimization (GRPO) reward shaping ruleset, mathematically immunizing the swarm against Goodhart's Law and reward hacking.\n\nCAUSAL AFFORDANCE: Projects a continuous penalty/reward gradient across extracted axiomatic paths, enforcing syntactic compliance through the format contract while simultaneously evaluating semantic/topological validity.\n\nEPISTEMIC BOUNDS: Prevents reward hacking by scaling the logical validity score (R_path) via the `beta_path_weight` scalar (`ge=0.0, le=1.0`). Gated by a cryptographic `reference_graph_cid` CID.\n\nMCP ROUTING TRIGGERS: GRPO, Reward Shaping, Goodhart's Law, Policy Gradient, Advantage Estimation",
-      "properties": {
-        "policy_cid": {
-          "description": "CID for this specific reward configuration.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Policy Cid",
-          "type": "string"
-        },
-        "reference_graph_cid": {
-          "description": "The globally unique decentralized identifier (DID) anchoring the EpistemicDomainGraphManifest acting as the deterministic ground truth.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Reference Graph Cid",
-          "type": "string"
-        },
-        "format_contract": {
-          "$ref": "#/$defs/CognitiveFormatContract",
-          "description": "The syntactic constraints the agent must follow to prevent reward zeroing."
-        },
-        "beta_path_weight": {
-          "description": "The scalar weight applied to the logical path validity (R_path) to prevent reward hacking.",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "Beta Path Weight",
-          "type": "number"
-        },
-        "topological_scoring": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/TopologicalRewardContract"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The continuous spatial/topological constraints governing path extraction validation."
-        }
-      },
-      "required": [
-        "policy_cid",
-        "reference_graph_cid",
-        "format_contract",
-        "beta_path_weight"
-      ],
-      "title": "EpistemicRewardGradientPolicy",
-      "type": "object"
-    },
     "EpistemicRigidityPolicy": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the acceptable bounds of probabilistic drift for an execution task, establishing the exact hardware and physics requirements for LLM inference.\n\nCAUSAL AFFORDANCE: Instructs the Tier-1 Tensor Router to either enforce local SGLang execution, execute a two-stage decoupled pipeline, or permit Cloud Oracle escalation via structured outputs.\n\nEPISTEMIC BOUNDS: The `minimum_rigidity_tier` is strictly constrained to a scalar mathematical bound `ge=0, le=255`. The semantic-to-scalar mapping (e.g., 'H100_CLUSTER' -> 255) is resolved via a Sovereign MCP Projection. `max_retries_on_semantic_tax` is bounded `ge=0, le=100` to prevent infinite validation loops.\n\nMCP ROUTING TRIGGERS: Epistemic Rigidity Matrix, Execution Routing Policy, Logit Suffocation, Probabilistic Escalation, Semantic Tax Bounding",
@@ -8553,7 +8254,7 @@
     },
     "EpistemicSOPManifest": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Encodes a macroscopic Petri net or Directed Acyclic Graph (DAG)\nformalizing standard operating procedures into mathematically traversable state\ntransitions. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate\nstate.\n\nCAUSAL AFFORDANCE: Physically bounds the executing agent (target_persona:\nProfileCIDState) to a deterministic sequence of CognitiveStateProfiles, unlocking\nthe ability for the orchestrator to dynamically evaluate execution via Process Reward\nModels (prm_evaluations: list[ProcessRewardContract]) at each topological node.\n\nEPISTEMIC BOUNDS: The cognitive_steps dictionary is constrained to max_length=1000\nto cap memory footprint. The @model_validator reject_ghost_nodes mathematically enforces\nreferential integrity, guaranteeing that no chronological_flow_edges AND no\nstructural_grammar_hashes point to an undefined state.\n\nMCP ROUTING TRIGGERS: Petri Net, Directed Acyclic Graph, Process Reward Model,\nTopological Flow, Referential Integrity",
+      "description": "CoReason Shared Kernel Ontology\n\n AGENT INSTRUCTION: Encodes a macroscopic Petri net or Directed Acyclic Graph (DAG)\n formalizing standard operating procedures into mathematically traversable state\n transitions. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate\n state.\n\n CAUSAL AFFORDANCE: Physically bounds the executing agent (target_persona:\n ProfileCIDState) to a deterministic sequence of CognitiveStateProfiles, unlocking\n the ability for the orchestrator to dynamically evaluate execution via Process Reward\n.\n\n EPISTEMIC BOUNDS: The cognitive_steps dictionary is constrained to max_length=1000\n to cap memory footprint. The @model_validator reject_ghost_nodes mathematically enforces\n referential integrity, guaranteeing that no chronological_flow_edges AND no\n structural_grammar_hashes point to an undefined state.\n\n MCP ROUTING TRIGGERS: Petri Net, Directed Acyclic Graph, Process Reward Model,\n Topological Flow, Referential Integrity",
       "properties": {
         "sop_cid": {
           "description": "A Content Identifier (CID) for the Standard Operating Procedure.",
@@ -8608,15 +8309,6 @@
           },
           "title": "Chronological Flow Edges",
           "type": "array"
-        },
-        "prm_evaluations": {
-          "coreason_topological_exemption": true,
-          "description": "The strict array of Process Reward Contracts evaluating the logic.",
-          "items": {
-            "$ref": "#/$defs/ProcessRewardContract"
-          },
-          "title": "Prm Evaluations",
-          "type": "array"
         }
       },
       "required": [
@@ -8624,8 +8316,7 @@
         "target_persona",
         "cognitive_steps",
         "structural_grammar_hashes",
-        "chronological_flow_edges",
-        "prm_evaluations"
+        "chronological_flow_edges"
       ],
       "title": "EpistemicSOPManifest",
       "type": "object"
@@ -12260,70 +11951,6 @@
       "title": "KinematicDerivativeProfile",
       "type": "object"
     },
-    "KinematicNoiseProfile": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Stochastic Process Theory (1/f^β spectral noise)\nand Hick-Hyman Law cognitive delay modeling to inject human-like motor control\nperturbations into pointer trajectories, preventing deterministic bot-detection\nvia timing analysis. As a ...Profile suffix, this is a declarative, frozen\nsnapshot of a noise geometry.\n\nCAUSAL AFFORDANCE: Authorizes the Spatial Kinematics engine to perturb each\nSE3TransformProfile along the Bezier trajectory by sampling from the\nspecified noise distribution, achieving biomechanically plausible jitter with\ncognitive delay and corrective submovements.\n\nEPISTEMIC BOUNDS: The pink_noise_amplitude is strictly clamped to the\nnormalized range (ge=0.0, le=1.0), preventing trajectory corruption. The\nfrequency_exponent (1/f^β) is bounded (ge=0.0, le=5.0) to cover the full\nspectrum from white noise (β=0) to black noise (β≥2). The noise_class Literal\nautomaton locks generation to [\"pink\", \"brownian\", \"gaussian\"]. The\nvelocity_profile is locked to [\"minimum_jerk\", \"constant\",\n\"fractional_brownian\"]. target_overshoot_radius_pixels is bounded (ge=0,\nle=5000) and hick_hyman_dwell_time_ms is bounded (ge=0, le=18446744073709551615).\n\nMCP ROUTING TRIGGERS: Stochastic Process, Pink Noise, Brownian Motion,\nMotor Control Perturbation, Hick-Hyman Law, Fitts's Law",
-      "properties": {
-        "noise_class": {
-          "description": "The stochastic process governing the noise generation for pointer trajectory perturbation.",
-          "enum": [
-            "pink",
-            "brownian",
-            "gaussian"
-          ],
-          "title": "Noise Class",
-          "type": "string"
-        },
-        "velocity_profile": {
-          "default": "minimum_jerk",
-          "description": "The mathematical model governing movement acceleration and velocity smoothing.",
-          "enum": [
-            "minimum_jerk",
-            "constant",
-            "fractional_brownian"
-          ],
-          "title": "Velocity Profile",
-          "type": "string"
-        },
-        "pink_noise_amplitude": {
-          "description": "The normalized amplitude of the 1/f noise injected into the pointer trajectory. Bounded [0.0, 1.0].",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "Pink Noise Amplitude",
-          "type": "number"
-        },
-        "frequency_exponent": {
-          "description": "The spectral exponent β in the 1/f^β power spectral density function governing noise color.",
-          "maximum": 5.0,
-          "minimum": 0.0,
-          "title": "Frequency Exponent",
-          "type": "number"
-        },
-        "target_overshoot_radius_pixels": {
-          "default": 0,
-          "description": "The Euclidean radius in pixels for corrective submovements overshooting the target coordinate.",
-          "maximum": 5000,
-          "minimum": 0,
-          "title": "Target Overshoot Radius Pixels",
-          "type": "integer"
-        },
-        "hick_hyman_dwell_time_ms": {
-          "default": 0,
-          "description": "Cognitive choice reaction delay in milliseconds, modeled via Hick-Hyman Law.",
-          "maximum": 18446744073709551615,
-          "minimum": 0,
-          "title": "Hick Hyman Dwell Time Ms",
-          "type": "integer"
-        }
-      },
-      "required": [
-        "noise_class",
-        "pink_noise_amplitude",
-        "frequency_exponent"
-      ],
-      "title": "KinematicNoiseProfile",
-      "type": "object"
-    },
     "KineticBudgetPolicy": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Optimal Stopping Theory and Simulated Annealing to mechanistically manage the Exploration-Exploitation dilemma during Test-Time Compute.\n\nCAUSAL AFFORDANCE: Forces probability wave collapse by dynamically throttling the sampling temperature toward the `dynamic_temperature_asymptote` and physically halting lateral ThoughtBranch generation when the `forced_exploitation_threshold_ms` is breached.\n\nEPISTEMIC BOUNDS: The `dynamic_temperature_asymptote` is physically clamped to `le=2.0`. In Softmax thermodynamics, T -> 0 forces argmax exploitation; exceeding this boundary induces uniform noise, mathematically defeating exploitation. The decay geometry is strictly confined to the `exploration_decay_curve` Literal.\n\nMCP ROUTING TRIGGERS: Optimal Stopping Theory, Simulated Annealing, Probability Wave Collapse, Exploration-Exploitation Dilemma, Kinetic Thermodynamics",
@@ -15585,58 +15212,6 @@
         "trigger_description"
       ],
       "title": "ProceduralMetadataManifest",
-      "type": "object"
-    },
-    "ProcessRewardContract": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Enforces the Step-Level Verification heuristics for Process Reward Models (PRMs) during non-monotonic reasoning searches and test-time compute.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator to physically prune hallucinating ThoughtBranchState vectors from the LatentScratchpadReceipt if their logit probabilities drop below the viable threshold, emulating rigorous Beam Search pruning.\n\nEPISTEMIC BOUNDS: Strictly bounds the search space geometry via `pruning_threshold` (`ge=0.0, le=1.0`) and mechanically caps State-Space Explosion through `max_backtracks_allowed` (`ge=0, le=18446744073709551615`).\n\nMCP ROUTING TRIGGERS: Process Reward Model, Beam Search Pruning, Latent Trajectory, State-Space Explosion, A* Search",
-      "properties": {
-        "convergence_sla": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/DynamicConvergenceSLA"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The dynamic circuit breaker that halts the search when PRM variance converges, preventing VRAM waste."
-        },
-        "pruning_threshold": {
-          "description": "If a ThoughtBranchState's prm_score falls below this threshold, the orchestrator MUST halt its generation.",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "Pruning Threshold",
-          "type": "number"
-        },
-        "max_backtracks_allowed": {
-          "description": "The absolute limit on how many times the agent can start a new branch before throwing a SystemFaultEvent.",
-          "maximum": 18446744073709551615,
-          "minimum": 0,
-          "title": "Max Backtracks Allowed",
-          "type": "integer"
-        },
-        "evaluator_matrix_name": {
-          "anyOf": [
-            {
-              "maxLength": 2000,
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The specific PRM model used to score the logic (e.g., 'math-prm-v2').",
-          "title": "Evaluator Matrix Name"
-        }
-      },
-      "required": [
-        "pruning_threshold",
-        "max_backtracks_allowed"
-      ],
-      "title": "ProcessRewardContract",
       "type": "object"
     },
     "ProfileCIDState": {

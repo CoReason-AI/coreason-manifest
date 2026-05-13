@@ -177,66 +177,6 @@ export type Criteria = GradingCriterionProfile[];
  */
 export type PassingThreshold = number;
 /**
- * The imitation learning persona governing the behavioral emulation profile.
- */
-export type GenerativePersona = "hesitant_novice" | "fast_expert" | "distracted_browser";
-/**
- * The stochastic process governing the noise generation for pointer trajectory perturbation.
- */
-export type NoiseClass = "pink" | "brownian" | "gaussian";
-/**
- * The mathematical model governing movement acceleration and velocity smoothing.
- */
-export type VelocityProfile = "minimum_jerk" | "constant" | "fractional_brownian";
-/**
- * The normalized amplitude of the 1/f noise injected into the pointer trajectory. Bounded [0.0, 1.0].
- */
-export type PinkNoiseAmplitude = number;
-/**
- * The spectral exponent β in the 1/f^β power spectral density function governing noise color.
- */
-export type FrequencyExponent = number;
-/**
- * The Euclidean radius in pixels for corrective submovements overshooting the target coordinate.
- */
-export type TargetOvershootRadiusPixels = number;
-/**
- * Cognitive choice reaction delay in milliseconds, modeled via Hick-Hyman Law.
- */
-export type HickHymanDwellTimeMs = number;
-/**
- * The JA3/JA4 TLS Client Hello fingerprint URN to project during handshake emulation.
- */
-export type TlsCipherPermutation = string | null;
-/**
- * The Content Identifier (CID) of the WebGL canvas entropy seed used to generate a deterministic spoofed fingerprint.
- */
-export type WebglEntropySeedHash = string;
-/**
- * The User-Agent string template projected to exogenous web servers to mask the true computational substrate.
- */
-export type UserAgentTemplate = string;
-/**
- * The spoofed CPU core count projected to the DOM via navigator.hardwareConcurrency.
- */
-export type HardwareConcurrencyMask = number;
-/**
- * The spoofed UTC timezone offset in minutes, bounded to the valid terrestrial range.
- */
-export type TimezoneOffsetMinutes = number;
-/**
- * The spoofed horizontal display resolution in pixels.
- */
-export type ScreenResolutionWidth = number;
-/**
- * The spoofed vertical display resolution in pixels.
- */
-export type ScreenResolutionHeight = number;
-/**
- * The target normalized score for human-likeness against anti-bot heuristic classifiers.
- */
-export type EmulationFidelityTarget = number;
-/**
  * Discriminator for adversarial macro.
  */
 export type TopologyClass2 = "macro_adversarial";
@@ -2149,30 +2089,6 @@ export type MaxLatentTokensBudget = number;
  */
 export type MaxTestTimeComputeMs = number;
 /**
- * The minimal required PRM score improvement across the lookback window to justify continued compute.
- */
-export type ConvergenceDeltaEpsilon = number;
-/**
- * The N-step temporal window over which the PRM gradient is calculated.
- */
-export type LookbackWindowSteps = number;
-/**
- * The mandatory 'burn-in' period. The orchestrator cannot terminate the search before this structural depth is reached, preventing premature collapse.
- */
-export type MinimumReasoningSteps = number;
-/**
- * If a ThoughtBranchState's prm_score falls below this threshold, the orchestrator MUST halt its generation.
- */
-export type PruningThreshold = number;
-/**
- * The absolute limit on how many times the agent can start a new branch before throwing a SystemFaultEvent.
- */
-export type MaxBacktracksAllowed = number;
-/**
- * The specific PRM model used to score the logic (e.g., 'math-prm-v2').
- */
-export type EvaluatorMatrixName = string | null;
-/**
  * Unique identifier for this symbolic delegation.
  */
 export type HandoffCid = string;
@@ -2219,54 +2135,6 @@ export type MaxFeaturesPerLayer = number;
  * If True, the orchestrator MUST generate cryptographic latent state proofs alongside the activation extractions.
  */
 export type RequireZkCommitments = boolean;
-/**
- * CID for this specific reward configuration.
- */
-export type PolicyCid = string;
-/**
- * The globally unique decentralized identifier (DID) anchoring the EpistemicDomainGraphManifest acting as the deterministic ground truth.
- */
-export type ReferenceGraphCid = string;
-/**
- * Forces the inclusion of structural XML tags to isolate the reasoning trace.
- */
-export type RequireThinkTags = boolean;
-/**
- * The strict regular expression the model must satisfy to yield a valid discrete classification. Optional because LMQL/Guidance do not use standard regex.
- */
-export type FinalAnswerRegex = string | null;
-/**
- * The mechanistic strategy for intercepting the LLM forward pass.
- */
-export type EnforcementStrategy = "fsm_logit_mask" | "lmql_query" | "guidance_program" | "ebnf_grammar";
-/**
- * The URN of the backend used to compile the CFG or Regex into a DFA/PDA (e.g., 'urn:coreason:compiler:xgrammar').
- */
-export type CompilerBackend = string;
-/**
- * The raw LMQL query string, Guidance program, or EBNF grammar. Required if the enforcement_strategy is not standard JSON/Regex masking.
- */
-export type FormalGrammarString = string | null;
-/**
- * If True, mathematically forces the engine to halt if the LLM attempts to generate an EOS token before the FSM reaches an accepting state.
- */
-export type TerminateOnEosLeak = boolean;
-/**
- * The scalar weight applied to the logical path validity (R_path) to prevent reward hacking.
- */
-export type BetaPathWeight = number;
-/**
- * The lower bound for Random Walk with Restart (RWR) reachability.
- */
-export type MinEdgeCriticalityScore = number;
-/**
- * The lower bound for GCN/GAT cosine similarity.
- */
-export type MinSemanticRelevanceScore = number;
-/**
- * The deterministic protocol the orchestrator must use to compute these scores.
- */
-export type AggregationMethod = "gcn_spatial" | "attention_gat" | "rwr_topological";
 /**
  * The mathematical tolerance for the detailed balance constraint.
  */
@@ -2410,9 +2278,25 @@ export type FormalSchemaUrn = string | null;
  */
 export type StrictValidation = boolean;
 /**
+ * The mechanistic strategy for intercepting the LLM forward pass.
+ */
+export type EnforcementStrategy = "fsm_logit_mask" | "lmql_query" | "guidance_program" | "ebnf_grammar";
+/**
+ * The URN of the backend used to compile the CFG or Regex into a DFA/PDA (e.g., 'urn:coreason:compiler:xgrammar').
+ */
+export type CompilerBackend = string;
+/**
+ * The raw LMQL query string, Guidance program, or EBNF grammar. Required if the enforcement_strategy is not standard JSON/Regex masking.
+ */
+export type FormalGrammarString = string | null;
+/**
+ * If True, mathematically forces the engine to halt if the LLM attempts to generate an EOS token before the FSM reaches an accepting state.
+ */
+export type TerminateOnEosLeak = boolean;
+/**
  * Unique identifier for this macroscopic flow control policy.
  */
-export type PolicyCid1 = string;
+export type PolicyCid = string;
 /**
  * Whether this policy is currently enforcing data sanitization.
  */
@@ -3299,7 +3183,6 @@ export type AnyStateEvent =
   | EpistemicTelemetryEvent
   | CognitivePredictionReceipt
   | EpistemicAxiomVerificationReceipt
-  | CognitiveRewardEvaluationReceipt
   | EpistemicFlowStateReceipt
   | CausalExplanationEvent
   | IntentClassificationReceipt
@@ -4073,48 +3956,7 @@ export type PriorEventHash22 = string | null;
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
 export type Timestamp22 = number;
-export type TopologyClass105 = "cognitive_reward_evaluation";
-/**
- * The globally unique decentralized identifier (DID) anchoring the LLM's raw generated text trajectory.
- */
-export type SourceGenerationCid = string;
-/**
- * The globally unique decentralized identifier (DID) anchoring the origin node.
- */
-export type SourceConceptCid = string;
-/**
- * The topological relationship.
- */
-export type DirectedEdgeClass = string;
-/**
- * The globally unique decentralized identifier (DID) anchoring destination node.
- */
-export type TargetConceptCid = string;
-/**
- * The specific axiomatic claims extracted exclusively from the bounded reasoning block.
- */
-export type ExtractedAxioms = EpistemicAxiomState[];
-/**
- * The dense reasoning reward signal derived from the verified axioms.
- */
-export type CalculatedRPath = number;
-/**
- * The final computed GRPO advantage signal used to update the policy gradients.
- */
-export type TotalAdvantageScore = number;
-/**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
- */
-export type EventCid23 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash23 = string | null;
-/**
- * Causal Ancestry markers required to resolve decentralized event ordering.
- */
-export type Timestamp23 = number;
-export type TopologyClass106 = "epistemic_flow_state";
+export type TopologyClass105 = "epistemic_flow_state";
 /**
  * The globally unique decentralized identifier (DID) anchoring the partial CognitiveReasoningTraceState.
  */
@@ -4130,19 +3972,19 @@ export type TerminalRewardFactorized = boolean;
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
-export type EventCid24 = string;
+export type EventCid23 = string;
 /**
  * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
  */
-export type PriorEventHash24 = string | null;
+export type PriorEventHash23 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
-export type Timestamp24 = number;
+export type Timestamp23 = number;
 /**
  * Discriminator type for a causal explanation event.
  */
-export type TopologyClass107 = "causal_explanation";
+export type TopologyClass106 = "causal_explanation";
 /**
  * The globally unique decentralized identifier (DID) anchoring the collective outcome being explained.
  */
@@ -4182,19 +4024,19 @@ export type AgentAttributions = ShapleyAttributionReceipt[];
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
-export type EventCid25 = string;
+export type EventCid24 = string;
 /**
  * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
  */
-export type PriorEventHash25 = string | null;
+export type PriorEventHash24 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
-export type Timestamp25 = number;
+export type Timestamp24 = number;
 /**
  * Discriminator type for an intent classification receipt.
  */
-export type TopologyClass108 = "intent_classification";
+export type TopologyClass107 = "intent_classification";
 /**
  * The raw, unparsed human natural language instruction.
  */
@@ -4211,19 +4053,19 @@ export type ConfidenceScore1 = number;
  * The TaxonomicRoutingPolicy CID that governed this classification.
  */
 export type RoutingPolicyCid = string | null;
-export type TopologyClass109 = "semantic_relational_record";
+export type TopologyClass108 = "semantic_relational_record";
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
-export type EventCid26 = string;
+export type EventCid25 = string;
 /**
  * The RFC 8785 Canonical hash of the immediate causal ancestor, securing the Merkle-DAG.
  */
-export type PriorEventHash26 = string | null;
+export type PriorEventHash25 = string | null;
 /**
  * The precise temporal coordinate of the event realization.
  */
-export type Timestamp26 = number;
+export type Timestamp25 = number;
 /**
  * The domain-independent structural classification of the record.
  */
@@ -4235,19 +4077,19 @@ export type FormalSchemaUrn1 = string | null;
 /**
  * Discriminator for the reification receipt.
  */
-export type TopologyClass110 = "ontological_reification";
+export type TopologyClass109 = "ontological_reification";
 /**
  * Cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
-export type EventCid27 = string;
+export type EventCid26 = string;
 /**
  * The RFC 8785 Canonical hash of the immediate causal ancestor.
  */
-export type PriorEventHash27 = string | null;
+export type PriorEventHash26 = string | null;
 /**
  * The precise temporal coordinate of the event realization.
  */
-export type Timestamp27 = number;
+export type Timestamp26 = number;
 /**
  * The undeniable SHA-256 hash of the pre-transmutation artifact, unstructured text chunk, or telemetry row.
  */
@@ -4271,6 +4113,26 @@ export type IsLatentInference = boolean;
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
+export type EventCid27 = string;
+/**
+ * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
+ */
+export type PriorEventHash27 = string | null;
+/**
+ * Causal Ancestry markers required to resolve decentralized event ordering.
+ */
+export type Timestamp27 = number;
+/**
+ * The type of the resilience payload.
+ */
+export type TopologyClass110 = "circuit_breaker_event";
+/**
+ * Signature or summary of the error causing the trip.
+ */
+export type ErrorSignature = string;
+/**
+ * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ */
 export type EventCid28 = string;
 /**
  * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
@@ -4281,29 +4143,9 @@ export type PriorEventHash28 = string | null;
  */
 export type Timestamp28 = number;
 /**
- * The type of the resilience payload.
- */
-export type TopologyClass111 = "circuit_breaker_event";
-/**
- * Signature or summary of the error causing the trip.
- */
-export type ErrorSignature = string;
-/**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
- */
-export type EventCid29 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash29 = string | null;
-/**
- * Causal Ancestry markers required to resolve decentralized event ordering.
- */
-export type Timestamp29 = number;
-/**
  * Discriminator type for an exogenous event.
  */
-export type TopologyClass112 = "exogenous_event";
+export type TopologyClass111 = "exogenous_event";
 /**
  * Cryptographic identifier for the Black Swan event.
  */
@@ -4323,19 +4165,19 @@ export type LockedMagnitude = number;
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
-export type EventCid30 = string;
+export type EventCid29 = string;
 /**
  * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
  */
-export type PriorEventHash30 = string | null;
+export type PriorEventHash29 = string | null;
 /**
  * Discriminator type for a log event.
  */
-export type TopologyClass113 = "epistemic_log";
+export type TopologyClass112 = "epistemic_log";
 /**
  * The UNIX timestamp of the log event.
  */
-export type Timestamp30 = number;
+export type Timestamp29 = number;
 /**
  * The severity level of the log event.
  */
@@ -4348,19 +4190,19 @@ export type TelemetryScalarState = string | number | boolean | null;
 /**
  * The type of the intervention payload.
  */
-export type TopologyClass114 = "verdict";
+export type TopologyClass113 = "verdict";
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
-export type EventCid31 = string;
+export type EventCid30 = string;
 /**
  * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
  */
-export type PriorEventHash31 = string | null;
+export type PriorEventHash30 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
-export type Timestamp31 = number;
+export type Timestamp30 = number;
 /**
  * The cryptographic nonce uniquely identifying the intervention request.
  */
@@ -4396,16 +4238,16 @@ export type LivenessChallengeHash = string;
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
-export type EventCid32 = string;
+export type EventCid31 = string;
 /**
  * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
  */
-export type PriorEventHash32 = string | null;
+export type PriorEventHash31 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
-export type Timestamp32 = number;
-export type TopologyClass115 = "custody_receipt";
+export type Timestamp31 = number;
+export type TopologyClass114 = "custody_receipt";
 /**
  * Unique identifier for this chain-of-custody entry.
  */
@@ -4433,16 +4275,16 @@ export type RedactionTimestampUnixNano = number;
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
-export type EventCid33 = string;
+export type EventCid32 = string;
 /**
  * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
  */
-export type PriorEventHash33 = string | null;
+export type PriorEventHash32 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
-export type Timestamp33 = number;
-export type TopologyClass116 = "defeasible_attack";
+export type Timestamp32 = number;
+export type TopologyClass115 = "defeasible_attack";
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this directed attack edge.
  */
@@ -4458,16 +4300,16 @@ export type TargetClaimCid = string;
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
-export type EventCid34 = string;
+export type EventCid33 = string;
 /**
  * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
  */
-export type PriorEventHash34 = string | null;
+export type PriorEventHash33 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
-export type Timestamp34 = number;
-export type TopologyClass117 = "epistemic_rejection";
+export type Timestamp33 = number;
+export type TopologyClass116 = "epistemic_rejection";
 export type ReceiptCid1 = string;
 export type FailedProjectionCid = string;
 export type ViolatedAlgebraicConstraint = string;
@@ -4476,16 +4318,16 @@ export type StochasticMutationGradient = string;
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
-export type EventCid35 = string;
+export type EventCid34 = string;
 /**
  * The RFC 8785 Canonical hash of the immediate causal ancestor.
  */
-export type PriorEventHash35 = string | null;
+export type PriorEventHash34 = string | null;
 /**
  * The precise temporal coordinate of the event realization.
  */
-export type Timestamp35 = number;
-export type TopologyClass118 = "formal_verification_receipt";
+export type Timestamp34 = number;
+export type TopologyClass117 = "formal_verification_receipt";
 /**
  * The definitive Boolean evaluating whether the proof succeeded, the program is satisfiable, or the deduction holds true.
  */
@@ -4504,8 +4346,24 @@ export type FailingContext = string | null;
 export type ExtractedBindings = {
   [k: string]: JsonPrimitiveState;
 }[];
-export type TopologyClass119 = "belief_modulation";
+export type TopologyClass118 = "belief_modulation";
 export type ReceiptCid2 = string;
+/**
+ * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ */
+export type EventCid35 = string;
+/**
+ * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
+ */
+export type PriorEventHash35 = string | null;
+/**
+ * Causal Ancestry markers required to resolve decentralized event ordering.
+ */
+export type Timestamp35 = number;
+export type TargetGraphCid4 = string;
+export type SeveredEdgeCids = string[];
+export type TopologyClass119 = "rdf_export_receipt";
+export type ExportCid1 = string;
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
@@ -4518,29 +4376,13 @@ export type PriorEventHash36 = string | null;
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
 export type Timestamp36 = number;
-export type TargetGraphCid4 = string;
-export type SeveredEdgeCids = string[];
-export type TopologyClass120 = "rdf_export_receipt";
-export type ExportCid1 = string;
-/**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
- */
-export type EventCid37 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash37 = string | null;
-/**
- * Causal Ancestry markers required to resolve decentralized event ordering.
- */
-export type Timestamp37 = number;
 export type SerializedPayload = string;
 export type RdfTripleCount = number;
 export type Sha256GraphHash = string;
-export type EventCid38 = string;
-export type PriorEventHash38 = string | null;
-export type Timestamp38 = number;
-export type TopologyClass121 = "epistemic_starvation";
+export type EventCid37 = string;
+export type PriorEventHash37 = string | null;
+export type Timestamp37 = number;
+export type TopologyClass120 = "epistemic_starvation";
 /**
  * The cryptographic pointer to the specific edge that failed empirical grounding.
  */
@@ -4553,10 +4395,10 @@ export type FailedCitations = EvidentiaryCitationState[];
  * The semantic explanation for the starvation (e.g., 'Maximum search retries exhausted').
  */
 export type DiagnosticReason = string;
-export type EventCid39 = string;
-export type PriorEventHash39 = string | null;
-export type Timestamp39 = number;
-export type TopologyClass122 = "sparql_query_result";
+export type EventCid38 = string;
+export type PriorEventHash38 = string | null;
+export type Timestamp38 = number;
+export type TopologyClass121 = "sparql_query_result";
 /**
  * A pointer back to the SPARQLQueryIntent that authorized this execution.
  */
@@ -4568,7 +4410,7 @@ export type ExecutionTimeMs = number;
 /**
  * Discriminator for the OracleExecutionReceipt topology.
  */
-export type TopologyClass123 = "oracle_execution_receipt";
+export type TopologyClass122 = "oracle_execution_receipt";
 /**
  * The SHA-256 hash of the complete execution payload, providing undeniable cryptographic provenance for the Merkle-DAG audit trail.
  */
@@ -4609,7 +4451,7 @@ export type AnyTransitionEdge = TransitionEdgeProfile | CyclicEdgeProfile;
 /**
  * Discriminator type for an acyclic edge.
  */
-export type TopologyClass124 = "acyclic";
+export type TopologyClass123 = "acyclic";
 /**
  * The coinductive pointer to the destination capability.
  */
@@ -4641,7 +4483,7 @@ export type ComputeWeightMagnitude = number;
 /**
  * Discriminator type for a cyclic edge.
  */
-export type TopologyClass125 = "cyclic";
+export type TopologyClass124 = "cyclic";
 /**
  * The coinductive pointer to the destination capability.
  */
@@ -4727,7 +4569,7 @@ export type EntryPointCid = string;
 /**
  * Unique identifier for this specific separation boundary.
  */
-export type PolicyCid2 = string;
+export type PolicyCid1 = string;
 /**
  * A topological matrix of tool names or MCP URIs. If an agent mounts one capability in a cluster, all other capabilities in that cluster are mathematically quarantined.
  */
@@ -4748,6 +4590,14 @@ export type ExecutionFeeLmsr = number;
  * Strict Boolean indicating if BOTH agents mathematically agree on factual alignment.
  */
 export type TraceFactualAlignment = boolean;
+/**
+ * Forces the inclusion of structural XML tags to isolate the reasoning trace.
+ */
+export type RequireThinkTags = boolean;
+/**
+ * The strict regular expression the model must satisfy to yield a valid discrete classification. Optional because LMQL/Guidance do not use standard regex.
+ */
+export type FinalAnswerRegex = string | null;
 /**
  * The globally unique decentralized identifier (DID) anchoring this specific non-monotonic reasoning trace.
  */
@@ -4936,6 +4786,18 @@ export type DistributionShapeProfile = "gaussian" | "uniform" | "beta";
  */
 export type ChronologicalFlowEdges = [unknown, unknown][];
 /**
+ * The minimal required PRM score improvement across the lookback window to justify continued compute.
+ */
+export type ConvergenceDeltaEpsilon = number;
+/**
+ * The N-step temporal window over which the PRM gradient is calculated.
+ */
+export type LookbackWindowSteps = number;
+/**
+ * The mandatory 'burn-in' period. The orchestrator cannot terminate the search before this structural depth is reached, preventing premature collapse.
+ */
+export type MinimumReasoningSteps = number;
+/**
  * A Python 3.14 t-string template definition for dynamic UI grid evaluation.
  */
 export type LayoutTstring = string;
@@ -5007,6 +4869,18 @@ export type Justification19 = string;
  * The foundational premises supporting this claim.
  */
 export type Warrants = EvidentiaryWarrantState[];
+/**
+ * The globally unique decentralized identifier (DID) anchoring the origin node.
+ */
+export type SourceConceptCid = string;
+/**
+ * The topological relationship.
+ */
+export type DirectedEdgeClass = string;
+/**
+ * The globally unique decentralized identifier (DID) anchoring destination node.
+ */
+export type TargetConceptCid = string;
 export type ChainCid = string;
 /**
  * @minItems 1
@@ -5192,10 +5066,6 @@ export type SopCid = string;
  * The exact topological flow between step_cids.
  */
 export type ChronologicalFlowEdges1 = [unknown, unknown][];
-/**
- * The strict array of Process Reward Contracts evaluating the logic.
- */
-export type PrmEvaluations = ProcessRewardContract[];
 /**
  * AGENT INSTRUCTION: Defines the minimum cryptographic isolation perimeter required for this node's thermodynamic execution.
  *
@@ -5591,7 +5461,7 @@ export type TabularEncodingProfile1 =
 /**
  * Unique identifier for this pre-flight routing policy.
  */
-export type PolicyCid3 = string;
+export type PolicyCid2 = string;
 /**
  * The deterministic default applied if intent classification falls below the safety threshold.
  */
@@ -5607,6 +5477,18 @@ export type FallbackHeuristic = "chronological" | "entity_centric" | "semantic_c
  */
 export type TensorStructuralFormatProfile1 = "float32" | "float64" | "int8" | "uint8" | "int32" | "int64";
 export type TieBreakerPolicy = "lowest_cost" | "lowest_latency" | "highest_confidence" | "random";
+/**
+ * The lower bound for Random Walk with Restart (RWR) reachability.
+ */
+export type MinEdgeCriticalityScore = number;
+/**
+ * The lower bound for GCN/GAT cosine similarity.
+ */
+export type MinSemanticRelevanceScore = number;
+/**
+ * The deterministic protocol the orchestrator must use to compute these scores.
+ */
+export type AggregationMethod = "gcn_spatial" | "attention_gat" | "rwr_topological";
 /**
  * A strictly typed SHA-256 hash pointing to a historically executed topological state.
  */
@@ -5664,7 +5546,6 @@ export interface CoReasonSharedKernelOntology {
   AdjudicationIntent?: AdjudicationIntent;
   AdjudicationReceipt?: AdjudicationReceipt;
   AdjudicationRubricProfile?: AdjudicationRubricProfile;
-  AdversarialEmulationProfile?: AdversarialEmulationProfile;
   AdversarialMarketTopologyManifest?: AdversarialMarketTopologyManifest;
   AgentAttestationReceipt?: AgentAttestationReceipt;
   AgentBidIntent?: AgentBidIntent;
@@ -5712,11 +5593,10 @@ export interface CoReasonSharedKernelOntology {
   CognitiveCritiqueProfile?: CognitiveCritiqueProfile1;
   CognitiveDetailedBalanceContract?: CognitiveDetailedBalanceContract;
   CognitiveDualVerificationReceipt?: CognitiveDualVerificationReceipt;
-  CognitiveFormatContract?: CognitiveFormatContract1;
+  CognitiveFormatContract?: CognitiveFormatContract;
   CognitiveHumanNodeProfile?: CognitiveHumanNodeProfile;
   CognitivePredictionReceipt?: CognitivePredictionReceipt;
   CognitiveReasoningTraceState?: CognitiveReasoningTraceState;
-  CognitiveRewardEvaluationReceipt?: CognitiveRewardEvaluationReceipt;
   CognitiveRoutingContract?: CognitiveRoutingContract;
   CognitiveSamplingPolicy?: CognitiveSamplingPolicy;
   CognitiveStateProfile?: CognitiveStateProfile;
@@ -5733,7 +5613,7 @@ export interface CoReasonSharedKernelOntology {
   ConsensusPolicy?: ConsensusPolicy;
   ConstitutionalAmendmentIntent?: ConstitutionalAmendmentIntent;
   ConstitutionalPolicy?: ConstitutionalPolicy;
-  ConstrainedDecodingPolicy?: ConstrainedDecodingPolicy1;
+  ConstrainedDecodingPolicy?: ConstrainedDecodingPolicy;
   ContextExpansionPolicy?: ContextExpansionPolicy;
   ContextualSemanticResolutionIntent?: ContextualSemanticResolutionIntent;
   ContextualizedSourceState?: ContextualizedSourceState3;
@@ -5777,7 +5657,6 @@ export interface CoReasonSharedKernelOntology {
   EmpiricalFalsificationContract?: EmpiricalFalsificationContract;
   EmpiricalStatisticalProfile?: EmpiricalStatisticalProfile;
   EnsembleTopologyProfile?: EnsembleTopologyProfile;
-  EnvironmentalSpoofingProfile?: EnvironmentalSpoofingProfile;
   EphemeralNamespacePartitionState?: EphemeralNamespacePartitionState;
   EpistemicArgumentClaimState?: EpistemicArgumentClaimState;
   EpistemicArgumentGraphState?: EpistemicArgumentGraphState;
@@ -5801,7 +5680,6 @@ export interface CoReasonSharedKernelOntology {
   EpistemicProxyState_Any_?: EpistemicProxyStateAny;
   EpistemicQuarantineSnapshot?: EpistemicQuarantineSnapshot;
   EpistemicRejectionReceipt?: EpistemicRejectionReceipt;
-  EpistemicRewardGradientPolicy?: EpistemicRewardGradientPolicy;
   EpistemicRigidityPolicy?: EpistemicRigidityPolicy;
   EpistemicSOPManifest?: EpistemicSOPManifest;
   EpistemicScanningPolicy?: EpistemicScanningPolicy;
@@ -5870,7 +5748,6 @@ export interface CoReasonSharedKernelOntology {
   JsonPrimitiveState?: JsonPrimitiveState;
   KinematicDeltaManifest?: KinematicDeltaManifest;
   KinematicDerivativeProfile?: KinematicDerivativeProfile;
-  KinematicNoiseProfile?: KinematicNoiseProfile;
   KineticBudgetPolicy?: KineticBudgetPolicy;
   KineticSeparationPolicy?: KineticSeparationPolicy;
   LatentProjectionIntent?: LatentProjectionIntent;
@@ -5931,7 +5808,6 @@ export interface CoReasonSharedKernelOntology {
   PredictionMarketState?: PredictionMarketState;
   PresentationManifest?: PresentationManifest;
   ProceduralMetadataManifest?: ProceduralMetadataManifest;
-  ProcessRewardContract?: ProcessRewardContract;
   ProfileCIDState?: ProfileCIDState;
   QoSClassificationProfile?: QoSClassificationProfile;
   QuarantineIntent?: QuarantineIntent;
@@ -6246,107 +6122,6 @@ export interface GradingCriterionProfile {
   criterion_cid: CriterionCid;
   description: Description;
   weight: Weight;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
- * AGENT INSTRUCTION: Aggregates the full Adversarial Emulation geometry, composing
- * KinematicNoiseProfile (pointer perturbation) and EnvironmentalSpoofingProfile
- * (browser fingerprint masking) into a unified anti-detection manifold governed by
- * a generative imitation learning persona. As a ...Profile suffix, this is a
- * declarative, frozen snapshot of an N-dimensional emulation coordinate.
- *
- * CAUSAL AFFORDANCE: Authorizes the orchestrator's Spatial Kinematics engine to
- * simultaneously inject stochastic pointer noise and spoof environmental telemetry,
- * achieving a target emulation_fidelity_target score against anti-bot heuristics
- * while behaviorally mimicking the selected generative_persona.
- *
- * EPISTEMIC BOUNDS: The emulation_fidelity_target is strictly clamped to the
- * normalized probability range (ge=0.0, le=1.0). Both sub-profiles are optional
- * (default=None), allowing partial emulation geometries. The generative_persona
- * is locked to a Literal automaton ["hesitant_novice", "fast_expert",
- * "distracted_browser"].
- *
- * MCP ROUTING TRIGGERS: Adversarial Emulation, Anti-Bot Evasion, Imitation
- * Learning, Browser Fingerprint Spoofing, Emulation Fidelity
- */
-export interface AdversarialEmulationProfile {
-  generative_persona?: GenerativePersona;
-  /**
-   * The stochastic pointer trajectory perturbation profile for human-like motor control emulation.
-   */
-  kinematic_noise?: KinematicNoiseProfile | null;
-  /**
-   * The browser fingerprint and environmental telemetry spoofing geometry.
-   */
-  environmental_spoofing?: EnvironmentalSpoofingProfile | null;
-  emulation_fidelity_target: EmulationFidelityTarget;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
- * AGENT INSTRUCTION: Implements Stochastic Process Theory (1/f^β spectral noise)
- * and Hick-Hyman Law cognitive delay modeling to inject human-like motor control
- * perturbations into pointer trajectories, preventing deterministic bot-detection
- * via timing analysis. As a ...Profile suffix, this is a declarative, frozen
- * snapshot of a noise geometry.
- *
- * CAUSAL AFFORDANCE: Authorizes the Spatial Kinematics engine to perturb each
- * SE3TransformProfile along the Bezier trajectory by sampling from the
- * specified noise distribution, achieving biomechanically plausible jitter with
- * cognitive delay and corrective submovements.
- *
- * EPISTEMIC BOUNDS: The pink_noise_amplitude is strictly clamped to the
- * normalized range (ge=0.0, le=1.0), preventing trajectory corruption. The
- * frequency_exponent (1/f^β) is bounded (ge=0.0, le=5.0) to cover the full
- * spectrum from white noise (β=0) to black noise (β≥2). The noise_class Literal
- * automaton locks generation to ["pink", "brownian", "gaussian"]. The
- * velocity_profile is locked to ["minimum_jerk", "constant",
- * "fractional_brownian"]. target_overshoot_radius_pixels is bounded (ge=0,
- * le=5000) and hick_hyman_dwell_time_ms is bounded (ge=0, le=18446744073709551615).
- *
- * MCP ROUTING TRIGGERS: Stochastic Process, Pink Noise, Brownian Motion,
- * Motor Control Perturbation, Hick-Hyman Law, Fitts's Law
- */
-export interface KinematicNoiseProfile {
-  noise_class: NoiseClass;
-  velocity_profile?: VelocityProfile;
-  pink_noise_amplitude: PinkNoiseAmplitude;
-  frequency_exponent: FrequencyExponent;
-  target_overshoot_radius_pixels?: TargetOvershootRadiusPixels;
-  hick_hyman_dwell_time_ms?: HickHymanDwellTimeMs;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
- * AGENT INSTRUCTION: Defines the deterministic Browser Fingerprint Entropy geometry
- * for spoofing environmental telemetry vectors (WebGL canvas hashes, User-Agent
- * strings, timezone offsets, TLS Client Hello fingerprints, and display resolution).
- * As a ...Profile suffix, this is a declarative, frozen snapshot of a spoofed
- * environmental coordinate.
- *
- * CAUSAL AFFORDANCE: Instructs the orchestrator's Spatial Kinematics engine to
- * project a synthetic browser identity, masking the true computational substrate
- * from exogenous anti-bot fingerprinting oracles including JA3/JA4 TLS analysis.
- *
- * EPISTEMIC BOUNDS: The webgl_entropy_seed_hash is constrained to a 128-char CID
- * pattern. The user_agent_template is clamped to max_length=2000. The
- * timezone_offset_minutes is mathematically bounded to the valid UTC range
- * (ge=-720, le=840). Screen resolution components are bounded (ge=1, le=15360).
- * The tls_cipher_permutation is locked to a Literal automaton. The
- * hardware_concurrency_mask is bounded (gt=0, le=256).
- *
- * MCP ROUTING TRIGGERS: Browser Fingerprinting, WebGL Canvas Entropy, User-Agent
- * Spoofing, JA3 TLS Fingerprint, Anti-Fingerprint Evasion
- */
-export interface EnvironmentalSpoofingProfile {
-  tls_cipher_permutation?: TlsCipherPermutation;
-  webgl_entropy_seed_hash: WebglEntropySeedHash;
-  user_agent_template: UserAgentTemplate;
-  hardware_concurrency_mask?: HardwareConcurrencyMask;
-  timezone_offset_minutes: TimezoneOffsetMinutes;
-  screen_resolution_width: ScreenResolutionWidth;
-  screen_resolution_height: ScreenResolutionHeight;
 }
 /**
  * CoReason Shared Kernel Ontology
@@ -8551,10 +8326,6 @@ export interface CognitiveAgentNodeProfile {
    */
   escalation_policy?: EscalationContract | null;
   /**
-   * The ruleset governing how intermediate thoughts are scored and pruned.
-   */
-  prm_policy?: ProcessRewardContract | null;
-  /**
    * The formal contract demanding mathematical proof of Expected Information Gain before authorizing tool execution.
    */
   active_inference_policy?: ActiveInferenceContract | null;
@@ -8578,14 +8349,6 @@ export interface CognitiveAgentNodeProfile {
    * The declarative contract mathematically binding this agent to a core altruistic objective.
    */
   anchoring_policy?: AnchoringPolicy | null;
-  /**
-   * The RL post-training contract forcing the agent to evaluate traces against an implicit graph reward.
-   */
-  grpo_reward_policy?: EpistemicRewardGradientPolicy | null;
-  /**
-   * The adversarial emulation geometry composing kinematic noise and environmental spoofing for anti-bot trajectory evasion.
-   */
-  emulation_profile?: AdversarialEmulationProfile | null;
   /**
    * Authorizes trajectory balance optimization during non-monotonic reasoning.
    */
@@ -8989,50 +8752,6 @@ export interface EscalationContract {
 /**
  * CoReason Shared Kernel Ontology
  *
- * AGENT INSTRUCTION: Enforces the Step-Level Verification heuristics for Process Reward Models (PRMs) during non-monotonic reasoning searches and test-time compute.
- *
- * CAUSAL AFFORDANCE: Authorizes the orchestrator to physically prune hallucinating ThoughtBranchState vectors from the LatentScratchpadReceipt if their logit probabilities drop below the viable threshold, emulating rigorous Beam Search pruning.
- *
- * EPISTEMIC BOUNDS: Strictly bounds the search space geometry via `pruning_threshold` (`ge=0.0, le=1.0`) and mechanically caps State-Space Explosion through `max_backtracks_allowed` (`ge=0, le=18446744073709551615`).
- *
- * MCP ROUTING TRIGGERS: Process Reward Model, Beam Search Pruning, Latent Trajectory, State-Space Explosion, A* Search
- */
-export interface ProcessRewardContract {
-  /**
-   * The dynamic circuit breaker that halts the search when PRM variance converges, preventing VRAM waste.
-   */
-  convergence_sla?: DynamicConvergenceSLA | null;
-  pruning_threshold: PruningThreshold;
-  max_backtracks_allowed: MaxBacktracksAllowed;
-  evaluator_matrix_name?: EvaluatorMatrixName;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
- * AGENT INSTRUCTION: Defines the mathematical Optimal Stopping Theory boundaries for Monte
- * Carlo Tree Search (MCTS) and test-time compute scaling. As an ...SLA suffix, this object
- * enforces rigid mathematical boundaries that the orchestrator must respect globally.
- *
- * CAUSAL AFFORDANCE: Triggers an early termination circuit breaker on reasoning trajectories
- * when the gradient of the Process Reward Model (PRM) score falls below the epsilon delta,
- * halting unnecessary probability wave expansion and preserving VRAM.
- *
- * EPISTEMIC BOUNDS: Mathematically constrained by convergence_delta_epsilon (ge=0.0, le=1.0)
- * over a strictly positive lookback_window_steps (gt=0, le=18446744073709551615). Physically mandates
- * a minimum_reasoning_steps burn-in period (gt=0, le=18446744073709551615) to prevent premature
- * collapse before the latent space is adequately explored.
- *
- * MCP ROUTING TRIGGERS: Optimal Stopping Theory, MCTS, PRM Convergence, Circuit Breaker,
- * Bellman Equation
- */
-export interface DynamicConvergenceSLA {
-  convergence_delta_epsilon: ConvergenceDeltaEpsilon;
-  lookback_window_steps: LookbackWindowSteps;
-  minimum_reasoning_steps: MinimumReasoningSteps;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
  * AGENT INSTRUCTION: Bridges the stochastic-deterministic divide by invoking Satisfiability Modulo Theories (SMT) and formal theorem provers (Z3, Lean4, Coq) to execute mathematically unassailable logic.
  *
  * CAUSAL AFFORDANCE: Offloads non-monotonic probabilistic reasoning into a rigid, verifiable algebraic solver, returning the mathematically proven result to the swarm.
@@ -9065,60 +8784,6 @@ export interface MechanisticAuditContract {
   target_hook_points: TargetHookPoints1;
   max_features_per_layer: MaxFeaturesPerLayer;
   require_zk_commitments?: RequireZkCommitments;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
- * AGENT INSTRUCTION: Establishes the Group Relative Policy Optimization (GRPO) reward shaping ruleset, mathematically immunizing the swarm against Goodhart's Law and reward hacking.
- *
- * CAUSAL AFFORDANCE: Projects a continuous penalty/reward gradient across extracted axiomatic paths, enforcing syntactic compliance through the format contract while simultaneously evaluating semantic/topological validity.
- *
- * EPISTEMIC BOUNDS: Prevents reward hacking by scaling the logical validity score (R_path) via the `beta_path_weight` scalar (`ge=0.0, le=1.0`). Gated by a cryptographic `reference_graph_cid` CID.
- *
- * MCP ROUTING TRIGGERS: GRPO, Reward Shaping, Goodhart's Law, Policy Gradient, Advantage Estimation
- */
-export interface EpistemicRewardGradientPolicy {
-  policy_cid: PolicyCid;
-  reference_graph_cid: ReferenceGraphCid;
-  format_contract: CognitiveFormatContract;
-  beta_path_weight: BetaPathWeight;
-  /**
-   * The continuous spatial/topological constraints governing path extraction validation.
-   */
-  topological_scoring?: TopologicalRewardContract | null;
-}
-/**
- * The syntactic constraints the agent must follow to prevent reward zeroing.
- */
-export interface CognitiveFormatContract {
-  require_think_tags?: RequireThinkTags;
-  final_answer_regex?: FinalAnswerRegex;
-  decoding_policy: ConstrainedDecodingPolicy;
-}
-/**
- * The mandatory hardware-level execution limits for token masking.
- */
-export interface ConstrainedDecodingPolicy {
-  enforcement_strategy?: EnforcementStrategy;
-  compiler_backend: CompilerBackend;
-  formal_grammar_string?: FormalGrammarString;
-  terminate_on_eos_leak?: TerminateOnEosLeak;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
- * AGENT INSTRUCTION: Enforces Graph Representation Learning (GCN/GAT) constraints to shape the epistemic reward based purely on the topological centrality and spectral connectivity of the extracted axioms.
- *
- * CAUSAL AFFORDANCE: Commands the orchestrator to execute deterministic graph traversal algorithms (Random Walk with Restart, Spatial GCN) to compute node reachability and vector similarity before allocating policy gradients.
- *
- * EPISTEMIC BOUNDS: Clamps structural relevance geometrically using `min_edge_criticality_score` and `min_semantic_relevance_score` (`ge=0.0, le=1.0`). `aggregation_method` restricts the orchestrator to a strict Literal automaton.
- *
- * MCP ROUTING TRIGGERS: Graph Convolutional Networks, Spectral Graph Theory, Random Walk with Restart, Topological Reward Shaping, PageRank
- */
-export interface TopologicalRewardContract {
-  min_edge_criticality_score: MinEdgeCriticalityScore;
-  min_semantic_relevance_score: MinSemanticRelevanceScore;
-  aggregation_method: AggregationMethod;
 }
 /**
  * CoReason Shared Kernel Ontology
@@ -9380,7 +9045,7 @@ export interface StateContract {
   /**
    * The optional hardware-level execution limits for token masking.
    */
-  decoding_policy?: ConstrainedDecodingPolicy1 | null;
+  decoding_policy?: ConstrainedDecodingPolicy | null;
 }
 /**
  * A strict JSON Schema dictionary defining the required shape of the shared epistemic blackboard.
@@ -9399,7 +9064,7 @@ export interface SchemaDefinition {
  *
  * MCP ROUTING TRIGGERS: FSM Logit Masking, Constrained Decoding, Tokenizer Interception, Hardware Execution Boundary, Pushdown Automaton
  */
-export interface ConstrainedDecodingPolicy1 {
+export interface ConstrainedDecodingPolicy {
   enforcement_strategy?: EnforcementStrategy;
   compiler_backend: CompilerBackend;
   formal_grammar_string?: FormalGrammarString;
@@ -9426,7 +9091,7 @@ export interface ConstrainedDecodingPolicy1 {
  * Security, Biba Integrity Model, Defense-in-Depth
  */
 export interface SemanticFlowPolicy {
-  policy_cid: PolicyCid1;
+  policy_cid: PolicyCid;
   active?: Active1;
   rules?: Rules;
   /**
@@ -11967,52 +11632,6 @@ export interface EpistemicAxiomVerificationReceipt {
 /**
  * CoReason Shared Kernel Ontology
  *
- * AGENT INSTRUCTION: The immutable cryptographic receipt of a GRPO Advantage Actor-Critic
- * evaluation step, permanently logging the mathematically verified advantage score of a
- * specific generation trajectory. As a ...Receipt suffix, this is an append-only coordinate
- * on the Merkle-DAG that the LLM must never hallucinate a mutation to.
- *
- * CAUSAL AFFORDANCE: Unlocks policy gradient updates by providing the deterministic advantage
- * signal derived from the extracted_axioms of the source_generation_cid.
- *
- * EPISTEMIC BOUNDS: The calculated_r_path is strictly clamped between [ge=0.0, le=1.0], and
- * the total_advantage_score is capped at le=100.0. The @model_validator physically guarantees
- * that the extracted_axioms array is deterministically sorted by the composite key
- * (source_concept_cid, directed_edge_class, target_concept_cid) to preserve RFC 8785 canonical
- * hashing across the distributed swarm.
- *
- * MCP ROUTING TRIGGERS: Advantage Actor-Critic, Policy Gradient Update, Epistemic Reward,
- * Baseline Normalization, Reinforcement Learning
- */
-export interface CognitiveRewardEvaluationReceipt {
-  event_cid: EventCid22;
-  prior_event_hash?: PriorEventHash22;
-  timestamp: Timestamp22;
-  topology_class?: TopologyClass105;
-  source_generation_cid: SourceGenerationCid;
-  extracted_axioms?: ExtractedAxioms;
-  calculated_r_path: CalculatedRPath;
-  total_advantage_score: TotalAdvantageScore;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
- * AGENT INSTRUCTION: Implements First-Order Logic and Resource Description Framework (RDF) triples to mathematically formalize knowledge. As a ...State suffix, this is a declarative, frozen snapshot of a specific causal connection.
- *
- * CAUSAL AFFORDANCE: Distills high-entropy natural language token streams into rigid, hashable causal edges (Subject, Predicate, Object), unlocking deterministic querying and Truth Maintenance System (TMS) traversals.
- *
- * EPISTEMIC BOUNDS: Source and target concept physical boundaries are strictly locked to 128-char CIDs matching the regex `^[a-zA-Z0-9_.:-]+$`. The `directed_edge_class` is clamped to a `max_length=2000` to prevent dictionary bombing during semantic evaluation.
- *
- * MCP ROUTING TRIGGERS: First-Order Logic, RDF Triple, Semantic Distillation, Causal Edge, Directed Graph
- */
-export interface EpistemicAxiomState {
-  source_concept_cid: SourceConceptCid;
-  directed_edge_class: DirectedEdgeClass;
-  target_concept_cid: TargetConceptCid;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
  * AGENT INSTRUCTION: An immutable cryptographic coordinate recording the successful
  * factorization of a terminal reward into a fractional flow value across a continuous
  * CognitiveReasoningTraceState trajectory. As a ...Receipt suffix, this is an append-only
@@ -12031,10 +11650,10 @@ export interface EpistemicAxiomState {
  * Scalar Backpropagation, Acyclic Path
  */
 export interface EpistemicFlowStateReceipt {
-  event_cid: EventCid23;
-  prior_event_hash?: PriorEventHash23;
-  timestamp: Timestamp23;
-  topology_class?: TopologyClass106;
+  event_cid: EventCid22;
+  prior_event_hash?: PriorEventHash22;
+  timestamp: Timestamp22;
+  topology_class?: TopologyClass105;
   source_trajectory_cid: SourceTrajectoryCid;
   estimated_flow_value: EstimatedFlowValue;
   terminal_reward_factorized: TerminalRewardFactorized;
@@ -12060,10 +11679,10 @@ export interface EpistemicFlowStateReceipt {
  * Macroscopic Explanation, Deterministic Sorting
  */
 export interface CausalExplanationEvent {
-  event_cid: EventCid24;
-  prior_event_hash?: PriorEventHash24;
-  timestamp: Timestamp24;
-  topology_class?: TopologyClass107;
+  event_cid: EventCid23;
+  prior_event_hash?: PriorEventHash23;
+  timestamp: Timestamp23;
+  topology_class?: TopologyClass106;
   target_outcome_event_cid: TargetOutcomeEventCid;
   collective_intelligence: CollectiveIntelligenceProfile;
   agent_attributions: AgentAttributions;
@@ -12124,10 +11743,10 @@ export interface ShapleyAttributionReceipt {
  * Routing Heuristic, Semantic Wave Collapse
  */
 export interface IntentClassificationReceipt {
-  event_cid: EventCid25;
-  prior_event_hash?: PriorEventHash25;
-  timestamp: Timestamp25;
-  topology_class?: TopologyClass108;
+  event_cid: EventCid24;
+  prior_event_hash?: PriorEventHash24;
+  timestamp: Timestamp24;
+  topology_class?: TopologyClass107;
   raw_input_string: RawInputString;
   classified_intent: ClassifiedIntent;
   confidence_score: ConfidenceScore1;
@@ -12145,10 +11764,10 @@ export interface IntentClassificationReceipt {
  *     MCP ROUTING TRIGGERS: Semantic Relational Record, Payload Injection, Hardware Guillotine, Structured Telemetry
  */
 export interface SemanticRelationalVectorState {
-  topology_class?: TopologyClass109;
-  event_cid: EventCid26;
-  prior_event_hash?: PriorEventHash26;
-  timestamp: Timestamp26;
+  topology_class?: TopologyClass108;
+  event_cid: EventCid25;
+  prior_event_hash?: PriorEventHash25;
+  timestamp: Timestamp25;
   ontology_class: UpperOntologyClassProfile;
   temporal_bounds: TemporalBoundsProfile1;
   formal_schema_urn?: FormalSchemaUrn1;
@@ -12190,10 +11809,10 @@ export interface PayloadInjectionZone {
  *     MCP ROUTING TRIGGERS: Ontological Reification, Bimodal Semantic Transformation, Epistemic Ledger, Traceability Collapse
  */
 export interface OntologicalReificationReceipt {
-  topology_class?: TopologyClass110;
-  event_cid: EventCid27;
-  prior_event_hash?: PriorEventHash27;
-  timestamp: Timestamp27;
+  topology_class?: TopologyClass109;
+  event_cid: EventCid26;
+  prior_event_hash?: PriorEventHash26;
+  timestamp: Timestamp26;
   source_data_hash: SourceDataHash;
   target_namespace: TargetNamespace;
   algorithmic_mechanism: TransformationMechanismProfile;
@@ -12230,10 +11849,10 @@ export interface DempsterShaferBeliefVector2 {
  * MCP ROUTING TRIGGERS: Lyapunov Stability, Control Theory, Circuit Breaker, Cascading Failure, State Equilibrium
  */
 export interface CircuitBreakerEvent {
-  event_cid: EventCid28;
-  prior_event_hash?: PriorEventHash28;
-  timestamp: Timestamp28;
-  topology_class?: TopologyClass111;
+  event_cid: EventCid27;
+  prior_event_hash?: PriorEventHash27;
+  timestamp: Timestamp27;
+  topology_class?: TopologyClass110;
   /**
    * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
    */
@@ -12261,10 +11880,10 @@ export interface CircuitBreakerEvent {
  * Energy, Exogenous Perturbation, Epistemic Stress Test
  */
 export interface ExogenousEpistemicEvent {
-  event_cid: EventCid29;
-  prior_event_hash?: PriorEventHash29;
-  timestamp: Timestamp29;
-  topology_class?: TopologyClass112;
+  event_cid: EventCid28;
+  prior_event_hash?: PriorEventHash28;
+  timestamp: Timestamp28;
+  topology_class?: TopologyClass111;
   shock_cid: ShockCid;
   target_node_hash: TargetNodeHash;
   bayesian_surprise_score: BayesianSurpriseScore1;
@@ -12295,10 +11914,10 @@ export interface SimulationEscrowContract {
  * MCP ROUTING TRIGGERS: Out-of-Band Telemetry, Asynchronous Logging, Severity Masking, Peripheral Audit, Ephemeral Context
  */
 export interface EpistemicLogEvent {
-  event_cid: EventCid30;
-  prior_event_hash?: PriorEventHash30;
-  topology_class?: TopologyClass113;
-  timestamp: Timestamp30;
+  event_cid: EventCid29;
+  prior_event_hash?: PriorEventHash29;
+  topology_class?: TopologyClass112;
+  timestamp: Timestamp29;
   level: Level;
   message: Message1;
   context_profile?: TelemetryContextProfile;
@@ -12328,10 +11947,10 @@ export interface TelemetryContextProfile {
  * MCP ROUTING TRIGGERS: Cryptographic Nonce, State Resumption, Replay Attack Prevention, Wetware Attestation, Liveness Resolution
  */
 export interface InterventionReceipt {
-  topology_class?: TopologyClass114;
-  event_cid: EventCid31;
-  prior_event_hash?: PriorEventHash31;
-  timestamp: Timestamp31;
+  topology_class?: TopologyClass113;
+  event_cid: EventCid30;
+  prior_event_hash?: PriorEventHash30;
+  timestamp: Timestamp30;
   intervention_request_cid: InterventionRequestCid;
   /**
    * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
@@ -12386,10 +12005,10 @@ export interface WetwareAttestationContract {
  * MCP ROUTING TRIGGERS: Chain of Custody, Cryptographic Provenance, Merkle-DAG Audit, Non-Repudiation, Data Isomorphism
  */
 export interface CustodyReceipt {
-  event_cid: EventCid32;
-  prior_event_hash?: PriorEventHash32;
-  timestamp: Timestamp32;
-  topology_class?: TopologyClass115;
+  event_cid: EventCid31;
+  prior_event_hash?: PriorEventHash31;
+  timestamp: Timestamp31;
+  topology_class?: TopologyClass114;
   custody_cid: CustodyCid;
   source_node_cid: SourceNodeCid;
   applied_policy_cid: AppliedPolicyCid;
@@ -12409,10 +12028,10 @@ export interface CustodyReceipt {
  * MCP ROUTING TRIGGERS: Undercutting Defeater, Dialectical Edge, Truth Maintenance System, Bipartite Mapping, Non-Monotonic Retraction
  */
 export interface DefeasibleAttackEvent {
-  event_cid: EventCid33;
-  prior_event_hash?: PriorEventHash33;
-  timestamp: Timestamp33;
-  topology_class?: TopologyClass116;
+  event_cid: EventCid32;
+  prior_event_hash?: PriorEventHash32;
+  timestamp: Timestamp32;
+  topology_class?: TopologyClass115;
   attack_cid: AttackCid;
   source_claim_cid: SourceClaimCid;
   target_claim_cid: TargetClaimCid;
@@ -12433,10 +12052,10 @@ export interface DefeasibleAttackEvent {
  * MCP ROUTING TRIGGERS: Rejection Receipt, Free Energy Feedback, MCTS Backpropagation, Variational Free Energy, Mutation Gradient
  */
 export interface EpistemicRejectionReceipt {
-  event_cid: EventCid34;
-  prior_event_hash?: PriorEventHash34;
-  timestamp: Timestamp34;
-  topology_class?: TopologyClass117;
+  event_cid: EventCid33;
+  prior_event_hash?: PriorEventHash33;
+  timestamp: Timestamp33;
+  topology_class?: TopologyClass116;
   receipt_cid: ReceiptCid1;
   failed_projection_cid: FailedProjectionCid;
   violated_algebraic_constraint: ViolatedAlgebraicConstraint;
@@ -12455,10 +12074,10 @@ export interface EpistemicRejectionReceipt {
  * MCP ROUTING TRIGGERS: System 2 Remediation, Mathematical Truth, Proof Verification, Epistemic Ledger
  */
 export interface FormalVerificationReceipt {
-  event_cid: EventCid35;
-  prior_event_hash?: PriorEventHash35;
-  timestamp: Timestamp35;
-  topology_class?: TopologyClass118;
+  event_cid: EventCid34;
+  prior_event_hash?: PriorEventHash34;
+  timestamp: Timestamp34;
+  topology_class?: TopologyClass117;
   /**
    * Pointer to the specific node or intent that requested this formal verification.
    */
@@ -12472,11 +12091,11 @@ export interface FormalVerificationReceipt {
  * CoReason Shared Kernel Ontology
  */
 export interface BeliefModulationReceipt {
-  topology_class?: TopologyClass119;
+  topology_class?: TopologyClass118;
   receipt_cid: ReceiptCid2;
-  event_cid: EventCid36;
-  prior_event_hash?: PriorEventHash36;
-  timestamp: Timestamp36;
+  event_cid: EventCid35;
+  prior_event_hash?: PriorEventHash35;
+  timestamp: Timestamp35;
   target_graph_cid: TargetGraphCid4;
   grounded_edges: GroundedEdges;
   severed_edge_cids: SeveredEdgeCids;
@@ -12488,11 +12107,11 @@ export interface GroundedEdges {
  * CoReason Shared Kernel Ontology
  */
 export interface RDFExportReceipt {
-  topology_class?: TopologyClass120;
+  topology_class?: TopologyClass119;
   export_cid: ExportCid1;
-  event_cid: EventCid37;
-  prior_event_hash?: PriorEventHash37;
-  timestamp: Timestamp37;
+  event_cid: EventCid36;
+  prior_event_hash?: PriorEventHash36;
+  timestamp: Timestamp36;
   serialized_payload: SerializedPayload;
   rdf_triple_count: RdfTripleCount;
   sha256_graph_hash: Sha256GraphHash;
@@ -12509,10 +12128,10 @@ export interface RDFExportReceipt {
  * MCP ROUTING TRIGGERS: Epistemic Starvation, Natural Language Inference, Truth Maintenance System, Defeasible Logic, Belief Mass Depletion
  */
 export interface EpistemicStarvationEvent {
-  event_cid: EventCid38;
-  prior_event_hash?: PriorEventHash38;
-  timestamp: Timestamp38;
-  topology_class?: TopologyClass121;
+  event_cid: EventCid37;
+  prior_event_hash?: PriorEventHash37;
+  timestamp: Timestamp37;
+  topology_class?: TopologyClass120;
   starved_edge_cid: StarvedEdgeCid;
   failed_citations: FailedCitations;
   diagnostic_reason: DiagnosticReason;
@@ -12529,10 +12148,10 @@ export interface EpistemicStarvationEvent {
  * MCP ROUTING TRIGGERS: SPARQL Result, RDF Bindings, Epistemic Projection, Payload Bounding, Ledger Commit
  */
 export interface SPARQLQueryResultReceipt {
-  event_cid: EventCid39;
-  prior_event_hash?: PriorEventHash39;
-  timestamp: Timestamp39;
-  topology_class?: TopologyClass122;
+  event_cid: EventCid38;
+  prior_event_hash?: PriorEventHash38;
+  timestamp: Timestamp38;
+  topology_class?: TopologyClass121;
   query_intent_cid: QueryIntentCid;
   returned_bindings: ReturnedBindings;
   execution_time_ms: ExecutionTimeMs;
@@ -12555,7 +12174,7 @@ export interface ReturnedBindings {
  * MCP ROUTING TRIGGERS: Execution Audit, Merkle-DAG Provenance, Thermodynamic Accounting, Oracle Telemetry, Human-in-the-Loop Attestation, Cryptographic Receipt
  */
 export interface OracleExecutionReceipt {
-  topology_class?: TopologyClass123;
+  topology_class?: TopologyClass122;
   execution_hash: ExecutionHash;
   solver_urn: SolverUrn;
   tokens_burned: TokensBurned;
@@ -12573,7 +12192,7 @@ export interface OracleExecutionReceipt {
  * MCP ROUTING TRIGGERS: Markov Decision Process, Acyclic Edge, Stochastic Routing, Transition Probability, Directed Graph
  */
 export interface TransitionEdgeProfile {
-  topology_class?: TopologyClass124;
+  topology_class?: TopologyClass123;
   target_node_cid?: TargetNodeCid1;
   /**
    * Dynamic discovery intent for bridging nodes.
@@ -12617,7 +12236,7 @@ export interface EdgeMappingContract {
  * MCP ROUTING TRIGGERS: Markov Decision Process, Cyclic Edge, Bellman Equation, Thermodynamic Discounting, Recursive Traversal
  */
 export interface CyclicEdgeProfile {
-  topology_class?: TopologyClass125;
+  topology_class?: TopologyClass124;
   target_node_cid?: TargetNodeCid2;
   /**
    * Dynamic discovery intent for bridging nodes.
@@ -12787,7 +12406,7 @@ export interface TransitionMatrix {
  * MCP ROUTING TRIGGERS: Bipartite Graph Separation, Toxic Capability Quarantine, Finite State Machine, Structural Interlock, Conflict Graph
  */
 export interface KineticSeparationPolicy {
-  policy_cid: PolicyCid2;
+  policy_cid: PolicyCid1;
   mutually_exclusive_clusters: MutuallyExclusiveClusters;
   enforcement_action: EnforcementAction;
 }
@@ -12851,10 +12470,27 @@ export interface CognitiveDualVerificationReceipt {
  *
  * MCP ROUTING TRIGGERS: FSM Logit Masking, Constrained Decoding, Regular Expression Automaton, Syntactic Boundary, Token Suffocation
  */
-export interface CognitiveFormatContract1 {
+export interface CognitiveFormatContract {
   require_think_tags?: RequireThinkTags;
   final_answer_regex?: FinalAnswerRegex;
-  decoding_policy: ConstrainedDecodingPolicy;
+  decoding_policy: ConstrainedDecodingPolicy1;
+}
+/**
+ * CoReason Shared Kernel Ontology
+ *
+ * AGENT INSTRUCTION: A rigid mathematical boundary enforcing systemic constraints globally. Dictates the hardware-level execution limits for the token sampling phase by converting structural formatting from a probabilistic neural suggestion into a deterministic physics problem.
+ *
+ * CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation by physically suffocating invalid token probabilities. Instructs the inference engine (e.g., Outlines, XGrammar) to compile a DFA/PDA and mechanically overwrite illegal token logits to negative infinity.
+ *
+ * EPISTEMIC BOUNDS: Strict categorical literal on `enforcement_strategy`. The `compiler_backend` is constrained via URN pattern. The `validate_grammar_requirements` `@model_validator` mandates `formal_grammar_string` is non-null if the strategy expects a Context-Free Grammar (CFG).
+ *
+ * MCP ROUTING TRIGGERS: FSM Logit Masking, Constrained Decoding, Tokenizer Interception, Hardware Execution Boundary, Pushdown Automaton
+ */
+export interface ConstrainedDecodingPolicy1 {
+  enforcement_strategy?: EnforcementStrategy;
+  compiler_backend: CompilerBackend;
+  formal_grammar_string?: FormalGrammarString;
+  terminate_on_eos_leak?: TerminateOnEosLeak;
 }
 /**
  * CoReason Shared Kernel Ontology
@@ -13261,6 +12897,30 @@ export interface Blocks1 {
 /**
  * CoReason Shared Kernel Ontology
  *
+ * AGENT INSTRUCTION: Defines the mathematical Optimal Stopping Theory boundaries for Monte
+ * Carlo Tree Search (MCTS) and test-time compute scaling. As an ...SLA suffix, this object
+ * enforces rigid mathematical boundaries that the orchestrator must respect globally.
+ *
+ * CAUSAL AFFORDANCE: Triggers an early termination circuit breaker on reasoning trajectories
+ * when the gradient of the Process Reward Model (PRM) score falls below the epsilon delta,
+ * halting unnecessary probability wave expansion and preserving VRAM.
+ *
+ * EPISTEMIC BOUNDS: Mathematically constrained by convergence_delta_epsilon (ge=0.0, le=1.0)
+ * over a strictly positive lookback_window_steps (gt=0, le=18446744073709551615). Physically mandates
+ * a minimum_reasoning_steps burn-in period (gt=0, le=18446744073709551615) to prevent premature
+ * collapse before the latent space is adequately explored.
+ *
+ * MCP ROUTING TRIGGERS: Optimal Stopping Theory, MCTS, PRM Convergence, Circuit Breaker,
+ * Bellman Equation
+ */
+export interface DynamicConvergenceSLA {
+  convergence_delta_epsilon: ConvergenceDeltaEpsilon;
+  lookback_window_steps: LookbackWindowSteps;
+  minimum_reasoning_steps: MinimumReasoningSteps;
+}
+/**
+ * CoReason Shared Kernel Ontology
+ *
  * AGENT INSTRUCTION: Encapsulates a Python 3.14 t-string template as an Abstract Syntax Tree (AST) artifact for declarative, zero-trust UI evaluation.
  *
  * CAUSAL AFFORDANCE: Projects dynamic visual grids onto the UI plane while physically suffocating any capability for Arbitrary Code Execution (ACE) during runtime string interpolation.
@@ -13407,6 +13067,22 @@ export interface Claims {
  */
 export interface Attacks {
   [k: string]: DefeasibleAttackEvent;
+}
+/**
+ * CoReason Shared Kernel Ontology
+ *
+ * AGENT INSTRUCTION: Implements First-Order Logic and Resource Description Framework (RDF) triples to mathematically formalize knowledge. As a ...State suffix, this is a declarative, frozen snapshot of a specific causal connection.
+ *
+ * CAUSAL AFFORDANCE: Distills high-entropy natural language token streams into rigid, hashable causal edges (Subject, Predicate, Object), unlocking deterministic querying and Truth Maintenance System (TMS) traversals.
+ *
+ * EPISTEMIC BOUNDS: Source and target concept physical boundaries are strictly locked to 128-char CIDs matching the regex `^[a-zA-Z0-9_.:-]+$`. The `directed_edge_class` is clamped to a `max_length=2000` to prevent dictionary bombing during semantic evaluation.
+ *
+ * MCP ROUTING TRIGGERS: First-Order Logic, RDF Triple, Semantic Distillation, Causal Edge, Directed Graph
+ */
+export interface EpistemicAxiomState {
+  source_concept_cid: SourceConceptCid;
+  directed_edge_class: DirectedEdgeClass;
+  target_concept_cid: TargetConceptCid;
 }
 /**
  * CoReason Shared Kernel Ontology
@@ -13823,23 +13499,23 @@ export interface ProceduralMetadataManifest {
 /**
  * CoReason Shared Kernel Ontology
  *
- * AGENT INSTRUCTION: Encodes a macroscopic Petri net or Directed Acyclic Graph (DAG)
- * formalizing standard operating procedures into mathematically traversable state
- * transitions. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate
- * state.
+ *  AGENT INSTRUCTION: Encodes a macroscopic Petri net or Directed Acyclic Graph (DAG)
+ *  formalizing standard operating procedures into mathematically traversable state
+ *  transitions. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate
+ *  state.
  *
- * CAUSAL AFFORDANCE: Physically bounds the executing agent (target_persona:
- * ProfileCIDState) to a deterministic sequence of CognitiveStateProfiles, unlocking
- * the ability for the orchestrator to dynamically evaluate execution via Process Reward
- * Models (prm_evaluations: list[ProcessRewardContract]) at each topological node.
+ *  CAUSAL AFFORDANCE: Physically bounds the executing agent (target_persona:
+ *  ProfileCIDState) to a deterministic sequence of CognitiveStateProfiles, unlocking
+ *  the ability for the orchestrator to dynamically evaluate execution via Process Reward
+ * .
  *
- * EPISTEMIC BOUNDS: The cognitive_steps dictionary is constrained to max_length=1000
- * to cap memory footprint. The @model_validator reject_ghost_nodes mathematically enforces
- * referential integrity, guaranteeing that no chronological_flow_edges AND no
- * structural_grammar_hashes point to an undefined state.
+ *  EPISTEMIC BOUNDS: The cognitive_steps dictionary is constrained to max_length=1000
+ *  to cap memory footprint. The @model_validator reject_ghost_nodes mathematically enforces
+ *  referential integrity, guaranteeing that no chronological_flow_edges AND no
+ *  structural_grammar_hashes point to an undefined state.
  *
- * MCP ROUTING TRIGGERS: Petri Net, Directed Acyclic Graph, Process Reward Model,
- * Topological Flow, Referential Integrity
+ *  MCP ROUTING TRIGGERS: Petri Net, Directed Acyclic Graph, Process Reward Model,
+ *  Topological Flow, Referential Integrity
  */
 export interface EpistemicSOPManifest {
   sop_cid: SopCid;
@@ -13850,7 +13526,6 @@ export interface EpistemicSOPManifest {
   cognitive_steps: CognitiveSteps;
   structural_grammar_hashes: StructuralGrammarHashes;
   chronological_flow_edges: ChronologicalFlowEdges1;
-  prm_evaluations: PrmEvaluations;
 }
 /**
  * Dictionary mapping step_cids to strict causal DAG constraints.
@@ -14872,7 +14547,7 @@ export interface GenerativeManifoldSLA1 {
  * MCP ROUTING TRIGGERS: Softmax Gating, Cognitive Load Theory, Pre-Flight Routing, Dictionary Bombing Prevention, Token Exhaustion Mitigation
  */
 export interface TaxonomicRoutingPolicy {
-  policy_cid: PolicyCid3;
+  policy_cid: PolicyCid2;
   intent_to_heuristic_matrix: IntentToHeuristicMatrix;
   fallback_heuristic: FallbackHeuristic;
 }
@@ -14928,6 +14603,22 @@ export interface TerminalConditionContract1 {
 export interface TopologicalFidelityReceipt1 {
   contextual_completeness_score: ContextualCompletenessScore;
   surrounding_token_density: SurroundingTokenDensity;
+}
+/**
+ * CoReason Shared Kernel Ontology
+ *
+ * AGENT INSTRUCTION: Enforces Graph Representation Learning (GCN/GAT) constraints to shape the epistemic reward based purely on the topological centrality and spectral connectivity of the extracted axioms.
+ *
+ * CAUSAL AFFORDANCE: Commands the orchestrator to execute deterministic graph traversal algorithms (Random Walk with Restart, Spatial GCN) to compute node reachability and vector similarity before allocating policy gradients.
+ *
+ * EPISTEMIC BOUNDS: Clamps structural relevance geometrically using `min_edge_criticality_score` and `min_semantic_relevance_score` (`ge=0.0, le=1.0`). `aggregation_method` restricts the orchestrator to a strict Literal automaton.
+ *
+ * MCP ROUTING TRIGGERS: Graph Convolutional Networks, Spectral Graph Theory, Random Walk with Restart, Topological Reward Shaping, PageRank
+ */
+export interface TopologicalRewardContract {
+  min_edge_criticality_score: MinEdgeCriticalityScore;
+  min_semantic_relevance_score: MinSemanticRelevanceScore;
+  aggregation_method: AggregationMethod;
 }
 /**
  * CoReason Shared Kernel Ontology

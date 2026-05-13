@@ -3461,45 +3461,6 @@ class AdjudicationIntent(CoreasonBaseState):
         return self
 
 
-class AdversarialEmulationProfile(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Aggregates the full Adversarial Emulation geometry, composing
-    KinematicNoiseProfile (pointer perturbation) and EnvironmentalSpoofingProfile
-    (browser fingerprint masking) into a unified anti-detection manifold governed by
-    a generative imitation learning persona. As a ...Profile suffix, this is a
-    declarative, frozen snapshot of an N-dimensional emulation coordinate.
-
-    CAUSAL AFFORDANCE: Authorizes the orchestrator's Spatial Kinematics engine to
-    simultaneously inject stochastic pointer noise and spoof environmental telemetry,
-    achieving a target emulation_fidelity_target score against anti-bot heuristics
-    while behaviorally mimicking the selected generative_persona.
-
-    EPISTEMIC BOUNDS: The emulation_fidelity_target is strictly clamped to the
-    normalized probability range (ge=0.0, le=1.0). Both sub-profiles are optional
-    (default=None), allowing partial emulation geometries. The generative_persona
-    is locked to a Literal automaton ["hesitant_novice", "fast_expert",
-    "distracted_browser"].
-
-    MCP ROUTING TRIGGERS: Adversarial Emulation, Anti-Bot Evasion, Imitation
-    Learning, Browser Fingerprint Spoofing, Emulation Fidelity
-    """
-
-    generative_persona: Literal["hesitant_novice", "fast_expert", "distracted_browser"] = Field(
-        default="fast_expert", description="The imitation learning persona governing the behavioral emulation profile."
-    )
-    kinematic_noise: "KinematicNoiseProfile | None" = Field(
-        default=None,
-        description="The stochastic pointer trajectory perturbation profile for human-like motor control emulation.",
-    )
-    environmental_spoofing: "EnvironmentalSpoofingProfile | None" = Field(
-        default=None, description="The browser fingerprint and environmental telemetry spoofing geometry."
-    )
-    emulation_fidelity_target: float = Field(
-        ge=0.0,
-        le=1.0,
-        description="The target normalized score for human-likeness against anti-bot heuristic classifiers.",
-    )
-
 
 class AgentBidIntent(CoreasonBaseState):
     r"""
@@ -5005,58 +4966,6 @@ class EnsembleTopologyProfile(CoreasonBaseState):
         object.__setattr__(self, "concurrent_branch_cids", sorted(self.concurrent_branch_cids))
         return self
 
-
-class EnvironmentalSpoofingProfile(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Defines the deterministic Browser Fingerprint Entropy geometry
-    for spoofing environmental telemetry vectors (WebGL canvas hashes, User-Agent
-    strings, timezone offsets, TLS Client Hello fingerprints, and display resolution).
-    As a ...Profile suffix, this is a declarative, frozen snapshot of a spoofed
-    environmental coordinate.
-
-    CAUSAL AFFORDANCE: Instructs the orchestrator's Spatial Kinematics engine to
-    project a synthetic browser identity, masking the true computational substrate
-    from exogenous anti-bot fingerprinting oracles including JA3/JA4 TLS analysis.
-
-    EPISTEMIC BOUNDS: The webgl_entropy_seed_hash is constrained to a 128-char CID
-    pattern. The user_agent_template is clamped to max_length=2000. The
-    timezone_offset_minutes is mathematically bounded to the valid UTC range
-    (ge=-720, le=840). Screen resolution components are bounded (ge=1, le=15360).
-    The tls_cipher_permutation is locked to a Literal automaton. The
-    hardware_concurrency_mask is bounded (gt=0, le=256).
-
-    MCP ROUTING TRIGGERS: Browser Fingerprinting, WebGL Canvas Entropy, User-Agent
-    Spoofing, JA3 TLS Fingerprint, Anti-Fingerprint Evasion
-    """
-
-    tls_cipher_permutation: Annotated[str, StringConstraints(pattern=r"^urn:coreason:.*$")] | None = Field(
-        default=None, description="The JA3/JA4 TLS Client Hello fingerprint URN to project during handshake emulation."
-    )
-    webgl_entropy_seed_hash: Annotated[
-        str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
-    ] = Field(
-        description="The Content Identifier (CID) of the WebGL canvas entropy seed used to generate a deterministic spoofed fingerprint.",
-    )
-    user_agent_template: Annotated[str, StringConstraints(max_length=2000)] = Field(
-        description="The User-Agent string template projected to exogenous web servers to mask the true computational substrate."
-    )
-    hardware_concurrency_mask: int = Field(
-        gt=0,
-        le=256,
-        default=8,
-        description="The spoofed CPU core count projected to the DOM via navigator.hardwareConcurrency.",
-    )
-    timezone_offset_minutes: int = Field(
-        ge=-720,
-        le=840,
-        description="The spoofed UTC timezone offset in minutes, bounded to the valid terrestrial range.",
-    )
-    screen_resolution_width: int = Field(
-        ge=1, le=15360, description="The spoofed horizontal display resolution in pixels."
-    )
-    screen_resolution_height: int = Field(
-        ge=1, le=15360, description="The spoofed vertical display resolution in pixels."
-    )
 
 
 class EpistemicCompressionSLA(CoreasonBaseState):
@@ -7840,62 +7749,6 @@ class MCPServerManifest(CoreasonBaseState):
         return self
 
 
-class KinematicNoiseProfile(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Implements Stochastic Process Theory (1/f^β spectral noise)
-    and Hick-Hyman Law cognitive delay modeling to inject human-like motor control
-    perturbations into pointer trajectories, preventing deterministic bot-detection
-    via timing analysis. As a ...Profile suffix, this is a declarative, frozen
-    snapshot of a noise geometry.
-
-    CAUSAL AFFORDANCE: Authorizes the Spatial Kinematics engine to perturb each
-    SE3TransformProfile along the Bezier trajectory by sampling from the
-    specified noise distribution, achieving biomechanically plausible jitter with
-    cognitive delay and corrective submovements.
-
-    EPISTEMIC BOUNDS: The pink_noise_amplitude is strictly clamped to the
-    normalized range (ge=0.0, le=1.0), preventing trajectory corruption. The
-    frequency_exponent (1/f^β) is bounded (ge=0.0, le=5.0) to cover the full
-    spectrum from white noise (β=0) to black noise (β≥2). The noise_class Literal
-    automaton locks generation to ["pink", "brownian", "gaussian"]. The
-    velocity_profile is locked to ["minimum_jerk", "constant",
-    "fractional_brownian"]. target_overshoot_radius_pixels is bounded (ge=0,
-    le=5000) and hick_hyman_dwell_time_ms is bounded (ge=0, le=18446744073709551615).
-
-    MCP ROUTING TRIGGERS: Stochastic Process, Pink Noise, Brownian Motion,
-    Motor Control Perturbation, Hick-Hyman Law, Fitts's Law
-    """
-
-    noise_class: Literal["pink", "brownian", "gaussian"] = Field(
-        description="The stochastic process governing the noise generation for pointer trajectory perturbation."
-    )
-    velocity_profile: Literal["minimum_jerk", "constant", "fractional_brownian"] = Field(
-        default="minimum_jerk",
-        description="The mathematical model governing movement acceleration and velocity smoothing.",
-    )
-    pink_noise_amplitude: float = Field(
-        ge=0.0,
-        le=1.0,
-        description="The normalized amplitude of the 1/f noise injected into the pointer trajectory. Bounded [0.0, 1.0].",
-    )
-    frequency_exponent: float = Field(
-        ge=0.0,
-        le=5.0,
-        description="The spectral exponent β in the 1/f^β power spectral density function governing noise color.",
-    )
-    target_overshoot_radius_pixels: int = Field(
-        ge=0,
-        le=5000,
-        default=0,
-        description="The Euclidean radius in pixels for corrective submovements overshooting the target coordinate.",
-    )
-    hick_hyman_dwell_time_ms: int = Field(
-        ge=0,
-        le=18446744073709551615,
-        default=0,
-        description="Cognitive choice reaction delay in milliseconds, modeled via Hick-Hyman Law.",
-    )
-
 
 class KineticSeparationPolicy(CoreasonBaseState):
     r"""
@@ -9197,7 +9050,7 @@ class EpistemicSOPManifest(CoreasonBaseState):
     CAUSAL AFFORDANCE: Physically bounds the executing agent (target_persona:
     ProfileCIDState) to a deterministic sequence of CognitiveStateProfiles, unlocking
     the ability for the orchestrator to dynamically evaluate execution via Process Reward
-    Models (prm_evaluations: list[ProcessRewardContract]) at each topological node.
+   .
 
     EPISTEMIC BOUNDS: The cognitive_steps dictionary is constrained to max_length=1000
     to cap memory footprint. The @model_validator reject_ghost_nodes mathematically enforces
@@ -9225,11 +9078,6 @@ class EpistemicSOPManifest(CoreasonBaseState):
         description="The exact topological flow between step_cids.",
     )
     # Note: chronological_flow_edges is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
-    prm_evaluations: list["ProcessRewardContract"] = Field(
-        json_schema_extra={"coreason_topological_exemption": True},
-        description="The strict array of Process Reward Contracts evaluating the logic.",
-        # Note: prm_evaluations is a structurally ordered sequence (Topological Exemption) and MUST NOT be sorted.
-    )
 
     @model_validator(mode="after")
     def reject_ghost_nodes(self) -> Self:
@@ -9243,37 +9091,6 @@ class EpistemicSOPManifest(CoreasonBaseState):
                 raise ValueError(f"Ghost node referenced in structural_grammar_hashes: {step_cid}")
         return self
 
-
-class ProcessRewardContract(CoreasonBaseState):
-    r"""
-    AGENT INSTRUCTION: Enforces the Step-Level Verification heuristics for Process Reward Models (PRMs) during non-monotonic reasoning searches and test-time compute.
-
-    CAUSAL AFFORDANCE: Authorizes the orchestrator to physically prune hallucinating ThoughtBranchState vectors from the LatentScratchpadReceipt if their logit probabilities drop below the viable threshold, emulating rigorous Beam Search pruning.
-
-    EPISTEMIC BOUNDS: Strictly bounds the search space geometry via `pruning_threshold` (`ge=0.0, le=1.0`) and mechanically caps State-Space Explosion through `max_backtracks_allowed` (`ge=0, le=18446744073709551615`).
-
-    MCP ROUTING TRIGGERS: Process Reward Model, Beam Search Pruning, Latent Trajectory, State-Space Explosion, A* Search
-
-    """
-
-    convergence_sla: DynamicConvergenceSLA | None = Field(
-        default=None,
-        description="The dynamic circuit breaker that halts the search when PRM variance converges, preventing VRAM waste.",
-    )
-    pruning_threshold: float = Field(
-        ge=0.0,
-        le=1.0,
-        description="If a ThoughtBranchState's prm_score falls below this threshold, the orchestrator MUST halt its generation.",
-    )
-    max_backtracks_allowed: int = Field(
-        le=18446744073709551615,
-        ge=0,
-        description="The absolute limit on how many times the agent can start a new branch before throwing a SystemFaultEvent.",
-    )
-    evaluator_matrix_name: Annotated[str, StringConstraints(max_length=2000)] | None = Field(
-        default=None,
-        description="The specific PRM model used to score the logic (e.g., 'math-prm-v2').",
-    )
 
 
 type QoSClassificationProfile = Literal["critical", "high", "interactive", "background_batch"]
@@ -11077,9 +10894,6 @@ class CognitiveAgentNodeProfile(CoreasonBaseState):
     escalation_policy: EscalationContract | None = Field(
         default=None, description="The mathematical boundary authorizing the agent to spin up Test-Time Compute."
     )
-    prm_policy: ProcessRewardContract | None = Field(
-        default=None, description="The ruleset governing how intermediate thoughts are scored and pruned."
-    )
     active_inference_policy: ActiveInferenceContract | None = Field(
         default=None,
         description="The formal contract demanding mathematical proof of Expected Information Gain before authorizing tool execution.",
@@ -11102,14 +10916,6 @@ class CognitiveAgentNodeProfile(CoreasonBaseState):
     anchoring_policy: AnchoringPolicy | None = Field(
         default=None,
         description="The declarative contract mathematically binding this agent to a core altruistic objective.",
-    )
-    grpo_reward_policy: EpistemicRewardGradientPolicy | None = Field(
-        default=None,
-        description="The RL post-training contract forcing the agent to evaluate traces against an implicit graph reward.",
-    )
-    emulation_profile: AdversarialEmulationProfile | None = Field(
-        default=None,
-        description="The adversarial emulation geometry composing kinematic noise and environmental spoofing for anti-bot trajectory evasion.",
     )
     gflownet_balance_policy: CognitiveDetailedBalanceContract | None = Field(
         default=None, description="Authorizes trajectory balance optimization during non-monotonic reasoning."
@@ -13337,104 +13143,6 @@ class CognitiveFormatContract(CoreasonBaseState):
         return self
 
 
-class EpistemicRewardGradientPolicy(CoreasonBaseState):
-    r"""
-    AGENT INSTRUCTION: Establishes the Group Relative Policy Optimization (GRPO) reward shaping ruleset, mathematically immunizing the swarm against Goodhart's Law and reward hacking.
-
-    CAUSAL AFFORDANCE: Projects a continuous penalty/reward gradient across extracted axiomatic paths, enforcing syntactic compliance through the format contract while simultaneously evaluating semantic/topological validity.
-
-    EPISTEMIC BOUNDS: Prevents reward hacking by scaling the logical validity score (R_path) via the `beta_path_weight` scalar (`ge=0.0, le=1.0`). Gated by a cryptographic `reference_graph_cid` CID.
-
-    MCP ROUTING TRIGGERS: GRPO, Reward Shaping, Goodhart's Law, Policy Gradient, Advantage Estimation
-
-    """
-
-    policy_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="CID for this specific reward configuration."
-    )
-    reference_graph_cid: Annotated[
-        str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
-    ] = Field(
-        description="The globally unique decentralized identifier (DID) anchoring the EpistemicDomainGraphManifest acting as the deterministic ground truth.",
-    )
-    format_contract: CognitiveFormatContract = Field(
-        description="The syntactic constraints the agent must follow to prevent reward zeroing."
-    )
-    beta_path_weight: float = Field(
-        le=1.0,
-        ge=0.0,
-        description="The scalar weight applied to the logical path validity (R_path) to prevent reward hacking.",
-    )
-    topological_scoring: TopologicalRewardContract | None = Field(
-        default=None, description="The continuous spatial/topological constraints governing path extraction validation."
-    )
-
-
-class CognitiveRewardEvaluationReceipt(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: The immutable cryptographic receipt of a GRPO Advantage Actor-Critic
-    evaluation step, permanently logging the mathematically verified advantage score of a
-    specific generation trajectory. As a ...Receipt suffix, this is an append-only coordinate
-    on the Merkle-DAG that the LLM must never hallucinate a mutation to.
-
-    CAUSAL AFFORDANCE: Unlocks policy gradient updates by providing the deterministic advantage
-    signal derived from the extracted_axioms of the source_generation_cid.
-
-    EPISTEMIC BOUNDS: The calculated_r_path is strictly clamped between [ge=0.0, le=1.0], and
-    the total_advantage_score is capped at le=100.0. The @model_validator physically guarantees
-    that the extracted_axioms array is deterministically sorted by the composite key
-    (source_concept_cid, directed_edge_class, target_concept_cid) to preserve RFC 8785 canonical
-    hashing across the distributed swarm.
-
-    MCP ROUTING TRIGGERS: Advantage Actor-Critic, Policy Gradient Update, Epistemic Reward,
-    Baseline Normalization, Reinforcement Learning
-    """
-
-    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-    )
-    timestamp: float = Field(
-        ge=0.0,
-        le=253402300799.0,
-        description="Causal Ancestry markers required to resolve decentralized event ordering.",
-    )
-
-    topology_class: Literal["cognitive_reward_evaluation"] = Field(default="cognitive_reward_evaluation")
-    source_generation_cid: Annotated[
-        str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
-    ] = Field(
-        description="The globally unique decentralized identifier (DID) anchoring the LLM's raw generated text trajectory.",
-    )
-    extracted_axioms: list[EpistemicAxiomState] = Field(
-        default_factory=list,
-        description="The specific axiomatic claims extracted exclusively from the bounded reasoning block.",
-    )
-    calculated_r_path: float = Field(
-        ge=0.0, le=1.0, description="The dense reasoning reward signal derived from the verified axioms."
-    )
-    total_advantage_score: float = Field(
-        le=100.0, description="The final computed GRPO advantage signal used to update the policy gradients."
-    )
-
-    @model_validator(mode="after")
-    def _enforce_canonical_sort(self) -> Self:
-        object.__setattr__(
-            self,
-            "extracted_axioms",
-            sorted(
-                self.extracted_axioms,
-                key=operator.attrgetter("source_concept_cid", "directed_edge_class", "target_concept_cid"),
-            ),
-        )
-
-        return self
-
 
 class CognitiveDetailedBalanceContract(CoreasonBaseState):
     r"""
@@ -14023,7 +13731,6 @@ type AnyStateEvent = Annotated[
     | EpistemicTelemetryEvent
     | CognitivePredictionReceipt
     | EpistemicAxiomVerificationReceipt
-    | CognitiveRewardEvaluationReceipt
     | EpistemicFlowStateReceipt
     | CausalExplanationEvent
     | IntentClassificationReceipt
@@ -14531,8 +14238,6 @@ EpistemicGroundedTaskManifest.model_rebuild()
 EpistemicCurriculumManifest.model_rebuild()
 ConstrainedDecodingPolicy.model_rebuild()
 CognitiveFormatContract.model_rebuild()
-EpistemicRewardGradientPolicy.model_rebuild()
-CognitiveRewardEvaluationReceipt.model_rebuild()
 CognitiveAgentNodeProfile.model_rebuild()
 CognitiveDetailedBalanceContract.model_rebuild()
 EpistemicFlowStateReceipt.model_rebuild()
@@ -14543,9 +14248,6 @@ LatentSchemaInferenceIntent.model_rebuild()
 HumanDirectiveIntent.model_rebuild()
 IntentClassificationReceipt.model_rebuild()
 ReasoningEngineeringPolicy.model_rebuild()
-KinematicNoiseProfile.model_rebuild()
-EnvironmentalSpoofingProfile.model_rebuild()
-AdversarialEmulationProfile.model_rebuild()
 ContinuousObservationState.model_rebuild()
 StreamingDisfluencyContract.model_rebuild()
 SpeculativeExecutionPolicy.model_rebuild()
