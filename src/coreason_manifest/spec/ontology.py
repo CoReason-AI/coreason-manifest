@@ -4092,7 +4092,7 @@ class ConstitutionalAmendmentIntent(CoreasonBaseState):
     )
     drift_event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
         Field(
-            description="The globally unique decentralized identifier (DID) anchoring the NormativeDriftEvent that justified triggering this proposal.",
+            description="The globally unique decentralized identifier (DID) anchoring the GuardrailViolationEvent that justified triggering this proposal.",
         )
     )
     proposed_patch: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
