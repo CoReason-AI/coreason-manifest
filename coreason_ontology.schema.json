@@ -219,28 +219,12 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing the\ndefinitive collapse of an MCDA evaluation, acting as a verified Outcome Reward Model\n(ORM) signal. As a ...Receipt suffix, this is an append-only coordinate on the\nMerkle-DAG.\n\nCAUSAL AFFORDANCE: Commits the calculated score and boolean passed verdict to the\nEpistemic Ledger, permanently binding the deterministic evaluation to the specific\ntarget_node_cid (NodeCIDState) and authorizing downstream policy updates.\n\nEPISTEMIC BOUNDS: The evaluation outcome is strictly bounded to an integer score\n(ge=0, le=100). The underlying deductive proof (reasoning) is physically capped at\nmax_length=2000. The entire receipt is cryptographically locked to the originating\nrubric_cid CID (128-char regex).\n\nMCP ROUTING TRIGGERS: Cryptographic Verdict, Deterministic Proof, Grading Execution,\nEpistemic Commitment, Audit Trail",
       "properties": {
         "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -1252,21 +1236,6 @@
           "title": "Event Cid",
           "type": "string"
         },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Prior Event Hash"
-        },
         "timestamp": {
           "maximum": 253402300799.0,
           "minimum": 0.0,
@@ -1374,28 +1343,12 @@
           "type": "string"
         },
         "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The RFC 8785 Canonical hash of the immediate causal ancestor, securing the Merkle-DAG.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "The precise temporal coordinate of the event realization.",
@@ -1642,28 +1595,12 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Encodes an asynchronous hardware interrupt or exogenous sensory spike that forces a premature probability wave collapse on an active generation trajectory.\n\nCAUSAL AFFORDANCE: Physically severs the continuous multimodal sequence of the `target_event_cid`, injecting the `retained_partial_payload` into the Epistemic Quarantine and forcing the orchestrator to execute the `epistemic_disposition`.\n\nEPISTEMIC BOUNDS: Topologically anchored to `target_event_cid` via a strict 128-char CID regex. The `retained_partial_payload` is volumetrically clamped by the `enforce_payload_topology` hook to prevent VRAM exhaustion.\n\nMCP ROUTING TRIGGERS: Asynchronous Interrupt, Generative Severing, Context Switching, Defeasible Disposition, Wave Collapse",
       "properties": {
         "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -1760,28 +1697,12 @@
           "type": "string"
         },
         "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -1833,28 +1754,12 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Bayesian Belief Updating and Pearlian Causal Tracing by synthesizing internal cognitive shifts into discrete, hashable facts.\n\nCAUSAL AFFORDANCE: Projects a synthesized conclusion into the shared topology, binding the new belief to `causal_attributions`.\n\nEPISTEMIC BOUNDS: Structural validation is enforced via nested schema instantiation. `payload` is volumetrically clamped by `@field_validator`. `quorum_signatures` prevents Sybil attacks via `@model_validator` `enforce_sybil_resistance`.\n\nMCP ROUTING TRIGGERS: Bayesian Belief Updating, Causal Tracing, Cognitive Synthesis, Merkle-DAG Coordinate, Non-Monotonic Leap",
       "properties": {
         "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -2159,28 +2064,12 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents the definitive algorithmic circuit breaker (Optimal Stopping boundary) triggered the exact millisecond thermodynamic token burn mathematically exceeds the locked Proof-of-Stake escrow.\n\nCAUSAL AFFORDANCE: Instantly collapses the active Latent Scratchpad trajectory and physically severs the kinetic execution loop, preventing Sybil griefing attacks against the swarm's compute pool.\n\nEPISTEMIC BOUNDS: Cryptographically targets the specific `exhausted_escrow_cid` and the exact `final_burn_receipt_cid` (CID regex) that pushed the thermodynamic ledger into a negative state, providing an undeniable audit trail.\n\nMCP ROUTING TRIGGERS: Optimal Stopping Theory, Escrow Exhaustion, Sybil Resistance, Algorithmic Circuit Breaker, Generation Halting",
       "properties": {
         "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -2552,28 +2441,12 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing the\nmacroscopic factorization of a collective swarm outcome into its constituent causal\ncomponents. As an ...Event suffix, this is an append-only coordinate on the\nMerkle-DAG.\n\nCAUSAL AFFORDANCE: Commits the system-level CollectiveIntelligenceProfile and the\nindividual ShapleyAttributionReceipt array to the Epistemic Ledger, finalizing the\ncredit assignment for a target_outcome_event_cid.\n\nEPISTEMIC BOUNDS: The target_outcome_event_cid is locked to a 128-char CID regex. The\n@model_validator mathematically enforces deterministic canonical hashing by sorting the\nagent_attributions array by target_node_cid (NodeCIDState), guaranteeing RFC 8785\nalignment.\n\nMCP ROUTING TRIGGERS: Causal Factorization, Epistemic Ledger Commit, Credit Assignment,\nMacroscopic Explanation, Deterministic Sorting",
       "properties": {
         "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -2679,28 +2552,12 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Lyapunov Stability and distributed Control Theory to guarantee that the neurosymbolic network returns to a deterministic equilibrium when facing catastrophic variance. As an ...Event suffix, this is a cryptographically frozen coordinate.\n\nCAUSAL AFFORDANCE: Physically severs the active execution thread for the targeted node, acting as a hardware guillotine that immediately halts out-of-memory cascades, runaway generative loops, or API rate-limit breaches.\n\nEPISTEMIC BOUNDS: The fault perimeter is mathematically restricted to a specific `target_node_cid` (`NodeCIDState`). To prevent log-poisoning and VRAM exhaustion during the crash, the `error_signature` is strictly clamped at `max_length=2000`.\n\nMCP ROUTING TRIGGERS: Lyapunov Stability, Control Theory, Circuit Breaker, Cascading Failure, State Equilibrium",
       "properties": {
         "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -3451,28 +3308,12 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Captures the pre-verification predictive distribution (Softmax logit outputs) of an LLM across a latent conceptual boundary.\n\nCAUSAL AFFORDANCE: Exposes the raw generative probability manifold to the orchestrator, enabling external mechanistic solvers to evaluate token divergence before crystallizing the probability wave into a permanent epistemic axiom.\n\nEPISTEMIC BOUNDS: Mathematical isolation enforced by binding predictions to a strict `source_chain_cid` CID. The prediction vector is physically capped by `predicted_top_k_tokens` (string `max_length=255`) to prevent unbounded tensor serialization.\n\nMCP ROUTING TRIGGERS: Predictive Distribution, Softmax Logits, Generative Manifold, Probability Wave Collapse, Entropy",
       "properties": {
         "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -4952,28 +4793,12 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Employs Counterfactual Regret Minimization (CFR) and Pearlian Do-Calculus to execute simulated alternative timelines for policy refinement.\n\nCAUSAL AFFORDANCE: Commits a simulated causal divergence (intervention) into the ledger, mathematically quantifying the opportunity cost (regret) to backpropagate stateless adjustments to the routing policy.\n\nEPISTEMIC BOUNDS: Anchored to `historical_event_cid` (128-char CID). Expected utilities and `epistemic_regret` are physically capped at `le=18446744073709551615.0`. `policy_mutation_gradients` restrict tensor adjustments.\n\nMCP ROUTING TRIGGERS: Counterfactual Regret Minimization, Pearlian Do-Calculus, Opportunity Cost, Alternative Timeline, Policy Gradient Update",
       "properties": {
         "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -5102,21 +4927,6 @@
           "title": "Event Cid",
           "type": "string"
         },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Prior Event Hash"
-        },
         "timestamp": {
           "maximum": 253402300799.0,
           "minimum": 0.0,
@@ -5232,28 +5042,12 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing the successful execution of an SemanticFlowPolicy redaction on the Merkle-DAG. Enforced as fully immutable via `ConfigDict(frozen=True)`.\n\nCAUSAL AFFORDANCE: Unlocks strict audit compliance by mathematically mapping the optional toxic `pre_redaction_hash` to the mandatory safe `post_redaction_hash`, proving non-repudiation via the `applied_policy_cid`.\n\nEPISTEMIC BOUNDS: Temporal geometry strictly clamped to `redaction_timestamp_unix_nano` (`ge=0, le=253402300799000000000`). Both hashes are locked to immutable SHA-256 hexadecimal bounds (`^[a-f0-9]{64}$`). `pre_redaction_hash` is optional (`default=None`) for isolated audit vaults.\n\nMCP ROUTING TRIGGERS: Chain of Custody, Cryptographic Provenance, Merkle-DAG Audit, Non-Repudiation, Data Isomorphism",
       "properties": {
         "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -5611,28 +5405,12 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes the binary attack relation in Dung's Abstract Argumentation Framework. As an ...Event suffix, this is an append-only, cryptographically frozen historical fact on the Merkle-DAG.\n\nCAUSAL AFFORDANCE: Projects an undercutting or rebutting defeater from a source claim against a target claim. If mathematically validated, it physically triggers a DefeasibleCascadeEvent to sever all downstream nodes relying on the target.\n\nEPISTEMIC BOUNDS: Strictly bounds the attack geometry using AttackVectorProfile enums (`Literal[\"rebuttal\", \"undercutter\", \"underminer\"]`). Source and target mappings are locked to 128-character CIDs, preventing unbounded graph traversals.\n\nMCP ROUTING TRIGGERS: Undercutting Defeater, Dialectical Edge, Truth Maintenance System, Bipartite Mapping, Non-Monotonic Retraction",
       "properties": {
         "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -7111,28 +6889,12 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements automated Natural Language Inference (NLI) and Entailment Verification to mechanically quarantine hallucinated tokens. As a ...Receipt suffix, it represents an immutable cryptographic verdict.\n\nCAUSAL AFFORDANCE: Acts as the definitive logic gate for the Truth Maintenance System. If verification succeeds, it physically unlocks the promotion of the source prediction into the global semantic knowledge graph.\n\nEPISTEMIC BOUNDS: Factual alignment is geometrically bounded by sequence_similarity_score (ge=0.0, le=1.0). The @model_validator enforce_epistemic_quarantine deliberately crashes instantiation if fact_score_passed is False, physically severing the DAG to prevent epistemic contagion. Structural integrity mathematically demands that the `zero_trust_receipt_cid` be present to prove the generative extraction bypassed prompt injection boundaries.\n\nMCP ROUTING TRIGGERS: Entailment Verification, Natural Language Inference, Truth Maintenance System, Epistemic Quarantine, Hallucination Filtering",
       "properties": {
         "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -7401,28 +7163,12 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: An immutable cryptographic coordinate recording the successful\nfactorization of a terminal reward into a fractional flow value across a continuous\nCognitiveReasoningTraceState trajectory. As a ...Receipt suffix, this is an append-only\ncoordinate on the Merkle-DAG.\n\nCAUSAL AFFORDANCE: Physically anchors the scalar backpropagation of a factored reward\nto a specific source_trajectory_cid, unlocking global flow consistency calculations\nacross the distributed swarm. The terminal_reward_factorized boolean confirms\nsuccessful reward decomposition.\n\nEPISTEMIC BOUNDS: Flow magnitude is geometrically bounded by estimated_flow_value\n(ge=0.0, le=18446744073709551615.0) to prevent exploding gradients during policy updates.\nCryptographically mapped to a rigid 128-char source_trajectory_cid CID.\n\nMCP ROUTING TRIGGERS: Trajectory Balance, Reward Factorization, Flow Network Receipt,\nScalar Backpropagation, Acyclic Path",
       "properties": {
         "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -7587,7 +7333,7 @@
     },
     "EpistemicLedgerState": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Event Sourcing and the Merkle-DAG structure as the absolute, immutable source of truth for the swarm, fully partitioned from volatile memory.\n\nCAUSAL AFFORDANCE: Permanently crystallizes validated events into the `history` log. Applies Truth Maintenance, context eviction, and tracks active `DefeasibleCascadeEvents` and `RollbackIntents`.\n\nEPISTEMIC BOUNDS: The `@model_validator` `_enforce_canonical_sort` deterministically sorts history by timestamp, checkpoints by ID, and active cascades—guaranteeing invariant RFC 8785 canonical hashing. Validation prevents epistemic paradoxes (child before parent).\n\nMCP ROUTING TRIGGERS: Event Sourcing, Merkle-DAG, Immutable Ledger, Truth Crystallization, Chronological Sort",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Event Sourcing as the absolute, immutable source of truth for the swarm, fully partitioned from volatile memory. Provenance is delegated to Sigstore (Cosign + Rekor transparency log) via the CI/CD pipeline.\n\nCAUSAL AFFORDANCE: Permanently crystallizes validated events into the `history` log. Applies Truth Maintenance, context eviction, and tracks active `DefeasibleCascadeEvents` and `RollbackIntents`.\n\nEPISTEMIC BOUNDS: The `@model_validator` `_enforce_canonical_sort` deterministically sorts history by timestamp, checkpoints by ID, and active cascades—guaranteeing invariant RFC 8785 canonical hashing. Validation prevents epistemic paradoxes (child before parent).\n\nMCP ROUTING TRIGGERS: Event Sourcing, Sigstore, Rekor Transparency Log, Immutable Ledger, Truth Crystallization, Chronological Sort",
       "properties": {
         "history": {
           "description": "An append-only, cryptographic ledger of state events. [SITD-Alpha: Non-Monotonic Epistemic Quarantine Isometry]",
@@ -7696,28 +7442,12 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines a purely out-of-band semantic logging vector, structurally isolated from the rigorous causal constraints of the Dapper trace tree.\n\nCAUSAL AFFORDANCE: Emits asynchronous telemetry for human-in-the-loop debugging or peripheral auditing without mutating the active Epistemic Ledger's topological state.\n\nEPISTEMIC BOUNDS: Temporal reality clamped by `timestamp`. Severity strictly masked by a Literal automaton `[\"DEBUG\", \"INFO\", \"WARNING\", \"ERROR\", \"CRITICAL\"]`. Message bounded to `max_length=2000`.\n\nMCP ROUTING TRIGGERS: Out-of-Band Telemetry, Asynchronous Logging, Severity Masking, Peripheral Audit, Ephemeral Context",
       "properties": {
         "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
         },
         "topology_class": {
           "const": "epistemic_log",
@@ -7770,28 +7500,12 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents Hippocampal-Neocortical Consolidation, proving the successful extraction and transfer of generalized knowledge from short-term episodic traces into the permanent semantic graph.\n\nCAUSAL AFFORDANCE: Emits a permanent Merkle-DAG coordinate (`crystallized_semantic_node_cid`) that downstream agents can zero-shot reference, severing the need to reload raw source logs into active context.\n\nEPISTEMIC BOUNDS: Mathematical chain of custody bound to the strictly sorted array of `source_episodic_event_cids`. Token efficiency proven by `compression_ratio` float (`le=1.0`) guaranteeing Shannon Entropy reduction.\n\nMCP ROUTING TRIGGERS: Hippocampal Consolidation, Knowledge Distillation, Semantic Memory, Shannon Entropy Compression, Epistemic Promotion",
       "properties": {
         "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -8072,28 +7786,12 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The mathematical backpropagation signal triggered when the Deterministic Compiler rejects a stochastic manifold. Quantifies the rejection and provides a mutation gradient.\n\nCAUSAL AFFORDANCE: Instructs the LLM ensemble on how to perturb the Upper Confidence Bound (UCB) during the next MCTS generation attempt by mathematically quantifying the error.\n\nEPISTEMIC BOUNDS: Kullback-Leibler divergence is strictly non-negative. A negative mathematical distance is a paradox and raises a ValueError.\n\nMCP ROUTING TRIGGERS: Rejection Receipt, Free Energy Feedback, MCTS Backpropagation, Variational Free Energy, Mutation Gradient",
       "properties": {
         "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -8420,21 +8118,6 @@
           "title": "Event Cid",
           "type": "string"
         },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Prior Event Hash"
-        },
         "timestamp": {
           "maximum": 253402300799.0,
           "minimum": 0.0,
@@ -8485,28 +8168,12 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Human-in-the-Loop (HITL) Supervisory Control Theory and Epistemic Regret tracking to measure out-of-band human physical attention kinematics.\n\nCAUSAL AFFORDANCE: Emits passive structural telemetry to update retrieval gradients and Bayesian priors based on human spatial interaction, without halting the underlying execution DAG.\n\nEPISTEMIC BOUNDS: The human interaction is rigidly confined to the `interaction_modality` Literal automaton. Temporal liveness of attention is bounded by `dwell_duration_ms` (`ge=0, le=18446744073709551615`). Target is locked to `target_node_cid` CID.\n\nMCP ROUTING TRIGGERS: Epistemic Regret, Supervisory Control Theory, Human-in-the-Loop, Dwell Time, Spatial Telemetry",
       "properties": {
         "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -8816,28 +8483,12 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact proving the flawless execution of an EpistemicZeroTrustContract.\n\nCAUSAL AFFORDANCE: Permits the orchestrator to append the transmuted payload to the global immutable ledger, certifying that prompt injection was structurally impossible and AST contracts were fulfilled.\n\nEPISTEMIC BOUNDS: `firewall_breach_detected` must strictly be False. Hashes are bounded to RFC 8785 canonicalization requirements.\n\nMCP ROUTING TRIGGERS: Cryptographic Ledger, Formal Verification Receipt, Immutable Provenance, Hash Canonicalization, Data Masking",
       "properties": {
         "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -9616,28 +9267,12 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Nassim Taleb's Black Swan Theory by injecting\nOut-of-Distribution (OOD) epistemic shocks into the causal graph. As an ...Event suffix,\nthis is an append-only coordinate on the Merkle-DAG that the LLM must never hallucinate\na mutation to.\n\nCAUSAL AFFORDANCE: Forces the active reasoning topology to process a high-entropy\nsynthetic_payload, actively testing the swarm's non-monotonic truth maintenance,\ndefeasible reasoning, and overall topological resilience.\n\nEPISTEMIC BOUNDS: Cryptographically targets a specific Merkle root via target_node_hash\n(strict SHA-256 pattern ^[a-f0-9]{64}$) and bounds the Variational Free Energy via\nbayesian_surprise_score [ge=0.0, le=1.0, allow_inf_nan=False]. The @model_validator\nphysically guarantees execution is halted if the attached escrow is not strictly positive.\n\nMCP ROUTING TRIGGERS: Black Swan Theory, Out-of-Distribution Shock, Variational Free\nEnergy, Exogenous Perturbation, Epistemic Stress Test",
       "properties": {
         "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -10026,28 +9661,12 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing the unified outcome of a formal logic evaluation or theorem proof.\n\nCAUSAL AFFORDANCE: Unlocks System 2 remediation loops or graph progression by providing deterministic, algebraically verified execution traces and truth values.\n\nEPISTEMIC BOUNDS: Cryptographically anchored to the Merkle-DAG. The boolean 'is_proved' definitively represents mathematical truth.\n\nMCP ROUTING TRIGGERS: System 2 Remediation, Mathematical Truth, Proof Verification, Epistemic Ledger",
       "properties": {
         "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The RFC 8785 Canonical hash of the immediate causal ancestor.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "The precise temporal coordinate of the event realization.",
@@ -10540,28 +10159,12 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Tracks a deterministic security boundary violation emitted by the NeMo Guardrails proxy. This event is a frozen historical fact representing a failed cryptographic or semantic check.\n\nCAUSAL AFFORDANCE: Triggers an immediate suspension of the active execution trajectory and publishes a high-severity alert to the telemetry broker for remediation.\n\nEPISTEMIC BOUNDS: The event must include the specific HTTP status code (e.g., 401, 403, 406, 422) and the opaque violation manifest emitted by the proxy.\n\nMCP ROUTING TRIGGERS: Security, Guardrails, Data Loss Prevention, Policy Violation, Telemetry",
       "properties": {
         "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -10880,28 +10483,12 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Instantiates an abductive reasoning branch governed by Popperian Falsification and Bayesian updating on the Merkle-DAG.\n\nCAUSAL AFFORDANCE: Commits a formalized causal premise into the EpistemicLedgerState, unlocking the orchestration of empirical testing via active inference to falsify or verify the embedded causal model.\n\nEPISTEMIC BOUNDS: `bayesian_prior` is clamped `[ge=0.0, le=1.0]`. Identity is cryptographically locked via `hypothesis_cid` (128-char CID). `falsification_conditions` deterministically sorted by `@model_validator`.\n\nMCP ROUTING TRIGGERS: Abductive Reasoning, Popperian Falsification, Bayesian Prior, Causal Hypothesis, Epistemic Commitment",
       "properties": {
         "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -11176,28 +10763,12 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing the non-monotonic\ncollapse of a high-entropy human natural language string into a discrete, mathematically\nbounded routing heuristic. As a ...Receipt suffix, this is an append-only Merkle-DAG coordinate.\n\nCAUSAL AFFORDANCE: Commits the LLM's Softmax classification verdict to the Epistemic Ledger,\nauthorizing the TaxonomicRoutingPolicy or router gate to physically execute the targeted\ntopology or sub-agent.\n\nEPISTEMIC BOUNDS: The raw_input_string is physically clamped (max_length=100000) to prevent\ncontext window buffer overflows. The classification confidence is strictly bound to a\nnormalized float (ge=0.0, le=1.0).\n\nMCP ROUTING TRIGGERS: Intent Classification, Softmax Gating, High-Entropy Parsing,\nRouting Heuristic, Semantic Wave Collapse",
       "properties": {
         "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -11559,28 +11130,12 @@
           "type": "string"
         },
         "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -12721,28 +12276,12 @@
         },
         "event_cid": {
           "default": "mcp_tool_cid",
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The RFC 8785 Canonical hash of the immediate causal ancestor event. Null for genesis nodes.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "default": 0.0,
@@ -13437,7 +12976,7 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: An append-only, cryptographically frozen coordinate representing the verifiable output of a MechanisticAuditContract.\n\nCAUSAL AFFORDANCE: Commits the extracted `SaeFeatureActivationState` matrix (`hook_activations`) to the Merkle-DAG. The `causal_scrubbing_applied` boolean mathematically proves that the orchestrator actively resampled or ablated the circuit to confirm direct causal responsibility.\n\nEPISTEMIC BOUNDS: Cryptographic integrity structurally anchored by `audit_cid` (128-char CID regex). The `@model_validator` sorts each `SaeFeatureActivationState` list within `hook_activations` by `feature_index`, guaranteeing zero-variance RFC 8785 Merkle-DAG hashing.\n\nMCP ROUTING TRIGGERS: Causal Scrubbing, Epistemic Provenance, Mechanistic Audit, RFC 8785 Canonicalization, Cryptographic Brain-Scan, TransformerLens, SAELens",
       "properties": {
         "audit_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
@@ -13942,28 +13481,12 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes the ingestion of Bayesian Evidence ($E$) by capturing the raw, lossless semantic output from a ToolInvocationEvent or environmental shift.\n\nCAUSAL AFFORDANCE: Injects verified exogenous truth into the EpistemicLedgerState. The payload is linked to its source via `triggering_invocation_cid`.\n\nEPISTEMIC BOUNDS: The `payload` dictionary is physically constrained against OOM exhaustion via the `@field_validator` `enforce_payload_topology`. Hardware attestation and zero-knowledge proofs provide cryptographic integrity.\n\nMCP ROUTING TRIGGERS: Bayesian Evidence, Neurosymbolic Binding, Exogenous Truth, Epistemic Grounding, Payload Topological Bounding",
       "properties": {
         "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -14253,22 +13776,6 @@
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The RFC 8785 Canonical hash of the immediate causal ancestor.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "The precise temporal coordinate of the event realization.",
@@ -14800,28 +14307,12 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing the absolute Write-Ahead Logging (WAL) serialization of an ephemeral state differential to durable cold-storage.\n\nCAUSAL AFFORDANCE: Commits the internal `committed_temporal_crdt_cid` into the macroscopic Apache Iceberg or Delta Lake backing store, yielding a verifiable `lakehouse_snapshot_cid` to guarantee Eventual Consistency.\n\nEPISTEMIC BOUNDS: `lakehouse_snapshot_cid` and `committed_temporal_crdt_cid` are rigorously clamped by `max_length=128` and a strict CID regex (`^[a-zA-Z0-9_.:-]+$`), mathematically preventing path traversal injections.\n\nMCP ROUTING TRIGGERS: Event Sourcing, Write-Ahead Logging, Two-Phase Commit, Lakehouse Serialization, State Differential Flush",
       "properties": {
         "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -14888,22 +14379,6 @@
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The RFC 8785 Canonical hash of the immediate causal ancestor.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "The precise temporal coordinate of the event realization.",
@@ -15342,28 +14817,12 @@
           "type": "string"
         },
         "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -15967,21 +15426,6 @@
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "maximum": 253402300799.0,
@@ -16861,28 +16305,12 @@
           "type": "string"
         },
         "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The RFC 8785 Canonical hash of the immediate causal ancestor, securing the Merkle-DAG.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "The precise temporal coordinate of the event realization.",
@@ -18479,28 +17907,12 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as a structural terminal state mapping a Byzantine Fault or catastrophic topological execution collapse within the distributed system.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's circuit breakers to completely sever the active execution branch and quarantine the associated probability wave, preventing failure contagion.\n\nEPISTEMIC BOUNDS: Inherits strict temporal and spatial bounds from CoreasonBaseState. Its semantic geometry is permanently constrained to the strict Literal automaton `[\"system_fault\"]`.\n\nMCP ROUTING TRIGGERS: Byzantine Fault Tolerance, Circuit Breaker, Terminal State, Execution Collapse, Fault Isolation",
       "properties": {
         "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -19529,28 +18941,12 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Landauer's Principle of thermodynamic computing within the neurosymbolic network, serving as a lock-free, cryptographically frozen record of irreversible token and energy expenditure.\n\nCAUSAL AFFORDANCE: Deducts exact computational magnitude from the agent's localized Proof-of-Stake (PoS) execution escrow, progressively narrowing its available search depth. Bound to causal origin via `tool_invocation_cid`.\n\nEPISTEMIC BOUNDS: Integer bounds (`ge=0, le=18446744073709551615`) on `input_tokens`, `output_tokens`, and `burn_magnitude` mathematically prevent integer overflow and fractional bypasses during ledger tallying.\n\nMCP ROUTING TRIGGERS: Landauer's Principle, Thermodynamic Compute, Token Burn, Resource Exhaustion, Lock-Free Tallying",
       "properties": {
         "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
@@ -19612,28 +19008,12 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Judea Pearl's Do-Operator ($do(X=x)$) on an external or internal toolset, acting as an A Priori Kinetic Commitment.\n\nCAUSAL AFFORDANCE: Transitions the swarm from internal epistemic deliberation to kinetic execution. Targets a specific `tool_name` with bound parameters, demanding a valid `agent_attestation` identity.\n\nEPISTEMIC BOUNDS: `parameters` payload is volumetrically capped by `enforce_payload_topology`. To prevent infinite compute loops, `authorized_budget_magnitude` is mandated `ge=1`. `zk_proof` serves as mathematical authorization proof.\n\nMCP ROUTING TRIGGERS: Pearlian Do-Operator, Kinetic Commitment, Active Inference, Thermodynamic Escrow, Zero-Trust Actuation",
       "properties": {
         "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
           "title": "Event Cid",
           "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
         },
         "timestamp": {
           "description": "Causal Ancestry markers required to resolve decentralized event ordering.",

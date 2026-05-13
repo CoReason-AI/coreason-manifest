@@ -124,13 +124,9 @@ export type StructuralType = string;
  */
 export type TimeoutAction = "rollback" | "proceed_default" | "terminate";
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type EventCid = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
@@ -3199,30 +3195,21 @@ export type AddSet = NodeCIDState[];
 export type TerminateSet = TemporalEdgeInvalidationIntent[];
 export type TopologyClass83 = "mcp_tool_definition";
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type EventCid1 = string;
-/**
- * The RFC 8785 Canonical hash of the immediate causal ancestor event. Null for genesis nodes.
- */
-export type PriorEventHash1 = string | null;
 export type Timestamp1 = number;
 export type Name = string;
 export type Description9 = string;
 export type EventCid2 = string;
-export type PriorEventHash2 = string | null;
 export type Timestamp2 = number;
 export type TopologyClass84 = "crosswalk_resolution";
 export type ReceiptCid = string;
 export type TargetGraphCid3 = string;
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type EventCid3 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash3 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
@@ -3252,13 +3239,9 @@ export type RemediationEpochsConsumed = number;
  */
 export type TransmutedPayloadHash = string;
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type EventCid4 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash4 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
@@ -3347,7 +3330,7 @@ export type TemporalDurationMs = number;
  */
 export type SalienceThresholdBreached = boolean;
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type AuditCid = string;
 /**
@@ -3397,13 +3380,9 @@ export type DecayThreshold = number;
  */
 export type MaxLookbackWindow = number;
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type EventCid5 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash5 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
@@ -3449,13 +3428,9 @@ export type TotalLatentTokens = number;
  */
 export type QuorumSignatures = string[];
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type EventCid6 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash6 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
@@ -3466,13 +3441,9 @@ export type Timestamp6 = number;
 export type TopologyClass90 = "system_fault";
 export type TopologyClass91 = "atomic_proposition";
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type EventCid7 = string;
-/**
- * The RFC 8785 Canonical hash of the immediate causal ancestor, securing the Merkle-DAG.
- */
-export type PriorEventHash7 = string | null;
 /**
  * The precise temporal coordinate of the event realization.
  */
@@ -3532,10 +3503,6 @@ export type TopologyClass92 = "post_coordinated_concept";
  */
 export type EventCid8 = string;
 /**
- * The RFC 8785 Canonical hash of the immediate causal ancestor.
- */
-export type PriorEventHash8 = string | null;
-/**
  * The precise temporal coordinate of the event realization.
  */
 export type Timestamp8 = number;
@@ -3552,7 +3519,6 @@ export type ManifoldAlignmentMetricProfile1 = "gromov_wasserstein" | "earth_move
  */
 export type IsometryScore = number;
 export type EventCid9 = string;
-export type PriorEventHash9 = string | null;
 export type Timestamp9 = number;
 export type TopologyClass93 = "artifact_corruption";
 /**
@@ -3562,13 +3528,9 @@ export type ArtifactCid = string;
 export type CorruptionClass = "drm_locked" | "malformed_bytes" | "ocr_failure" | "unsupported_format";
 export type DiagnosticHash = string;
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type EventCid10 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash10 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
@@ -3616,13 +3578,9 @@ export type LatentVariables = string[];
  */
 export type CausalEdges1 = CausalDirectedEdgeState[];
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type EventCid11 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash11 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
@@ -3649,13 +3607,9 @@ export type RetainedPartialPayload =
  */
 export type EpistemicDisposition = "discard" | "retain_as_context" | "mark_as_falsified";
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type EventCid12 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash12 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
@@ -3685,13 +3639,9 @@ export type ExpectedUtilitySimulated = number;
  */
 export type EpistemicRegret = number;
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type EventCid13 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash13 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
@@ -3709,13 +3659,9 @@ export type ToolName1 = string;
  */
 export type AuthorizedBudgetMagnitude = number;
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type EventCid14 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash14 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
@@ -3737,13 +3683,9 @@ export type CrystallizedSemanticNodeCid = string;
  */
 export type CompressionRatio = number;
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type EventCid15 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash15 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
@@ -3765,13 +3707,9 @@ export type CommittedTemporalCrdtCid = string;
  */
 export type TargetTableUri = string;
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type EventCid16 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash16 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
@@ -3797,13 +3735,9 @@ export type OutputTokens = number;
  */
 export type BurnMagnitude = number;
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type EventCid17 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash17 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
@@ -3821,13 +3755,9 @@ export type ExhaustedEscrowCid = string;
  */
 export type FinalBurnReceiptCid = string;
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type EventCid18 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash18 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
@@ -3849,13 +3779,9 @@ export type TargetNodeCid = string;
  */
 export type DwellDurationMs = number | null;
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type EventCid19 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash19 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
@@ -3868,13 +3794,9 @@ export type TargetSourceConcept = string;
  */
 export type PredictedTopKTokens = [string, ...string[]];
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type EventCid20 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash20 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
@@ -3888,13 +3810,9 @@ export type FactScorePassed = boolean;
  */
 export type ZeroTrustReceiptCid1 = string | null;
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type EventCid21 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash21 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
@@ -3913,13 +3831,9 @@ export type EstimatedFlowValue = number;
  */
 export type TerminalRewardFactorized = boolean;
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type EventCid22 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash22 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
@@ -3965,13 +3879,9 @@ export type ConfidenceIntervalUpper = number;
  */
 export type AgentAttributions = ShapleyAttributionReceipt[];
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type EventCid23 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash23 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
@@ -3998,13 +3908,9 @@ export type ConfidenceScore1 = number;
 export type RoutingPolicyCid = string | null;
 export type TopologyClass108 = "semantic_relational_record";
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type EventCid24 = string;
-/**
- * The RFC 8785 Canonical hash of the immediate causal ancestor, securing the Merkle-DAG.
- */
-export type PriorEventHash24 = string | null;
 /**
  * The precise temporal coordinate of the event realization.
  */
@@ -4025,10 +3931,6 @@ export type TopologyClass109 = "ontological_reification";
  * Cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
 export type EventCid25 = string;
-/**
- * The RFC 8785 Canonical hash of the immediate causal ancestor.
- */
-export type PriorEventHash25 = string | null;
 /**
  * The precise temporal coordinate of the event realization.
  */
@@ -4054,13 +3956,9 @@ export type TransformationMechanismProfile =
  */
 export type IsLatentInference = boolean;
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type EventCid26 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash26 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
@@ -4074,13 +3972,9 @@ export type TopologyClass110 = "circuit_breaker_event";
  */
 export type ErrorSignature = string;
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type EventCid27 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash27 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
@@ -4106,13 +4000,9 @@ export type BayesianSurpriseScore1 = number;
  */
 export type LockedMagnitude = number;
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type EventCid28 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash28 = string | null;
 /**
  * Discriminator type for a log event.
  */
@@ -4135,13 +4025,9 @@ export type TelemetryScalarState = string | number | boolean | null;
  */
 export type TopologyClass113 = "verdict";
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type EventCid29 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash29 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
@@ -4179,13 +4065,9 @@ export type DagNodeNonce = string;
  */
 export type LivenessChallengeHash = string;
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type EventCid30 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash30 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
@@ -4216,13 +4098,9 @@ export type PostRedactionHash = string;
  */
 export type RedactionTimestampUnixNano = number;
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type EventCid31 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash31 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
@@ -4241,13 +4119,9 @@ export type SourceClaimCid = string;
  */
 export type TargetClaimCid = string;
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type EventCid32 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash32 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
@@ -4259,13 +4133,9 @@ export type ViolatedAlgebraicConstraint = string;
 export type KlDivergenceToValidity = number;
 export type StochasticMutationGradient = string;
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type EventCid33 = string;
-/**
- * The RFC 8785 Canonical hash of the immediate causal ancestor.
- */
-export type PriorEventHash33 = string | null;
 /**
  * The precise temporal coordinate of the event realization.
  */
@@ -4292,13 +4162,9 @@ export type ExtractedBindings = {
 export type TopologyClass118 = "belief_modulation";
 export type ReceiptCid2 = string;
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type EventCid34 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash34 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
@@ -4308,13 +4174,9 @@ export type SeveredEdgeCids = string[];
 export type TopologyClass119 = "rdf_export_receipt";
 export type ExportCid1 = string;
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type EventCid35 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash35 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
@@ -4323,7 +4185,6 @@ export type SerializedPayload = string;
 export type RdfTripleCount = number;
 export type Sha256GraphHash = string;
 export type EventCid36 = string;
-export type PriorEventHash36 = string | null;
 export type Timestamp36 = number;
 export type TopologyClass120 = "epistemic_starvation";
 /**
@@ -4339,7 +4200,6 @@ export type FailedCitations = EvidentiaryCitationState[];
  */
 export type DiagnosticReason = string;
 export type EventCid37 = string;
-export type PriorEventHash37 = string | null;
 export type Timestamp37 = number;
 export type TopologyClass121 = "sparql_query_result";
 /**
@@ -4371,13 +4231,9 @@ export type TokensBurned = number;
  */
 export type HumanAttestationSignature = string | null;
 /**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
 export type EventCid38 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash38 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
@@ -6010,7 +5866,6 @@ export interface EpistemicProxyStateAny {
  */
 export interface AdjudicationReceipt {
   event_cid: EventCid;
-  prior_event_hash?: PriorEventHash;
   timestamp: Timestamp;
   topology_class?: TopologyClass1;
   rubric_cid: RubricCid;
@@ -10721,7 +10576,6 @@ export interface VectorClock {
 export interface MCPToolDefinition {
   topology_class?: TopologyClass83;
   event_cid?: EventCid1;
-  prior_event_hash?: PriorEventHash1;
   timestamp?: Timestamp1;
   name: Name;
   description: Description9;
@@ -10746,7 +10600,6 @@ export interface Inputschema {
  */
 export interface CrosswalkResolutionReceipt {
   event_cid: EventCid2;
-  prior_event_hash?: PriorEventHash2;
   timestamp: Timestamp2;
   topology_class?: TopologyClass84;
   receipt_cid: ReceiptCid;
@@ -10791,7 +10644,6 @@ export interface DempsterShaferBeliefVector1 {
  */
 export interface EpistemicZeroTrustReceipt {
   event_cid: EventCid3;
-  prior_event_hash?: PriorEventHash3;
   timestamp: Timestamp3;
   topology_class?: TopologyClass85;
   intent_reference_cid: IntentReferenceCid;
@@ -10813,7 +10665,6 @@ export interface EpistemicZeroTrustReceipt {
  */
 export interface ObservationEvent {
   event_cid: EventCid4;
-  prior_event_hash?: PriorEventHash4;
   timestamp: Timestamp4;
   topology_class?: TopologyClass86;
   payload: Payload;
@@ -11017,7 +10868,6 @@ export interface StreamingDisfluencyContract {
  */
 export interface BeliefMutationEvent {
   event_cid: EventCid5;
-  prior_event_hash?: PriorEventHash5;
   timestamp: Timestamp5;
   topology_class?: TopologyClass89;
   payload: Payload1;
@@ -11132,7 +10982,6 @@ export interface LatentScratchpadReceipt {
  */
 export interface SystemFaultEvent {
   event_cid: EventCid6;
-  prior_event_hash?: PriorEventHash6;
   timestamp: Timestamp6;
   topology_class?: TopologyClass90;
 }
@@ -11150,7 +10999,6 @@ export interface SystemFaultEvent {
 export interface AtomicPropositionState {
   topology_class?: TopologyClass91;
   event_cid: EventCid7;
-  prior_event_hash?: PriorEventHash7;
   timestamp: Timestamp7;
   proposition_cid: PropositionCid;
   rhetorical_role: RhetoricalStructureProfile;
@@ -11191,7 +11039,6 @@ export interface EmpiricalStatisticalProfile {
 export interface PostCoordinatedSemanticState {
   topology_class?: TopologyClass92;
   event_cid: EventCid8;
-  prior_event_hash?: PriorEventHash8;
   timestamp: Timestamp8;
   concept_cid: ConceptCid;
   /**
@@ -11221,7 +11068,6 @@ export interface ContextualModifiers {
  */
 export interface ArtifactCorruptionEvent {
   event_cid: EventCid9;
-  prior_event_hash?: PriorEventHash9;
   timestamp: Timestamp9;
   topology_class?: TopologyClass93;
   artifact_cid: ArtifactCid;
@@ -11241,7 +11087,6 @@ export interface ArtifactCorruptionEvent {
  */
 export interface HypothesisGenerationEvent {
   event_cid: EventCid10;
-  prior_event_hash?: PriorEventHash10;
   timestamp: Timestamp10;
   topology_class?: TopologyClass94;
   hypothesis_cid: HypothesisCid;
@@ -11283,7 +11128,6 @@ export interface StructuralCausalGraphProfile {
  */
 export interface BargeInInterruptEvent {
   event_cid: EventCid11;
-  prior_event_hash?: PriorEventHash11;
   timestamp: Timestamp11;
   topology_class?: TopologyClass95;
   target_event_cid: TargetEventCid1;
@@ -11307,7 +11151,6 @@ export interface BargeInInterruptEvent {
  */
 export interface CounterfactualRegretEvent {
   event_cid: EventCid12;
-  prior_event_hash?: PriorEventHash12;
   timestamp: Timestamp12;
   topology_class?: TopologyClass96;
   historical_event_cid: HistoricalEventCid;
@@ -11336,7 +11179,6 @@ export interface PolicyMutationGradients {
  */
 export interface ToolInvocationEvent {
   event_cid: EventCid13;
-  prior_event_hash?: PriorEventHash13;
   timestamp: Timestamp13;
   topology_class?: TopologyClass97;
   tool_name: ToolName1;
@@ -11402,7 +11244,6 @@ export interface ZeroKnowledgeReceipt1 {
  */
 export interface EpistemicPromotionEvent {
   event_cid: EventCid14;
-  prior_event_hash?: PriorEventHash14;
   timestamp: Timestamp14;
   topology_class?: TopologyClass98;
   source_episodic_event_cids: SourceEpisodicEventCids;
@@ -11422,7 +11263,6 @@ export interface EpistemicPromotionEvent {
  */
 export interface PersistenceCommitReceipt {
   event_cid: EventCid15;
-  prior_event_hash?: PriorEventHash15;
   timestamp: Timestamp15;
   topology_class?: TopologyClass99;
   lakehouse_snapshot_cid: LakehouseSnapshotCid;
@@ -11442,7 +11282,6 @@ export interface PersistenceCommitReceipt {
  */
 export interface TokenBurnReceipt {
   event_cid: EventCid16;
-  prior_event_hash?: PriorEventHash16;
   timestamp: Timestamp16;
   topology_class?: TopologyClass100;
   tool_invocation_cid: ToolInvocationCid;
@@ -11463,7 +11302,6 @@ export interface TokenBurnReceipt {
  */
 export interface BudgetExhaustionEvent {
   event_cid: EventCid17;
-  prior_event_hash?: PriorEventHash17;
   timestamp: Timestamp17;
   topology_class?: TopologyClass101;
   exhausted_escrow_cid: ExhaustedEscrowCid;
@@ -11482,7 +11320,6 @@ export interface BudgetExhaustionEvent {
  */
 export interface EpistemicTelemetryEvent {
   event_cid: EventCid18;
-  prior_event_hash?: PriorEventHash18;
   timestamp: Timestamp18;
   topology_class?: TopologyClass102;
   interaction_modality: InteractionModality;
@@ -11506,7 +11343,6 @@ export interface EpistemicTelemetryEvent {
  */
 export interface CognitivePredictionReceipt {
   event_cid: EventCid19;
-  prior_event_hash?: PriorEventHash19;
   timestamp: Timestamp19;
   topology_class?: TopologyClass103;
   source_chain_cid: SourceChainCid;
@@ -11526,7 +11362,6 @@ export interface CognitivePredictionReceipt {
  */
 export interface EpistemicAxiomVerificationReceipt {
   event_cid: EventCid20;
-  prior_event_hash?: PriorEventHash20;
   timestamp: Timestamp20;
   topology_class?: TopologyClass104;
   source_prediction_cid: SourcePredictionCid;
@@ -11560,7 +11395,6 @@ export interface EpistemicAxiomVerificationReceipt {
  */
 export interface EpistemicFlowStateReceipt {
   event_cid: EventCid21;
-  prior_event_hash?: PriorEventHash21;
   timestamp: Timestamp21;
   topology_class?: TopologyClass105;
   source_trajectory_cid: SourceTrajectoryCid;
@@ -11589,7 +11423,6 @@ export interface EpistemicFlowStateReceipt {
  */
 export interface CausalExplanationEvent {
   event_cid: EventCid22;
-  prior_event_hash?: PriorEventHash22;
   timestamp: Timestamp22;
   topology_class?: TopologyClass106;
   target_outcome_event_cid: TargetOutcomeEventCid;
@@ -11653,7 +11486,6 @@ export interface ShapleyAttributionReceipt {
  */
 export interface IntentClassificationReceipt {
   event_cid: EventCid23;
-  prior_event_hash?: PriorEventHash23;
   timestamp: Timestamp23;
   topology_class?: TopologyClass107;
   raw_input_string: RawInputString;
@@ -11675,7 +11507,6 @@ export interface IntentClassificationReceipt {
 export interface SemanticRelationalVectorState {
   topology_class?: TopologyClass108;
   event_cid: EventCid24;
-  prior_event_hash?: PriorEventHash24;
   timestamp: Timestamp24;
   ontology_class: UpperOntologyClassProfile;
   temporal_bounds: TemporalBoundsProfile1;
@@ -11720,7 +11551,6 @@ export interface PayloadInjectionZone {
 export interface OntologicalReificationReceipt {
   topology_class?: TopologyClass109;
   event_cid: EventCid25;
-  prior_event_hash?: PriorEventHash25;
   timestamp: Timestamp25;
   source_data_hash: SourceDataHash;
   target_namespace: TargetNamespace;
@@ -11759,7 +11589,6 @@ export interface DempsterShaferBeliefVector2 {
  */
 export interface CircuitBreakerEvent {
   event_cid: EventCid26;
-  prior_event_hash?: PriorEventHash26;
   timestamp: Timestamp26;
   topology_class?: TopologyClass110;
   /**
@@ -11790,7 +11619,6 @@ export interface CircuitBreakerEvent {
  */
 export interface ExogenousEpistemicEvent {
   event_cid: EventCid27;
-  prior_event_hash?: PriorEventHash27;
   timestamp: Timestamp27;
   topology_class?: TopologyClass111;
   shock_cid: ShockCid;
@@ -11824,7 +11652,6 @@ export interface SimulationEscrowContract {
  */
 export interface EpistemicLogEvent {
   event_cid: EventCid28;
-  prior_event_hash?: PriorEventHash28;
   topology_class?: TopologyClass112;
   timestamp: Timestamp28;
   level: Level;
@@ -11858,7 +11685,6 @@ export interface TelemetryContextProfile {
 export interface InterventionReceipt {
   topology_class?: TopologyClass113;
   event_cid: EventCid29;
-  prior_event_hash?: PriorEventHash29;
   timestamp: Timestamp29;
   intervention_request_cid: InterventionRequestCid;
   /**
@@ -11915,7 +11741,6 @@ export interface WetwareAttestationContract {
  */
 export interface CustodyReceipt {
   event_cid: EventCid30;
-  prior_event_hash?: PriorEventHash30;
   timestamp: Timestamp30;
   topology_class?: TopologyClass114;
   custody_cid: CustodyCid;
@@ -11938,7 +11763,6 @@ export interface CustodyReceipt {
  */
 export interface DefeasibleAttackEvent {
   event_cid: EventCid31;
-  prior_event_hash?: PriorEventHash31;
   timestamp: Timestamp31;
   topology_class?: TopologyClass115;
   attack_cid: AttackCid;
@@ -11962,7 +11786,6 @@ export interface DefeasibleAttackEvent {
  */
 export interface EpistemicRejectionReceipt {
   event_cid: EventCid32;
-  prior_event_hash?: PriorEventHash32;
   timestamp: Timestamp32;
   topology_class?: TopologyClass116;
   receipt_cid: ReceiptCid1;
@@ -11984,7 +11807,6 @@ export interface EpistemicRejectionReceipt {
  */
 export interface FormalVerificationReceipt {
   event_cid: EventCid33;
-  prior_event_hash?: PriorEventHash33;
   timestamp: Timestamp33;
   topology_class?: TopologyClass117;
   /**
@@ -12003,7 +11825,6 @@ export interface BeliefModulationReceipt {
   topology_class?: TopologyClass118;
   receipt_cid: ReceiptCid2;
   event_cid: EventCid34;
-  prior_event_hash?: PriorEventHash34;
   timestamp: Timestamp34;
   target_graph_cid: TargetGraphCid4;
   grounded_edges: GroundedEdges;
@@ -12019,7 +11840,6 @@ export interface RDFExportReceipt {
   topology_class?: TopologyClass119;
   export_cid: ExportCid1;
   event_cid: EventCid35;
-  prior_event_hash?: PriorEventHash35;
   timestamp: Timestamp35;
   serialized_payload: SerializedPayload;
   rdf_triple_count: RdfTripleCount;
@@ -12038,7 +11858,6 @@ export interface RDFExportReceipt {
  */
 export interface EpistemicStarvationEvent {
   event_cid: EventCid36;
-  prior_event_hash?: PriorEventHash36;
   timestamp: Timestamp36;
   topology_class?: TopologyClass120;
   starved_edge_cid: StarvedEdgeCid;
@@ -12058,7 +11877,6 @@ export interface EpistemicStarvationEvent {
  */
 export interface SPARQLQueryResultReceipt {
   event_cid: EventCid37;
-  prior_event_hash?: PriorEventHash37;
   timestamp: Timestamp37;
   topology_class?: TopologyClass121;
   query_intent_cid: QueryIntentCid;
@@ -12102,7 +11920,6 @@ export interface OracleExecutionReceipt {
  */
 export interface GuardrailViolationEvent {
   event_cid: EventCid38;
-  prior_event_hash?: PriorEventHash38;
   timestamp: Timestamp38;
   topology_class?: TopologyClass123;
   violation_id: ViolationId;
@@ -13183,13 +13000,13 @@ export interface EpistemicHydrationPolicy {
 /**
  * CoReason Shared Kernel Ontology
  *
- * AGENT INSTRUCTION: Formalizes Event Sourcing and the Merkle-DAG structure as the absolute, immutable source of truth for the swarm, fully partitioned from volatile memory.
+ * AGENT INSTRUCTION: Formalizes Event Sourcing as the absolute, immutable source of truth for the swarm, fully partitioned from volatile memory. Provenance is delegated to Sigstore (Cosign + Rekor transparency log) via the CI/CD pipeline.
  *
  * CAUSAL AFFORDANCE: Permanently crystallizes validated events into the `history` log. Applies Truth Maintenance, context eviction, and tracks active `DefeasibleCascadeEvents` and `RollbackIntents`.
  *
  * EPISTEMIC BOUNDS: The `@model_validator` `_enforce_canonical_sort` deterministically sorts history by timestamp, checkpoints by ID, and active cascades—guaranteeing invariant RFC 8785 canonical hashing. Validation prevents epistemic paradoxes (child before parent).
  *
- * MCP ROUTING TRIGGERS: Event Sourcing, Merkle-DAG, Immutable Ledger, Truth Crystallization, Chronological Sort
+ * MCP ROUTING TRIGGERS: Event Sourcing, Sigstore, Rekor Transparency Log, Immutable Ledger, Truth Crystallization, Chronological Sort
  */
 export interface EpistemicLedgerState {
   history: History;
