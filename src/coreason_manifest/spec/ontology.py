@@ -14022,7 +14022,6 @@ DeliberativeEnvelope.model_rebuild()
 StrategicThoughtNodeIntent.model_rebuild()
 
 
-
 class CausalDiscoveryIntent(CoreasonBaseState):
     """
     AGENT INSTRUCTION: A test-time hypothesis representing the intent to discover a causal graph from observational data.
@@ -14030,9 +14029,13 @@ class CausalDiscoveryIntent(CoreasonBaseState):
     EPISTEMIC BOUNDS: Bounded by max_discrete_bins (le=100) to prevent combinatorial explosion.
     MCP ROUTING TRIGGERS: Causal Inference, Structural Causal Models, PyWhy, Directed Acyclic Graph, causallearn
     """
+
     dataset_uri: str = Field(..., description="The URI of the observational dataset.")
     discovery_algorithm: Literal["PC", "FCI"] = Field(..., description="The algorithm to use for causal discovery.")
-    max_discrete_bins: int = Field(default=10, le=100, description="The maximum number of bins for continuous variables.")
+    max_discrete_bins: int = Field(
+        default=10, le=100, description="The maximum number of bins for continuous variables."
+    )
+
 
 class StructuralCausalGraphProfile(CoreasonBaseState):
     """
@@ -14041,14 +14044,16 @@ class StructuralCausalGraphProfile(CoreasonBaseState):
     EPISTEMIC BOUNDS: Mathematically defines a Directed Acyclic Graph (DAG) or Acyclic Directed Mixed Graph (ADMG).
     MCP ROUTING TRIGGERS: Causal Inference, Structural Causal Models, PyWhy, Directed Acyclic Graph, causallearn
     """
+
     edges: list[tuple[str, str]] = Field(default_factory=list, description="The directed edges of the causal graph.")
     nodes: list[str] = Field(default_factory=list, description="The nodes of the causal graph.")
-    
+
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> "StructuralCausalGraphProfile":
         self.edges = sorted(self.edges)
         self.nodes = sorted(self.nodes)
         return self
+
 
 class DoWhyEstimationIntent(CoreasonBaseState):
     """
@@ -14057,9 +14062,13 @@ class DoWhyEstimationIntent(CoreasonBaseState):
     EPISTEMIC BOUNDS: Requires a strict causal graph representation and identified treatment/outcome variables.
     MCP ROUTING TRIGGERS: Causal Inference, Average Treatment Effect, DoWhy, Causal Estimand
     """
-    causal_graph: StructuralCausalGraphProfile = Field(..., description="The structural causal graph to use for estimation.")
+
+    causal_graph: StructuralCausalGraphProfile = Field(
+        ..., description="The structural causal graph to use for estimation."
+    )
     treatment: str = Field(..., description="The treatment variable.")
     outcome: str = Field(..., description="The outcome variable.")
+
 
 class DoWhyEstimationReceipt(CoreasonBaseState):
     """
@@ -14068,9 +14077,11 @@ class DoWhyEstimationReceipt(CoreasonBaseState):
     EPISTEMIC BOUNDS: The refutation_p_value must be mathematically bounded between 0.0 and 1.0.
     MCP ROUTING TRIGGERS: Causal Inference, Average Treatment Effect, DoWhy, Causal Estimand
     """
+
     identified_estimand: str = Field(..., description="The identified causal estimand.")
     average_treatment_effect: float = Field(..., description="The estimated average treatment effect.")
     refutation_p_value: float = Field(..., ge=0.0, le=1.0, description="The p-value of the refutation test.")
+
 
 class EconMLCATEIntent(CoreasonBaseState):
     """
@@ -14079,20 +14090,21 @@ class EconMLCATEIntent(CoreasonBaseState):
     EPISTEMIC BOUNDS: Requires a DoWhyEstimationReceipt to guarantee the presence of a validated ATE estimation.
     MCP ROUTING TRIGGERS: Causal Inference, Heterogeneous Treatment Effect, Double Machine Learning, EconML
     """
+
     base_estimation_receipt: DoWhyEstimationReceipt = Field(..., description="The base ATE estimation receipt.")
     features: list[str] = Field(default_factory=list, description="The features to condition the treatment effect on.")
-    
+
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> "EconMLCATEIntent":
         self.features = sorted(self.features)
         return self
+
 
 CausalDiscoveryIntent.model_rebuild()
 StructuralCausalGraphProfile.model_rebuild()
 DoWhyEstimationIntent.model_rebuild()
 DoWhyEstimationReceipt.model_rebuild()
 EconMLCATEIntent.model_rebuild()
-
 
 
 class CausalDiscoveryReceipt(CoreasonBaseState):
@@ -14102,8 +14114,10 @@ class CausalDiscoveryReceipt(CoreasonBaseState):
     EPISTEMIC BOUNDS: Requires a strict causal graph representation.
     MCP ROUTING TRIGGERS: Causal Inference, Structural Causal Models, PyWhy, Directed Acyclic Graph, causallearn
     """
+
     causal_graph: StructuralCausalGraphProfile = Field(..., description="The structural causal graph discovered.")
     discovery_algorithm_used: str = Field(..., description="The algorithm that was used.")
+
 
 class HTEEstimationReceipt(CoreasonBaseState):
     """
@@ -14112,13 +14126,15 @@ class HTEEstimationReceipt(CoreasonBaseState):
     EPISTEMIC BOUNDS: The cate_estimate must be mathematically valid.
     MCP ROUTING TRIGGERS: Causal Inference, Heterogeneous Treatment Effect, Double Machine Learning, EconML
     """
+
     features: list[str] = Field(default_factory=list, description="The features conditioned on.")
     cate_estimate: float = Field(..., description="The conditional average treatment effect.")
-    
+
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> "HTEEstimationReceipt":
         self.features = sorted(self.features)
         return self
+
 
 CausalDiscoveryReceipt.model_rebuild()
 HTEEstimationReceipt.model_rebuild()
