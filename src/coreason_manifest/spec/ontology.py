@@ -15,6 +15,7 @@ import math
 import operator
 import re
 import typing
+from datetime import datetime
 from enum import StrEnum
 from typing import Annotated, Any, Literal, Self
 
@@ -237,23 +238,6 @@ class RhetoricalStructureProfile(StrEnum):
     ELABORATION = "elaboration"
     CONTRAST = "contrast"
     CONCESSION = "concession"
-
-
-class SemanticClassificationProfile(StrEnum):
-    r"""
-    AGENT INSTRUCTION: Implements SPIFFE/SPIRE workload identity bounds and Service Mesh data sensitivity labels, establishing the foundational mathematical axis for Information Flow Control across the distributed swarm via Envoy delegation.
-
-    CAUSAL AFFORDANCE: Physically authorizes or severs the projection of semantic payloads. In an Envoy-native OPA policy enforcement model, this label acts as the primary metadata selector for decentralized identity verification between a payload and an agent's SPIFFE Verifiable Identity Document (SVID).
-
-    EPISTEMIC BOUNDS: Constrained to a strict, 4-dimensional string literal space to prevent the hallucination of unauthorized workload labels. The platform delegating to mTLS and OPA for enforcement, removing the requirement for scalar manifest-level dominance checks.
-
-    MCP ROUTING TRIGGERS: SPIFFE/SPIRE, Envoy Service Mesh, Workload Identity, mTLS Delegation, Epistemic Quarantine
-    """
-
-    PUBLIC = "public"
-    INTERNAL = "internal"
-    CONFIDENTIAL = "confidential"
-    RESTRICTED = "restricted"
 
 
 type FaultCategoryProfile = Literal[
@@ -2165,7 +2149,7 @@ class SemanticSlicingPolicy(CoreasonBaseState):
 
     """
 
-    permitted_classification_tiers: list[SemanticClassificationProfile] = Field(
+    permitted_classification_tiers: list[Literal["public", "internal", "confidential", "restricted"]] = Field(
         min_length=1, description="The explicit whitelist of sensitivity bounds allowed into context."
     )
     required_semantic_labels: list[Annotated[str, StringConstraints(max_length=255)]] | None = Field(
@@ -2184,7 +2168,7 @@ class SemanticSlicingPolicy(CoreasonBaseState):
         object.__setattr__(
             self,
             "permitted_classification_tiers",
-            sorted(self.permitted_classification_tiers, key=lambda x: str(x.value)),
+            sorted(self.permitted_classification_tiers, key=lambda x: str(x)),
         )
         if self.required_semantic_labels is not None:
             object.__setattr__(self, "required_semantic_labels", sorted(self.required_semantic_labels))
@@ -2192,7 +2176,7 @@ class SemanticSlicingPolicy(CoreasonBaseState):
             object.__setattr__(
                 self,
                 "permitted_classification_tiers",
-                sorted(self.permitted_classification_tiers, key=lambda x: str(x.value)),
+                sorted(self.permitted_classification_tiers, key=lambda x: str(x)),
             )
         return self
 
@@ -2369,44 +2353,6 @@ class CognitiveUncertaintyProfile(CoreasonBaseState):
     )
 
 
-class ConstitutionalPolicy(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Formalizes a discrete normative axiom within a Constitutional AI
-    framework to prevent instrumental convergence. As a ...Policy suffix, this object defines
-    rigid mathematical boundaries that the orchestrator must enforce globally.
-
-    CAUSAL AFFORDANCE: Establishes a hard structural boundary that mathematically repels the
-    swarm's generative trajectory away from forbidden semantic manifolds. Violation severity
-    is classified via a strict Literal["low", "medium", "high", "critical"] tier.
-
-    EPISTEMIC BOUNDS: Geometrically restricts the state space by blacklisting specific
-    execution branches via the forbidden_intents array (max_length=1000),
-    deterministically sorted by @model_validator to preserve RFC 8785 canonical hashing.
-    The rule_cid is bounded to a 128-char CID.
-
-    MCP ROUTING TRIGGERS: Constitutional AI, Value Alignment, Normative Axiom, Instrumental
-    Convergence, Semantic Boundary
-    """
-
-    rule_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="Unique identifier for the constitutional rule."
-    )
-    description: Annotated[str, StringConstraints(max_length=2000)] = Field(
-        description="The definitive causal constraint or heuristic boundary enforced by this rule."
-    )
-    severity: Literal["low", "medium", "high", "critical"] = Field(
-        description="The categorical magnitude of the systemic breach enacted upon rule violation."
-    )
-    forbidden_intents: list[Annotated[str, StringConstraints(min_length=1)]] = Field(
-        max_length=1000, description="The explicit, structurally bounded set of forbidden semantic intents."
-    )
-
-    @model_validator(mode="after")
-    def _enforce_canonical_sort(self) -> Self:
-        object.__setattr__(self, "forbidden_intents", sorted(self.forbidden_intents))
-        return self
-
-
 class GradingCriterionProfile(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Defines a discrete objective dimension within a Multi-Attribute
@@ -2581,57 +2527,6 @@ class ConsensusPolicy(CoreasonBaseState):
     def validate_pbft_requirements(self) -> Self:
         if self.strategy == "pbft" and self.quorum_rules is None:
             raise ValueError("quorum_rules must be provided when strategy is 'pbft'.")
-        return self
-
-
-class RedactionPolicy(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Defines a deterministic Data Sanitization heuristic mapped to a
-    specific SemanticClassificationProfile (e.g., Bell-LaPadula clearance levels). As a
-    ...Policy suffix, this object defines rigid mathematical boundaries that the orchestrator
-    must enforce globally.
-
-    CAUSAL AFFORDANCE: Executes a rigid regex-bounded search-and-replace algorithm via
-    target_regex_pattern to mutate or mask toxic data payloads, substituting matches with a
-    safe replacement_token. The action (SanitizationActionIntent) dictates the exact
-    sanitization method.
-
-    EPISTEMIC BOUNDS: The target_regex_pattern is strictly capped at max_length=200 to
-    mathematically prevent ReDoS (Regular Expression Denial of Service) CPU exhaustion. A
-    secondary target_pattern (max_length=2000) provides a broader semantic entity match. The
-    optional context_exclusion_zones array (max_length=100) is deterministically sorted by
-    the @model_validator.
-
-    MCP ROUTING TRIGGERS: Data Sanitization, Regular Expression DoS Prevention,
-    Bell-LaPadula Model, Masking Heuristic, Algorithmic Redaction
-    """
-
-    rule_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="Unique identifier for the sanitization rule."
-    )
-    classification: SemanticClassificationProfile = Field(
-        description="The category of sensitive payload this rule targets."
-    )
-    target_pattern: Annotated[str, StringConstraints(max_length=2000)] = Field(
-        description="The semantic entity type or declarative regex pattern to identify."
-    )
-    target_regex_pattern: Annotated[str, StringConstraints(max_length=200)] = Field(
-        description="The dynamic regex pattern to target."
-    )
-    context_exclusion_zones: list[Annotated[str, StringConstraints(max_length=2000)]] | None = Field(
-        default=None, max_length=100, description="Specific JSON paths where this rule should NOT apply."
-    )
-    action: SanitizationActionIntent = Field(
-        description="The required algorithmic response when this pattern is detected."
-    )
-    replacement_token: Annotated[str, StringConstraints(max_length=2000)] | None = Field(
-        default=None, description="The strictly typed string to insert if the action is 'redact'."
-    )
-
-    @model_validator(mode="after")
-    def _enforce_canonical_sort(self) -> Self:
-        if self.context_exclusion_zones is not None:
-            object.__setattr__(self, "context_exclusion_zones", sorted(self.context_exclusion_zones))
         return self
 
 
@@ -4197,7 +4092,7 @@ class ConstitutionalAmendmentIntent(CoreasonBaseState):
     )
     drift_event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
         Field(
-            description="The globally unique decentralized identifier (DID) anchoring the NormativeDriftEvent that justified triggering this proposal.",
+            description="The globally unique decentralized identifier (DID) anchoring the GuardrailViolationEvent that justified triggering this proposal.",
         )
     )
     proposed_patch: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
@@ -5810,6 +5705,30 @@ class TemporalConflictResolutionPolicy(CoreasonBaseState):
     )
 
 
+class EpistemicGuardrailsManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A declarative proxy that outputs standard NeMo Colang format (.co files)
+    to configure the NeMo Guardrails reverse-proxy in the Envoy mesh.
+
+    CAUSAL AFFORDANCE: Defines the exact Colang state machine configuration for intercepting
+    and overriding LLM outputs before they hit the network.
+
+    EPISTEMIC BOUNDS: Bounded by a strict max_length=100000 on the raw Colang payload
+    to prevent memory exhaustion. The @model_validator deterministically sorts the required
+    imports.
+
+    MCP ROUTING TRIGGERS: NeMo Guardrails, Colang, Reverse Proxy, Constitutional Alignment, Envoy Mesh
+    """
+
+    colang_version: Literal["1.0", "2.0"] = Field(default="2.0", description="The Colang specification version.")
+    colang_payload: Annotated[str, StringConstraints(max_length=100000)] = Field(
+        description="The raw Colang (.co) state machine configuration."
+    )
+    severity: Literal["low", "medium", "high", "critical"] = Field(
+        default="critical", description="The categorical magnitude of the systemic breach enacted upon rule violation."
+    )
+
+
 class GlobalGovernancePolicy(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Superimposes macro-economic and thermodynamic constraints over the
@@ -5832,7 +5751,7 @@ class GlobalGovernancePolicy(CoreasonBaseState):
     Bounding, ESG Constraint, Execution Envelope
     """
 
-    mandatory_license_rule: ConstitutionalPolicy = Field(
+    mandatory_license_rule: EpistemicGuardrailsManifest = Field(
         description="The mathematical governance constraint enforcing the root safety and licensing boundary on all execution paths."
     )
     max_budget_magnitude: int = Field(
@@ -5985,38 +5904,6 @@ class DynamicRoutingManifest(CoreasonBaseState):
                 raise ValueError(
                     "Merkle Violation: BypassReceipt artifact_event_cid does not match the root artifact_profile."
                 )
-        return self
-
-
-class GovernancePolicy(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Aggregates discrete ConstitutionalPolicy nodes into a cohesive,
-    version-controlled Normative Alignment Manifold. As a ...Policy suffix, this object
-    defines rigid mathematical boundaries that the orchestrator must enforce globally.
-
-    CAUSAL AFFORDANCE: Instructs the orchestrator to enforce a unified cybernetic governance
-    model across all swarm trajectories, grounding generative actions in a specific semantic
-    version (SemanticVersionState).
-
-    EPISTEMIC BOUNDS: The topological integrity of the manifold is mathematically guaranteed
-    by the @model_validator, which deterministically sorts the rules array by rule_cid to
-    prevent Byzantine hash fractures across distributed nodes.
-
-    MCP ROUTING TRIGGERS: Cybernetic Governance, Normative Alignment Manifold, Rule
-    Aggregation, Version Control, RFC 8785 Canonicalization
-    """
-
-    policy_name: Annotated[str, StringConstraints(max_length=2000)] = Field(
-        description="Name of the governance policy."
-    )
-    version: SemanticVersionState = Field(description="Semantic version of the governance policy.")
-    rules: list[ConstitutionalPolicy] = Field(
-        description="The explicit array of constitutional rules included in this policy."
-    )
-
-    @model_validator(mode="after")
-    def _enforce_canonical_sort(self) -> Self:
-        object.__setattr__(self, "rules", sorted(self.rules, key=operator.attrgetter("rule_cid")))
         return self
 
 
@@ -8615,52 +8502,6 @@ class NeuroSymbolicHandoffContract(CoreasonBaseState):
     )
 
 
-class NormativeDriftEvent(CoreasonBaseState):
-    r"""
-    AGENT INSTRUCTION: A cryptographically frozen historical fact tracking the Kullback-Leibler (KL) divergence between the swarm's active behavioral manifold and its foundational ConstitutionalPolicy.
-
-    CAUSAL AFFORDANCE: Emits a deterministic topological signal that the causal graph is experiencing logical friction against the `tripped_rule_cid`, unlocking the injection of a System2RemediationIntent constraint.
-
-    EPISTEMIC BOUNDS: Mathematically bounded by `measured_semantic_drift` (`le=18446744073709551615.0`) and cryptographically tied to `contradiction_proof_hash` (SHA-256 pattern `^[a-f0-9]{64}$`) proving the anomaly.
-
-    MCP ROUTING TRIGGERS: Kullback-Leibler Divergence, Normative Drift, Distributional Shift, Semantic Friction, Constitutional Alignment
-
-    """
-
-    event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-    )
-    timestamp: float = Field(
-        ge=0.0,
-        le=253402300799.0,
-        description="Causal Ancestry markers required to resolve decentralized event ordering.",
-    )
-
-    topology_class: Literal["normative_drift"] = Field(
-        default="normative_drift", description="Discriminator type for a normative drift event."
-    )
-    tripped_rule_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
-        Field(
-            description="The Content Identifier (CID) of the specific ConstitutionalPolicy causing logical friction.",
-        )
-    )
-    measured_semantic_drift: float = Field(
-        le=18446744073709551615.0,
-        description="The calculated probabilistic delta showing how far the swarm's observed reality is diverging from the static rule.",
-    )
-    contradiction_proof_hash: Annotated[
-        str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")
-    ] = Field(
-        description="A cryptographic pointer to the internal scratchpad trace (ThoughtBranchState) definitively proving the rule is obsolete or causing a loop.",
-    )
-
-
 class OutputMappingContract(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Formalizes a contravariant Functor (Category Theory) or
@@ -9264,9 +9105,7 @@ class SemanticFlowPolicy(CoreasonBaseState):
         description="Unique identifier for this macroscopic flow control policy."
     )
     active: bool = Field(default=True, description="Whether this policy is currently enforcing data sanitization.")
-    rules: list[RedactionPolicy] = Field(
-        default_factory=list, description="The array of sanitization rules to enforce."
-    )
+    # RedactionPolicy has been superseded by NeMo Guardrails (EpistemicGuardrailsManifest).
     semantic_firewall: SemanticFirewallPolicy | None = Field(
         default=None, description="The active cognitive defense perimeter against adversarial control-flow overrides."
     )
@@ -9278,9 +9117,8 @@ class SemanticFlowPolicy(CoreasonBaseState):
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
         """
-        Mathematically sorts rules by rule_cid to guarantee deterministic hashing.
+        Mathematically sorts latent firewalls to guarantee deterministic hashing.
         """
-        object.__setattr__(self, "rules", sorted(self.rules, key=operator.attrgetter("rule_cid")))
         object.__setattr__(
             self, "latent_firewalls", sorted(self.latent_firewalls, key=operator.attrgetter("target_feature_index"))
         )
@@ -13623,7 +13461,6 @@ type AnyStateEvent = Annotated[
     | CounterfactualRegretEvent
     | ToolInvocationEvent
     | EpistemicPromotionEvent
-    | NormativeDriftEvent
     | PersistenceCommitReceipt
     | TokenBurnReceipt
     | BudgetExhaustionEvent
@@ -14103,6 +13940,29 @@ class EpistemicLedgerState(CoreasonBaseState):
         return self
 
 
+class GuardrailViolationEvent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Tracks a deterministic security boundary violation emitted by the NeMo Guardrails proxy. This event is a frozen historical fact representing a failed cryptographic or semantic check.
+
+    CAUSAL AFFORDANCE: Triggers an immediate suspension of the active execution trajectory and publishes a high-severity alert to the telemetry broker for remediation.
+
+    EPISTEMIC BOUNDS: The event must include the specific HTTP status code (e.g., 401, 403, 406, 422) and the opaque violation manifest emitted by the proxy.
+
+    MCP ROUTING TRIGGERS: Security, Guardrails, Data Loss Prevention, Policy Violation, Telemetry
+    """
+
+    violation_id: str = Field(..., description="Unique identifier for the violation event.")
+    status_code: int = Field(..., description="The HTTP status code returned by the Guardrails proxy.")
+    violation_type: str = Field(
+        ..., description="The classification of the violation (e.g., 'pii_leak', 'toxic_content')."
+    )
+    violation_details: dict[str, Any] = Field(
+        default_factory=dict, description="Detailed manifest from the Guardrails proxy."
+    )
+    timestamp: datetime = Field(default_factory=datetime.now, description="The ISO-8601 timestamp of the violation.")
+
+
+GuardrailViolationEvent.model_rebuild()
 CompositeNodeProfile.model_rebuild()
 WorkflowManifest.model_rebuild()
 StateHydrationManifest.model_rebuild()

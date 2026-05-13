@@ -16,8 +16,6 @@ from coreason_manifest.spec.ontology import (
     EpistemicZeroTrustReceipt,
     InterventionReceipt,
     OntologicalAlignmentPolicy,
-    RedactionPolicy,
-    SemanticClassificationProfile,
     SpatialBillboardContract,
     VectorEmbeddingState,
     WetwareAttestationContract,
@@ -64,18 +62,6 @@ def test_billboard_manifold() -> None:
         SpatialBillboardContract(
             anchoring_node_cid="cid1", spherical_cylindrical_lock="none", distance_scaling_factor=1.0
         )
-
-
-def test_data_sanitization_rule() -> None:
-    policy = RedactionPolicy(
-        rule_cid="rule1",
-        classification=SemanticClassificationProfile.CONFIDENTIAL,
-        target_pattern="test",
-        target_regex_pattern=".*",
-        action="redact",
-        context_exclusion_zones=["zone2", "zone1"],
-    )
-    assert policy.context_exclusion_zones == ["zone1", "zone2"]
 
 
 def test_discourse_tree_manifest() -> None:

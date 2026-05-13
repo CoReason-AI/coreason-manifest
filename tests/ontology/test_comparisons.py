@@ -8,15 +8,7 @@
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
-from coreason_manifest.spec.ontology import RiskLevelPolicy, SemanticClassificationProfile
-
-
-def test_semantic_classification_profile_exists() -> None:
-    # Verify the profile members exist
-    assert SemanticClassificationProfile.PUBLIC.value == "public"
-    assert SemanticClassificationProfile.INTERNAL.value == "internal"
-    assert SemanticClassificationProfile.CONFIDENTIAL.value == "confidential"
-    assert SemanticClassificationProfile.RESTRICTED.value == "restricted"
+from coreason_manifest.spec.ontology import RiskLevelPolicy
 
 
 def test_risk_level_policy_comparisons() -> None:
