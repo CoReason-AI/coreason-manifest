@@ -710,6 +710,7 @@
           "escalation": "#/$defs/EscalationIntent",
           "fallback_intent": "#/$defs/FallbackIntent",
           "falsification_contract": "#/$defs/FalsificationContract",
+          "federated_discovery_intent": "#/$defs/FederatedDiscoveryIntent",
           "forced_adjudication": "#/$defs/AdjudicationIntent",
           "formal_logic_premise": "#/$defs/FormalLogicPremise",
           "fyi": "#/$defs/FYIIntent",
@@ -878,6 +879,9 @@
         },
         {
           "$ref": "#/$defs/OntologicalNormalizationIntent"
+        },
+        {
+          "$ref": "#/$defs/FederatedDiscoveryIntent"
         }
       ]
     },
@@ -9862,6 +9866,38 @@
         "target_hypothesis_cid"
       ],
       "title": "FalsificationContract",
+      "type": "object"
+    },
+    "FederatedDiscoveryIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Encapsulates the geometric parameters for a cross-authority capability discovery query.\nUsed by the Federated Gateway to route semantic search intents across zero-trust network boundaries.\n\nCAUSAL AFFORDANCE: Enables the discovery of URN-addressable capabilities that match specific topological and status filters.\n\nEPISTEMIC BOUNDS: Strictly bounded by the domain_filter array and the minimum_epistemic_status enum.\n\nMCP ROUTING TRIGGERS: Federated Discovery, Semantic Search, Capability Routing, Zero-Trust Discovery.",
+      "properties": {
+        "topology_class": {
+          "const": "federated_discovery_intent",
+          "default": "federated_discovery_intent",
+          "description": "Discriminator for the FederatedDiscoveryIntent topology.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "domain_filter": {
+          "description": "The strict array of strings defining topological limits on the discovered capabilities.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Domain Filter",
+          "type": "array"
+        },
+        "minimum_epistemic_status": {
+          "default": "DRAFT",
+          "description": "The minimum SRB governance lifecycle phase required for projected capabilities (DRAFT / SRB_APPROVED / CLIENT_APPROVED / PUBLISHED).",
+          "title": "Minimum Epistemic Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "domain_filter"
+      ],
+      "title": "FederatedDiscoveryIntent",
       "type": "object"
     },
     "FitnessObjectiveProfile": {

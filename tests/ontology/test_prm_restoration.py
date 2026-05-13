@@ -10,11 +10,12 @@
 
 import pytest
 from pydantic import ValidationError
+
 from coreason_manifest.spec.ontology import (
+    CognitiveStateProfile,
+    DynamicConvergenceSLA,
     EpistemicSOPManifest,
     ProcessRewardContract,
-    DynamicConvergenceSLA,
-    CognitiveStateProfile,
 )
 
 
