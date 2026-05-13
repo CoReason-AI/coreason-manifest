@@ -3583,13 +3583,7 @@ class SystemFaultEvent(CoreasonBaseState):
     """
 
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
     )
     timestamp: float = Field(
         ge=0.0,
@@ -3948,13 +3942,7 @@ class CausalExplanationEvent(CoreasonBaseState):
     """
 
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
     )
     timestamp: float = Field(
         ge=0.0,
@@ -4049,13 +4037,7 @@ class CircuitBreakerEvent(CoreasonBaseState):
     """
 
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
     )
     timestamp: float = Field(
         ge=0.0,
@@ -4162,13 +4144,7 @@ class CounterfactualRegretEvent(CoreasonBaseState):
     """
 
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
     )
     timestamp: float = Field(
         ge=0.0,
@@ -4749,13 +4725,7 @@ class BargeInInterruptEvent(CoreasonBaseState):
     """
 
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
     )
     timestamp: float = Field(
         ge=0.0,
@@ -4872,13 +4842,7 @@ class EpistemicPromotionEvent(CoreasonBaseState):
     """
 
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
     )
     timestamp: float = Field(
         ge=0.0,
@@ -4986,9 +4950,6 @@ class CrosswalkResolutionReceipt(CoreasonBaseState):
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         ...
     )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(default=None)
     timestamp: float = Field(ge=0.0, le=253402300799.0)
 
     topology_class: Literal["crosswalk_resolution"] = "crosswalk_resolution"
@@ -5604,13 +5565,7 @@ class BudgetExhaustionEvent(CoreasonBaseState):
     """
 
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
     )
     timestamp: float = Field(
         ge=0.0,
@@ -5642,13 +5597,7 @@ class TokenBurnReceipt(CoreasonBaseState):
     """
 
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
     )
     timestamp: float = Field(
         ge=0.0,
@@ -6539,11 +6488,8 @@ class FormalVerificationReceipt(CoreasonBaseState):
     """
 
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG."
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore."
     )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(default=None, description="The RFC 8785 Canonical hash of the immediate causal ancestor.")
     timestamp: float = Field(ge=0.0, description="The precise temporal coordinate of the event realization.")
 
     topology_class: Literal["formal_verification_receipt"] = Field(default="formal_verification_receipt")
@@ -6613,13 +6559,7 @@ class BeliefModulationReceipt(CoreasonBaseState):
     topology_class: Literal["belief_modulation"] = "belief_modulation"
     receipt_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
     )
     timestamp: float = Field(
         ge=0.0,
@@ -6681,9 +6621,6 @@ class SPARQLQueryResultReceipt(CoreasonBaseState):
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         ...
     )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(default=None)
     timestamp: float = Field(ge=0.0, le=253402300799.0)
 
     topology_class: Literal["sparql_query_result"] = "sparql_query_result"
@@ -6727,13 +6664,7 @@ class RDFExportReceipt(CoreasonBaseState):
     topology_class: Literal["rdf_export_receipt"] = "rdf_export_receipt"
     export_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
     )
     timestamp: float = Field(
         ge=0.0,
@@ -8443,7 +8374,7 @@ class NeuralAuditAttestationReceipt(CoreasonBaseState):
     """
 
     audit_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
     )
     hook_activations: dict[str, list[SaeFeatureActivationState]] = Field(
         description="A mapping of specific TransformerLens hook points to their top-k activated SAE features."
@@ -8678,13 +8609,7 @@ class PersistenceCommitReceipt(CoreasonBaseState):
     """
 
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
     )
     timestamp: float = Field(
         ge=0.0,
@@ -9274,13 +9199,7 @@ class ExogenousEpistemicEvent(CoreasonBaseState):
     """
 
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
     )
     timestamp: float = Field(
         ge=0.0,
@@ -9498,13 +9417,7 @@ class HypothesisGenerationEvent(CoreasonBaseState):
     """
 
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
     )
     timestamp: float = Field(
         ge=0.0,
@@ -9750,13 +9663,7 @@ class EpistemicLogEvent(CoreasonBaseState):
     """
 
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
     )
     topology_class: Literal["epistemic_log"] = Field(
         default="epistemic_log", description="Discriminator type for a log event."
@@ -10036,13 +9943,7 @@ class ToolInvocationEvent(CoreasonBaseState):
     """
 
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
     )
     timestamp: float = Field(
         ge=0.0,
@@ -12241,13 +12142,7 @@ class BeliefMutationEvent(CoreasonBaseState):
     """
 
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
     )
     timestamp: float = Field(
         ge=0.0,
@@ -12340,13 +12235,7 @@ class ObservationEvent(CoreasonBaseState):
     """
 
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
     )
     timestamp: float = Field(
         ge=0.0,
@@ -12438,9 +12327,6 @@ class ArtifactCorruptionEvent(CoreasonBaseState):
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         ...
     )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(default=None)
     timestamp: float = Field(ge=0.0, le=253402300799.0)
 
     topology_class: Literal["artifact_corruption"] = "artifact_corruption"
@@ -12464,13 +12350,7 @@ class EpistemicTelemetryEvent(CoreasonBaseState):
     """
 
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
     )
     timestamp: float = Field(
         ge=0.0,
@@ -12592,13 +12472,7 @@ class CognitivePredictionReceipt(CoreasonBaseState):
     """
 
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
     )
     timestamp: float = Field(
         ge=0.0,
@@ -12639,13 +12513,7 @@ class IntentClassificationReceipt(CoreasonBaseState):
     """
 
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
     )
     timestamp: float = Field(
         ge=0.0,
@@ -12680,13 +12548,7 @@ class EpistemicAxiomVerificationReceipt(CoreasonBaseState):
     """
 
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
     )
     timestamp: float = Field(
         ge=0.0,
@@ -13021,13 +12883,7 @@ class EpistemicFlowStateReceipt(CoreasonBaseState):
     """
 
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
     )
     timestamp: float = Field(
         ge=0.0,
@@ -13091,9 +12947,6 @@ class PostCoordinatedSemanticState(CoreasonBaseState):
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         description="Cryptographic Lineage Watermark binding this node to the Merkle-DAG."
     )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(default=None, description="The RFC 8785 Canonical hash of the immediate causal ancestor.")
     timestamp: float = Field(description="The precise temporal coordinate of the event realization.")
     concept_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         description="The unique geometric coordinate representing this specific assembled concept."
@@ -13159,13 +13012,7 @@ class AtomicPropositionState(CoreasonBaseState):
 
     topology_class: Literal["atomic_proposition"] = Field(default="atomic_proposition")
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG."
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The RFC 8785 Canonical hash of the immediate causal ancestor, securing the Merkle-DAG.",
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore."
     )
     timestamp: float = Field(description="The precise temporal coordinate of the event realization.")
     proposition_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
@@ -13212,13 +13059,7 @@ class EpistemicRejectionReceipt(CoreasonBaseState):
     """
 
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
     )
     timestamp: float = Field(
         ge=0.0,
@@ -13263,13 +13104,7 @@ class AdjudicationReceipt(CoreasonBaseState):
     """
 
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
     )
     timestamp: float = Field(
         ge=0.0,
@@ -13304,13 +13139,7 @@ class CustodyReceipt(CoreasonBaseState):
 
     model_config = ConfigDict(frozen=True)
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
     )
     timestamp: float = Field(
         ge=0.0,
@@ -13353,13 +13182,7 @@ class DefeasibleAttackEvent(CoreasonBaseState):
     """
 
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
     )
     timestamp: float = Field(
         ge=0.0,
@@ -13403,13 +13226,7 @@ class InterventionReceipt(CoreasonBaseState):
 
     topology_class: Literal["verdict"] = Field(default="verdict", description="The type of the intervention payload.")
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
     )
     timestamp: float = Field(
         ge=0.0,
@@ -13458,13 +13275,7 @@ class EpistemicZeroTrustReceipt(CoreasonBaseState):
     """
 
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
     )
     timestamp: float = Field(
         ge=0.0,
@@ -13502,13 +13313,7 @@ class MCPToolDefinition(CoreasonBaseState):
     topology_class: Literal["mcp_tool_definition"] = Field(default="mcp_tool_definition")
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         default="mcp_tool_cid",
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The RFC 8785 Canonical hash of the immediate causal ancestor event. Null for genesis nodes.",
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
     )
     timestamp: float = Field(default=0.0)
     name: Annotated[str, StringConstraints(max_length=64, pattern="^[a-zA-Z0-9_-]+$")]
@@ -13742,9 +13547,6 @@ class EpistemicStarvationEvent(CoreasonBaseState):
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         ...
     )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(default=None)
     timestamp: float = Field(ge=0.0, le=253402300799.0)
 
     topology_class: Literal["epistemic_starvation"] = "epistemic_starvation"
@@ -13783,9 +13585,6 @@ class OntologicalReificationReceipt(CoreasonBaseState):
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         description="Cryptographic Lineage Watermark binding this node to the Merkle-DAG."
     )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(default=None, description="The RFC 8785 Canonical hash of the immediate causal ancestor.")
     timestamp: float = Field(description="The precise temporal coordinate of the event realization.")
     source_data_hash: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] = Field(
         description="The undeniable SHA-256 hash of the pre-transmutation artifact, unstructured text chunk, or telemetry row."
@@ -13818,13 +13617,7 @@ class SemanticRelationalVectorState(CoreasonBaseState):
 
     topology_class: Literal["semantic_relational_record"] = Field(default="semantic_relational_record")
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The RFC 8785 Canonical hash of the immediate causal ancestor, securing the Merkle-DAG.",
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
     )
     timestamp: float = Field(description="The precise temporal coordinate of the event realization.")
     ontology_class: UpperOntologyClassProfile = Field(
@@ -13952,13 +13745,13 @@ class SpeculativeExecutionPolicy(CoreasonBaseState):
 
 class EpistemicLedgerState(CoreasonBaseState):
     r"""
-    AGENT INSTRUCTION: Formalizes Event Sourcing and the Merkle-DAG structure as the absolute, immutable source of truth for the swarm, fully partitioned from volatile memory.
+    AGENT INSTRUCTION: Formalizes Event Sourcing as the absolute, immutable source of truth for the swarm, fully partitioned from volatile memory. Provenance is delegated to Sigstore (Cosign + Rekor transparency log) via the CI/CD pipeline.
 
     CAUSAL AFFORDANCE: Permanently crystallizes validated events into the `history` log. Applies Truth Maintenance, context eviction, and tracks active `DefeasibleCascadeEvents` and `RollbackIntents`.
 
     EPISTEMIC BOUNDS: The `@model_validator` `_enforce_canonical_sort` deterministically sorts history by timestamp, checkpoints by ID, and active cascades—guaranteeing invariant RFC 8785 canonical hashing. Validation prevents epistemic paradoxes (child before parent).
 
-    MCP ROUTING TRIGGERS: Event Sourcing, Merkle-DAG, Immutable Ledger, Truth Crystallization, Chronological Sort
+    MCP ROUTING TRIGGERS: Event Sourcing, Sigstore, Rekor Transparency Log, Immutable Ledger, Truth Crystallization, Chronological Sort
 
     """
 
@@ -14030,12 +13823,6 @@ class EpistemicLedgerState(CoreasonBaseState):
         )
         return self
 
-    @model_validator(mode="after")
-    def verify_merkle_chain(self) -> Self:
-        for i in range(1, len(self.history)):
-            if getattr(self.history[i], "prior_event_hash", None) is None:
-                raise ValueError("Merkle Chain Broken: Event missing prior_event_hash")
-        return self
 
     @model_validator(mode="after")
     def enforce_defeasible_quarantine(self) -> Self:
@@ -14061,13 +13848,7 @@ class GuardrailViolationEvent(CoreasonBaseState):
     """
 
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-    )
-    prior_event_hash: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-f0-9]{64}$")] | None
-    ) = Field(
-        default=None,
-        description="The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+        description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
     )
     timestamp: float = Field(
         ge=0.0,
