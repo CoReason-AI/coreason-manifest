@@ -2436,6 +2436,60 @@
       "title": "CausalDirectedEdgeState",
       "type": "object"
     },
+    "CausalDiscoveryIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A test-time hypothesis representing the intent to discover a causal graph from observational data.\nCAUSAL AFFORDANCE: Unlocks the ability to execute SCM construction via PC or FCI algorithms.\nEPISTEMIC BOUNDS: Bounded by max_discrete_bins (le=100) to prevent combinatorial explosion.\nMCP ROUTING TRIGGERS: Causal Inference, Structural Causal Models, PyWhy, Directed Acyclic Graph, causallearn",
+      "properties": {
+        "dataset_uri": {
+          "description": "The URI of the observational dataset.",
+          "title": "Dataset Uri",
+          "type": "string"
+        },
+        "discovery_algorithm": {
+          "description": "The algorithm to use for causal discovery.",
+          "enum": [
+            "PC",
+            "FCI"
+          ],
+          "title": "Discovery Algorithm",
+          "type": "string"
+        },
+        "max_discrete_bins": {
+          "default": 10,
+          "description": "The maximum number of bins for continuous variables.",
+          "maximum": 100,
+          "title": "Max Discrete Bins",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "dataset_uri",
+        "discovery_algorithm"
+      ],
+      "title": "CausalDiscoveryIntent",
+      "type": "object"
+    },
+    "CausalDiscoveryReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing the result of a causal discovery execution.\nCAUSAL AFFORDANCE: Confirms the successful generation of a causal graph from observational data.\nEPISTEMIC BOUNDS: Requires a strict causal graph representation.\nMCP ROUTING TRIGGERS: Causal Inference, Structural Causal Models, PyWhy, Directed Acyclic Graph, causallearn",
+      "properties": {
+        "causal_graph": {
+          "$ref": "#/$defs/StructuralCausalGraphProfile",
+          "description": "The structural causal graph discovered."
+        },
+        "discovery_algorithm_used": {
+          "description": "The algorithm that was used.",
+          "title": "Discovery Algorithm Used",
+          "type": "string"
+        }
+      },
+      "required": [
+        "causal_graph",
+        "discovery_algorithm_used"
+      ],
+      "title": "CausalDiscoveryReceipt",
+      "type": "object"
+    },
     "CausalExplanationEvent": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing the\nmacroscopic factorization of a collective swarm outcome into its constituent causal\ncomponents. As an ...Event suffix, this is an append-only coordinate on the\nMerkle-DAG.\n\nCAUSAL AFFORDANCE: Commits the system-level CollectiveIntelligenceProfile and the\nindividual ShapleyAttributionReceipt array to the Epistemic Ledger, finalizing the\ncredit assignment for a target_outcome_event_cid.\n\nEPISTEMIC BOUNDS: The target_outcome_event_cid is locked to a 128-char CID regex. The\n@model_validator mathematically enforces deterministic canonical hashing by sorting the\nagent_attributions array by target_node_cid (NodeCIDState), guaranteeing RFC 8785\nalignment.\n\nMCP ROUTING TRIGGERS: Causal Factorization, Epistemic Ledger Commit, Credit Assignment,\nMacroscopic Explanation, Deterministic Sorting",
@@ -6077,6 +6131,63 @@
       "title": "DiversityPolicy",
       "type": "object"
     },
+    "DoWhyEstimationIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A test-time hypothesis to estimate the causal effect of a treatment on an outcome.\nCAUSAL AFFORDANCE: Unlocks back-door/front-door adjustments and returns the Average Treatment Effect (ATE).\nEPISTEMIC BOUNDS: Requires a strict causal graph representation and identified treatment/outcome variables.\nMCP ROUTING TRIGGERS: Causal Inference, Average Treatment Effect, DoWhy, Causal Estimand",
+      "properties": {
+        "causal_graph": {
+          "$ref": "#/$defs/StructuralCausalGraphProfile",
+          "description": "The structural causal graph to use for estimation."
+        },
+        "treatment": {
+          "description": "The treatment variable.",
+          "title": "Treatment",
+          "type": "string"
+        },
+        "outcome": {
+          "description": "The outcome variable.",
+          "title": "Outcome",
+          "type": "string"
+        }
+      },
+      "required": [
+        "causal_graph",
+        "treatment",
+        "outcome"
+      ],
+      "title": "DoWhyEstimationIntent",
+      "type": "object"
+    },
+    "DoWhyEstimationReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing the result of a DoWhy estimation.\nCAUSAL AFFORDANCE: Confirms the identified estimand and the estimated Average Treatment Effect (ATE).\nEPISTEMIC BOUNDS: The refutation_p_value must be mathematically bounded between 0.0 and 1.0.\nMCP ROUTING TRIGGERS: Causal Inference, Average Treatment Effect, DoWhy, Causal Estimand",
+      "properties": {
+        "identified_estimand": {
+          "description": "The identified causal estimand.",
+          "title": "Identified Estimand",
+          "type": "string"
+        },
+        "average_treatment_effect": {
+          "description": "The estimated average treatment effect.",
+          "title": "Average Treatment Effect",
+          "type": "number"
+        },
+        "refutation_p_value": {
+          "description": "The p-value of the refutation test.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Refutation P Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "identified_estimand",
+        "average_treatment_effect",
+        "refutation_p_value"
+      ],
+      "title": "DoWhyEstimationReceipt",
+      "type": "object"
+    },
     "DoWhyInterventionIntent": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology",
@@ -6491,6 +6602,29 @@
         "branch_budgets_magnitude"
       ],
       "title": "DynamicRoutingManifest",
+      "type": "object"
+    },
+    "EconMLCATEIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A test-time hypothesis to explore varying causal effects across diverse sub-populations.\nCAUSAL AFFORDANCE: Unlocks Double Machine Learning (DML) to estimate Conditional Average Treatment Effects (CATE).\nEPISTEMIC BOUNDS: Requires a DoWhyEstimationReceipt to guarantee the presence of a validated ATE estimation.\nMCP ROUTING TRIGGERS: Causal Inference, Heterogeneous Treatment Effect, Double Machine Learning, EconML",
+      "properties": {
+        "base_estimation_receipt": {
+          "$ref": "#/$defs/DoWhyEstimationReceipt",
+          "description": "The base ATE estimation receipt."
+        },
+        "features": {
+          "description": "The features to condition the treatment effect on.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Features",
+          "type": "array"
+        }
+      },
+      "required": [
+        "base_estimation_receipt"
+      ],
+      "title": "EconMLCATEIntent",
       "type": "object"
     },
     "EdgeMappingContract": {
@@ -10286,6 +10420,30 @@
         "violation_type"
       ],
       "title": "GuardrailViolationEvent",
+      "type": "object"
+    },
+    "HTEEstimationReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing the result of an EconML CATE estimation.\nCAUSAL AFFORDANCE: Confirms the identified conditional average treatment effect.\nEPISTEMIC BOUNDS: The cate_estimate must be mathematically valid.\nMCP ROUTING TRIGGERS: Causal Inference, Heterogeneous Treatment Effect, Double Machine Learning, EconML",
+      "properties": {
+        "features": {
+          "description": "The features conditioned on.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Features",
+          "type": "array"
+        },
+        "cate_estimate": {
+          "description": "The conditional average treatment effect.",
+          "title": "Cate Estimate",
+          "type": "number"
+        }
+      },
+      "required": [
+        "cate_estimate"
+      ],
+      "title": "HTEEstimationReceipt",
       "type": "object"
     },
     "HTTPTransportProfile": {
@@ -17560,6 +17718,40 @@
         "max_lookback_window"
       ],
       "title": "StreamingDisfluencyContract",
+      "type": "object"
+    },
+    "StructuralCausalGraphProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative, frozen snapshot of an N-dimensional coordinate representing a causal graph.\nCAUSAL AFFORDANCE: Provides the structural geometry required for back-door and front-door adjustment estimations.\nEPISTEMIC BOUNDS: Mathematically defines a Directed Acyclic Graph (DAG) or Acyclic Directed Mixed Graph (ADMG).\nMCP ROUTING TRIGGERS: Causal Inference, Structural Causal Models, PyWhy, Directed Acyclic Graph, causallearn",
+      "properties": {
+        "edges": {
+          "description": "The directed edges of the causal graph.",
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "type": "array"
+          },
+          "title": "Edges",
+          "type": "array"
+        },
+        "nodes": {
+          "description": "The nodes of the causal graph.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Nodes",
+          "type": "array"
+        }
+      },
+      "title": "StructuralCausalGraphProfile",
       "type": "object"
     },
     "SubstrateHydrationManifest": {
