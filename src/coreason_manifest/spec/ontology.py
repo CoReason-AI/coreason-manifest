@@ -6950,6 +6950,16 @@ class DoWhyInterventionIntent(CoreasonBaseState):
         default_factory=list, description="Optional explicit common causes (confounders) to adjust for."
     )
 
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        if self.common_causes:
+            object.__setattr__(
+                self,
+                "common_causes",
+                sorted(self.common_causes),
+            )
+        return self
+
 
 class JSONRPCErrorState(CoreasonBaseState):
     """
