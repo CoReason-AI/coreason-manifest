@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.54.1](https://github.com/CoReason-AI/coreason-manifest/compare/v0.54.0...v0.54.1) (2026-05-13)
+
+
+### Features
+
+* **ontology:** remove deprecated proprietary chaos components ([#1721](https://github.com/CoReason-AI/coreason-manifest/issues/1721)) ([1f54db6](https://github.com/CoReason-AI/coreason-manifest/commit/1f54db6b2e024440678e3ac9f03ec6a69e7e3b3c))
+
+
+### Bug Fixes
+
+* **ci:** sync release-please manifest version to v0.54.0 ([c5dd1b9](https://github.com/CoReason-AI/coreason-manifest/commit/c5dd1b9e0f15294f09a7286270b448643da176fb))
+* **ci:** sync release-please manifest version to v0.54.0 ([5fa206f](https://github.com/CoReason-AI/coreason-manifest/commit/5fa206f3578b9e0519dccc27be8b50134b185cf6))
+* remove orphaned SteadyStateHypothesisState (chaos deprecation) ([b42dbec](https://github.com/CoReason-AI/coreason-manifest/commit/b42dbec45c03afe7576a2516d48f43d96ed8db2e))
+* remove unused mypy type-ignore on mcp_adapters (Python 3.14 compat) ([5e33849](https://github.com/CoReason-AI/coreason-manifest/commit/5e33849fb33e9db3051d4cd142176b99a9d4fab2))
+
+
+### Refactoring
+
+* remove deprecated SpanKindProfile ([ed75ab7](https://github.com/CoReason-AI/coreason-manifest/commit/ed75ab7a7e22f4d54b980c316aa0c90fea4e6c82))
+
 ## 0.54.0 (2026-05-13)
 
 
