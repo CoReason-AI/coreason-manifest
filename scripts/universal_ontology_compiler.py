@@ -439,8 +439,6 @@ def evaluate_topological_reachability() -> None:
         "ComputationalThermodynamicsProfile",
         "ActiveInferenceEpochState",
         "AuctionState",
-        "AdversarialSimulationProfile",
-        "ChaosExperimentTask",
         "DocumentLayoutManifest",
         "DynamicLayoutManifest",
         "AdjudicationRubricProfile",

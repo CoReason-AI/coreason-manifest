@@ -716,7 +716,7 @@ class CoreasonBaseState(BaseModel):
         except AttributeError:
             raw_dict = self.model_dump(mode="json", exclude_none=True, by_alias=True)
             canonical_payload = _canonicalize_payload(raw_dict)
-            canonical_dump = canonicaljson.encode_canonical_json(canonical_payload)
+            canonical_dump: bytes = canonicaljson.encode_canonical_json(canonical_payload)
             object.__setattr__(self, "_cached_canonical_dump", canonical_dump)
             return canonical_dump
 
@@ -3461,40 +3461,6 @@ class AdjudicationIntent(CoreasonBaseState):
         return self
 
 
-class AdversarialSimulationProfile(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: A deterministic red-team configuration injecting Chaos Engineering vectors into a targeted node to map the fragility of the active context boundary. As a ...Profile suffix, this is a declarative snapshot of an attack geometry.
-
-    CAUSAL AFFORDANCE: Authorizes the physical injection of a malicious structural payload (the "Judas Node" vector) to intentionally trip semantic firewalls, data exfiltration blocks, or tool poisoning filters, generating verification assertions.
-
-    EPISTEMIC BOUNDS: The attack surface is rigidly constrained by the Literal automaton attack_vector. The payload is physically bounded by the synthetic_payload limits (max_length=100000), explicitly targeting a specific 128-char CID (target_node_cid).
-
-    MCP ROUTING TRIGGERS: Chaos Engineering, Judas Node, Threat Modeling, Structural Sabotage, Semantic Firewall Validation
-    """
-
-    model_config = ConfigDict(json_schema_extra=_inject_sim_examples_and_security_cluster)
-
-    simulation_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
-        Field(description="The unique identifier for this red-team experiment.")
-    )
-    target_node_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
-        Field(description="The exact NodeCIDState the 'Judas Node' will attempt to compromise.")
-    )
-    attack_vector: Literal["prompt_extraction", "data_exfiltration", "semantic_hijacking", "tool_poisoning"] = Field(
-        description="The mathematically predictable category of structural sabotage being simulated."
-    )
-    synthetic_payload: (
-        dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState]
-        | Annotated[str, StringConstraints(max_length=100000)]
-    ) = Field(
-        description="The raw poisoned text or malicious JSON-RPC schema injected into the target's context window.",
-    )
-    expected_firewall_trip: Annotated[str, StringConstraints(max_length=2000)] | None = Field(
-        default=None,
-        description="The exact rule_cid of the SemanticFlowPolicy or Governance bound expected to block this attack. Governing automated test assertions.",
-    )
-
-
 class AdversarialEmulationProfile(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Aggregates the full Adversarial Emulation geometry, composing
@@ -5744,34 +5710,6 @@ class EmpiricalFalsificationContract(CoreasonBaseState):
     )
 
 
-class FaultInjectionProfile(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Defines a deterministic Byzantine fault vector for Chaos Engineering
-    perturbation tests. As a ...Profile suffix, this is a declarative, frozen snapshot of an
-    attack geometry at a specific point in time.
-
-    CAUSAL AFFORDANCE: Instructs the execution engine to physically degrade, throttle, or
-    corrupt the structural state or network connectivity of the target_node_cid based on the
-    specific fault_category (FaultCategoryProfile) manifold.
-
-    EPISTEMIC BOUNDS: The severity of the perturbation is constrained above by the intensity
-    scalar (le=18446744073709551615.0) but unbounded below, permitting negative fault magnitudes. The
-    blast radius targets either the entire swarm (target_node_cid=None) or a specific node
-    bounded to a valid 128-char CID regex ^[a-zA-Z0-9_.:-]+$.
-
-    MCP ROUTING TRIGGERS: Chaos Engineering, Byzantine Fault Injection, Perturbation Theory,
-    Structural Sabotage, Resilience Testing
-    """
-
-    fault_category: FaultCategoryProfile = Field(description="The specific type of fault to inject.")
-    target_node_cid: (
-        Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] | None
-    ) = Field(default=None, description="The specific node to attack, or None for swarm-wide.")
-    intensity: float = Field(
-        le=18446744073709551615.0, description="The severity of the fault, represented from 0.0 to 1.0."
-    )
-
-
 class FitnessObjectiveProfile(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Defines a specific mathematical objective function (fitness dimension)
@@ -7168,7 +7106,6 @@ type AnyIntent = Annotated[
     | SPARQLQueryIntent
     | AnalogicalMappingTask
     | BoundedJSONRPCIntent
-    | ChaosExperimentTask
     | EpistemicTransmutationTask
     | EpistemicUpsamplingTask
     | InterventionalCausalTask
@@ -9837,7 +9774,7 @@ class SteadyStateHypothesisState(CoreasonBaseState):
     N-dimensional geometry.
 
     CAUSAL AFFORDANCE: Provides the deterministic baseline against which chaotic
-    perturbations (e.g., ChaosExperimentTask) are measured, establishing temporal
+    perturbations (e.g., CNCF Chaos Mesh) are measured, establishing temporal
     and procedural expectations for standard execution loops.
 
     EPISTEMIC BOUNDS: Latency expectations are continuously bounded by
@@ -9865,46 +9802,6 @@ class SteadyStateHypothesisState(CoreasonBaseState):
     def _enforce_canonical_sort(self) -> Self:
         if self.required_tool_usage is not None:
             object.__setattr__(self, "required_tool_usage", sorted(self.required_tool_usage))
-        return self
-
-
-class ChaosExperimentTask(CoreasonBaseState):
-    topology_class: Literal["chaos_experiment_task"] = Field(default="chaos_experiment_task")
-    """
-    AGENT INSTRUCTION: Orchestrates an automated steady-state hypothesis falsification loop
-    via structured Chaos Engineering. As a ...Task suffix, this represents an authorized
-    kinetic execution trigger initiating active topological stress testing.
-
-    CAUSAL AFFORDANCE: Deploys a deterministic matrix of faults and exogenous shocks against
-    a baseline SteadyStateHypothesisState to empirically discover latent fragility and
-    evaluate the resilience of the DAG topology.
-
-    EPISTEMIC BOUNDS: Cryptographic determinism is mathematically guaranteed by the
-    @model_validator, which sorts the faults array by composite key (fault_category,
-    target_node_cid) and the shocks array by shock_cid to preserve RFC 8785 canonical hashing.
-
-    MCP ROUTING TRIGGERS: Steady State Falsification, Chaos Engineering, Automated Failure
-    Discovery, Resilience Orchestration, Systemic Perturbation
-    """
-
-    experiment_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
-        Field(description="The unique identifier for the chaos experiment.")
-    )
-    hypothesis: SteadyStateHypothesisState = Field(description="The baseline steady state hypothesis being tested.")
-    faults: list[FaultInjectionProfile] = Field(
-        description="The strict array of fault injection profiles defining the chaotic elements."
-    )
-    shocks: list[ExogenousEpistemicEvent] = Field(
-        default_factory=list,
-        description="The declarative array of exogenous Black Swan events injected into the topology.",
-    )
-
-    @model_validator(mode="after")
-    def _enforce_canonical_sort(self) -> Self:
-        object.__setattr__(
-            self, "faults", sorted(self.faults, key=operator.attrgetter("fault_category", "target_node_cid"))
-        )
-        object.__setattr__(self, "shocks", sorted(self.shocks, key=operator.attrgetter("shock_cid")))
         return self
 
 
