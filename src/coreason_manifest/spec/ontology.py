@@ -13823,7 +13823,6 @@ class EpistemicLedgerState(CoreasonBaseState):
         )
         return self
 
-
     @model_validator(mode="after")
     def enforce_defeasible_quarantine(self) -> Self:
         quarantined_cids: set[str] = set()
