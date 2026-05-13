@@ -231,5 +231,3 @@ class TestDocumentModels:
         for dtype in ["preamble", "methodology", "argumentation", "findings", "conclusion", "addendum"]:
             obj = DiscourseNodeState(node_cid=f"did:z:{dtype}", discourse_type=dtype)  # type: ignore[arg-type]
             assert obj.discourse_type == dtype
-
-

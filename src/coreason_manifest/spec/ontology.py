@@ -3461,7 +3461,6 @@ class AdjudicationIntent(CoreasonBaseState):
         return self
 
 
-
 class AgentBidIntent(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Represents a probabilistic agentic bid in a multi-objective optimization market, factoring in projected compute latency, carbon constraints, and internal epistemic certainty.
@@ -4965,7 +4964,6 @@ class EnsembleTopologyProfile(CoreasonBaseState):
     def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "concurrent_branch_cids", sorted(self.concurrent_branch_cids))
         return self
-
 
 
 class EpistemicCompressionSLA(CoreasonBaseState):
@@ -7749,7 +7747,6 @@ class MCPServerManifest(CoreasonBaseState):
         return self
 
 
-
 class KineticSeparationPolicy(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Implements strict Bipartite Graph Separation (Conflict Graphs) to mathematically prevent toxic capability combinations from co-existing within the same causal execution chain.
@@ -9042,23 +9039,23 @@ class PresentationManifest(CoreasonBaseState):
 
 class EpistemicSOPManifest(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Encodes a macroscopic Petri net or Directed Acyclic Graph (DAG)
-    formalizing standard operating procedures into mathematically traversable state
-    transitions. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate
-    state.
+     AGENT INSTRUCTION: Encodes a macroscopic Petri net or Directed Acyclic Graph (DAG)
+     formalizing standard operating procedures into mathematically traversable state
+     transitions. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate
+     state.
 
-    CAUSAL AFFORDANCE: Physically bounds the executing agent (target_persona:
-    ProfileCIDState) to a deterministic sequence of CognitiveStateProfiles, unlocking
-    the ability for the orchestrator to dynamically evaluate execution via Process Reward
-   .
+     CAUSAL AFFORDANCE: Physically bounds the executing agent (target_persona:
+     ProfileCIDState) to a deterministic sequence of CognitiveStateProfiles, unlocking
+     the ability for the orchestrator to dynamically evaluate execution via Process Reward
+    .
 
-    EPISTEMIC BOUNDS: The cognitive_steps dictionary is constrained to max_length=1000
-    to cap memory footprint. The @model_validator reject_ghost_nodes mathematically enforces
-    referential integrity, guaranteeing that no chronological_flow_edges AND no
-    structural_grammar_hashes point to an undefined state.
+     EPISTEMIC BOUNDS: The cognitive_steps dictionary is constrained to max_length=1000
+     to cap memory footprint. The @model_validator reject_ghost_nodes mathematically enforces
+     referential integrity, guaranteeing that no chronological_flow_edges AND no
+     structural_grammar_hashes point to an undefined state.
 
-    MCP ROUTING TRIGGERS: Petri Net, Directed Acyclic Graph, Process Reward Model,
-    Topological Flow, Referential Integrity
+     MCP ROUTING TRIGGERS: Petri Net, Directed Acyclic Graph, Process Reward Model,
+     Topological Flow, Referential Integrity
     """
 
     sop_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
@@ -9090,7 +9087,6 @@ class EpistemicSOPManifest(CoreasonBaseState):
             if step_cid not in self.cognitive_steps:
                 raise ValueError(f"Ghost node referenced in structural_grammar_hashes: {step_cid}")
         return self
-
 
 
 type QoSClassificationProfile = Literal["critical", "high", "interactive", "background_batch"]
@@ -13141,7 +13137,6 @@ class CognitiveFormatContract(CoreasonBaseState):
                 "Regex constraints must be embedded directly inside the LMQL grammar string when using 'lmql_query'."
             )
         return self
-
 
 
 class CognitiveDetailedBalanceContract(CoreasonBaseState):
