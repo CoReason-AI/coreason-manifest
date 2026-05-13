@@ -6,6 +6,8 @@ from coreason_manifest.spec.ontology import GuardrailViolationEvent
 def test_guardrail_violation_event_instantiation() -> None:
     """Tests the basic instantiation and validation of GuardrailViolationEvent."""
     event = GuardrailViolationEvent(
+        event_cid="cid_123",
+        timestamp=123456789.0,
         violation_id="viol_123",
         status_code=403,
         violation_type="pii_leak",
@@ -15,12 +17,14 @@ def test_guardrail_violation_event_instantiation() -> None:
     assert event.status_code == 403
     assert event.violation_type == "pii_leak"
     assert event.violation_details["field"] == "ssn"
-    assert isinstance(event.timestamp, datetime)
+    assert isinstance(event.timestamp, float)
 
 
 def test_guardrail_violation_event_json_isomorphism() -> None:
     """Tests that the event correctly serializes and deserializes."""
     event = GuardrailViolationEvent(
+        event_cid="cid_456",
+        timestamp=123456790.0,
         violation_id="viol_456",
         status_code=422,
         violation_type="input_validation_failed",
