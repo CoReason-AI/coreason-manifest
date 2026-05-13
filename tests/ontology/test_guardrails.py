@@ -1,4 +1,3 @@
-from datetime import datetime
 
 from coreason_manifest.spec.ontology import GuardrailViolationEvent
 
