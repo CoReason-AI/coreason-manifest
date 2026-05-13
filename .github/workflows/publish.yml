@@ -57,14 +57,14 @@ jobs:
       #       dist/*.tar.gz
 
       - name: Generate SBOM
-        uses: anchore/sbom-action@v0
+        uses: anchore/sbom-action@bb716408e75840bab848af0a4e0a969df8b46e4b # v0.17.6
         with:
           format: spdx-json
           output-file: sbom.spdx.json
           upload-release-assets: false
 
       - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@15c56dba361d8335944d31a2ecd17d700fd7ece1 # release/v1
         with:
           attestations: false  # Requires Enterprise Cloud or public repo
 

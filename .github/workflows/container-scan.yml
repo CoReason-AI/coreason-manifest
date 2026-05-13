@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ "coreason-develop", "main" ]
 
+
+permissions:
+  contents: read
+
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
