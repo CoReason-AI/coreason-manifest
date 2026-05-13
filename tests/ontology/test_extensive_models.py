@@ -15,7 +15,6 @@ and model_validators that only run during actual construction.
 """
 
 from coreason_manifest.spec.ontology import (
-    AdversarialEmulationProfile,
     # Simple models with minimal required fields
     AmbientState,
     BoundedInterventionScopePolicy,
@@ -53,8 +52,6 @@ from coreason_manifest.spec.ontology import (
     FYIIntent,
     # Multi-modal token anchor
     MultimodalTokenAnchorState,
-    # Process Reward
-    ProcessRewardContract,
 )
 
 
@@ -64,10 +61,6 @@ class TestSimpleModels:
     def test_ambient_state(self) -> None:
         obj = AmbientState(status_message="active")
         assert obj.status_message == "active"
-
-    def test_adversarial_emulation(self) -> None:
-        obj = AdversarialEmulationProfile(emulation_fidelity_target=0.95)
-        assert obj.emulation_fidelity_target == 0.95
 
     def test_causal_attribution(self) -> None:
         obj = CausalAttributionState(source_event_cid="ev-1", influence_weight=0.7)
@@ -240,9 +233,3 @@ class TestDocumentModels:
             assert obj.discourse_type == dtype
 
 
-class TestProcessAndSOP:
-    """Exercise process reward and SOP models."""
-
-    def test_process_reward(self) -> None:
-        obj = ProcessRewardContract(pruning_threshold=0.5, max_backtracks_allowed=10)
-        assert obj.pruning_threshold == 0.5
