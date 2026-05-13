@@ -716,7 +716,7 @@ class CoreasonBaseState(BaseModel):
         except AttributeError:
             raw_dict = self.model_dump(mode="json", exclude_none=True, by_alias=True)
             canonical_payload = _canonicalize_payload(raw_dict)
-            canonical_dump = canonicaljson.encode_canonical_json(canonical_payload)
+            canonical_dump: bytes = canonicaljson.encode_canonical_json(canonical_payload)
             object.__setattr__(self, "_cached_canonical_dump", canonical_dump)
             return canonical_dump
 

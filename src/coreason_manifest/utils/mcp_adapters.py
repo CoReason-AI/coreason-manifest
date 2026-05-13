@@ -51,4 +51,4 @@ class DeterministicTransportAdapter:
             "id": request_cid,  # Note: External Protocol Exemption.
         }
         encoder = msgspec.json.Encoder(order="deterministic")
-        return encoder.encode(wrapped_payload)
+        return encoder.encode(wrapped_payload)  # type: ignore[no-any-return]
