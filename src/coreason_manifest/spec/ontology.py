@@ -13350,7 +13350,13 @@ type AnyStateEvent = Annotated[
     | EpistemicStarvationEvent
     | SPARQLQueryResultReceipt
     | OracleExecutionReceipt
-    | GuardrailViolationEvent,
+    | GuardrailViolationEvent
+    | CausalDiscoveryIntent
+    | CausalDiscoveryReceipt
+    | DoWhyEstimationIntent
+    | DoWhyEstimationReceipt
+    | EconMLCATEIntent
+    | HTEEstimationReceipt,
     Field(discriminator="topology_class", description="A discriminated union of state events."),
 ]
 
@@ -14030,6 +14036,10 @@ class CausalDiscoveryIntent(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Causal Inference, Structural Causal Models, PyWhy, Directed Acyclic Graph, causallearn
     """
 
+    topology_class: Literal["causal_discovery_intent"] = Field(
+        default="causal_discovery_intent",
+        description="Discriminator for the CausalDiscoveryIntent topology.",
+    )
     dataset_uri: str = Field(..., description="The URI of the observational dataset.")
     discovery_algorithm: Literal["PC", "FCI"] = Field(..., description="The algorithm to use for causal discovery.")
     max_discrete_bins: int = Field(
@@ -14045,6 +14055,10 @@ class StructuralCausalGraphProfile(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Causal Inference, Structural Causal Models, PyWhy, Directed Acyclic Graph, causallearn
     """
 
+    topology_class: Literal["structural_causal_graph"] = Field(
+        default="structural_causal_graph",
+        description="Discriminator for the StructuralCausalGraphProfile topology.",
+    )
     edges: list[tuple[str, str]] = Field(default_factory=list, description="The directed edges of the causal graph.")
     nodes: list[str] = Field(default_factory=list, description="The nodes of the causal graph.")
 
@@ -14063,6 +14077,10 @@ class DoWhyEstimationIntent(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Causal Inference, Average Treatment Effect, DoWhy, Causal Estimand
     """
 
+    topology_class: Literal["dowhy_estimation_intent"] = Field(
+        default="dowhy_estimation_intent",
+        description="Discriminator for the DoWhyEstimationIntent topology.",
+    )
     causal_graph: StructuralCausalGraphProfile = Field(
         ..., description="The structural causal graph to use for estimation."
     )
@@ -14078,6 +14096,10 @@ class DoWhyEstimationReceipt(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Causal Inference, Average Treatment Effect, DoWhy, Causal Estimand
     """
 
+    topology_class: Literal["dowhy_estimation_receipt"] = Field(
+        default="dowhy_estimation_receipt",
+        description="Discriminator for the DoWhyEstimationReceipt topology.",
+    )
     identified_estimand: str = Field(..., description="The identified causal estimand.")
     average_treatment_effect: float = Field(..., description="The estimated average treatment effect.")
     refutation_p_value: float = Field(..., ge=0.0, le=1.0, description="The p-value of the refutation test.")
@@ -14091,6 +14113,10 @@ class EconMLCATEIntent(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Causal Inference, Heterogeneous Treatment Effect, Double Machine Learning, EconML
     """
 
+    topology_class: Literal["econml_cate_intent"] = Field(
+        default="econml_cate_intent",
+        description="Discriminator for the EconMLCATEIntent topology.",
+    )
     base_estimation_receipt: DoWhyEstimationReceipt = Field(..., description="The base ATE estimation receipt.")
     features: list[str] = Field(default_factory=list, description="The features to condition the treatment effect on.")
 
@@ -14115,6 +14141,10 @@ class CausalDiscoveryReceipt(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Causal Inference, Structural Causal Models, PyWhy, Directed Acyclic Graph, causallearn
     """
 
+    topology_class: Literal["causal_discovery_receipt"] = Field(
+        default="causal_discovery_receipt",
+        description="Discriminator for the CausalDiscoveryReceipt topology.",
+    )
     causal_graph: StructuralCausalGraphProfile = Field(..., description="The structural causal graph discovered.")
     discovery_algorithm_used: str = Field(..., description="The algorithm that was used.")
 
@@ -14127,6 +14157,10 @@ class HTEEstimationReceipt(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Causal Inference, Heterogeneous Treatment Effect, Double Machine Learning, EconML
     """
 
+    topology_class: Literal["hte_estimation_receipt"] = Field(
+        default="hte_estimation_receipt",
+        description="Discriminator for the HTEEstimationReceipt topology.",
+    )
     features: list[str] = Field(default_factory=list, description="The features conditioned on.")
     cate_estimate: float = Field(..., description="The conditional average treatment effect.")
 
