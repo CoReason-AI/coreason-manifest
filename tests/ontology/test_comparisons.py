@@ -11,8 +11,6 @@
 from coreason_manifest.spec.ontology import RiskLevelPolicy
 
 
-
-
 def test_risk_level_policy_comparisons() -> None:
     s = RiskLevelPolicy.SAFE
     st = RiskLevelPolicy.STANDARD

@@ -16,7 +16,6 @@ from coreason_manifest.spec.ontology import (
     EpistemicZeroTrustReceipt,
     InterventionReceipt,
     OntologicalAlignmentPolicy,
-
     SpatialBillboardContract,
     VectorEmbeddingState,
     WetwareAttestationContract,
@@ -63,9 +62,6 @@ def test_billboard_manifold() -> None:
         SpatialBillboardContract(
             anchoring_node_cid="cid1", spherical_cylindrical_lock="none", distance_scaling_factor=1.0
         )
-
-
-
 
 
 def test_discourse_tree_manifest() -> None:

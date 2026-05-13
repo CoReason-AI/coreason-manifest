@@ -239,8 +239,6 @@ class RhetoricalStructureProfile(StrEnum):
     CONCESSION = "concession"
 
 
-
-
 type FaultCategoryProfile = Literal[
     "pod_kill",
     "network_delay",
@@ -2354,8 +2352,6 @@ class CognitiveUncertaintyProfile(CoreasonBaseState):
     )
 
 
-
-
 class GradingCriterionProfile(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Defines a discrete objective dimension within a Multi-Attribute
@@ -2531,8 +2527,6 @@ class ConsensusPolicy(CoreasonBaseState):
         if self.strategy == "pbft" and self.quorum_rules is None:
             raise ValueError("quorum_rules must be provided when strategy is 'pbft'.")
         return self
-
-
 
 
 class SaeLatentPolicy(CoreasonBaseState):
@@ -5725,9 +5719,7 @@ class EpistemicGuardrailsManifest(CoreasonBaseState):
     MCP ROUTING TRIGGERS: NeMo Guardrails, Colang, Reverse Proxy, Constitutional Alignment, Envoy Mesh
     """
 
-    colang_version: Literal["1.0", "2.0"] = Field(
-        default="2.0", description="The Colang specification version."
-    )
+    colang_version: Literal["1.0", "2.0"] = Field(default="2.0", description="The Colang specification version.")
     colang_payload: Annotated[str, StringConstraints(max_length=100000)] = Field(
         description="The raw Colang (.co) state machine configuration."
     )
@@ -5912,8 +5904,6 @@ class DynamicRoutingManifest(CoreasonBaseState):
                     "Merkle Violation: BypassReceipt artifact_event_cid does not match the root artifact_profile."
                 )
         return self
-
-
 
 
 class GrammarPanelProfile(CoreasonBaseState):
@@ -8509,8 +8499,6 @@ class NeuroSymbolicHandoffContract(CoreasonBaseState):
         gt=0,
         description="The maximum compute time allocated to the symbolic solver before aborting.",
     )
-
-
 
 
 class OutputMappingContract(CoreasonBaseState):
@@ -13951,6 +13939,29 @@ class EpistemicLedgerState(CoreasonBaseState):
         return self
 
 
+class GuardrailViolationEvent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Tracks a deterministic security boundary violation emitted by the NeMo Guardrails proxy. This event is a frozen historical fact representing a failed cryptographic or semantic check.
+
+    CAUSAL AFFORDANCE: Triggers an immediate suspension of the active execution trajectory and publishes a high-severity alert to the telemetry broker for remediation.
+
+    EPISTEMIC BOUNDS: The event must include the specific HTTP status code (e.g., 401, 403, 406, 422) and the opaque violation manifest emitted by the proxy.
+
+    MCP ROUTING TRIGGERS: Security, Guardrails, Data Loss Prevention, Policy Violation, Telemetry
+    """
+
+    violation_id: str = Field(..., description="Unique identifier for the violation event.")
+    status_code: int = Field(..., description="The HTTP status code returned by the Guardrails proxy.")
+    violation_type: str = Field(
+        ..., description="The classification of the violation (e.g., 'pii_leak', 'toxic_content')."
+    )
+    violation_details: dict[str, Any] = Field(
+        default_factory=dict, description="Detailed manifest from the Guardrails proxy."
+    )
+    timestamp: datetime = Field(default_factory=datetime.now, description="The ISO-8601 timestamp of the violation.")
+
+
+GuardrailViolationEvent.model_rebuild()
 CompositeNodeProfile.model_rebuild()
 WorkflowManifest.model_rebuild()
 StateHydrationManifest.model_rebuild()
