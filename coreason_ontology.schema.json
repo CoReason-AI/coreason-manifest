@@ -981,10 +981,10 @@
           "epistemic_telemetry": "#/$defs/EpistemicTelemetryEvent",
           "exogenous_event": "#/$defs/ExogenousEpistemicEvent",
           "formal_verification_receipt": "#/$defs/FormalVerificationReceipt",
+          "guardrail_violation_event": "#/$defs/GuardrailViolationEvent",
           "hypothesis": "#/$defs/HypothesisGenerationEvent",
           "intent_classification": "#/$defs/IntentClassificationReceipt",
           "mcp_tool_definition": "#/$defs/MCPToolDefinition",
-          "normative_drift": "#/$defs/NormativeDriftEvent",
           "observation": "#/$defs/ObservationEvent",
           "ontological_reification": "#/$defs/OntologicalReificationReceipt",
           "oracle_execution_receipt": "#/$defs/OracleExecutionReceipt",
@@ -1047,9 +1047,6 @@
         },
         {
           "$ref": "#/$defs/EpistemicPromotionEvent"
-        },
-        {
-          "$ref": "#/$defs/NormativeDriftEvent"
         },
         {
           "$ref": "#/$defs/PersistenceCommitReceipt"
@@ -1125,6 +1122,9 @@
         },
         {
           "$ref": "#/$defs/OracleExecutionReceipt"
+        },
+        {
+          "$ref": "#/$defs/GuardrailViolationEvent"
         }
       ]
     },
@@ -4390,7 +4390,7 @@
           "type": "string"
         },
         "drift_event_cid": {
-          "description": "The globally unique decentralized identifier (DID) anchoring the NormativeDriftEvent that justified triggering this proposal.",
+          "description": "The globally unique decentralized identifier (DID) anchoring the GuardrailViolationEvent that justified triggering this proposal.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
@@ -4421,55 +4421,6 @@
         "justification"
       ],
       "title": "ConstitutionalAmendmentIntent",
-      "type": "object"
-    },
-    "ConstitutionalPolicy": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes a discrete normative axiom within a Constitutional AI\nframework to prevent instrumental convergence. As a ...Policy suffix, this object defines\nrigid mathematical boundaries that the orchestrator must enforce globally.\n\nCAUSAL AFFORDANCE: Establishes a hard structural boundary that mathematically repels the\nswarm's generative trajectory away from forbidden semantic manifolds. Violation severity\nis classified via a strict Literal[\"low\", \"medium\", \"high\", \"critical\"] tier.\n\nEPISTEMIC BOUNDS: Geometrically restricts the state space by blacklisting specific\nexecution branches via the forbidden_intents array (max_length=1000),\ndeterministically sorted by @model_validator to preserve RFC 8785 canonical hashing.\nThe rule_cid is bounded to a 128-char CID.\n\nMCP ROUTING TRIGGERS: Constitutional AI, Value Alignment, Normative Axiom, Instrumental\nConvergence, Semantic Boundary",
-      "properties": {
-        "rule_cid": {
-          "description": "Unique identifier for the constitutional rule.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Rule Cid",
-          "type": "string"
-        },
-        "description": {
-          "description": "The definitive causal constraint or heuristic boundary enforced by this rule.",
-          "maxLength": 2000,
-          "title": "Description",
-          "type": "string"
-        },
-        "severity": {
-          "description": "The categorical magnitude of the systemic breach enacted upon rule violation.",
-          "enum": [
-            "low",
-            "medium",
-            "high",
-            "critical"
-          ],
-          "title": "Severity",
-          "type": "string"
-        },
-        "forbidden_intents": {
-          "description": "The explicit, structurally bounded set of forbidden semantic intents.",
-          "items": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "maxItems": 1000,
-          "title": "Forbidden Intents",
-          "type": "array"
-        }
-      },
-      "required": [
-        "rule_cid",
-        "description",
-        "severity",
-        "forbidden_intents"
-      ],
-      "title": "ConstitutionalPolicy",
       "type": "object"
     },
     "ConstrainedDecodingPolicy": {
@@ -6515,6 +6466,40 @@
       "title": "DraftingIntent",
       "type": "object"
     },
+    "DynamicConvergenceSLA": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the mathematical Optimal Stopping Theory boundaries for Monte\nCarlo Tree Search (MCTS) and test-time compute scaling. As an ...SLA suffix, this object\nenforces rigid mathematical boundaries that the orchestrator must respect globally.\n\nCAUSAL AFFORDANCE: Triggers an early termination circuit breaker on reasoning trajectories\nwhen the gradient of the Process Reward Model (PRM) score falls below the epsilon delta,\nhalting unnecessary probability wave expansion and preserving VRAM.\n\nEPISTEMIC BOUNDS: Mathematically constrained by convergence_delta_epsilon (ge=0.0, le=1.0)\nover a strictly positive lookback_window_steps (gt=0, le=18446744073709551615). Physically mandates\na minimum_reasoning_steps burn-in period (gt=0, le=18446744073709551615) to prevent premature\ncollapse before the latent space is adequately explored.\n\nMCP ROUTING TRIGGERS: Optimal Stopping Theory, MCTS, PRM Convergence, Circuit Breaker,\nBellman Equation",
+      "properties": {
+        "convergence_delta_epsilon": {
+          "description": "The minimal required PRM score improvement across the lookback window to justify continued compute.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Convergence Delta Epsilon",
+          "type": "number"
+        },
+        "lookback_window_steps": {
+          "description": "The N-step temporal window over which the PRM gradient is calculated.",
+          "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
+          "title": "Lookback Window Steps",
+          "type": "integer"
+        },
+        "minimum_reasoning_steps": {
+          "description": "The burn-in period before convergence logic is activated.",
+          "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
+          "title": "Minimum Reasoning Steps",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "convergence_delta_epsilon",
+        "lookback_window_steps",
+        "minimum_reasoning_steps"
+      ],
+      "title": "DynamicConvergenceSLA",
+      "type": "object"
+    },
     "DynamicLayoutManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Encapsulates a Python 3.14 t-string template as an Abstract Syntax Tree (AST) artifact for declarative, zero-trust UI evaluation.\n\nCAUSAL AFFORDANCE: Projects dynamic visual grids onto the UI plane while physically suffocating any capability for Arbitrary Code Execution (ACE) during runtime string interpolation.\n\nEPISTEMIC BOUNDS: The `layout_tstring` is physically clamped at `max_length=2000`. The `@field_validator` `validate_tstring` mathematically proves execution safety by traversing the AST and explicitly quarantining forbidden kinetic nodes (e.g., Call, Import), restricting to declarative operations.\n\nMCP ROUTING TRIGGERS: Abstract Syntax Tree Validation, Zero-Trust UI Projection, Arbitrary Code Execution Prevention, Declarative Templating",
@@ -7520,6 +7505,45 @@
       "title": "EpistemicGroundedTaskManifest",
       "type": "object"
     },
+    "EpistemicGuardrailsManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative proxy that outputs standard NeMo Colang format (.co files)\nto configure the NeMo Guardrails reverse-proxy in the Envoy mesh.\n\nCAUSAL AFFORDANCE: Defines the exact Colang state machine configuration for intercepting\nand overriding LLM outputs before they hit the network.\n\nEPISTEMIC BOUNDS: Bounded by a strict max_length=100000 on the raw Colang payload\nto prevent memory exhaustion. The @model_validator deterministically sorts the required\nimports.\n\nMCP ROUTING TRIGGERS: NeMo Guardrails, Colang, Reverse Proxy, Constitutional Alignment, Envoy Mesh",
+      "properties": {
+        "colang_version": {
+          "default": "2.0",
+          "description": "The Colang specification version.",
+          "enum": [
+            "1.0",
+            "2.0"
+          ],
+          "title": "Colang Version",
+          "type": "string"
+        },
+        "colang_payload": {
+          "description": "The raw Colang (.co) state machine configuration.",
+          "maxLength": 100000,
+          "title": "Colang Payload",
+          "type": "string"
+        },
+        "severity": {
+          "default": "critical",
+          "description": "The categorical magnitude of the systemic breach enacted upon rule violation.",
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ],
+          "title": "Severity",
+          "type": "string"
+        }
+      },
+      "required": [
+        "colang_payload"
+      ],
+      "title": "EpistemicGuardrailsManifest",
+      "type": "object"
+    },
     "EpistemicHydrationPolicy": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the limits of infinite graph unfolding to protect UI VRAM when pulling from the EpistemicLedgerState.\nCAUSAL AFFORDANCE: Instructs the orchestrator's deserialization engine to halt graph traversal at a specific recursion depth, replacing raw objects with cryptographic pointers.\nEPISTEMIC BOUNDS: The `max_unfold_depth` strictly bounds the DAG traversal depth (`ge=1, le=18446744073709551615`). `lazy_fetch_timeout_ms` prevents infinite halting (`ge=1, le=60000`). `truncation_strategy` is constrained to a Literal.\nMCP ROUTING TRIGGERS: Coalgebraic Unfolding, Lazy Evaluation, State-Space Bounding, VRAM Exhaustion Prevention",
@@ -8185,7 +8209,7 @@
     },
     "EpistemicSOPManifest": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\n AGENT INSTRUCTION: Encodes a macroscopic Petri net or Directed Acyclic Graph (DAG)\n formalizing standard operating procedures into mathematically traversable state\n transitions. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate\n state.\n\n CAUSAL AFFORDANCE: Physically bounds the executing agent (target_persona:\n ProfileCIDState) to a deterministic sequence of CognitiveStateProfiles, unlocking\n the ability for the orchestrator to dynamically evaluate execution via Process Reward\n.\n\n EPISTEMIC BOUNDS: The cognitive_steps dictionary is constrained to max_length=1000\n to cap memory footprint. The @model_validator reject_ghost_nodes mathematically enforces\n referential integrity, guaranteeing that no chronological_flow_edges AND no\n structural_grammar_hashes point to an undefined state.\n\n MCP ROUTING TRIGGERS: Petri Net, Directed Acyclic Graph, Process Reward Model,\n Topological Flow, Referential Integrity",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Encodes a macroscopic Petri net or Directed Acyclic Graph (DAG)\nformalizing standard operating procedures into mathematically traversable state\ntransitions. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate\nstate.\n\nCAUSAL AFFORDANCE: Physically bounds the executing agent (target_persona:\nProfileCIDState) to a deterministic sequence of CognitiveStateProfiles, unlocking\nthe ability for the orchestrator to dynamically evaluate execution\nvia Process Reward Models (prm_evaluations: list[ProcessRewardContract]) at each\ntopological node.\n\nEPISTEMIC BOUNDS: The cognitive_steps dictionary is constrained to max_length=1000\nto cap memory footprint. The @model_validator reject_ghost_nodes mathematically enforces\nreferential integrity, guaranteeing that no chronological_flow_edges AND no\nstructural_grammar_hashes point to an undefined state.\n\nMCP ROUTING TRIGGERS: Petri Net, Directed Acyclic Graph, Process Reward Model,\nTopological Flow, Referential Integrity",
       "properties": {
         "sop_cid": {
           "description": "A Content Identifier (CID) for the Standard Operating Procedure.",
@@ -8239,6 +8263,15 @@
             "type": "array"
           },
           "title": "Chronological Flow Edges",
+          "type": "array"
+        },
+        "prm_evaluations": {
+          "coreason_topological_exemption": true,
+          "description": "The strict array of Process Reward Contracts evaluating the logic.",
+          "items": {
+            "$ref": "#/$defs/ProcessRewardContract"
+          },
+          "title": "Prm Evaluations",
           "type": "array"
         }
       },
@@ -10146,7 +10179,7 @@
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Superimposes macro-economic and thermodynamic constraints over the\nswarm's execution graph to prevent unbounded compute exhaustion. As a ...Policy suffix,\nthis object defines rigid mathematical boundaries that the orchestrator must enforce\nglobally.\n\nCAUSAL AFFORDANCE: Acts as the ultimate hardware guillotine, authorizing the orchestrator\nto physically sever the execution thread if thermodynamic, economic, or temporal budgets\nare breached. Includes a mandatory zero-trust @model_validator enforcing that a\ncritical-severity root governance anchor exists in the DAG.\n\nEPISTEMIC BOUNDS: Enforces absolute physical ceilings: max_budget_magnitude\n(le=18446744073709551615), max_global_tokens (le=18446744073709551615), global_timeout_seconds (ge=0,\nle=18446744073709551615 — a strict 24-hour TTL), and optional max_carbon_budget_gco2eq (ge=0.0,\nle=18446744073709551615.0). An optional FormalVerificationContract provides mathematical proofs of\nstructural correctness.\n\nMCP ROUTING TRIGGERS: Thermodynamic Compute Limits, Hardware Guillotine, Halting Problem\nBounding, ESG Constraint, Execution Envelope",
       "properties": {
         "mandatory_license_rule": {
-          "$ref": "#/$defs/ConstitutionalPolicy",
+          "$ref": "#/$defs/EpistemicGuardrailsManifest",
           "description": "The mathematical governance constraint enforcing the root safety and licensing boundary on all execution paths."
         },
         "max_budget_magnitude": {
@@ -10307,37 +10340,6 @@
       "title": "GlobalSemanticProfile",
       "type": "object"
     },
-    "GovernancePolicy": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Aggregates discrete ConstitutionalPolicy nodes into a cohesive,\nversion-controlled Normative Alignment Manifold. As a ...Policy suffix, this object\ndefines rigid mathematical boundaries that the orchestrator must enforce globally.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator to enforce a unified cybernetic governance\nmodel across all swarm trajectories, grounding generative actions in a specific semantic\nversion (SemanticVersionState).\n\nEPISTEMIC BOUNDS: The topological integrity of the manifold is mathematically guaranteed\nby the @model_validator, which deterministically sorts the rules array by rule_cid to\nprevent Byzantine hash fractures across distributed nodes.\n\nMCP ROUTING TRIGGERS: Cybernetic Governance, Normative Alignment Manifold, Rule\nAggregation, Version Control, RFC 8785 Canonicalization",
-      "properties": {
-        "policy_name": {
-          "description": "Name of the governance policy.",
-          "maxLength": 2000,
-          "title": "Policy Name",
-          "type": "string"
-        },
-        "version": {
-          "$ref": "#/$defs/SemanticVersionState",
-          "description": "Semantic version of the governance policy."
-        },
-        "rules": {
-          "description": "The explicit array of constitutional rules included in this policy.",
-          "items": {
-            "$ref": "#/$defs/ConstitutionalPolicy"
-          },
-          "title": "Rules",
-          "type": "array"
-        }
-      },
-      "required": [
-        "policy_name",
-        "version",
-        "rules"
-      ],
-      "title": "GovernancePolicy",
-      "type": "object"
-    },
     "GradingCriterionProfile": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines a discrete objective dimension within a Multi-Attribute\nUtility Theory (MAUT) framework. As a ...Profile suffix, this is a declarative,\nfrozen snapshot of an evaluation geometry.\n\nCAUSAL AFFORDANCE: Provides the orchestrator's reward model with a formalized\nmathematical vector to compute partial utility scores during algorithmic adjudication.\nThe description field (max_length=2000) carries the exact logical boundary.\n\nEPISTEMIC BOUNDS: The objective significance is physically constrained by weight\n(ge=0.0, le=100.0). The geometric perimeter is locked to a 128-char criterion_cid CID\nregex.\n\nMCP ROUTING TRIGGERS: Multi-Criteria Decision Analysis, Dimensional Weighting,\nBehavioral Scoring, MCDA, Scalar Boundary",
@@ -10495,6 +10497,80 @@
         "edge_projection_mode"
       ],
       "title": "GraphFlatteningPolicy",
+      "type": "object"
+    },
+    "GuardrailViolationEvent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Tracks a deterministic security boundary violation emitted by the NeMo Guardrails proxy. This event is a frozen historical fact representing a failed cryptographic or semantic check.\n\nCAUSAL AFFORDANCE: Triggers an immediate suspension of the active execution trajectory and publishes a high-severity alert to the telemetry broker for remediation.\n\nEPISTEMIC BOUNDS: The event must include the specific HTTP status code (e.g., 401, 403, 406, 422) and the opaque violation manifest emitted by the proxy.\n\nMCP ROUTING TRIGGERS: Security, Guardrails, Data Loss Prevention, Policy Violation, Telemetry",
+      "properties": {
+        "event_cid": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "topology_class": {
+          "const": "guardrail_violation_event",
+          "default": "guardrail_violation_event",
+          "description": "The type of the security violation payload.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "violation_id": {
+          "description": "Unique identifier for the violation event.",
+          "title": "Violation Id",
+          "type": "string"
+        },
+        "status_code": {
+          "description": "The HTTP status code returned by the Guardrails proxy.",
+          "title": "Status Code",
+          "type": "integer"
+        },
+        "violation_type": {
+          "description": "The classification of the violation (e.g., 'pii_leak', 'toxic_content').",
+          "title": "Violation Type",
+          "type": "string"
+        },
+        "violation_details": {
+          "additionalProperties": true,
+          "description": "Detailed manifest from the Guardrails proxy.",
+          "title": "Violation Details",
+          "type": "object"
+        }
+      },
+      "required": [
+        "event_cid",
+        "timestamp",
+        "violation_id",
+        "status_code",
+        "violation_type"
+      ],
+      "title": "GuardrailViolationEvent",
       "type": "object"
     },
     "HTTPTransportProfile": {
@@ -12536,15 +12612,21 @@
           "description": "Polymorphic transport configuration (stdio, sse, or http) including env_vars, args, and headers.",
           "discriminator": {
             "mapping": {
-              "http": "#/$defs/MCPTransportProfile",
-              "sse": "#/$defs/MCPTransportProfile",
-              "stdio": "#/$defs/MCPTransportProfile"
+              "http": "#/$defs/HTTPTransportProfile",
+              "sse": "#/$defs/SSETransportProfile",
+              "stdio": "#/$defs/StdioTransportProfile"
             },
             "propertyName": "topology_class"
           },
           "oneOf": [
             {
-              "$ref": "#/$defs/MCPTransportProfile"
+              "$ref": "#/$defs/StdioTransportProfile"
+            },
+            {
+              "$ref": "#/$defs/SSETransportProfile"
+            },
+            {
+              "$ref": "#/$defs/HTTPTransportProfile"
             }
           ],
           "title": "Transport"
@@ -12658,19 +12740,6 @@
       ],
       "title": "MCPToolDefinition",
       "type": "object"
-    },
-    "MCPTransportProfile": {
-      "anyOf": [
-        {
-          "$ref": "#/$defs/StdioTransportProfile"
-        },
-        {
-          "$ref": "#/$defs/SSETransportProfile"
-        },
-        {
-          "$ref": "#/$defs/HTTPTransportProfile"
-        }
-      ]
     },
     "MacroGridProfile": {
       "additionalProperties": false,
@@ -13780,81 +13849,6 @@
       "minLength": 7,
       "pattern": "^did:[a-z0-9]+:[a-zA-Z0-9.\\-_:]+$",
       "type": "string"
-    },
-    "NormativeDriftEvent": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact tracking the Kullback-Leibler (KL) divergence between the swarm's active behavioral manifold and its foundational ConstitutionalPolicy.\n\nCAUSAL AFFORDANCE: Emits a deterministic topological signal that the causal graph is experiencing logical friction against the `tripped_rule_cid`, unlocking the injection of a System2RemediationIntent constraint.\n\nEPISTEMIC BOUNDS: Mathematically bounded by `measured_semantic_drift` (`le=18446744073709551615.0`) and cryptographically tied to `contradiction_proof_hash` (SHA-256 pattern `^[a-f0-9]{64}$`) proving the anomaly.\n\nMCP ROUTING TRIGGERS: Kullback-Leibler Divergence, Normative Drift, Distributional Shift, Semantic Friction, Constitutional Alignment",
-      "properties": {
-        "event_cid": {
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Event Cid",
-          "type": "string"
-        },
-        "prior_event_hash": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-f0-9]{64}$",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
-          "title": "Prior Event Hash"
-        },
-        "timestamp": {
-          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
-          "maximum": 253402300799.0,
-          "minimum": 0.0,
-          "title": "Timestamp",
-          "type": "number"
-        },
-        "topology_class": {
-          "const": "normative_drift",
-          "default": "normative_drift",
-          "description": "Discriminator type for a normative drift event.",
-          "title": "Topology Class",
-          "type": "string"
-        },
-        "tripped_rule_cid": {
-          "description": "The Content Identifier (CID) of the specific ConstitutionalPolicy causing logical friction.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Tripped Rule Cid",
-          "type": "string"
-        },
-        "measured_semantic_drift": {
-          "description": "The calculated probabilistic delta showing how far the swarm's observed reality is diverging from the static rule.",
-          "maximum": 1.8446744073709552e+19,
-          "title": "Measured Semantic Drift",
-          "type": "number"
-        },
-        "contradiction_proof_hash": {
-          "description": "A cryptographic pointer to the internal scratchpad trace (ThoughtBranchState) definitively proving the rule is obsolete or causing a loop.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-f0-9]{64}$",
-          "title": "Contradiction Proof Hash",
-          "type": "string"
-        }
-      },
-      "required": [
-        "event_cid",
-        "timestamp",
-        "tripped_rule_cid",
-        "measured_semantic_drift",
-        "contradiction_proof_hash"
-      ],
-      "title": "NormativeDriftEvent",
-      "type": "object"
     },
     "ObservabilityLODPolicy": {
       "additionalProperties": false,
@@ -15145,6 +15139,58 @@
       "title": "ProceduralMetadataManifest",
       "type": "object"
     },
+    "ProcessRewardContract": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Enforces the Step-Level Verification heuristics for Process Reward Models (PRMs) during non-monotonic reasoning searches and test-time compute.\n\nCAUSAL AFFORDANCE: Authorizes the orchestrator to physically prune hallucinating ThoughtBranchState vectors from the LatentScratchpadReceipt if their logit probabilities drop below the viable threshold, emulating rigorous Beam Search pruning.\n\nEPISTEMIC BOUNDS: Strictly bounds the search space geometry via `pruning_threshold` (`ge=0.0, le=1.0`) and mechanically caps State-Space Explosion through `max_backtracks_allowed` (`ge=0, le=18446744073709551615`).\n\nMCP ROUTING TRIGGERS: Process Reward Model, Beam Search Pruning, Latent Trajectory, State-Space Explosion, A* Search",
+      "properties": {
+        "convergence_sla": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DynamicConvergenceSLA"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The dynamic circuit breaker that halts the search when PRM variance converges, preventing VRAM waste."
+        },
+        "pruning_threshold": {
+          "description": "If a ThoughtBranchState's prm_score falls below this threshold, the orchestrator MUST halt its generation.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Pruning Threshold",
+          "type": "number"
+        },
+        "max_backtracks_allowed": {
+          "description": "The absolute limit on how many times the agent can start a new branch before throwing a SystemFaultEvent.",
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Max Backtracks Allowed",
+          "type": "integer"
+        },
+        "evaluator_matrix_name": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The specific PRM model used to score the logic (e.g., 'math-prm-v2').",
+          "title": "Evaluator Matrix Name"
+        }
+      },
+      "required": [
+        "pruning_threshold",
+        "max_backtracks_allowed"
+      ],
+      "title": "ProcessRewardContract",
+      "type": "object"
+    },
     "ProfileCIDState": {
       "description": "A deterministic cognitive routing boundary that defines the non-monotonic instruction set for the agent.",
       "examples": [
@@ -15401,81 +15447,6 @@
         "human_override_gradient"
       ],
       "title": "ReasoningEngineeringPolicy",
-      "type": "object"
-    },
-    "RedactionPolicy": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines a deterministic Data Sanitization heuristic mapped to a\nspecific SemanticClassificationProfile (e.g., Bell-LaPadula clearance levels). As a\n...Policy suffix, this object defines rigid mathematical boundaries that the orchestrator\nmust enforce globally.\n\nCAUSAL AFFORDANCE: Executes a rigid regex-bounded search-and-replace algorithm via\ntarget_regex_pattern to mutate or mask toxic data payloads, substituting matches with a\nsafe replacement_token. The action (SanitizationActionIntent) dictates the exact\nsanitization method.\n\nEPISTEMIC BOUNDS: The target_regex_pattern is strictly capped at max_length=200 to\nmathematically prevent ReDoS (Regular Expression Denial of Service) CPU exhaustion. A\nsecondary target_pattern (max_length=2000) provides a broader semantic entity match. The\noptional context_exclusion_zones array (max_length=100) is deterministically sorted by\nthe @model_validator.\n\nMCP ROUTING TRIGGERS: Data Sanitization, Regular Expression DoS Prevention,\nBell-LaPadula Model, Masking Heuristic, Algorithmic Redaction",
-      "properties": {
-        "rule_cid": {
-          "description": "Unique identifier for the sanitization rule.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Rule Cid",
-          "type": "string"
-        },
-        "classification": {
-          "$ref": "#/$defs/SemanticClassificationProfile",
-          "description": "The category of sensitive payload this rule targets."
-        },
-        "target_pattern": {
-          "description": "The semantic entity type or declarative regex pattern to identify.",
-          "maxLength": 2000,
-          "title": "Target Pattern",
-          "type": "string"
-        },
-        "target_regex_pattern": {
-          "description": "The dynamic regex pattern to target.",
-          "maxLength": 200,
-          "title": "Target Regex Pattern",
-          "type": "string"
-        },
-        "context_exclusion_zones": {
-          "anyOf": [
-            {
-              "items": {
-                "maxLength": 2000,
-                "type": "string"
-              },
-              "maxItems": 100,
-              "type": "array"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Specific JSON paths where this rule should NOT apply.",
-          "title": "Context Exclusion Zones"
-        },
-        "action": {
-          "$ref": "#/$defs/SanitizationActionIntent",
-          "description": "The required algorithmic response when this pattern is detected."
-        },
-        "replacement_token": {
-          "anyOf": [
-            {
-              "maxLength": 2000,
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The strictly typed string to insert if the action is 'redact'.",
-          "title": "Replacement Token"
-        }
-      },
-      "required": [
-        "rule_cid",
-        "classification",
-        "target_pattern",
-        "target_regex_pattern",
-        "action"
-      ],
-      "title": "RedactionPolicy",
       "type": "object"
     },
     "RhetoricalStructureProfile": {
@@ -16213,15 +16184,6 @@
       "title": "SalienceProfile",
       "type": "object"
     },
-    "SanitizationActionIntent": {
-      "enum": [
-        "redact",
-        "hash",
-        "drop_event",
-        "trigger_quarantine"
-      ],
-      "type": "string"
-    },
     "ScalePolicy": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Stevens's levels of measurement and Wilkinson's Grammar of Graphics to mathematically project abstract data domains into visual geometric ranges.\n\nCAUSAL AFFORDANCE: Physically distorts or linearly maps the input metric tensor into rendering space, dictating how the orchestrator processes logarithmic, temporal, or ordinal data vectors for UI projection.\n\nEPISTEMIC BOUNDS: The transformation algorithm is strictly constrained to a Literal automaton `[\"linear\", \"log\", \"time\", \"ordinal\", \"nominal\"]`. Physical data boundaries (`domain_min`, `domain_max`) are upper-bounded by `le=18446744073709551615.0` to prevent geometric projection overflow.\n\nMCP ROUTING TRIGGERS: Grammar of Graphics, Metric Tensor Distortion, Levels of Measurement, Scale Projection, FSM Literal",
@@ -16395,17 +16357,6 @@
       ],
       "title": "SelfCorrectionPolicy",
       "type": "object"
-    },
-    "SemanticClassificationProfile": {
-      "description": "AGENT INSTRUCTION: Implements SPIFFE/SPIRE workload identity bounds and Service Mesh data sensitivity labels, establishing the foundational mathematical axis for Information Flow Control across the distributed swarm via Envoy delegation.\n\nCAUSAL AFFORDANCE: Physically authorizes or severs the projection of semantic payloads. In an Envoy-native OPA policy enforcement model, this label acts as the primary metadata selector for decentralized identity verification between a payload and an agent's SPIFFE Verifiable Identity Document (SVID).\n\nEPISTEMIC BOUNDS: Constrained to a strict, 4-dimensional string literal space to prevent the hallucination of unauthorized workload labels. The platform delegating to mTLS and OPA for enforcement, removing the requirement for scalar manifest-level dominance checks.\n\nMCP ROUTING TRIGGERS: SPIFFE/SPIRE, Envoy Service Mesh, Workload Identity, mTLS Delegation, Epistemic Quarantine",
-      "enum": [
-        "public",
-        "internal",
-        "confidential",
-        "restricted"
-      ],
-      "title": "SemanticClassificationProfile",
-      "type": "string"
     },
     "SemanticDiscoveryIntent": {
       "additionalProperties": false,
@@ -16622,14 +16573,6 @@
           "description": "Whether this policy is currently enforcing data sanitization.",
           "title": "Active",
           "type": "boolean"
-        },
-        "rules": {
-          "description": "The array of sanitization rules to enforce.",
-          "items": {
-            "$ref": "#/$defs/RedactionPolicy"
-          },
-          "title": "Rules",
-          "type": "array"
         },
         "semantic_firewall": {
           "anyOf": [
@@ -16973,7 +16916,13 @@
         "permitted_classification_tiers": {
           "description": "The explicit whitelist of sensitivity bounds allowed into context.",
           "items": {
-            "$ref": "#/$defs/SemanticClassificationProfile"
+            "enum": [
+              "public",
+              "internal",
+              "confidential",
+              "restricted"
+            ],
+            "type": "string"
           },
           "minItems": 1,
           "title": "Permitted Classification Tiers",

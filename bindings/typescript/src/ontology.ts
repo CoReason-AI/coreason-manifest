@@ -423,8 +423,7 @@ export type ServerCid = string;
 /**
  * Polymorphic transport configuration (stdio, sse, or http) including env_vars, args, and headers.
  */
-export type Transport = MCPTransportProfile;
-export type MCPTransportProfile = StdioTransportProfile | SSETransportProfile | HTTPTransportProfile;
+export type Transport = StdioTransportProfile | SSETransportProfile | HTTPTransportProfile;
 /**
  * Type of transport.
  */
@@ -1275,7 +1274,7 @@ export type Justification = string;
  */
 export type TopologyClass38 = "constitutional_amendment";
 /**
- * The globally unique decentralized identifier (DID) anchoring the NormativeDriftEvent that justified triggering this proposal.
+ * The globally unique decentralized identifier (DID) anchoring the GuardrailViolationEvent that justified triggering this proposal.
  */
 export type DriftEventCid = string;
 /**
@@ -2027,17 +2026,10 @@ export type EnforceFunctionalIsolation = boolean;
  *
  * @minItems 1
  */
-export type PermittedClassificationTiers = [SemanticClassificationProfile, ...SemanticClassificationProfile[]];
-/**
- * AGENT INSTRUCTION: Implements SPIFFE/SPIRE workload identity bounds and Service Mesh data sensitivity labels, establishing the foundational mathematical axis for Information Flow Control across the distributed swarm via Envoy delegation.
- *
- * CAUSAL AFFORDANCE: Physically authorizes or severs the projection of semantic payloads. In an Envoy-native OPA policy enforcement model, this label acts as the primary metadata selector for decentralized identity verification between a payload and an agent's SPIFFE Verifiable Identity Document (SVID).
- *
- * EPISTEMIC BOUNDS: Constrained to a strict, 4-dimensional string literal space to prevent the hallucination of unauthorized workload labels. The platform delegating to mTLS and OPA for enforcement, removing the requirement for scalar manifest-level dominance checks.
- *
- * MCP ROUTING TRIGGERS: SPIFFE/SPIRE, Envoy Service Mesh, Workload Identity, mTLS Delegation, Epistemic Quarantine
- */
-export type SemanticClassificationProfile = "public" | "internal" | "confidential" | "restricted";
+export type PermittedClassificationTiers = [
+  "public" | "internal" | "confidential" | "restricted",
+  ...("public" | "internal" | "confidential" | "restricted")[]
+];
 /**
  * The declarative whitelist of strictly typed ontological node labels authorized for context projection.
  */
@@ -2301,40 +2293,6 @@ export type PolicyCid = string;
  * Whether this policy is currently enforcing data sanitization.
  */
 export type Active1 = boolean;
-/**
- * Unique identifier for the sanitization rule.
- */
-export type RuleCid = string;
-/**
- * AGENT INSTRUCTION: Implements SPIFFE/SPIRE workload identity bounds and Service Mesh data sensitivity labels, establishing the foundational mathematical axis for Information Flow Control across the distributed swarm via Envoy delegation.
- *
- * CAUSAL AFFORDANCE: Physically authorizes or severs the projection of semantic payloads. In an Envoy-native OPA policy enforcement model, this label acts as the primary metadata selector for decentralized identity verification between a payload and an agent's SPIFFE Verifiable Identity Document (SVID).
- *
- * EPISTEMIC BOUNDS: Constrained to a strict, 4-dimensional string literal space to prevent the hallucination of unauthorized workload labels. The platform delegating to mTLS and OPA for enforcement, removing the requirement for scalar manifest-level dominance checks.
- *
- * MCP ROUTING TRIGGERS: SPIFFE/SPIRE, Envoy Service Mesh, Workload Identity, mTLS Delegation, Epistemic Quarantine
- */
-export type SemanticClassificationProfile1 = "public" | "internal" | "confidential" | "restricted";
-/**
- * The semantic entity type or declarative regex pattern to identify.
- */
-export type TargetPattern = string;
-/**
- * The dynamic regex pattern to target.
- */
-export type TargetRegexPattern = string;
-/**
- * Specific JSON paths where this rule should NOT apply.
- */
-export type ContextExclusionZones = string[] | null;
-/**
- * The strictly typed string to insert if the action is 'redact'.
- */
-export type ReplacementToken = string | null;
-/**
- * The array of sanitization rules to enforce.
- */
-export type Rules = RedactionPolicy[];
 /**
  * The absolute physical ceiling of tokens allowed in a single ingress payload.
  */
@@ -3176,7 +3134,6 @@ export type AnyStateEvent =
   | CounterfactualRegretEvent
   | ToolInvocationEvent
   | EpistemicPromotionEvent
-  | NormativeDriftEvent
   | PersistenceCommitReceipt
   | TokenBurnReceipt
   | BudgetExhaustionEvent
@@ -3201,7 +3158,8 @@ export type AnyStateEvent =
   | RDFExportReceipt
   | EpistemicStarvationEvent
   | SPARQLQueryResultReceipt
-  | OracleExecutionReceipt;
+  | OracleExecutionReceipt
+  | GuardrailViolationEvent;
 /**
  * Discriminator for temporal graph crdt.
  */
@@ -3778,37 +3736,9 @@ export type PriorEventHash15 = string | null;
  */
 export type Timestamp15 = number;
 /**
- * Discriminator type for a normative drift event.
- */
-export type TopologyClass98 = "normative_drift";
-/**
- * The Content Identifier (CID) of the specific ConstitutionalPolicy causing logical friction.
- */
-export type TrippedRuleCid = string;
-/**
- * The calculated probabilistic delta showing how far the swarm's observed reality is diverging from the static rule.
- */
-export type MeasuredSemanticDrift = number;
-/**
- * A cryptographic pointer to the internal scratchpad trace (ThoughtBranchState) definitively proving the rule is obsolete or causing a loop.
- */
-export type ContradictionProofHash = string;
-/**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
- */
-export type EventCid16 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash16 = string | null;
-/**
- * Causal Ancestry markers required to resolve decentralized event ordering.
- */
-export type Timestamp16 = number;
-/**
  * Discriminator type for a persistence commit receipt.
  */
-export type TopologyClass99 = "persistence_commit";
+export type TopologyClass98 = "persistence_commit";
 /**
  * The external cryptographic receipt generated by Iceberg/Delta.
  */
@@ -3824,19 +3754,19 @@ export type TargetTableUri = string;
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
-export type EventCid17 = string;
+export type EventCid16 = string;
 /**
  * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
  */
-export type PriorEventHash17 = string | null;
+export type PriorEventHash16 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
-export type Timestamp17 = number;
+export type Timestamp16 = number;
 /**
  * Discriminator type for a token burn receipt.
  */
-export type TopologyClass100 = "token_burn";
+export type TopologyClass99 = "token_burn";
 /**
  * A string linking this burn back to the specific ToolInvocationEvent CID.
  */
@@ -3856,19 +3786,19 @@ export type BurnMagnitude = number;
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
-export type EventCid18 = string;
+export type EventCid17 = string;
 /**
  * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
  */
-export type PriorEventHash18 = string | null;
+export type PriorEventHash17 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
-export type Timestamp18 = number;
+export type Timestamp17 = number;
 /**
  * Discriminator type for a budget exhaustion event.
  */
-export type TopologyClass101 = "budget_exhaustion";
+export type TopologyClass100 = "budget_exhaustion";
 /**
  * A string representing the original escrow boundary breached.
  */
@@ -3880,19 +3810,19 @@ export type FinalBurnReceiptCid = string;
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
-export type EventCid19 = string;
+export type EventCid18 = string;
 /**
  * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
  */
-export type PriorEventHash19 = string | null;
+export type PriorEventHash18 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
-export type Timestamp19 = number;
+export type Timestamp18 = number;
 /**
  * Discriminator type for telemetry events.
  */
-export type TopologyClass102 = "epistemic_telemetry";
+export type TopologyClass101 = "epistemic_telemetry";
 /**
  * The exact topological action the human operator performed on the projected manifold.
  */
@@ -3908,6 +3838,25 @@ export type DwellDurationMs = number | null;
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
+export type EventCid19 = string;
+/**
+ * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
+ */
+export type PriorEventHash19 = string | null;
+/**
+ * Causal Ancestry markers required to resolve decentralized event ordering.
+ */
+export type Timestamp19 = number;
+export type TopologyClass102 = "cognitive_prediction";
+export type SourceChainCid = string;
+export type TargetSourceConcept = string;
+/**
+ * @minItems 1
+ */
+export type PredictedTopKTokens = [string, ...string[]];
+/**
+ * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ */
 export type EventCid20 = string;
 /**
  * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
@@ -3917,13 +3866,14 @@ export type PriorEventHash20 = string | null;
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
 export type Timestamp20 = number;
-export type TopologyClass103 = "cognitive_prediction";
-export type SourceChainCid = string;
-export type TargetSourceConcept = string;
+export type TopologyClass103 = "epistemic_axiom_verification";
+export type SourcePredictionCid = string;
+export type SequenceSimilarityScore = number;
+export type FactScorePassed = boolean;
 /**
- * @minItems 1
+ * The undeniable pointer proving the source prediction traversed the Zero-Trust contract before being verified as an axiom.
  */
-export type PredictedTopKTokens = [string, ...string[]];
+export type ZeroTrustReceiptCid1 = string | null;
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
@@ -3936,27 +3886,7 @@ export type PriorEventHash21 = string | null;
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
 export type Timestamp21 = number;
-export type TopologyClass104 = "epistemic_axiom_verification";
-export type SourcePredictionCid = string;
-export type SequenceSimilarityScore = number;
-export type FactScorePassed = boolean;
-/**
- * The undeniable pointer proving the source prediction traversed the Zero-Trust contract before being verified as an axiom.
- */
-export type ZeroTrustReceiptCid1 = string | null;
-/**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
- */
-export type EventCid22 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash22 = string | null;
-/**
- * Causal Ancestry markers required to resolve decentralized event ordering.
- */
-export type Timestamp22 = number;
-export type TopologyClass105 = "epistemic_flow_state";
+export type TopologyClass104 = "epistemic_flow_state";
 /**
  * The globally unique decentralized identifier (DID) anchoring the partial CognitiveReasoningTraceState.
  */
@@ -3972,19 +3902,19 @@ export type TerminalRewardFactorized = boolean;
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
-export type EventCid23 = string;
+export type EventCid22 = string;
 /**
  * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
  */
-export type PriorEventHash23 = string | null;
+export type PriorEventHash22 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
-export type Timestamp23 = number;
+export type Timestamp22 = number;
 /**
  * Discriminator type for a causal explanation event.
  */
-export type TopologyClass106 = "causal_explanation";
+export type TopologyClass105 = "causal_explanation";
 /**
  * The globally unique decentralized identifier (DID) anchoring the collective outcome being explained.
  */
@@ -4024,19 +3954,19 @@ export type AgentAttributions = ShapleyAttributionReceipt[];
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
-export type EventCid24 = string;
+export type EventCid23 = string;
 /**
  * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
  */
-export type PriorEventHash24 = string | null;
+export type PriorEventHash23 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
-export type Timestamp24 = number;
+export type Timestamp23 = number;
 /**
  * Discriminator type for an intent classification receipt.
  */
-export type TopologyClass107 = "intent_classification";
+export type TopologyClass106 = "intent_classification";
 /**
  * The raw, unparsed human natural language instruction.
  */
@@ -4053,19 +3983,19 @@ export type ConfidenceScore1 = number;
  * The TaxonomicRoutingPolicy CID that governed this classification.
  */
 export type RoutingPolicyCid = string | null;
-export type TopologyClass108 = "semantic_relational_record";
+export type TopologyClass107 = "semantic_relational_record";
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
-export type EventCid25 = string;
+export type EventCid24 = string;
 /**
  * The RFC 8785 Canonical hash of the immediate causal ancestor, securing the Merkle-DAG.
  */
-export type PriorEventHash25 = string | null;
+export type PriorEventHash24 = string | null;
 /**
  * The precise temporal coordinate of the event realization.
  */
-export type Timestamp25 = number;
+export type Timestamp24 = number;
 /**
  * The domain-independent structural classification of the record.
  */
@@ -4077,19 +4007,19 @@ export type FormalSchemaUrn1 = string | null;
 /**
  * Discriminator for the reification receipt.
  */
-export type TopologyClass109 = "ontological_reification";
+export type TopologyClass108 = "ontological_reification";
 /**
  * Cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
-export type EventCid26 = string;
+export type EventCid25 = string;
 /**
  * The RFC 8785 Canonical hash of the immediate causal ancestor.
  */
-export type PriorEventHash26 = string | null;
+export type PriorEventHash25 = string | null;
 /**
  * The precise temporal coordinate of the event realization.
  */
-export type Timestamp26 = number;
+export type Timestamp25 = number;
 /**
  * The undeniable SHA-256 hash of the pre-transmutation artifact, unstructured text chunk, or telemetry row.
  */
@@ -4113,6 +4043,26 @@ export type IsLatentInference = boolean;
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
+export type EventCid26 = string;
+/**
+ * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
+ */
+export type PriorEventHash26 = string | null;
+/**
+ * Causal Ancestry markers required to resolve decentralized event ordering.
+ */
+export type Timestamp26 = number;
+/**
+ * The type of the resilience payload.
+ */
+export type TopologyClass109 = "circuit_breaker_event";
+/**
+ * Signature or summary of the error causing the trip.
+ */
+export type ErrorSignature = string;
+/**
+ * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ */
 export type EventCid27 = string;
 /**
  * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
@@ -4123,29 +4073,9 @@ export type PriorEventHash27 = string | null;
  */
 export type Timestamp27 = number;
 /**
- * The type of the resilience payload.
- */
-export type TopologyClass110 = "circuit_breaker_event";
-/**
- * Signature or summary of the error causing the trip.
- */
-export type ErrorSignature = string;
-/**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
- */
-export type EventCid28 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash28 = string | null;
-/**
- * Causal Ancestry markers required to resolve decentralized event ordering.
- */
-export type Timestamp28 = number;
-/**
  * Discriminator type for an exogenous event.
  */
-export type TopologyClass111 = "exogenous_event";
+export type TopologyClass110 = "exogenous_event";
 /**
  * Cryptographic identifier for the Black Swan event.
  */
@@ -4165,19 +4095,19 @@ export type LockedMagnitude = number;
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
-export type EventCid29 = string;
+export type EventCid28 = string;
 /**
  * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
  */
-export type PriorEventHash29 = string | null;
+export type PriorEventHash28 = string | null;
 /**
  * Discriminator type for a log event.
  */
-export type TopologyClass112 = "epistemic_log";
+export type TopologyClass111 = "epistemic_log";
 /**
  * The UNIX timestamp of the log event.
  */
-export type Timestamp29 = number;
+export type Timestamp28 = number;
 /**
  * The severity level of the log event.
  */
@@ -4190,19 +4120,19 @@ export type TelemetryScalarState = string | number | boolean | null;
 /**
  * The type of the intervention payload.
  */
-export type TopologyClass113 = "verdict";
+export type TopologyClass112 = "verdict";
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
-export type EventCid30 = string;
+export type EventCid29 = string;
 /**
  * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
  */
-export type PriorEventHash30 = string | null;
+export type PriorEventHash29 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
-export type Timestamp30 = number;
+export type Timestamp29 = number;
 /**
  * The cryptographic nonce uniquely identifying the intervention request.
  */
@@ -4238,16 +4168,16 @@ export type LivenessChallengeHash = string;
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
-export type EventCid31 = string;
+export type EventCid30 = string;
 /**
  * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
  */
-export type PriorEventHash31 = string | null;
+export type PriorEventHash30 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
-export type Timestamp31 = number;
-export type TopologyClass114 = "custody_receipt";
+export type Timestamp30 = number;
+export type TopologyClass113 = "custody_receipt";
 /**
  * Unique identifier for this chain-of-custody entry.
  */
@@ -4275,16 +4205,16 @@ export type RedactionTimestampUnixNano = number;
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
-export type EventCid32 = string;
+export type EventCid31 = string;
 /**
  * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
  */
-export type PriorEventHash32 = string | null;
+export type PriorEventHash31 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
-export type Timestamp32 = number;
-export type TopologyClass115 = "defeasible_attack";
+export type Timestamp31 = number;
+export type TopologyClass114 = "defeasible_attack";
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this directed attack edge.
  */
@@ -4300,16 +4230,16 @@ export type TargetClaimCid = string;
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
-export type EventCid33 = string;
+export type EventCid32 = string;
 /**
  * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
  */
-export type PriorEventHash33 = string | null;
+export type PriorEventHash32 = string | null;
 /**
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
-export type Timestamp33 = number;
-export type TopologyClass116 = "epistemic_rejection";
+export type Timestamp32 = number;
+export type TopologyClass115 = "epistemic_rejection";
 export type ReceiptCid1 = string;
 export type FailedProjectionCid = string;
 export type ViolatedAlgebraicConstraint = string;
@@ -4318,16 +4248,16 @@ export type StochasticMutationGradient = string;
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
-export type EventCid34 = string;
+export type EventCid33 = string;
 /**
  * The RFC 8785 Canonical hash of the immediate causal ancestor.
  */
-export type PriorEventHash34 = string | null;
+export type PriorEventHash33 = string | null;
 /**
  * The precise temporal coordinate of the event realization.
  */
-export type Timestamp34 = number;
-export type TopologyClass117 = "formal_verification_receipt";
+export type Timestamp33 = number;
+export type TopologyClass116 = "formal_verification_receipt";
 /**
  * The definitive Boolean evaluating whether the proof succeeded, the program is satisfiable, or the deduction holds true.
  */
@@ -4346,8 +4276,24 @@ export type FailingContext = string | null;
 export type ExtractedBindings = {
   [k: string]: JsonPrimitiveState;
 }[];
-export type TopologyClass118 = "belief_modulation";
+export type TopologyClass117 = "belief_modulation";
 export type ReceiptCid2 = string;
+/**
+ * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ */
+export type EventCid34 = string;
+/**
+ * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
+ */
+export type PriorEventHash34 = string | null;
+/**
+ * Causal Ancestry markers required to resolve decentralized event ordering.
+ */
+export type Timestamp34 = number;
+export type TargetGraphCid4 = string;
+export type SeveredEdgeCids = string[];
+export type TopologyClass118 = "rdf_export_receipt";
+export type ExportCid1 = string;
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
@@ -4360,29 +4306,13 @@ export type PriorEventHash35 = string | null;
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
 export type Timestamp35 = number;
-export type TargetGraphCid4 = string;
-export type SeveredEdgeCids = string[];
-export type TopologyClass119 = "rdf_export_receipt";
-export type ExportCid1 = string;
-/**
- * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
- */
-export type EventCid36 = string;
-/**
- * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
- */
-export type PriorEventHash36 = string | null;
-/**
- * Causal Ancestry markers required to resolve decentralized event ordering.
- */
-export type Timestamp36 = number;
 export type SerializedPayload = string;
 export type RdfTripleCount = number;
 export type Sha256GraphHash = string;
-export type EventCid37 = string;
-export type PriorEventHash37 = string | null;
-export type Timestamp37 = number;
-export type TopologyClass120 = "epistemic_starvation";
+export type EventCid36 = string;
+export type PriorEventHash36 = string | null;
+export type Timestamp36 = number;
+export type TopologyClass119 = "epistemic_starvation";
 /**
  * The cryptographic pointer to the specific edge that failed empirical grounding.
  */
@@ -4395,10 +4325,10 @@ export type FailedCitations = EvidentiaryCitationState[];
  * The semantic explanation for the starvation (e.g., 'Maximum search retries exhausted').
  */
 export type DiagnosticReason = string;
-export type EventCid38 = string;
-export type PriorEventHash38 = string | null;
-export type Timestamp38 = number;
-export type TopologyClass121 = "sparql_query_result";
+export type EventCid37 = string;
+export type PriorEventHash37 = string | null;
+export type Timestamp37 = number;
+export type TopologyClass120 = "sparql_query_result";
 /**
  * A pointer back to the SPARQLQueryIntent that authorized this execution.
  */
@@ -4410,7 +4340,7 @@ export type ExecutionTimeMs = number;
 /**
  * Discriminator for the OracleExecutionReceipt topology.
  */
-export type TopologyClass122 = "oracle_execution_receipt";
+export type TopologyClass121 = "oracle_execution_receipt";
 /**
  * The SHA-256 hash of the complete execution payload, providing undeniable cryptographic provenance for the Merkle-DAG audit trail.
  */
@@ -4427,6 +4357,34 @@ export type TokensBurned = number;
  * An optional cryptographic signature from a Human-in-the-Loop (HITL) operator attesting to the correctness of the execution result. Populated only when the Temporal workflow escalates to manual review.
  */
 export type HumanAttestationSignature = string | null;
+/**
+ * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.
+ */
+export type EventCid38 = string;
+/**
+ * The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.
+ */
+export type PriorEventHash38 = string | null;
+/**
+ * Causal Ancestry markers required to resolve decentralized event ordering.
+ */
+export type Timestamp38 = number;
+/**
+ * The type of the security violation payload.
+ */
+export type TopologyClass122 = "guardrail_violation_event";
+/**
+ * Unique identifier for the violation event.
+ */
+export type ViolationId = string;
+/**
+ * The HTTP status code returned by the Guardrails proxy.
+ */
+export type StatusCode = number;
+/**
+ * The classification of the violation (e.g., 'pii_leak', 'toxic_content').
+ */
+export type ViolationType = string;
 /**
  * A discriminated union of workflow topologies.
  */
@@ -4662,24 +4620,6 @@ export type MagnitudeUnit = string;
  */
 export type SupportedFunctionalExperts = string[];
 /**
- * Unique identifier for the constitutional rule.
- */
-export type RuleCid1 = string;
-/**
- * The definitive causal constraint or heuristic boundary enforced by this rule.
- */
-export type Description10 = string;
-/**
- * The categorical magnitude of the systemic breach enacted upon rule violation.
- */
-export type Severity = "low" | "medium" | "high" | "critical";
-/**
- * The explicit, structurally bounded set of forbidden semantic intents.
- *
- * @maxItems 1000
- */
-export type ForbiddenIntents1 = string[];
-/**
  * Forces non-destructive graph mutations.
  */
 export type MutationParadigm = "append_only" | "merge_on_resolve";
@@ -4777,6 +4717,18 @@ export type DistributionShapeProfile = "gaussian" | "uniform" | "beta";
  * Directed edges defining the topological sort (chronological flow) of the document.
  */
 export type ChronologicalFlowEdges = [unknown, unknown][];
+/**
+ * The minimal required PRM score improvement across the lookback window to justify continued compute.
+ */
+export type ConvergenceDeltaEpsilon = number;
+/**
+ * The N-step temporal window over which the PRM gradient is calculated.
+ */
+export type LookbackWindowSteps = number;
+/**
+ * The burn-in period before convergence logic is activated.
+ */
+export type MinimumReasoningSteps = number;
 /**
  * A Python 3.14 t-string template definition for dynamic UI grid evaluation.
  */
@@ -4913,6 +4865,18 @@ export type TestTimeMultiplier = number;
  */
 export type MaxEscalationTiers = number;
 /**
+ * The Colang specification version.
+ */
+export type ColangVersion = "1.0" | "2.0";
+/**
+ * The raw Colang (.co) state machine configuration.
+ */
+export type ColangPayload = string;
+/**
+ * The categorical magnitude of the systemic breach enacted upon rule violation.
+ */
+export type Severity = "low" | "medium" | "high" | "critical";
+/**
  * Absolute recursive depth limit for DAG deserialization.
  */
 export type MaxUnfoldDepth = number;
@@ -5047,6 +5011,22 @@ export type SopCid = string;
  */
 export type ChronologicalFlowEdges1 = [unknown, unknown][];
 /**
+ * If a ThoughtBranchState's prm_score falls below this threshold, the orchestrator MUST halt its generation.
+ */
+export type PruningThreshold = number;
+/**
+ * The absolute limit on how many times the agent can start a new branch before throwing a SystemFaultEvent.
+ */
+export type MaxBacktracksAllowed = number;
+/**
+ * The specific PRM model used to score the logic (e.g., 'math-prm-v2').
+ */
+export type EvaluatorMatrixName = string | null;
+/**
+ * The strict array of Process Reward Contracts evaluating the logic.
+ */
+export type PrmEvaluations = ProcessRewardContract[];
+/**
  * AGENT INSTRUCTION: Defines the minimum cryptographic isolation perimeter required for this node's thermodynamic execution.
  *
  * CAUSAL AFFORDANCE: Binds the execution graph to hardware Trusted Execution Environments (TEEs) if CONFIDENTIAL is set, physically guillotining unauthorized exfiltration.
@@ -5144,14 +5124,6 @@ export type CategoricalCohorts = string[];
  * The valid chronological windows encompassing the artifact.
  */
 export type TemporalObservationHorizons = TemporalBoundsProfile2[];
-/**
- * Name of the governance policy.
- */
-export type PolicyName = string;
-/**
- * The explicit array of constitutional rules included in this policy.
- */
-export type Rules1 = ConstitutionalPolicy[];
 /**
  * How to flatten SemanticNodeState.
  */
@@ -5361,7 +5333,6 @@ export type RhetoricalStructureProfile1 = "premise" | "conclusion" | "elaboratio
  * MCP ROUTING TRIGGERS: Quantitative Risk Assessment, Game Theory, Cybernetic Governance, Structural Circuit Breaker, Utility Theory
  */
 export type RiskLevelPolicy = "safe" | "standard" | "critical";
-export type SanitizationActionIntent = "redact" | "hash" | "drop_event" | "trigger_quarantine";
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this semantic edge to the Merkle-DAG.
  */
@@ -5579,7 +5550,6 @@ export interface CoReasonSharedKernelOntology {
   ConsensusFederationTopologyManifest?: ConsensusFederationTopologyManifest;
   ConsensusPolicy?: ConsensusPolicy;
   ConstitutionalAmendmentIntent?: ConstitutionalAmendmentIntent;
-  ConstitutionalPolicy?: ConstitutionalPolicy;
   ConstrainedDecodingPolicy?: ConstrainedDecodingPolicy;
   ContextExpansionPolicy?: ContextExpansionPolicy;
   ContextualSemanticResolutionIntent?: ContextualSemanticResolutionIntent;
@@ -5615,6 +5585,7 @@ export interface CoReasonSharedKernelOntology {
   DocumentLayoutManifest?: DocumentLayoutManifest;
   DocumentLayoutRegionState?: DocumentLayoutRegionState;
   DraftingIntent?: DraftingIntent;
+  DynamicConvergenceSLA?: DynamicConvergenceSLA;
   DynamicLayoutManifest?: DynamicLayoutManifest;
   DynamicManifoldProjectionManifest?: DynamicManifoldProjectionManifest1;
   DynamicRoutingManifest?: DynamicRoutingManifest;
@@ -5637,6 +5608,7 @@ export interface CoReasonSharedKernelOntology {
   EpistemicEscalationContract?: EpistemicEscalationContract;
   EpistemicFlowStateReceipt?: EpistemicFlowStateReceipt;
   EpistemicGroundedTaskManifest?: EpistemicGroundedTaskManifest;
+  EpistemicGuardrailsManifest?: EpistemicGuardrailsManifest;
   EpistemicHydrationPolicy?: EpistemicHydrationPolicy;
   EpistemicLedgerState?: EpistemicLedgerState;
   EpistemicLogEvent?: EpistemicLogEvent;
@@ -5686,10 +5658,10 @@ export interface CoReasonSharedKernelOntology {
   GlobalGovernancePolicy?: GlobalGovernancePolicy;
   GlobalSemanticInvariantProfile?: GlobalSemanticInvariantProfile;
   GlobalSemanticProfile?: GlobalSemanticProfile1;
-  GovernancePolicy?: GovernancePolicy;
   GradingCriterionProfile?: GradingCriterionProfile;
   GrammarPanelProfile?: GrammarPanelProfile1;
   GraphFlatteningPolicy?: GraphFlatteningPolicy;
+  GuardrailViolationEvent?: GuardrailViolationEvent;
   HTTPTransportProfile?: HTTPTransportProfile;
   HardwareEnclaveReceipt?: HardwareEnclaveReceipt;
   HierarchicalDOMManifest?: HierarchicalDOMManifest;
@@ -5730,7 +5702,6 @@ export interface CoReasonSharedKernelOntology {
   MCPResourceManifest?: MCPResourceManifest;
   MCPServerManifest?: MCPServerManifest;
   MCPToolDefinition?: MCPToolDefinition;
-  MCPTransportProfile?: MCPTransportProfile;
   MacroGridProfile?: MacroGridProfile;
   ManifestViolationReceipt?: ManifestViolationReceipt;
   ManifoldAlignmentMetricProfile?: ManifoldAlignmentMetricProfile2;
@@ -5749,7 +5720,6 @@ export interface CoReasonSharedKernelOntology {
   NeurosymbolicIngestionTopologyManifest?: NeurosymbolicIngestionTopologyManifest;
   NeurosymbolicVerificationTopologyManifest?: NeurosymbolicVerificationTopologyManifest;
   NodeCIDState?: NodeCIDState;
-  NormativeDriftEvent?: NormativeDriftEvent;
   ObservabilityLODPolicy?: ObservabilityLODPolicy;
   ObservationEvent?: ObservationEvent;
   OntologicalAlignmentPolicy?: OntologicalAlignmentPolicy;
@@ -5774,6 +5744,7 @@ export interface CoReasonSharedKernelOntology {
   PredictionMarketState?: PredictionMarketState;
   PresentationManifest?: PresentationManifest;
   ProceduralMetadataManifest?: ProceduralMetadataManifest;
+  ProcessRewardContract?: ProcessRewardContract;
   ProfileCIDState?: ProfileCIDState;
   QoSClassificationProfile?: QoSClassificationProfile;
   QuarantineIntent?: QuarantineIntent;
@@ -5781,7 +5752,6 @@ export interface CoReasonSharedKernelOntology {
   RDFExportReceipt?: RDFExportReceipt;
   RDFSerializationIntent?: RDFSerializationIntent;
   ReasoningEngineeringPolicy?: ReasoningEngineeringPolicy;
-  RedactionPolicy?: RedactionPolicy;
   RhetoricalStructureProfile?: RhetoricalStructureProfile1;
   RiskLevelPolicy?: RiskLevelPolicy;
   RollbackIntent?: RollbackIntent;
@@ -5795,12 +5765,10 @@ export interface CoReasonSharedKernelOntology {
   SaeFeatureActivationState?: SaeFeatureActivationState;
   SaeLatentPolicy?: SaeLatentPolicy;
   SalienceProfile?: SalienceProfile;
-  SanitizationActionIntent?: SanitizationActionIntent;
   ScalePolicy?: ScalePolicy;
   SchemaDrivenExtractionSLA?: SchemaDrivenExtractionSLA;
   SecureSubSessionState?: SecureSubSessionState;
   SelfCorrectionPolicy?: SelfCorrectionPolicy;
-  SemanticClassificationProfile?: SemanticClassificationProfile;
   SemanticDiscoveryIntent?: SemanticDiscoveryIntent;
   SemanticEdgeState?: SemanticEdgeState;
   SemanticFirewallPolicy?: SemanticFirewallPolicy;
@@ -9058,46 +9026,11 @@ export interface ConstrainedDecodingPolicy {
 export interface SemanticFlowPolicy {
   policy_cid: PolicyCid;
   active?: Active1;
-  rules?: Rules;
   /**
    * The active cognitive defense perimeter against adversarial control-flow overrides.
    */
   semantic_firewall?: SemanticFirewallPolicy | null;
   latent_firewalls?: LatentFirewalls;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
- * AGENT INSTRUCTION: Defines a deterministic Data Sanitization heuristic mapped to a
- * specific SemanticClassificationProfile (e.g., Bell-LaPadula clearance levels). As a
- * ...Policy suffix, this object defines rigid mathematical boundaries that the orchestrator
- * must enforce globally.
- *
- * CAUSAL AFFORDANCE: Executes a rigid regex-bounded search-and-replace algorithm via
- * target_regex_pattern to mutate or mask toxic data payloads, substituting matches with a
- * safe replacement_token. The action (SanitizationActionIntent) dictates the exact
- * sanitization method.
- *
- * EPISTEMIC BOUNDS: The target_regex_pattern is strictly capped at max_length=200 to
- * mathematically prevent ReDoS (Regular Expression Denial of Service) CPU exhaustion. A
- * secondary target_pattern (max_length=2000) provides a broader semantic entity match. The
- * optional context_exclusion_zones array (max_length=100) is deterministically sorted by
- * the @model_validator.
- *
- * MCP ROUTING TRIGGERS: Data Sanitization, Regular Expression DoS Prevention,
- * Bell-LaPadula Model, Masking Heuristic, Algorithmic Redaction
- */
-export interface RedactionPolicy {
-  rule_cid: RuleCid;
-  classification: SemanticClassificationProfile1;
-  target_pattern: TargetPattern;
-  target_regex_pattern: TargetRegexPattern;
-  context_exclusion_zones?: ContextExclusionZones;
-  /**
-   * The required algorithmic response when this pattern is detected.
-   */
-  action: "redact" | "hash" | "drop_event" | "trigger_quarantine";
-  replacement_token?: ReplacementToken;
 }
 /**
  * CoReason Shared Kernel Ontology
@@ -11448,26 +11381,6 @@ export interface EpistemicPromotionEvent {
 /**
  * CoReason Shared Kernel Ontology
  *
- * AGENT INSTRUCTION: A cryptographically frozen historical fact tracking the Kullback-Leibler (KL) divergence between the swarm's active behavioral manifold and its foundational ConstitutionalPolicy.
- *
- * CAUSAL AFFORDANCE: Emits a deterministic topological signal that the causal graph is experiencing logical friction against the `tripped_rule_cid`, unlocking the injection of a System2RemediationIntent constraint.
- *
- * EPISTEMIC BOUNDS: Mathematically bounded by `measured_semantic_drift` (`le=18446744073709551615.0`) and cryptographically tied to `contradiction_proof_hash` (SHA-256 pattern `^[a-f0-9]{64}$`) proving the anomaly.
- *
- * MCP ROUTING TRIGGERS: Kullback-Leibler Divergence, Normative Drift, Distributional Shift, Semantic Friction, Constitutional Alignment
- */
-export interface NormativeDriftEvent {
-  event_cid: EventCid15;
-  prior_event_hash?: PriorEventHash15;
-  timestamp: Timestamp15;
-  topology_class?: TopologyClass98;
-  tripped_rule_cid: TrippedRuleCid;
-  measured_semantic_drift: MeasuredSemanticDrift;
-  contradiction_proof_hash: ContradictionProofHash;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
  * AGENT INSTRUCTION: A cryptographically frozen historical fact representing the absolute Write-Ahead Logging (WAL) serialization of an ephemeral state differential to durable cold-storage.
  *
  * CAUSAL AFFORDANCE: Commits the internal `committed_temporal_crdt_cid` into the macroscopic Apache Iceberg or Delta Lake backing store, yielding a verifiable `lakehouse_snapshot_cid` to guarantee Eventual Consistency.
@@ -11477,10 +11390,10 @@ export interface NormativeDriftEvent {
  * MCP ROUTING TRIGGERS: Event Sourcing, Write-Ahead Logging, Two-Phase Commit, Lakehouse Serialization, State Differential Flush
  */
 export interface PersistenceCommitReceipt {
-  event_cid: EventCid16;
-  prior_event_hash?: PriorEventHash16;
-  timestamp: Timestamp16;
-  topology_class?: TopologyClass99;
+  event_cid: EventCid15;
+  prior_event_hash?: PriorEventHash15;
+  timestamp: Timestamp15;
+  topology_class?: TopologyClass98;
   lakehouse_snapshot_cid: LakehouseSnapshotCid;
   committed_temporal_crdt_cid: CommittedTemporalCrdtCid;
   target_table_uri: TargetTableUri;
@@ -11497,10 +11410,10 @@ export interface PersistenceCommitReceipt {
  * MCP ROUTING TRIGGERS: Landauer's Principle, Thermodynamic Compute, Token Burn, Resource Exhaustion, Lock-Free Tallying
  */
 export interface TokenBurnReceipt {
-  event_cid: EventCid17;
-  prior_event_hash?: PriorEventHash17;
-  timestamp: Timestamp17;
-  topology_class?: TopologyClass100;
+  event_cid: EventCid16;
+  prior_event_hash?: PriorEventHash16;
+  timestamp: Timestamp16;
+  topology_class?: TopologyClass99;
   tool_invocation_cid: ToolInvocationCid;
   input_tokens: InputTokens;
   output_tokens: OutputTokens;
@@ -11518,10 +11431,10 @@ export interface TokenBurnReceipt {
  * MCP ROUTING TRIGGERS: Optimal Stopping Theory, Escrow Exhaustion, Sybil Resistance, Algorithmic Circuit Breaker, Generation Halting
  */
 export interface BudgetExhaustionEvent {
-  event_cid: EventCid18;
-  prior_event_hash?: PriorEventHash18;
-  timestamp: Timestamp18;
-  topology_class?: TopologyClass101;
+  event_cid: EventCid17;
+  prior_event_hash?: PriorEventHash17;
+  timestamp: Timestamp17;
+  topology_class?: TopologyClass100;
   exhausted_escrow_cid: ExhaustedEscrowCid;
   final_burn_receipt_cid: FinalBurnReceiptCid;
 }
@@ -11537,10 +11450,10 @@ export interface BudgetExhaustionEvent {
  * MCP ROUTING TRIGGERS: Epistemic Regret, Supervisory Control Theory, Human-in-the-Loop, Dwell Time, Spatial Telemetry
  */
 export interface EpistemicTelemetryEvent {
-  event_cid: EventCid19;
-  prior_event_hash?: PriorEventHash19;
-  timestamp: Timestamp19;
-  topology_class?: TopologyClass102;
+  event_cid: EventCid18;
+  prior_event_hash?: PriorEventHash18;
+  timestamp: Timestamp18;
+  topology_class?: TopologyClass101;
   interaction_modality: InteractionModality;
   target_node_cid: TargetNodeCid;
   dwell_duration_ms?: DwellDurationMs;
@@ -11561,10 +11474,10 @@ export interface EpistemicTelemetryEvent {
  * MCP ROUTING TRIGGERS: Predictive Distribution, Softmax Logits, Generative Manifold, Probability Wave Collapse, Entropy
  */
 export interface CognitivePredictionReceipt {
-  event_cid: EventCid20;
-  prior_event_hash?: PriorEventHash20;
-  timestamp: Timestamp20;
-  topology_class?: TopologyClass103;
+  event_cid: EventCid19;
+  prior_event_hash?: PriorEventHash19;
+  timestamp: Timestamp19;
+  topology_class?: TopologyClass102;
   source_chain_cid: SourceChainCid;
   target_source_concept: TargetSourceConcept;
   predicted_top_k_tokens: PredictedTopKTokens;
@@ -11581,10 +11494,10 @@ export interface CognitivePredictionReceipt {
  * MCP ROUTING TRIGGERS: Entailment Verification, Natural Language Inference, Truth Maintenance System, Epistemic Quarantine, Hallucination Filtering
  */
 export interface EpistemicAxiomVerificationReceipt {
-  event_cid: EventCid21;
-  prior_event_hash?: PriorEventHash21;
-  timestamp: Timestamp21;
-  topology_class?: TopologyClass104;
+  event_cid: EventCid20;
+  prior_event_hash?: PriorEventHash20;
+  timestamp: Timestamp20;
+  topology_class?: TopologyClass103;
   source_prediction_cid: SourcePredictionCid;
   sequence_similarity_score: SequenceSimilarityScore;
   fact_score_passed: FactScorePassed;
@@ -11615,10 +11528,10 @@ export interface EpistemicAxiomVerificationReceipt {
  * Scalar Backpropagation, Acyclic Path
  */
 export interface EpistemicFlowStateReceipt {
-  event_cid: EventCid22;
-  prior_event_hash?: PriorEventHash22;
-  timestamp: Timestamp22;
-  topology_class?: TopologyClass105;
+  event_cid: EventCid21;
+  prior_event_hash?: PriorEventHash21;
+  timestamp: Timestamp21;
+  topology_class?: TopologyClass104;
   source_trajectory_cid: SourceTrajectoryCid;
   estimated_flow_value: EstimatedFlowValue;
   terminal_reward_factorized: TerminalRewardFactorized;
@@ -11644,10 +11557,10 @@ export interface EpistemicFlowStateReceipt {
  * Macroscopic Explanation, Deterministic Sorting
  */
 export interface CausalExplanationEvent {
-  event_cid: EventCid23;
-  prior_event_hash?: PriorEventHash23;
-  timestamp: Timestamp23;
-  topology_class?: TopologyClass106;
+  event_cid: EventCid22;
+  prior_event_hash?: PriorEventHash22;
+  timestamp: Timestamp22;
+  topology_class?: TopologyClass105;
   target_outcome_event_cid: TargetOutcomeEventCid;
   collective_intelligence: CollectiveIntelligenceProfile;
   agent_attributions: AgentAttributions;
@@ -11708,10 +11621,10 @@ export interface ShapleyAttributionReceipt {
  * Routing Heuristic, Semantic Wave Collapse
  */
 export interface IntentClassificationReceipt {
-  event_cid: EventCid24;
-  prior_event_hash?: PriorEventHash24;
-  timestamp: Timestamp24;
-  topology_class?: TopologyClass107;
+  event_cid: EventCid23;
+  prior_event_hash?: PriorEventHash23;
+  timestamp: Timestamp23;
+  topology_class?: TopologyClass106;
   raw_input_string: RawInputString;
   classified_intent: ClassifiedIntent;
   confidence_score: ConfidenceScore1;
@@ -11729,10 +11642,10 @@ export interface IntentClassificationReceipt {
  *     MCP ROUTING TRIGGERS: Semantic Relational Record, Payload Injection, Hardware Guillotine, Structured Telemetry
  */
 export interface SemanticRelationalVectorState {
-  topology_class?: TopologyClass108;
-  event_cid: EventCid25;
-  prior_event_hash?: PriorEventHash25;
-  timestamp: Timestamp25;
+  topology_class?: TopologyClass107;
+  event_cid: EventCid24;
+  prior_event_hash?: PriorEventHash24;
+  timestamp: Timestamp24;
   ontology_class: UpperOntologyClassProfile;
   temporal_bounds: TemporalBoundsProfile1;
   formal_schema_urn?: FormalSchemaUrn1;
@@ -11774,10 +11687,10 @@ export interface PayloadInjectionZone {
  *     MCP ROUTING TRIGGERS: Ontological Reification, Bimodal Semantic Transformation, Epistemic Ledger, Traceability Collapse
  */
 export interface OntologicalReificationReceipt {
-  topology_class?: TopologyClass109;
-  event_cid: EventCid26;
-  prior_event_hash?: PriorEventHash26;
-  timestamp: Timestamp26;
+  topology_class?: TopologyClass108;
+  event_cid: EventCid25;
+  prior_event_hash?: PriorEventHash25;
+  timestamp: Timestamp25;
   source_data_hash: SourceDataHash;
   target_namespace: TargetNamespace;
   algorithmic_mechanism: TransformationMechanismProfile;
@@ -11814,10 +11727,10 @@ export interface DempsterShaferBeliefVector2 {
  * MCP ROUTING TRIGGERS: Lyapunov Stability, Control Theory, Circuit Breaker, Cascading Failure, State Equilibrium
  */
 export interface CircuitBreakerEvent {
-  event_cid: EventCid27;
-  prior_event_hash?: PriorEventHash27;
-  timestamp: Timestamp27;
-  topology_class?: TopologyClass110;
+  event_cid: EventCid26;
+  prior_event_hash?: PriorEventHash26;
+  timestamp: Timestamp26;
+  topology_class?: TopologyClass109;
   /**
    * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
    */
@@ -11845,10 +11758,10 @@ export interface CircuitBreakerEvent {
  * Energy, Exogenous Perturbation, Epistemic Stress Test
  */
 export interface ExogenousEpistemicEvent {
-  event_cid: EventCid28;
-  prior_event_hash?: PriorEventHash28;
-  timestamp: Timestamp28;
-  topology_class?: TopologyClass111;
+  event_cid: EventCid27;
+  prior_event_hash?: PriorEventHash27;
+  timestamp: Timestamp27;
+  topology_class?: TopologyClass110;
   shock_cid: ShockCid;
   target_node_hash: TargetNodeHash;
   bayesian_surprise_score: BayesianSurpriseScore1;
@@ -11879,10 +11792,10 @@ export interface SimulationEscrowContract {
  * MCP ROUTING TRIGGERS: Out-of-Band Telemetry, Asynchronous Logging, Severity Masking, Peripheral Audit, Ephemeral Context
  */
 export interface EpistemicLogEvent {
-  event_cid: EventCid29;
-  prior_event_hash?: PriorEventHash29;
-  topology_class?: TopologyClass112;
-  timestamp: Timestamp29;
+  event_cid: EventCid28;
+  prior_event_hash?: PriorEventHash28;
+  topology_class?: TopologyClass111;
+  timestamp: Timestamp28;
   level: Level;
   message: Message1;
   context_profile?: TelemetryContextProfile;
@@ -11912,10 +11825,10 @@ export interface TelemetryContextProfile {
  * MCP ROUTING TRIGGERS: Cryptographic Nonce, State Resumption, Replay Attack Prevention, Wetware Attestation, Liveness Resolution
  */
 export interface InterventionReceipt {
-  topology_class?: TopologyClass113;
-  event_cid: EventCid30;
-  prior_event_hash?: PriorEventHash30;
-  timestamp: Timestamp30;
+  topology_class?: TopologyClass112;
+  event_cid: EventCid29;
+  prior_event_hash?: PriorEventHash29;
+  timestamp: Timestamp29;
   intervention_request_cid: InterventionRequestCid;
   /**
    * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
@@ -11970,10 +11883,10 @@ export interface WetwareAttestationContract {
  * MCP ROUTING TRIGGERS: Chain of Custody, Cryptographic Provenance, Merkle-DAG Audit, Non-Repudiation, Data Isomorphism
  */
 export interface CustodyReceipt {
-  event_cid: EventCid31;
-  prior_event_hash?: PriorEventHash31;
-  timestamp: Timestamp31;
-  topology_class?: TopologyClass114;
+  event_cid: EventCid30;
+  prior_event_hash?: PriorEventHash30;
+  timestamp: Timestamp30;
+  topology_class?: TopologyClass113;
   custody_cid: CustodyCid;
   source_node_cid: SourceNodeCid;
   applied_policy_cid: AppliedPolicyCid;
@@ -11993,10 +11906,10 @@ export interface CustodyReceipt {
  * MCP ROUTING TRIGGERS: Undercutting Defeater, Dialectical Edge, Truth Maintenance System, Bipartite Mapping, Non-Monotonic Retraction
  */
 export interface DefeasibleAttackEvent {
-  event_cid: EventCid32;
-  prior_event_hash?: PriorEventHash32;
-  timestamp: Timestamp32;
-  topology_class?: TopologyClass115;
+  event_cid: EventCid31;
+  prior_event_hash?: PriorEventHash31;
+  timestamp: Timestamp31;
+  topology_class?: TopologyClass114;
   attack_cid: AttackCid;
   source_claim_cid: SourceClaimCid;
   target_claim_cid: TargetClaimCid;
@@ -12017,10 +11930,10 @@ export interface DefeasibleAttackEvent {
  * MCP ROUTING TRIGGERS: Rejection Receipt, Free Energy Feedback, MCTS Backpropagation, Variational Free Energy, Mutation Gradient
  */
 export interface EpistemicRejectionReceipt {
-  event_cid: EventCid33;
-  prior_event_hash?: PriorEventHash33;
-  timestamp: Timestamp33;
-  topology_class?: TopologyClass116;
+  event_cid: EventCid32;
+  prior_event_hash?: PriorEventHash32;
+  timestamp: Timestamp32;
+  topology_class?: TopologyClass115;
   receipt_cid: ReceiptCid1;
   failed_projection_cid: FailedProjectionCid;
   violated_algebraic_constraint: ViolatedAlgebraicConstraint;
@@ -12039,10 +11952,10 @@ export interface EpistemicRejectionReceipt {
  * MCP ROUTING TRIGGERS: System 2 Remediation, Mathematical Truth, Proof Verification, Epistemic Ledger
  */
 export interface FormalVerificationReceipt {
-  event_cid: EventCid34;
-  prior_event_hash?: PriorEventHash34;
-  timestamp: Timestamp34;
-  topology_class?: TopologyClass117;
+  event_cid: EventCid33;
+  prior_event_hash?: PriorEventHash33;
+  timestamp: Timestamp33;
+  topology_class?: TopologyClass116;
   /**
    * Pointer to the specific node or intent that requested this formal verification.
    */
@@ -12056,11 +11969,11 @@ export interface FormalVerificationReceipt {
  * CoReason Shared Kernel Ontology
  */
 export interface BeliefModulationReceipt {
-  topology_class?: TopologyClass118;
+  topology_class?: TopologyClass117;
   receipt_cid: ReceiptCid2;
-  event_cid: EventCid35;
-  prior_event_hash?: PriorEventHash35;
-  timestamp: Timestamp35;
+  event_cid: EventCid34;
+  prior_event_hash?: PriorEventHash34;
+  timestamp: Timestamp34;
   target_graph_cid: TargetGraphCid4;
   grounded_edges: GroundedEdges;
   severed_edge_cids: SeveredEdgeCids;
@@ -12072,11 +11985,11 @@ export interface GroundedEdges {
  * CoReason Shared Kernel Ontology
  */
 export interface RDFExportReceipt {
-  topology_class?: TopologyClass119;
+  topology_class?: TopologyClass118;
   export_cid: ExportCid1;
-  event_cid: EventCid36;
-  prior_event_hash?: PriorEventHash36;
-  timestamp: Timestamp36;
+  event_cid: EventCid35;
+  prior_event_hash?: PriorEventHash35;
+  timestamp: Timestamp35;
   serialized_payload: SerializedPayload;
   rdf_triple_count: RdfTripleCount;
   sha256_graph_hash: Sha256GraphHash;
@@ -12093,10 +12006,10 @@ export interface RDFExportReceipt {
  * MCP ROUTING TRIGGERS: Epistemic Starvation, Natural Language Inference, Truth Maintenance System, Defeasible Logic, Belief Mass Depletion
  */
 export interface EpistemicStarvationEvent {
-  event_cid: EventCid37;
-  prior_event_hash?: PriorEventHash37;
-  timestamp: Timestamp37;
-  topology_class?: TopologyClass120;
+  event_cid: EventCid36;
+  prior_event_hash?: PriorEventHash36;
+  timestamp: Timestamp36;
+  topology_class?: TopologyClass119;
   starved_edge_cid: StarvedEdgeCid;
   failed_citations: FailedCitations;
   diagnostic_reason: DiagnosticReason;
@@ -12113,10 +12026,10 @@ export interface EpistemicStarvationEvent {
  * MCP ROUTING TRIGGERS: SPARQL Result, RDF Bindings, Epistemic Projection, Payload Bounding, Ledger Commit
  */
 export interface SPARQLQueryResultReceipt {
-  event_cid: EventCid38;
-  prior_event_hash?: PriorEventHash38;
-  timestamp: Timestamp38;
-  topology_class?: TopologyClass121;
+  event_cid: EventCid37;
+  prior_event_hash?: PriorEventHash37;
+  timestamp: Timestamp37;
+  topology_class?: TopologyClass120;
   query_intent_cid: QueryIntentCid;
   returned_bindings: ReturnedBindings;
   execution_time_ms: ExecutionTimeMs;
@@ -12139,11 +12052,38 @@ export interface ReturnedBindings {
  * MCP ROUTING TRIGGERS: Execution Audit, Merkle-DAG Provenance, Thermodynamic Accounting, Oracle Telemetry, Human-in-the-Loop Attestation, Cryptographic Receipt
  */
 export interface OracleExecutionReceipt {
-  topology_class?: TopologyClass122;
+  topology_class?: TopologyClass121;
   execution_hash: ExecutionHash;
   solver_urn: SolverUrn;
   tokens_burned: TokensBurned;
   human_attestation_signature?: HumanAttestationSignature;
+}
+/**
+ * CoReason Shared Kernel Ontology
+ *
+ * AGENT INSTRUCTION: Tracks a deterministic security boundary violation emitted by the NeMo Guardrails proxy. This event is a frozen historical fact representing a failed cryptographic or semantic check.
+ *
+ * CAUSAL AFFORDANCE: Triggers an immediate suspension of the active execution trajectory and publishes a high-severity alert to the telemetry broker for remediation.
+ *
+ * EPISTEMIC BOUNDS: The event must include the specific HTTP status code (e.g., 401, 403, 406, 422) and the opaque violation manifest emitted by the proxy.
+ *
+ * MCP ROUTING TRIGGERS: Security, Guardrails, Data Loss Prevention, Policy Violation, Telemetry
+ */
+export interface GuardrailViolationEvent {
+  event_cid: EventCid38;
+  prior_event_hash?: PriorEventHash38;
+  timestamp: Timestamp38;
+  topology_class?: TopologyClass122;
+  violation_id: ViolationId;
+  status_code: StatusCode;
+  violation_type: ViolationType;
+  violation_details?: ViolationDetails;
+}
+/**
+ * Detailed manifest from the Guardrails proxy.
+ */
+export interface ViolationDetails {
+  [k: string]: unknown;
 }
 /**
  * CoReason Shared Kernel Ontology
@@ -12558,31 +12498,6 @@ export interface ComputeRateContract1 {
 /**
  * CoReason Shared Kernel Ontology
  *
- * AGENT INSTRUCTION: Formalizes a discrete normative axiom within a Constitutional AI
- * framework to prevent instrumental convergence. As a ...Policy suffix, this object defines
- * rigid mathematical boundaries that the orchestrator must enforce globally.
- *
- * CAUSAL AFFORDANCE: Establishes a hard structural boundary that mathematically repels the
- * swarm's generative trajectory away from forbidden semantic manifolds. Violation severity
- * is classified via a strict Literal["low", "medium", "high", "critical"] tier.
- *
- * EPISTEMIC BOUNDS: Geometrically restricts the state space by blacklisting specific
- * execution branches via the forbidden_intents array (max_length=1000),
- * deterministically sorted by @model_validator to preserve RFC 8785 canonical hashing.
- * The rule_cid is bounded to a 128-char CID.
- *
- * MCP ROUTING TRIGGERS: Constitutional AI, Value Alignment, Normative Axiom, Instrumental
- * Convergence, Semantic Boundary
- */
-export interface ConstitutionalPolicy {
-  rule_cid: RuleCid1;
-  description: Description10;
-  severity: Severity;
-  forbidden_intents: ForbiddenIntents1;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
  * AGENT INSTRUCTION: Projects a semantically unified spatial token footprint representing the strictly bounded source projection.
  *
  *     CAUSAL AFFORDANCE: Authorizes downstream parsing tasks to isolate exact dimensional target strings while strictly maintaining chronological relationships via the topological envelope.
@@ -12825,6 +12740,30 @@ export interface DocumentLayoutManifest {
  */
 export interface Blocks1 {
   [k: string]: DocumentLayoutRegionState;
+}
+/**
+ * CoReason Shared Kernel Ontology
+ *
+ * AGENT INSTRUCTION: Defines the mathematical Optimal Stopping Theory boundaries for Monte
+ * Carlo Tree Search (MCTS) and test-time compute scaling. As an ...SLA suffix, this object
+ * enforces rigid mathematical boundaries that the orchestrator must respect globally.
+ *
+ * CAUSAL AFFORDANCE: Triggers an early termination circuit breaker on reasoning trajectories
+ * when the gradient of the Process Reward Model (PRM) score falls below the epsilon delta,
+ * halting unnecessary probability wave expansion and preserving VRAM.
+ *
+ * EPISTEMIC BOUNDS: Mathematically constrained by convergence_delta_epsilon (ge=0.0, le=1.0)
+ * over a strictly positive lookback_window_steps (gt=0, le=18446744073709551615). Physically mandates
+ * a minimum_reasoning_steps burn-in period (gt=0, le=18446744073709551615) to prevent premature
+ * collapse before the latent space is adequately explored.
+ *
+ * MCP ROUTING TRIGGERS: Optimal Stopping Theory, MCTS, PRM Convergence, Circuit Breaker,
+ * Bellman Equation
+ */
+export interface DynamicConvergenceSLA {
+  convergence_delta_epsilon: ConvergenceDeltaEpsilon;
+  lookback_window_steps: LookbackWindowSteps;
+  minimum_reasoning_steps: MinimumReasoningSteps;
 }
 /**
  * CoReason Shared Kernel Ontology
@@ -13180,6 +13119,26 @@ export interface EpistemicEscalationContract {
 /**
  * CoReason Shared Kernel Ontology
  *
+ * AGENT INSTRUCTION: A declarative proxy that outputs standard NeMo Colang format (.co files)
+ * to configure the NeMo Guardrails reverse-proxy in the Envoy mesh.
+ *
+ * CAUSAL AFFORDANCE: Defines the exact Colang state machine configuration for intercepting
+ * and overriding LLM outputs before they hit the network.
+ *
+ * EPISTEMIC BOUNDS: Bounded by a strict max_length=100000 on the raw Colang payload
+ * to prevent memory exhaustion. The @model_validator deterministically sorts the required
+ * imports.
+ *
+ * MCP ROUTING TRIGGERS: NeMo Guardrails, Colang, Reverse Proxy, Constitutional Alignment, Envoy Mesh
+ */
+export interface EpistemicGuardrailsManifest {
+  colang_version?: ColangVersion;
+  colang_payload: ColangPayload;
+  severity?: Severity;
+}
+/**
+ * CoReason Shared Kernel Ontology
+ *
  * AGENT INSTRUCTION: Defines the limits of infinite graph unfolding to protect UI VRAM when pulling from the EpistemicLedgerState.
  * CAUSAL AFFORDANCE: Instructs the orchestrator's deserialization engine to halt graph traversal at a specific recursion depth, replacing raw objects with cryptographic pointers.
  * EPISTEMIC BOUNDS: The `max_unfold_depth` strictly bounds the DAG traversal depth (`ge=1, le=18446744073709551615`). `lazy_fetch_timeout_ms` prevents infinite halting (`ge=1, le=60000`). `truncation_strategy` is constrained to a Literal.
@@ -13407,23 +13366,24 @@ export interface ProceduralMetadataManifest {
 /**
  * CoReason Shared Kernel Ontology
  *
- *  AGENT INSTRUCTION: Encodes a macroscopic Petri net or Directed Acyclic Graph (DAG)
- *  formalizing standard operating procedures into mathematically traversable state
- *  transitions. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate
- *  state.
+ * AGENT INSTRUCTION: Encodes a macroscopic Petri net or Directed Acyclic Graph (DAG)
+ * formalizing standard operating procedures into mathematically traversable state
+ * transitions. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate
+ * state.
  *
- *  CAUSAL AFFORDANCE: Physically bounds the executing agent (target_persona:
- *  ProfileCIDState) to a deterministic sequence of CognitiveStateProfiles, unlocking
- *  the ability for the orchestrator to dynamically evaluate execution via Process Reward
- * .
+ * CAUSAL AFFORDANCE: Physically bounds the executing agent (target_persona:
+ * ProfileCIDState) to a deterministic sequence of CognitiveStateProfiles, unlocking
+ * the ability for the orchestrator to dynamically evaluate execution
+ * via Process Reward Models (prm_evaluations: list[ProcessRewardContract]) at each
+ * topological node.
  *
- *  EPISTEMIC BOUNDS: The cognitive_steps dictionary is constrained to max_length=1000
- *  to cap memory footprint. The @model_validator reject_ghost_nodes mathematically enforces
- *  referential integrity, guaranteeing that no chronological_flow_edges AND no
- *  structural_grammar_hashes point to an undefined state.
+ * EPISTEMIC BOUNDS: The cognitive_steps dictionary is constrained to max_length=1000
+ * to cap memory footprint. The @model_validator reject_ghost_nodes mathematically enforces
+ * referential integrity, guaranteeing that no chronological_flow_edges AND no
+ * structural_grammar_hashes point to an undefined state.
  *
- *  MCP ROUTING TRIGGERS: Petri Net, Directed Acyclic Graph, Process Reward Model,
- *  Topological Flow, Referential Integrity
+ * MCP ROUTING TRIGGERS: Petri Net, Directed Acyclic Graph, Process Reward Model,
+ * Topological Flow, Referential Integrity
  */
 export interface EpistemicSOPManifest {
   sop_cid: SopCid;
@@ -13434,6 +13394,7 @@ export interface EpistemicSOPManifest {
   cognitive_steps: CognitiveSteps;
   structural_grammar_hashes: StructuralGrammarHashes;
   chronological_flow_edges: ChronologicalFlowEdges1;
+  prm_evaluations?: PrmEvaluations;
 }
 /**
  * Dictionary mapping step_cids to strict causal DAG constraints.
@@ -13446,6 +13407,26 @@ export interface CognitiveSteps {
  */
 export interface StructuralGrammarHashes {
   [k: string]: string;
+}
+/**
+ * CoReason Shared Kernel Ontology
+ *
+ * AGENT INSTRUCTION: Enforces the Step-Level Verification heuristics for Process Reward Models (PRMs) during non-monotonic reasoning searches and test-time compute.
+ *
+ * CAUSAL AFFORDANCE: Authorizes the orchestrator to physically prune hallucinating ThoughtBranchState vectors from the LatentScratchpadReceipt if their logit probabilities drop below the viable threshold, emulating rigorous Beam Search pruning.
+ *
+ * EPISTEMIC BOUNDS: Strictly bounds the search space geometry via `pruning_threshold` (`ge=0.0, le=1.0`) and mechanically caps State-Space Explosion through `max_backtracks_allowed` (`ge=0, le=18446744073709551615`).
+ *
+ * MCP ROUTING TRIGGERS: Process Reward Model, Beam Search Pruning, Latent Trajectory, State-Space Explosion, A* Search
+ */
+export interface ProcessRewardContract {
+  /**
+   * The dynamic circuit breaker that halts the search when PRM variance converges, preventing VRAM waste.
+   */
+  convergence_sla?: DynamicConvergenceSLA | null;
+  pruning_threshold: PruningThreshold;
+  max_backtracks_allowed: MaxBacktracksAllowed;
+  evaluator_matrix_name?: EvaluatorMatrixName;
 }
 /**
  * CoReason Shared Kernel Ontology
@@ -13651,7 +13632,7 @@ export interface GenerativeTaxonomyManifest1 {
  * Bounding, ESG Constraint, Execution Envelope
  */
 export interface GlobalGovernancePolicy {
-  mandatory_license_rule: ConstitutionalPolicy1;
+  mandatory_license_rule: EpistemicGuardrailsManifest1;
   max_budget_magnitude: MaxBudgetMagnitude1;
   /**
    * The mathematical CRDT ruleset governing distributed state synchronization.
@@ -13668,27 +13649,22 @@ export interface GlobalGovernancePolicy {
 /**
  * CoReason Shared Kernel Ontology
  *
- * AGENT INSTRUCTION: Formalizes a discrete normative axiom within a Constitutional AI
- * framework to prevent instrumental convergence. As a ...Policy suffix, this object defines
- * rigid mathematical boundaries that the orchestrator must enforce globally.
+ * AGENT INSTRUCTION: A declarative proxy that outputs standard NeMo Colang format (.co files)
+ * to configure the NeMo Guardrails reverse-proxy in the Envoy mesh.
  *
- * CAUSAL AFFORDANCE: Establishes a hard structural boundary that mathematically repels the
- * swarm's generative trajectory away from forbidden semantic manifolds. Violation severity
- * is classified via a strict Literal["low", "medium", "high", "critical"] tier.
+ * CAUSAL AFFORDANCE: Defines the exact Colang state machine configuration for intercepting
+ * and overriding LLM outputs before they hit the network.
  *
- * EPISTEMIC BOUNDS: Geometrically restricts the state space by blacklisting specific
- * execution branches via the forbidden_intents array (max_length=1000),
- * deterministically sorted by @model_validator to preserve RFC 8785 canonical hashing.
- * The rule_cid is bounded to a 128-char CID.
+ * EPISTEMIC BOUNDS: Bounded by a strict max_length=100000 on the raw Colang payload
+ * to prevent memory exhaustion. The @model_validator deterministically sorts the required
+ * imports.
  *
- * MCP ROUTING TRIGGERS: Constitutional AI, Value Alignment, Normative Axiom, Instrumental
- * Convergence, Semantic Boundary
+ * MCP ROUTING TRIGGERS: NeMo Guardrails, Colang, Reverse Proxy, Constitutional Alignment, Envoy Mesh
  */
-export interface ConstitutionalPolicy1 {
-  rule_cid: RuleCid1;
-  description: Description10;
-  severity: Severity;
-  forbidden_intents: ForbiddenIntents1;
+export interface EpistemicGuardrailsManifest1 {
+  colang_version?: ColangVersion;
+  colang_payload: ColangPayload;
+  severity?: Severity;
 }
 /**
  * CoReason Shared Kernel Ontology
@@ -13762,32 +13738,6 @@ export interface GlobalSemanticProfile1 {
   artifact_event_cid: ArtifactEventCid2;
   detected_modalities: DetectedModalities;
   token_density: TokenDensity;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
- * AGENT INSTRUCTION: Aggregates discrete ConstitutionalPolicy nodes into a cohesive,
- * version-controlled Normative Alignment Manifold. As a ...Policy suffix, this object
- * defines rigid mathematical boundaries that the orchestrator must enforce globally.
- *
- * CAUSAL AFFORDANCE: Instructs the orchestrator to enforce a unified cybernetic governance
- * model across all swarm trajectories, grounding generative actions in a specific semantic
- * version (SemanticVersionState).
- *
- * EPISTEMIC BOUNDS: The topological integrity of the manifold is mathematically guaranteed
- * by the @model_validator, which deterministically sorts the rules array by rule_cid to
- * prevent Byzantine hash fractures across distributed nodes.
- *
- * MCP ROUTING TRIGGERS: Cybernetic Governance, Normative Alignment Manifold, Rule
- * Aggregation, Version Control, RFC 8785 Canonicalization
- */
-export interface GovernancePolicy {
-  policy_name: PolicyName;
-  /**
-   * Semantic version of the governance policy.
-   */
-  version: string;
-  rules: Rules1;
 }
 /**
  * CoReason Shared Kernel Ontology
