@@ -981,6 +981,7 @@
           "epistemic_telemetry": "#/$defs/EpistemicTelemetryEvent",
           "exogenous_event": "#/$defs/ExogenousEpistemicEvent",
           "formal_verification_receipt": "#/$defs/FormalVerificationReceipt",
+          "guardrail_violation_event": "#/$defs/GuardrailViolationEvent",
           "hypothesis": "#/$defs/HypothesisGenerationEvent",
           "intent_classification": "#/$defs/IntentClassificationReceipt",
           "mcp_tool_definition": "#/$defs/MCPToolDefinition",
@@ -1121,6 +1122,9 @@
         },
         {
           "$ref": "#/$defs/OracleExecutionReceipt"
+        },
+        {
+          "$ref": "#/$defs/GuardrailViolationEvent"
         }
       ]
     },
@@ -10456,6 +10460,44 @@
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Tracks a deterministic security boundary violation emitted by the NeMo Guardrails proxy. This event is a frozen historical fact representing a failed cryptographic or semantic check.\n\nCAUSAL AFFORDANCE: Triggers an immediate suspension of the active execution trajectory and publishes a high-severity alert to the telemetry broker for remediation.\n\nEPISTEMIC BOUNDS: The event must include the specific HTTP status code (e.g., 401, 403, 406, 422) and the opaque violation manifest emitted by the proxy.\n\nMCP ROUTING TRIGGERS: Security, Guardrails, Data Loss Prevention, Policy Violation, Telemetry",
       "properties": {
+        "event_cid": {
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "prior_event_hash": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The SHA-256 hash of the temporally preceding event, establishing the Merkle-DAG chain.",
+          "title": "Prior Event Hash"
+        },
+        "timestamp": {
+          "description": "Causal Ancestry markers required to resolve decentralized event ordering.",
+          "maximum": 253402300799.0,
+          "minimum": 0.0,
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "topology_class": {
+          "const": "guardrail_violation_event",
+          "default": "guardrail_violation_event",
+          "description": "The type of the security violation payload.",
+          "title": "Topology Class",
+          "type": "string"
+        },
         "violation_id": {
           "description": "Unique identifier for the violation event.",
           "title": "Violation Id",
@@ -10476,15 +10518,11 @@
           "description": "Detailed manifest from the Guardrails proxy.",
           "title": "Violation Details",
           "type": "object"
-        },
-        "timestamp": {
-          "description": "The ISO-8601 timestamp of the violation.",
-          "format": "date-time",
-          "title": "Timestamp",
-          "type": "string"
         }
       },
       "required": [
+        "event_cid",
+        "timestamp",
         "violation_id",
         "status_code",
         "violation_type"
