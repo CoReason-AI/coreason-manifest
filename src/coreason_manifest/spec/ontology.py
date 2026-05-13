@@ -69,7 +69,6 @@ def _pure_python_longest_path_length(adjacency: dict[str, list[str]]) -> int:
         for t in targets:
             in_degree[t] = in_degree.get(t, 0) + 1
 
-    # ⚡ Bolt Optimization: Combine topological sort and longest path calculation into a single pass (~1.5x faster)
     queue: list[str] = [n for n, d in in_degree.items() if d == 0]
     dist: dict[str, int] = dict.fromkeys(adjacency, 0)
 
@@ -8751,7 +8750,6 @@ class PredictionMarketState(CoreasonBaseState):
 
             keys = list(probs_dict.keys())
 
-            # ⚡ Bolt Optimization: Replace slow NumPy operations with pure Python (~8x faster)
             vals = []
             for k in keys:
                 v_str = str(probs_dict[k])

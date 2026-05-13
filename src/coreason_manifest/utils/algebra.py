@@ -149,7 +149,6 @@ def get_ontology_schema() -> dict[str, Any]:
     global _CACHED_ONTOLOGY_SCHEMA
     global _CACHED_ONTOLOGY_SCHEMA_BYTES
     if _CACHED_ONTOLOGY_SCHEMA_BYTES is not None:
-        # ⚡ Bolt Optimization: Use msgspec.json.decode from cached bytes instead of copy.deepcopy (~3x faster)
         return msgspec.json.decode(_CACHED_ONTOLOGY_SCHEMA_BYTES)  # type: ignore[no-any-return]
     if _CACHED_ONTOLOGY_SCHEMA is not None:
         return copy.deepcopy(_CACHED_ONTOLOGY_SCHEMA)
@@ -398,7 +397,6 @@ def verify_ast_safety(payload: str) -> bool:
 def transmute_state_differential(
     current_state: dict[str, Any], differential: ontology.StateDifferentialManifest
 ) -> dict[str, Any]:
-    # ⚡ Bolt Optimization: Replace slow Pydantic model_dump with manual dictionary construction (~5x faster)
     patch_list = [
         {"op": p.op, "path": p.path, "value": p.value}
         if p.value is not None
@@ -423,7 +421,6 @@ def transmute_to_pycrdt_doc(manifest: ontology.TemporalGraphCRDTManifest) -> Any
     map_node: Any = pycrdt.Map()
     doc["crdt_state"] = map_node
 
-    # ⚡ Bolt Optimization: Instantiate pycrdt.Array with the full list directly.
     # This avoids multiple O(1) Rust-boundary crossings during sequential appends,
     # yielding a ~2.03x speedup on CRDT array initialization.
     map_node["add_set"] = pycrdt.Array(manifest.add_set)
