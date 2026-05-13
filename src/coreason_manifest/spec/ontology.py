@@ -6795,7 +6795,7 @@ type AnyIntent = Annotated[
     | BoundedJSONRPCIntent
     | EpistemicTransmutationTask
     | EpistemicUpsamplingTask
-    | InterventionalCausalTask
+    | DoWhyInterventionIntent
     | MCPClientIntent
     | RollbackIntent
     | StateMutationIntent
@@ -6925,39 +6925,29 @@ class InterventionIntent(CoreasonBaseState):
     )
 
 
-class InterventionalCausalTask(CoreasonBaseState):
-    topology_class: Literal["interventional_causal_task"] = Field(default="interventional_causal_task")
+class DoWhyInterventionIntent(CoreasonBaseState):
+    topology_class: Literal["dowhy_intervention_intent"] = Field(default="dowhy_intervention_intent")
     """
-    AGENT INSTRUCTION: Represents a formal Pearlian Do-Operator (P(y|do(X=x))) intervention, forcefully severing a variable from its historical back-door causal mechanisms to prove direct causal influence.
+    AGENT INSTRUCTION: Represents an intent to perform a causal intervention using DoWhy.
 
-    CAUSAL AFFORDANCE: Authorizes the orchestrator to physically mutate the intervention_variable to the do_operator_state, breaking confounding structural edges in the directed acyclic graph.
+    CAUSAL AFFORDANCE: Instructs the orchestrator to compute P(y|do(X=x)) using DoWhy's identify_effect and estimate_effect APIs.
 
-    EPISTEMIC BOUNDS: The physical mutation is economically capped by execution_cost_budget_magnitude (le=18446744073709551615), and its justification is strictly quantified by expected_causal_information_gain (bounded mathematically between 0.0 and 1.0).
+    EPISTEMIC BOUNDS: The variables are constrained by length limits to ensure safe API interaction with DoWhy.
 
-    MCP ROUTING TRIGGERS: Pearlian Do-Calculus, Structural Causal Models, Causal Intervention, Confounder Ablation, Back-door Criterion
+    MCP ROUTING TRIGGERS: DoWhy, PyWhy, Causal Intervention, estimate_effect, identify_effect
     """
 
     task_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
         description="Unique identifier for this causal intervention."
     )
-    target_hypothesis_cid: Annotated[
-        str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")
-    ] = Field(description="The hypothesis containing the SCM being tested.")
-    intervention_variable: Annotated[str, StringConstraints(max_length=2000)] = Field(
-        description="The specific node $X$ in the SCM the agent is forcing to a specific state."
+    treatment_variable: Annotated[str, StringConstraints(max_length=2000)] = Field(
+        description="The treatment variable (X) to intervene on."
     )
-    do_operator_state: Annotated[str, StringConstraints(max_length=2000)] = Field(
-        description="The exact value or condition forced upon the intervention_variable, isolating it from its historical causes."
+    outcome_variable: Annotated[str, StringConstraints(max_length=2000)] = Field(
+        description="The outcome variable (Y) to estimate the effect for."
     )
-    expected_causal_information_gain: float = Field(
-        ge=0.0,
-        le=1.0,
-        description="The mathematical proof of entropy reduction yielded specifically by breaking the confounding back-doors.",
-    )
-    execution_cost_budget_magnitude: int = Field(
-        le=18446744073709551615,
-        ge=0,
-        description="The maximum economic expenditure authorized to run this specific causal intervention.",
+    common_causes: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
+        default_factory=list, description="Optional explicit common causes (confounders) to adjust for."
     )
 
 
@@ -9373,35 +9363,21 @@ class StdioTransportProfile(CoreasonBaseState):
 type MCPTransportProfile = StdioTransportProfile | SSETransportProfile | HTTPTransportProfile
 
 
-class StructuralCausalGraphProfile(CoreasonBaseState):
+class CausalGraphDefinition(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Formalizes Judea Pearl's Structural Causal Models (SCMs) by mapping the causal topology of observed and latent variables.
+    AGENT INSTRUCTION: Generic graph representation compatible with DoWhy (PyWhy).
 
-    CAUSAL AFFORDANCE: Unlocks do-calculus and interventional logic by providing the orchestrator with the explicit DAG required to identify confounders and compute causal effects.
+    CAUSAL AFFORDANCE: Allows DoWhy to initialize a CausalModel using standardized DOT/GML strings or generic node/edge dictionaries.
 
-    EPISTEMIC BOUNDS: Variables are constrained by strict bounds (max_length=255). The @model_validator deterministically sorts observed_variables, latent_variables, and causal_edges to mathematically guarantee zero-variance RFC 8785 canonical hashing.
+    EPISTEMIC BOUNDS: Bounded to strict constraints on string length for DOT/GML inputs to prevent buffer overflows during DoWhy parsing.
 
-    MCP ROUTING TRIGGERS: Structural Causal Models, Pearlian DAG, Latent Confounder, d-separation, Interventional Topology
+    MCP ROUTING TRIGGERS: DoWhy, PyWhy, Causal Graph, DOT, GML, CausalModel
     """
 
-    observed_variables: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
-        max_length=1000, description="The nodes in the DAG that the agent can passively measure."
+    graph_format: Literal["gml", "dot", "dict"] = Field(description="The format of the provided causal graph.")
+    graph_payload: Annotated[str, StringConstraints(max_length=100000)] = Field(
+        description="The graph payload, either as a GML/DOT string or JSON-serialized dictionary of nodes and edges."
     )
-    latent_variables: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
-        max_length=1000, description="The unobserved confounders the agent suspects exist."
-    )
-    causal_edges: list[CausalDirectedEdgeState] = Field(description="The declared topological mapping of causality.")
-
-    @model_validator(mode="after")
-    def _enforce_canonical_sort(self) -> Self:
-        object.__setattr__(self, "observed_variables", sorted(self.observed_variables))
-        object.__setattr__(self, "latent_variables", sorted(self.latent_variables))
-        object.__setattr__(
-            self,
-            "causal_edges",
-            sorted(self.causal_edges, key=operator.attrgetter("source_variable", "target_variable")),
-        )
-        return self
 
 
 class HypothesisGenerationEvent(CoreasonBaseState):
@@ -9446,7 +9422,7 @@ class HypothesisGenerationEvent(CoreasonBaseState):
     status: Literal["active", "falsified", "verified"] = Field(
         default="active", description="The current validity state of this hypothesis in the EpistemicLedgerState."
     )
-    causal_model: StructuralCausalGraphProfile | None = Field(
+    causal_model: CausalGraphDefinition | None = Field(
         default=None,
         description="The formal DAG representing the agent's structural assumptions about the environment.",
     )
@@ -10673,7 +10649,7 @@ class CognitiveAgentNodeProfile(CoreasonBaseState):
     analogical_policy: AnalogicalMappingTask | None = Field(
         default=None, description="The formal contract forcing the agent to execute cross-domain lateral thinking."
     )
-    interventional_policy: InterventionalCausalTask | None = Field(
+    interventional_policy: DoWhyInterventionIntent | None = Field(
         default=None,
         description="The formal contract authorizing the agent to mutate variables to prove Pearlian causation.",
     )

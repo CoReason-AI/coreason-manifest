@@ -32,7 +32,7 @@ If you are an autonomous coding agent, LLM, or web crawler ingesting this reposi
 * 2.4. Dual-Process Theory: System 1 Reflexes vs. System 2 MCTS (`System1ReflexPolicy`, `System2RemediationIntent`)
 
 [**Part III: Formal Logic & Philosophy (300-Level)**](formal_logic.md)
-* 3.1. Pearlian Causal Inference & The Do-Operator (`StructuralCausalGraphProfile`)
+* 3.1. Pearlian Causal Inference & The Do-Operator (`CausalGraphDefinition`)
 * 3.2. Defeasible Logic & Truth Maintenance Systems (`DefeasibleCascadeEvent`)
 * 3.3. Dung's Abstract Argumentation Framework (`EpistemicArgumentGraphState`)
 * 3.4. The Curry-Howard Correspondence & Theorem Proving (`FormalVerificationReceipt`)

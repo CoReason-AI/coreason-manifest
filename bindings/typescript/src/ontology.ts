@@ -664,7 +664,7 @@ export type AnyIntent =
   | BoundedJSONRPCIntent
   | EpistemicTransmutationTask
   | EpistemicUpsamplingTask
-  | InterventionalCausalTask
+  | DoWhyInterventionIntent
   | MCPClientIntent
   | RollbackIntent
   | StateMutationIntent
@@ -1583,31 +1583,23 @@ export type UpsamplingConfidenceThreshold = number;
  * @maxItems 1000
  */
 export type JustificationVectors = [string, ...string[]];
-export type TopologyClass51 = "interventional_causal_task";
+export type TopologyClass51 = "dowhy_intervention_intent";
 /**
  * Unique identifier for this causal intervention.
  */
 export type TaskCid5 = string;
 /**
- * The hypothesis containing the SCM being tested.
+ * The treatment variable (X) to intervene on.
  */
-export type TargetHypothesisCid1 = string;
+export type TreatmentVariable = string;
 /**
- * The specific node $X$ in the SCM the agent is forcing to a specific state.
+ * The outcome variable (Y) to estimate the effect for.
  */
-export type InterventionVariable = string;
+export type OutcomeVariable = string;
 /**
- * The exact value or condition forced upon the intervention_variable, isolating it from its historical causes.
+ * Optional explicit common causes (confounders) to adjust for.
  */
-export type DoOperatorState = string;
-/**
- * The mathematical proof of entropy reduction yielded specifically by breaking the confounding back-doors.
- */
-export type ExpectedCausalInformationGain = number;
-/**
- * The maximum economic expenditure authorized to run this specific causal intervention.
- */
-export type ExecutionCostBudgetMagnitude2 = number;
+export type CommonCauses = string[];
 export type TopologyClass52 = "mcp_client_intent";
 /**
  * JSON-RPC version.
@@ -2623,7 +2615,7 @@ export type AgentCid1 = string;
 /**
  * The exact HypothesisGenerationEvent the agent is betting on.
  */
-export type TargetHypothesisCid2 = string;
+export type TargetHypothesisCid1 = string;
 /**
  * The volume of compute budget committed to this position.
  */
@@ -3562,21 +3554,13 @@ export type FalsificationConditions = [EmpiricalFalsificationContract, ...Empiri
  */
 export type Status = "active" | "falsified" | "verified";
 /**
- * The nodes in the DAG that the agent can passively measure.
- *
- * @maxItems 1000
+ * The format of the provided causal graph.
  */
-export type ObservedVariables = string[];
+export type GraphFormat = "gml" | "dot" | "dict";
 /**
- * The unobserved confounders the agent suspects exist.
- *
- * @maxItems 1000
+ * The graph payload, either as a GML/DOT string or JSON-serialized dictionary of nodes and edges.
  */
-export type LatentVariables = string[];
-/**
- * The declared topological mapping of causality.
- */
-export type CausalEdges1 = CausalDirectedEdgeState[];
+export type GraphPayload = string;
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
@@ -5393,6 +5377,7 @@ export interface CoReasonSharedKernelOntology {
   CausalAttributionState?: CausalAttributionState;
   CausalDirectedEdgeState?: CausalDirectedEdgeState;
   CausalExplanationEvent?: CausalExplanationEvent;
+  CausalGraphDefinition?: CausalGraphDefinition;
   CausalIntervalProfile?: CausalIntervalProfile;
   CausalPropagationIntent?: CausalPropagationIntent;
   CircuitBreakerEvent?: CircuitBreakerEvent;
@@ -5450,6 +5435,7 @@ export interface CoReasonSharedKernelOntology {
   DistributionProfile?: DistributionProfile;
   DistributionShapeProfile?: DistributionShapeProfile;
   DiversityPolicy?: DiversityPolicy;
+  DoWhyInterventionIntent?: DoWhyInterventionIntent;
   DocumentKnowledgeGraphManifest?: DocumentKnowledgeGraphManifest;
   DocumentLayoutManifest?: DocumentLayoutManifest;
   DocumentLayoutRegionState?: DocumentLayoutRegionState;
@@ -5550,7 +5536,6 @@ export interface CoReasonSharedKernelOntology {
   InterventionIntent?: InterventionIntent;
   InterventionPolicy?: InterventionPolicy;
   InterventionReceipt?: InterventionReceipt;
-  InterventionalCausalTask?: InterventionalCausalTask;
   JSONRPCErrorResponseState?: JSONRPCErrorResponseState;
   JSONRPCErrorState?: JSONRPCErrorState1;
   JsonPrimitiveState?: JsonPrimitiveState;
@@ -5671,7 +5656,6 @@ export interface CoReasonSharedKernelOntology {
   StochasticTopologyManifest?: StochasticTopologyManifest;
   StrategicThoughtNodeIntent?: StrategicThoughtNodeIntent;
   StreamingDisfluencyContract?: StreamingDisfluencyContract;
-  StructuralCausalGraphProfile?: StructuralCausalGraphProfile;
   SubstrateHydrationManifest?: SubstrateHydrationManifest;
   SwarmTopologyManifest?: SwarmTopologyManifest;
   SyntheticGenerationProfile?: SyntheticGenerationProfile;
@@ -7827,14 +7811,12 @@ export interface ContextualizedSourceState2 {
 /**
  * CoReason Shared Kernel Ontology
  */
-export interface InterventionalCausalTask {
+export interface DoWhyInterventionIntent {
   topology_class?: TopologyClass51;
   task_cid: TaskCid5;
-  target_hypothesis_cid: TargetHypothesisCid1;
-  intervention_variable: InterventionVariable;
-  do_operator_state: DoOperatorState;
-  expected_causal_information_gain: ExpectedCausalInformationGain;
-  execution_cost_budget_magnitude: ExecutionCostBudgetMagnitude2;
+  treatment_variable: TreatmentVariable;
+  outcome_variable: OutcomeVariable;
+  common_causes?: CommonCauses;
 }
 /**
  * CoReason Shared Kernel Ontology
@@ -8155,7 +8137,7 @@ export interface CognitiveAgentNodeProfile {
   /**
    * The formal contract authorizing the agent to mutate variables to prove Pearlian causation.
    */
-  interventional_policy?: InterventionalCausalTask | null;
+  interventional_policy?: DoWhyInterventionIntent | null;
   /**
    * The API-like contract allowing the agent to offload rigid logic to deterministic CPU solvers.
    */
@@ -9452,7 +9434,7 @@ export interface PredictionMarketState {
  */
 export interface HypothesisStakeReceipt {
   agent_cid: AgentCid1;
-  target_hypothesis_cid: TargetHypothesisCid2;
+  target_hypothesis_cid: TargetHypothesisCid1;
   staked_magnitude: StakedMagnitude;
   implied_probability: ImpliedProbability;
 }
@@ -11097,23 +11079,22 @@ export interface HypothesisGenerationEvent {
   /**
    * The formal DAG representing the agent's structural assumptions about the environment.
    */
-  causal_model?: StructuralCausalGraphProfile | null;
+  causal_model?: CausalGraphDefinition | null;
 }
 /**
  * CoReason Shared Kernel Ontology
  *
- * AGENT INSTRUCTION: Formalizes Judea Pearl's Structural Causal Models (SCMs) by mapping the causal topology of observed and latent variables.
+ * AGENT INSTRUCTION: Generic graph representation compatible with DoWhy (PyWhy).
  *
- * CAUSAL AFFORDANCE: Unlocks do-calculus and interventional logic by providing the orchestrator with the explicit DAG required to identify confounders and compute causal effects.
+ * CAUSAL AFFORDANCE: Allows DoWhy to initialize a CausalModel using standardized DOT/GML strings or generic node/edge dictionaries.
  *
- * EPISTEMIC BOUNDS: Variables are constrained by strict bounds (max_length=255). The @model_validator deterministically sorts observed_variables, latent_variables, and causal_edges to mathematically guarantee zero-variance RFC 8785 canonical hashing.
+ * EPISTEMIC BOUNDS: Bounded to strict constraints on string length for DOT/GML inputs to prevent buffer overflows during DoWhy parsing.
  *
- * MCP ROUTING TRIGGERS: Structural Causal Models, Pearlian DAG, Latent Confounder, d-separation, Interventional Topology
+ * MCP ROUTING TRIGGERS: DoWhy, PyWhy, Causal Graph, DOT, GML, CausalModel
  */
-export interface StructuralCausalGraphProfile {
-  observed_variables: ObservedVariables;
-  latent_variables: LatentVariables;
-  causal_edges: CausalEdges1;
+export interface CausalGraphDefinition {
+  graph_format: GraphFormat;
+  graph_payload: GraphPayload;
 }
 /**
  * CoReason Shared Kernel Ontology
