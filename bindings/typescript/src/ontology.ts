@@ -4591,14 +4591,6 @@ export type ExecutionFeeLmsr = number;
  */
 export type TraceFactualAlignment = boolean;
 /**
- * Forces the inclusion of structural XML tags to isolate the reasoning trace.
- */
-export type RequireThinkTags = boolean;
-/**
- * The strict regular expression the model must satisfy to yield a valid discrete classification. Optional because LMQL/Guidance do not use standard regex.
- */
-export type FinalAnswerRegex = string | null;
-/**
  * The globally unique decentralized identifier (DID) anchoring this specific non-monotonic reasoning trace.
  */
 export type TraceCid1 = string;
@@ -4785,18 +4777,6 @@ export type DistributionShapeProfile = "gaussian" | "uniform" | "beta";
  * Directed edges defining the topological sort (chronological flow) of the document.
  */
 export type ChronologicalFlowEdges = [unknown, unknown][];
-/**
- * The minimal required PRM score improvement across the lookback window to justify continued compute.
- */
-export type ConvergenceDeltaEpsilon = number;
-/**
- * The N-step temporal window over which the PRM gradient is calculated.
- */
-export type LookbackWindowSteps = number;
-/**
- * The mandatory 'burn-in' period. The orchestrator cannot terminate the search before this structural depth is reached, preventing premature collapse.
- */
-export type MinimumReasoningSteps = number;
 /**
  * A Python 3.14 t-string template definition for dynamic UI grid evaluation.
  */
@@ -5478,18 +5458,6 @@ export type FallbackHeuristic = "chronological" | "entity_centric" | "semantic_c
 export type TensorStructuralFormatProfile1 = "float32" | "float64" | "int8" | "uint8" | "int32" | "int64";
 export type TieBreakerPolicy = "lowest_cost" | "lowest_latency" | "highest_confidence" | "random";
 /**
- * The lower bound for Random Walk with Restart (RWR) reachability.
- */
-export type MinEdgeCriticalityScore = number;
-/**
- * The lower bound for GCN/GAT cosine similarity.
- */
-export type MinSemanticRelevanceScore = number;
-/**
- * The deterministic protocol the orchestrator must use to compute these scores.
- */
-export type AggregationMethod = "gcn_spatial" | "attention_gat" | "rwr_topological";
-/**
  * A strictly typed SHA-256 hash pointing to a historically executed topological state.
  */
 export type TopologyHashReceipt = string;
@@ -5593,7 +5561,6 @@ export interface CoReasonSharedKernelOntology {
   CognitiveCritiqueProfile?: CognitiveCritiqueProfile1;
   CognitiveDetailedBalanceContract?: CognitiveDetailedBalanceContract;
   CognitiveDualVerificationReceipt?: CognitiveDualVerificationReceipt;
-  CognitiveFormatContract?: CognitiveFormatContract;
   CognitiveHumanNodeProfile?: CognitiveHumanNodeProfile;
   CognitivePredictionReceipt?: CognitivePredictionReceipt;
   CognitiveReasoningTraceState?: CognitiveReasoningTraceState;
@@ -5648,7 +5615,6 @@ export interface CoReasonSharedKernelOntology {
   DocumentLayoutManifest?: DocumentLayoutManifest;
   DocumentLayoutRegionState?: DocumentLayoutRegionState;
   DraftingIntent?: DraftingIntent;
-  DynamicConvergenceSLA?: DynamicConvergenceSLA;
   DynamicLayoutManifest?: DynamicLayoutManifest;
   DynamicManifoldProjectionManifest?: DynamicManifoldProjectionManifest1;
   DynamicRoutingManifest?: DynamicRoutingManifest;
@@ -5904,7 +5870,6 @@ export interface CoReasonSharedKernelOntology {
   TopologicalFidelityReceipt?: TopologicalFidelityReceipt1;
   TopologicalProjectionIntent?: TopologicalProjectionIntent;
   TopologicalRetrievalContract?: TopologicalRetrievalContract;
-  TopologicalRewardContract?: TopologicalRewardContract;
   TopologyHashReceipt?: TopologyHashReceipt;
   TraceContextState?: TraceContextState1;
   TransformationMechanismProfile?: TransformationMechanismProfile1;
@@ -12462,39 +12427,6 @@ export interface CognitiveDualVerificationReceipt {
 /**
  * CoReason Shared Kernel Ontology
  *
- * AGENT INSTRUCTION: Employs Finite State Machine (FSM) Logit Masking and Constrained Decoding to deterministically herd LLM stochasticity into rigorous syntactic structures.
- *
- * CAUSAL AFFORDANCE: Instructs the orchestrator's inference engine to physically suffocate invalid token probabilities to negative infinity, mechanically ensuring the output conforms to downstream parser requirements.
- *
- * EPISTEMIC BOUNDS: Execution constraints are rigidly defined by `require_think_tags` and `final_answer_regex` (`max_length=2000`) to prevent ReDoS CPU exhaustion. The `@model_validator` `resolve_contract_conflicts` prevents unresolvable compilation conflicts in the DFA.
- *
- * MCP ROUTING TRIGGERS: FSM Logit Masking, Constrained Decoding, Regular Expression Automaton, Syntactic Boundary, Token Suffocation
- */
-export interface CognitiveFormatContract {
-  require_think_tags?: RequireThinkTags;
-  final_answer_regex?: FinalAnswerRegex;
-  decoding_policy: ConstrainedDecodingPolicy1;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
- * AGENT INSTRUCTION: A rigid mathematical boundary enforcing systemic constraints globally. Dictates the hardware-level execution limits for the token sampling phase by converting structural formatting from a probabilistic neural suggestion into a deterministic physics problem.
- *
- * CAUSAL AFFORDANCE: Enforces rigid isolation perimeters and limits subgraph generation by physically suffocating invalid token probabilities. Instructs the inference engine (e.g., Outlines, XGrammar) to compile a DFA/PDA and mechanically overwrite illegal token logits to negative infinity.
- *
- * EPISTEMIC BOUNDS: Strict categorical literal on `enforcement_strategy`. The `compiler_backend` is constrained via URN pattern. The `validate_grammar_requirements` `@model_validator` mandates `formal_grammar_string` is non-null if the strategy expects a Context-Free Grammar (CFG).
- *
- * MCP ROUTING TRIGGERS: FSM Logit Masking, Constrained Decoding, Tokenizer Interception, Hardware Execution Boundary, Pushdown Automaton
- */
-export interface ConstrainedDecodingPolicy1 {
-  enforcement_strategy?: EnforcementStrategy;
-  compiler_backend: CompilerBackend;
-  formal_grammar_string?: FormalGrammarString;
-  terminate_on_eos_leak?: TerminateOnEosLeak;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
  * AGENT INSTRUCTION: A declarative, frozen snapshot of a continuous proof trace resulting
  * from a successfully resolved non-monotonic search, projecting internal System 2 thinking
  * into the observable graph. As a ...State suffix, this is a frozen N-dimensional
@@ -12893,30 +12825,6 @@ export interface DocumentLayoutManifest {
  */
 export interface Blocks1 {
   [k: string]: DocumentLayoutRegionState;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
- * AGENT INSTRUCTION: Defines the mathematical Optimal Stopping Theory boundaries for Monte
- * Carlo Tree Search (MCTS) and test-time compute scaling. As an ...SLA suffix, this object
- * enforces rigid mathematical boundaries that the orchestrator must respect globally.
- *
- * CAUSAL AFFORDANCE: Triggers an early termination circuit breaker on reasoning trajectories
- * when the gradient of the Process Reward Model (PRM) score falls below the epsilon delta,
- * halting unnecessary probability wave expansion and preserving VRAM.
- *
- * EPISTEMIC BOUNDS: Mathematically constrained by convergence_delta_epsilon (ge=0.0, le=1.0)
- * over a strictly positive lookback_window_steps (gt=0, le=18446744073709551615). Physically mandates
- * a minimum_reasoning_steps burn-in period (gt=0, le=18446744073709551615) to prevent premature
- * collapse before the latent space is adequately explored.
- *
- * MCP ROUTING TRIGGERS: Optimal Stopping Theory, MCTS, PRM Convergence, Circuit Breaker,
- * Bellman Equation
- */
-export interface DynamicConvergenceSLA {
-  convergence_delta_epsilon: ConvergenceDeltaEpsilon;
-  lookback_window_steps: LookbackWindowSteps;
-  minimum_reasoning_steps: MinimumReasoningSteps;
 }
 /**
  * CoReason Shared Kernel Ontology
@@ -14603,22 +14511,6 @@ export interface TerminalConditionContract1 {
 export interface TopologicalFidelityReceipt1 {
   contextual_completeness_score: ContextualCompletenessScore;
   surrounding_token_density: SurroundingTokenDensity;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
- * AGENT INSTRUCTION: Enforces Graph Representation Learning (GCN/GAT) constraints to shape the epistemic reward based purely on the topological centrality and spectral connectivity of the extracted axioms.
- *
- * CAUSAL AFFORDANCE: Commands the orchestrator to execute deterministic graph traversal algorithms (Random Walk with Restart, Spatial GCN) to compute node reachability and vector similarity before allocating policy gradients.
- *
- * EPISTEMIC BOUNDS: Clamps structural relevance geometrically using `min_edge_criticality_score` and `min_semantic_relevance_score` (`ge=0.0, le=1.0`). `aggregation_method` restricts the orchestrator to a strict Literal automaton.
- *
- * MCP ROUTING TRIGGERS: Graph Convolutional Networks, Spectral Graph Theory, Random Walk with Restart, Topological Reward Shaping, PageRank
- */
-export interface TopologicalRewardContract {
-  min_edge_criticality_score: MinEdgeCriticalityScore;
-  min_semantic_relevance_score: MinSemanticRelevanceScore;
-  aggregation_method: AggregationMethod;
 }
 /**
  * CoReason Shared Kernel Ontology

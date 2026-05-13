@@ -43,7 +43,6 @@ from coreason_manifest.spec.ontology import (
     DistributionProfile,
     DiversityPolicy,
     DocumentLayoutRegionState,
-    DynamicConvergenceSLA,
     EdgeMappingContract,
     EmbodiedSensoryVectorProfile,
     # Facet
@@ -137,14 +136,6 @@ class TestSimpleModels:
     def test_diversity_policy(self) -> None:
         obj = DiversityPolicy(min_adversaries=2, model_variance_required=True)
         assert obj.min_adversaries == 2
-
-    def test_dynamic_convergence_sla(self) -> None:
-        obj = DynamicConvergenceSLA(
-            convergence_delta_epsilon=0.001,
-            lookback_window_steps=10,
-            minimum_reasoning_steps=5,
-        )
-        assert obj.lookback_window_steps == 10
 
     def test_edge_mapping_contract(self) -> None:
         obj = EdgeMappingContract(source_pointer="/input", target_pointer="/output")

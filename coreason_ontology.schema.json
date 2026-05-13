@@ -3308,41 +3308,6 @@
       "title": "CognitiveDualVerificationReceipt",
       "type": "object"
     },
-    "CognitiveFormatContract": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Employs Finite State Machine (FSM) Logit Masking and Constrained Decoding to deterministically herd LLM stochasticity into rigorous syntactic structures.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's inference engine to physically suffocate invalid token probabilities to negative infinity, mechanically ensuring the output conforms to downstream parser requirements.\n\nEPISTEMIC BOUNDS: Execution constraints are rigidly defined by `require_think_tags` and `final_answer_regex` (`max_length=2000`) to prevent ReDoS CPU exhaustion. The `@model_validator` `resolve_contract_conflicts` prevents unresolvable compilation conflicts in the DFA.\n\nMCP ROUTING TRIGGERS: FSM Logit Masking, Constrained Decoding, Regular Expression Automaton, Syntactic Boundary, Token Suffocation",
-      "properties": {
-        "require_think_tags": {
-          "default": true,
-          "description": "Forces the inclusion of structural XML tags to isolate the reasoning trace.",
-          "title": "Require Think Tags",
-          "type": "boolean"
-        },
-        "final_answer_regex": {
-          "anyOf": [
-            {
-              "maxLength": 2000,
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": "^Final Answer: .*$",
-          "description": "The strict regular expression the model must satisfy to yield a valid discrete classification. Optional because LMQL/Guidance do not use standard regex.",
-          "title": "Final Answer Regex"
-        },
-        "decoding_policy": {
-          "$ref": "#/$defs/ConstrainedDecodingPolicy",
-          "description": "The mandatory hardware-level execution limits for token masking."
-        }
-      },
-      "required": [
-        "decoding_policy"
-      ],
-      "title": "CognitiveFormatContract",
-      "type": "object"
-    },
     "CognitiveHumanNodeProfile": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Supervisory Control Theory within the causal DAG, instantiating an out-of-band Oracle node for Mixed-Initiative truth resolution.\n\nCAUSAL AFFORDANCE: Physically halts the continuous multi-agent generation loop, forcing the probability wave to suspend until external wetware (human) entropy is safely injected into the topological state.\n\nEPISTEMIC BOUNDS: To mathematically satisfy Byzantine Fault Tolerance (BFT), the `required_attestation` is mandatory. The orchestrator MUST NOT resolve this node without a cryptographically matching `WetwareAttestationContract`, verifying the human operator and preventing Sybil attacks.\n\nMCP ROUTING TRIGGERS: Supervisory Control Theory, Oracle Node, Mixed-Initiative, Proof of Humanity, Out-of-Band Entropy",
@@ -6548,40 +6513,6 @@
         "timeout_action"
       ],
       "title": "DraftingIntent",
-      "type": "object"
-    },
-    "DynamicConvergenceSLA": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the mathematical Optimal Stopping Theory boundaries for Monte\nCarlo Tree Search (MCTS) and test-time compute scaling. As an ...SLA suffix, this object\nenforces rigid mathematical boundaries that the orchestrator must respect globally.\n\nCAUSAL AFFORDANCE: Triggers an early termination circuit breaker on reasoning trajectories\nwhen the gradient of the Process Reward Model (PRM) score falls below the epsilon delta,\nhalting unnecessary probability wave expansion and preserving VRAM.\n\nEPISTEMIC BOUNDS: Mathematically constrained by convergence_delta_epsilon (ge=0.0, le=1.0)\nover a strictly positive lookback_window_steps (gt=0, le=18446744073709551615). Physically mandates\na minimum_reasoning_steps burn-in period (gt=0, le=18446744073709551615) to prevent premature\ncollapse before the latent space is adequately explored.\n\nMCP ROUTING TRIGGERS: Optimal Stopping Theory, MCTS, PRM Convergence, Circuit Breaker,\nBellman Equation",
-      "properties": {
-        "convergence_delta_epsilon": {
-          "description": "The minimal required PRM score improvement across the lookback window to justify continued compute.",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "Convergence Delta Epsilon",
-          "type": "number"
-        },
-        "lookback_window_steps": {
-          "description": "The N-step temporal window over which the PRM gradient is calculated.",
-          "exclusiveMinimum": 0,
-          "maximum": 18446744073709551615,
-          "title": "Lookback Window Steps",
-          "type": "integer"
-        },
-        "minimum_reasoning_steps": {
-          "description": "The mandatory 'burn-in' period. The orchestrator cannot terminate the search before this structural depth is reached, preventing premature collapse.",
-          "exclusiveMinimum": 0,
-          "maximum": 18446744073709551615,
-          "title": "Minimum Reasoning Steps",
-          "type": "integer"
-        }
-      },
-      "required": [
-        "convergence_delta_epsilon",
-        "lookback_window_steps",
-        "minimum_reasoning_steps"
-      ],
-      "title": "DynamicConvergenceSLA",
       "type": "object"
     },
     "DynamicLayoutManifest": {
@@ -19907,43 +19838,6 @@
         "allowed_causal_relationships"
       ],
       "title": "TopologicalRetrievalContract",
-      "type": "object"
-    },
-    "TopologicalRewardContract": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Enforces Graph Representation Learning (GCN/GAT) constraints to shape the epistemic reward based purely on the topological centrality and spectral connectivity of the extracted axioms.\n\nCAUSAL AFFORDANCE: Commands the orchestrator to execute deterministic graph traversal algorithms (Random Walk with Restart, Spatial GCN) to compute node reachability and vector similarity before allocating policy gradients.\n\nEPISTEMIC BOUNDS: Clamps structural relevance geometrically using `min_edge_criticality_score` and `min_semantic_relevance_score` (`ge=0.0, le=1.0`). `aggregation_method` restricts the orchestrator to a strict Literal automaton.\n\nMCP ROUTING TRIGGERS: Graph Convolutional Networks, Spectral Graph Theory, Random Walk with Restart, Topological Reward Shaping, PageRank",
-      "properties": {
-        "min_edge_criticality_score": {
-          "description": "The lower bound for Random Walk with Restart (RWR) reachability.",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "Min Edge Criticality Score",
-          "type": "number"
-        },
-        "min_semantic_relevance_score": {
-          "description": "The lower bound for GCN/GAT cosine similarity.",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "Min Semantic Relevance Score",
-          "type": "number"
-        },
-        "aggregation_method": {
-          "description": "The deterministic protocol the orchestrator must use to compute these scores.",
-          "enum": [
-            "gcn_spatial",
-            "attention_gat",
-            "rwr_topological"
-          ],
-          "title": "Aggregation Method",
-          "type": "string"
-        }
-      },
-      "required": [
-        "min_edge_criticality_score",
-        "min_semantic_relevance_score",
-        "aggregation_method"
-      ],
-      "title": "TopologicalRewardContract",
       "type": "object"
     },
     "TopologyHashReceipt": {

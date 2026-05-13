@@ -4816,42 +4816,6 @@ class DraftingIntent(CoreasonBaseState):
         return _validate_payload_bounds(v)
 
 
-class DynamicConvergenceSLA(CoreasonBaseState):
-    """
-    AGENT INSTRUCTION: Defines the mathematical Optimal Stopping Theory boundaries for Monte
-    Carlo Tree Search (MCTS) and test-time compute scaling. As an ...SLA suffix, this object
-    enforces rigid mathematical boundaries that the orchestrator must respect globally.
-
-    CAUSAL AFFORDANCE: Triggers an early termination circuit breaker on reasoning trajectories
-    when the gradient of the Process Reward Model (PRM) score falls below the epsilon delta,
-    halting unnecessary probability wave expansion and preserving VRAM.
-
-    EPISTEMIC BOUNDS: Mathematically constrained by convergence_delta_epsilon (ge=0.0, le=1.0)
-    over a strictly positive lookback_window_steps (gt=0, le=18446744073709551615). Physically mandates
-    a minimum_reasoning_steps burn-in period (gt=0, le=18446744073709551615) to prevent premature
-    collapse before the latent space is adequately explored.
-
-    MCP ROUTING TRIGGERS: Optimal Stopping Theory, MCTS, PRM Convergence, Circuit Breaker,
-    Bellman Equation
-    """
-
-    convergence_delta_epsilon: float = Field(
-        le=1.0,
-        ge=0.0,
-        description="The minimal required PRM score improvement across the lookback window to justify continued compute.",
-    )
-    lookback_window_steps: int = Field(
-        le=18446744073709551615,
-        gt=0,
-        description="The N-step temporal window over which the PRM gradient is calculated.",
-    )
-    minimum_reasoning_steps: int = Field(
-        le=18446744073709551615,
-        gt=0,
-        description="The mandatory 'burn-in' period. The orchestrator cannot terminate the search before this structural depth is reached, preventing premature collapse.",
-    )
-
-
 class EmbodiedSensoryVectorProfile(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Formalizes Multimodal Sensor Fusion by quantifying Bayesian Surprise (KL Divergence) against the agent's prior belief manifold.
@@ -13102,43 +13066,6 @@ class ConstrainedDecodingPolicy(CoreasonBaseState):
         return self
 
 
-class CognitiveFormatContract(CoreasonBaseState):
-    r"""
-    AGENT INSTRUCTION: Employs Finite State Machine (FSM) Logit Masking and Constrained Decoding to deterministically herd LLM stochasticity into rigorous syntactic structures.
-
-    CAUSAL AFFORDANCE: Instructs the orchestrator's inference engine to physically suffocate invalid token probabilities to negative infinity, mechanically ensuring the output conforms to downstream parser requirements.
-
-    EPISTEMIC BOUNDS: Execution constraints are rigidly defined by `require_think_tags` and `final_answer_regex` (`max_length=2000`) to prevent ReDoS CPU exhaustion. The `@model_validator` `resolve_contract_conflicts` prevents unresolvable compilation conflicts in the DFA.
-
-    MCP ROUTING TRIGGERS: FSM Logit Masking, Constrained Decoding, Regular Expression Automaton, Syntactic Boundary, Token Suffocation
-
-    """
-
-    require_think_tags: bool = Field(
-        default=True, description="Forces the inclusion of structural XML tags to isolate the reasoning trace."
-    )
-    final_answer_regex: Annotated[str, StringConstraints(max_length=2000)] | None = Field(
-        default="^Final Answer: .*$",
-        description="The strict regular expression the model must satisfy to yield a valid discrete classification. Optional because LMQL/Guidance do not use standard regex.",
-    )
-    decoding_policy: ConstrainedDecodingPolicy = Field(
-        description="The mandatory hardware-level execution limits for token masking."
-    )
-
-    @model_validator(mode="after")
-    def resolve_contract_conflicts(self) -> Self:
-        """
-        AGENT INSTRUCTION: Ensure disjoint routing policies are not simultaneously requested.
-        LMQL and Guidance implement regex masking natively within the compiled grammar string.
-        Applying a separate downstream regex filter causes unresolvable compilation conflicts in the DFA.
-        """
-        if self.decoding_policy.enforcement_strategy == "lmql_query" and self.final_answer_regex is not None:
-            raise ValueError(
-                "Regex constraints must be embedded directly inside the LMQL grammar string when using 'lmql_query'."
-            )
-        return self
-
-
 class CognitiveDetailedBalanceContract(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Implements Generative Flow Network (GFlowNet) trajectory balance conditions to ensure that the probability of generating a non-monotonic reasoning path is strictly proportional to its terminal reward.
@@ -13210,29 +13137,6 @@ class EpistemicFlowStateReceipt(CoreasonBaseState):
     )
     terminal_reward_factorized: bool = Field(
         description="True if this flow successfully factorized a terminal outcome reward."
-    )
-
-
-class TopologicalRewardContract(CoreasonBaseState):
-    r"""
-    AGENT INSTRUCTION: Enforces Graph Representation Learning (GCN/GAT) constraints to shape the epistemic reward based purely on the topological centrality and spectral connectivity of the extracted axioms.
-
-    CAUSAL AFFORDANCE: Commands the orchestrator to execute deterministic graph traversal algorithms (Random Walk with Restart, Spatial GCN) to compute node reachability and vector similarity before allocating policy gradients.
-
-    EPISTEMIC BOUNDS: Clamps structural relevance geometrically using `min_edge_criticality_score` and `min_semantic_relevance_score` (`ge=0.0, le=1.0`). `aggregation_method` restricts the orchestrator to a strict Literal automaton.
-
-    MCP ROUTING TRIGGERS: Graph Convolutional Networks, Spectral Graph Theory, Random Walk with Restart, Topological Reward Shaping, PageRank
-
-    """
-
-    min_edge_criticality_score: float = Field(
-        ge=0.0, le=1.0, description="The lower bound for Random Walk with Restart (RWR) reachability."
-    )
-    min_semantic_relevance_score: float = Field(
-        ge=0.0, le=1.0, description="The lower bound for GCN/GAT cosine similarity."
-    )
-    aggregation_method: Literal["gcn_spatial", "attention_gat", "rwr_topological"] = Field(
-        description="The deterministic protocol the orchestrator must use to compute these scores."
     )
 
 
@@ -14232,11 +14136,9 @@ CognitiveDualVerificationReceipt.model_rebuild()
 EpistemicGroundedTaskManifest.model_rebuild()
 EpistemicCurriculumManifest.model_rebuild()
 ConstrainedDecodingPolicy.model_rebuild()
-CognitiveFormatContract.model_rebuild()
 CognitiveAgentNodeProfile.model_rebuild()
 CognitiveDetailedBalanceContract.model_rebuild()
 EpistemicFlowStateReceipt.model_rebuild()
-TopologicalRewardContract.model_rebuild()
 DifferentiableLogicPolicy.model_rebuild()
 CausalExplanationEvent.model_rebuild()
 LatentSchemaInferenceIntent.model_rebuild()
