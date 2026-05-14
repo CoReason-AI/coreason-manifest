@@ -13,9 +13,9 @@ from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
     DiscourseTreeManifest,
+    EpistemicOntologicalAlignmentPolicy,
     EpistemicZeroTrustReceipt,
     InterventionReceipt,
-    OntologicalAlignmentPolicy,
     SpatialBillboardContract,
     VectorEmbeddingState,
     WetwareAttestationContract,
@@ -85,7 +85,7 @@ def test_algebra_coverage() -> None:
         dimensionality=1,
         vector_base64="A==",  # invalid base64 (incorrect padding)
     )
-    policy = OntologicalAlignmentPolicy(min_cosine_similarity=0.5, require_isometry_proof=False)
+    policy = EpistemicOntologicalAlignmentPolicy(min_cosine_similarity=0.5, require_isometry_proof=False)
 
     with pytest.raises(ValueError, match=r"Topological Contradiction: Invalid base64 encoding\."):
         calculate_latent_alignment(v1, v2, policy)

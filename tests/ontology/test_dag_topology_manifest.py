@@ -21,7 +21,7 @@ from coreason_manifest.spec.ontology import (
     CognitiveAgentNodeProfile,
     CognitiveSystemNodeProfile,
     DAGTopologyManifest,
-    TopologicalParadoxFalsification,
+    EpistemicTopologicalParadoxFalsificationEvent,
 )
 
 # ---------------------------------------------------------------------------
@@ -95,7 +95,7 @@ class TestDAGTopologyManifest:
             )
 
     def test_cycle_detected(self) -> None:
-        with pytest.raises((ValidationError, TopologicalParadoxFalsification)):
+        with pytest.raises((ValidationError, EpistemicTopologicalParadoxFalsificationEvent)):
             DAGTopologyManifest(
                 nodes={
                     "did:z:a": _agent(),
@@ -181,7 +181,7 @@ class TestDAGTopologyManifestPurePython:
     def test_cycle_detected_pure_python(self) -> None:
         with (
             patch("coreason_manifest.spec.ontology._HAS_RUSTWORKX", False),
-            pytest.raises((ValidationError, TopologicalParadoxFalsification)),
+            pytest.raises((ValidationError, EpistemicTopologicalParadoxFalsificationEvent)),
         ):
             DAGTopologyManifest(
                 nodes={

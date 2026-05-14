@@ -20,7 +20,7 @@ from pydantic import ValidationError
 from coreason_manifest.spec.ontology import (
     EpistemicAttentionState,
     SE3TransformProfile,
-    SpatialRenderMaterial,
+    SpatialRenderMaterialState,
     ViewportProjectionContract,
     VolumetricBoundingProfile,
 )
@@ -209,7 +209,7 @@ class TestEpistemicAttentionState:
 
 
 # ---------------------------------------------------------------------------
-# SpatialRenderMaterial
+# SpatialRenderMaterialState
 # ---------------------------------------------------------------------------
 
 
@@ -217,15 +217,15 @@ class TestSpatialRenderMaterial:
     """Exercise ensure_material_definition validator."""
 
     def test_material_urn_only(self) -> None:
-        obj = SpatialRenderMaterial(material_urn="urn:coreason:material:glass")
+        obj = SpatialRenderMaterialState(material_urn="urn:coreason:material:glass")
         assert obj.material_urn is not None
 
     def test_compiled_shader_only(self) -> None:
-        obj = SpatialRenderMaterial(compiled_shader_cid="shader-123")
+        obj = SpatialRenderMaterialState(compiled_shader_cid="shader-123")
         assert obj.compiled_shader_cid is not None
 
     def test_both_set(self) -> None:
-        obj = SpatialRenderMaterial(
+        obj = SpatialRenderMaterialState(
             material_urn="urn:coreason:material:metal",
             compiled_shader_cid="shader-456",
         )
@@ -234,4 +234,4 @@ class TestSpatialRenderMaterial:
 
     def test_neither_set_rejected(self) -> None:
         with pytest.raises(ValidationError, match="material_urn or a compiled_shader_cid"):
-            SpatialRenderMaterial()
+            SpatialRenderMaterialState()

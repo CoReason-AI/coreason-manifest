@@ -85,7 +85,17 @@ def evaluate_epistemic_compliance() -> None:
     header = "# Copyright (c) 2026 CoReason, Inc"
     for filepath in all_files:
         content = filepath.read_text(encoding="utf-8")
-        if not content.startswith(header):
+        lines = content.splitlines()
+        if not lines:
+            continue
+
+        has_header = False
+        if lines[0].startswith(header) or (
+            lines[0].startswith("#!") and len(lines) > 1 and lines[1].startswith(header)
+        ):
+            has_header = True
+
+        if not has_header:
             print(f"[HEADER ERROR] {filepath.relative_to(REPO_ROOT)}")
             header_errors += 1
 
@@ -145,6 +155,10 @@ def evaluate_epistemic_compliance() -> None:
             for e in errs:
                 print(f"  - {e}")
             class_violations += 1
+
+    print(f"Audit Complete: {header_errors} Header Errors, {class_violations} Class Violations.")
+    if header_errors > 0 or class_violations > 0:
+        sys.exit(1)
 
 
 # ==========================================
@@ -460,7 +474,7 @@ def evaluate_topological_reachability() -> None:
         "ReasoningEngineeringPolicy",
         "SemanticEdgeState",
         "SpatialReferenceFrameManifest",
-        "TaxonomicRoutingPolicy",
+        "CognitiveTaxonomicRoutingPolicy",
         "UtilityJustificationGraphReceipt",
         "ViewportProjectionContract",
         "EpistemicQuarantineSnapshot",
@@ -471,7 +485,7 @@ def evaluate_topological_reachability() -> None:
         "EpistemicUpsamplingTask",
         "SyntheticGenerationProfile",
         "NDimensionalTensorManifest",
-        "DeliberativeEnvelope",
+        "CognitiveDeliberativeEnvelopeState",
     ]
     reachable_indices = set()
     for root in root_nodes:
@@ -553,7 +567,7 @@ def scan_epistemic_quarantine(source: str) -> None:
         "SITD-Beta: Defeasible Merkle-DAG Causal Bounding",
         "SITD-Gamma: Neurosymbolic Substrate Alignment",
         "Topologically Bounded Latent Spaces",
-        "Pearlian Do-Operator",
+        "DoWhy Do-Operator",
     ]
 
     def extract_descriptions(data: Any) -> list[str]:
@@ -649,7 +663,7 @@ def execute_ontological_transmutation() -> None:
         "CognitiveSwarmDeploymentMacro": "CognitiveSwarmDeploymentManifest",
         "PostCoordinatedSemanticConcept": "PostCoordinatedSemanticState",
         "EmpiricalStatisticalQualifier": "EmpiricalStatisticalProfile",
-        "DempsterShaferBeliefState": "DempsterShaferBeliefVector",
+        "DempsterShaferBeliefState": "EpistemicDempsterShaferBeliefVectorState",
         "SemanticRelationalRecord": "SemanticRelationalVectorState",
         "test_semantic_relational_record": "test_semantic_relational_vector",
     }
@@ -686,7 +700,7 @@ def inject_ast_semantic_anchors() -> None:
         "PostCoordinatedSemanticState": "AGENT INSTRUCTION: The definitive output of a successful latent manifold alignment. Represents a dynamic assembly of a standardized entity (Base Concept + Contextual Modifiers) to achieve infinite semantic specificity without requiring an infinitely large pre-coordinated vocabulary.\n\n    CAUSAL AFFORDANCE: Physically authorizes the orchestrator to assemble a standardized entity with contextual modifiers.\n\n    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.\n\n    MCP ROUTING TRIGGERS: Post-Coordinated Semantics, Latent Manifold Alignment, Semantic Specificity, Entity Assembly",
         "EmpiricalStatisticalProfile": "AGENT INSTRUCTION: An explicit mathematical boundary extracted from text that limits the certainty or scope of a proposition. Physically prevents agents from performing epistemic smoothing.\n\n    CAUSAL AFFORDANCE: Physically authorizes the orchestrator to impose explicit mathematical boundaries on propositions.\n\n    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.\n\n    MCP ROUTING TRIGGERS: Empirical Statistics, Mathematical Boundary, Epistemic Smoothing, Proposition Certainty",
         "AtomicPropositionState": "AGENT INSTRUCTION: A declarative, frozen snapshot of a standalone, verifiable statement extracted from unstructured discourse. Transmutes probabilistic 'bags-of-words' into a discrete, traversable node within the Labeled Property Graph (LPG).\n\n    CAUSAL AFFORDANCE: Instructs the orchestrator to persist a verifiable statement as a discrete node within the LPG.\n\n    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.\n\n    MCP ROUTING TRIGGERS: Atomic Proposition, Discourse Extraction, Labeled Property Graph, Verifiable Statement",
-        "DempsterShaferBeliefVector": "AGENT INSTRUCTION: Replaces monolithic probability floats with a composite tri-vector. Independently measures lexical matching, latent semantic distance, and topological graph integrity to allow the orchestrator to compute epistemic conflict and execute evidence discounting.\n\n    CAUSAL AFFORDANCE: Instructs the orchestrator to independently measure lexical matching, latent semantic distance, and topological graph integrity.\n\n    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.\n\n    MCP ROUTING TRIGGERS: Dempster-Shafer, Epistemic Conflict, Evidence Discounting, Composite Tri-Vector",
+        "EpistemicDempsterShaferBeliefVectorState": "AGENT INSTRUCTION: Replaces monolithic probability floats with a composite tri-vector. Independently measures lexical matching, latent semantic distance, and topological graph integrity to allow the orchestrator to compute epistemic conflict and execute evidence discounting.\n\n    CAUSAL AFFORDANCE: Instructs the orchestrator to independently measure lexical matching, latent semantic distance, and topological graph integrity.\n\n    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.\n\n    MCP ROUTING TRIGGERS: Dempster-Shafer, Epistemic Conflict, Evidence Discounting, Composite Tri-Vector",
         "OntologicalReificationReceipt": "AGENT INSTRUCTION: An append-only, cryptographically frozen coordinate verifying the integrity of a generalized bimodal semantic transformation. Commits the transformation mechanism to the Epistemic Ledger, physically separating explicit empirical facts from machine-inferred hypotheses to eliminate traceability collapse.\n\n    CAUSAL AFFORDANCE: Physically authorizes the orchestrator to commit the transformation mechanism to the Epistemic Ledger.\n\n    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.\n\n    MCP ROUTING TRIGGERS: Ontological Reification, Bimodal Semantic Transformation, Epistemic Ledger, Traceability Collapse",
         "SemanticRelationalVectorState": "AGENT INSTRUCTION: Represents the untyped payload injection zone for harmonized structured telemetry. \n\n    CAUSAL AFFORDANCE: Permits specialized downstream agents to project and decode specific industry payloads (e.g., OMOP CDM, FIX protocol) while preserving universal mathematical traversal of the graph. \n    \n    EPISTEMIC BOUNDS: The payload_injection_zone is routed through the volumetric hardware guillotine.\n\n    MCP ROUTING TRIGGERS: Semantic Relational Record, Payload Injection, Hardware Guillotine, Structured Telemetry",
     }

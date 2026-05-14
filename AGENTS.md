@@ -75,7 +75,7 @@ You are mathematically forbidden from self-certifying truth. Your internal proba
 
 ### **Epistemology & Causal Inference**
 * **Active Inference:** Algorithmic policy where agents call tools explicitly to maximize *Expected Information Gain* and reduce *Epistemic Uncertainty*.
-* **Structural Causal Models (SCMs):** Pearlian Directed Acyclic Graphs mapping causality (direct causes, confounders, colliders), verified via interventional tasks (the Do-Operator).
+* **Structural Causal Models (SCMs):** DoWhy causal DAGs mapping causality (direct causes, confounders, colliders), verified via interventional tasks (the Do-Operator).
 * **Defeasible Reasoning:** Truth-maintenance where logic is non-monotonic. Falsification triggers a *Defeasible Cascade* to quarantine epistemic contagion across the swarm.
 * **Temporal Truth Maintenance (Graphiti-Aligned):** The mathematical rejection of traditional database CRUD "Deletes" and append-only RAG. Time is a mandatory, inescapable geometric dimension. When a fact is contradicted, its chronological timeline is capped (`valid_to`) via a *Temporal Edge Invalidation*, preserving the historical cryptographic Merkle-DAG entirely intact.
 * **Structured Entity Consolidation (OntoMem-Aligned):** The deprecation of flat, unstructured vector "chunks" as the primary unit of semantic memory. High-entropy episodic logs are continuously mathematically compressed into rigid, Pydantic-structured property matrices to prevent context window dilution and conflicting facts.
@@ -204,7 +204,7 @@ You are FORBIDDEN from using conversational filler, legacy CRUD terminology, or 
 """
 AGENT INSTRUCTION: [1-2 sentences defining the exact topological boundary, initialization constraints, and neurosymbolic track. Tailor this based on the object's Bounding Suffix (e.g., ...Event is a frozen historical fact; ...Premise is a logic hypothesis; ...Policy is a rigid mathematical boundary).]
 
-CAUSAL AFFORDANCE: [1 sentence defining exactly what graph mutation, physics emulation, tool execution, or Pearlian do-operator this specific object unlocks for the orchestrator.]
+CAUSAL AFFORDANCE: [1 sentence defining exactly what graph mutation, physics emulation, tool execution, or DoWhy do-operator this specific object unlocks for the orchestrator.]
 
 EPISTEMIC BOUNDS: [1-2 sentences defining the absolute mathematical or physical limits enforced by this object. You MUST derive this by reading the Pydantic field limits (e.g., le=1.0, max_length) and the `@model_validator` hooks.]
 
@@ -219,7 +219,7 @@ MCP ROUTING TRIGGERS: [A comma-separated list of 4-7 dense, high-dimensional con
 You are strictly FORBIDDEN from adding a 5th category (such as `THEORETICAL BASIS:`) to the class docstrings. Doing so causes Vector Dilution in an LLM's attention mechanism by separating the theoretical *intent* from the kinetic *action*.
 Instead, you must weaponize scientific, engineering, and mathematical concepts by weaving them directly into the 4-part schema.
 * **`AGENT INSTRUCTION` (The Theoretical Anchor):** Explicitly name the theorem, process, or academic framework. (e.g., *"Tracks the continuous POMDP belief distribution..."*)
-* **`CAUSAL AFFORDANCE` (The Applied Physics):** Describe how the mathematical concept translates into a kinetic action. (e.g., *"Unlocks non-monotonic logic via Pearlian do-operators ($P(y|do(x))$)."*)
+* **`CAUSAL AFFORDANCE` (The Applied Physics):** Describe how the mathematical concept translates into a kinetic action. (e.g., *"Unlocks non-monotonic logic via DoWhy do-operators ($P(y|do(x))$)."*)
 * **`EPISTEMIC BOUNDS` (The Mathematical Limits):** Define the exact formulas, equations, or statistical bounds enforced by the hardware.
 * **`MCP ROUTING TRIGGERS` (The Academic Vector Tags):** Pack this list with highly specific algorithmic identifiers. (e.g., `Answer Set Programming, Combinatorial Search, Constraint Satisfaction`).
 </semantic_gravity_directive>
@@ -514,3 +514,8 @@ We strictly enforce the Zero-Orphan Invariant ($|V_O| = 0$). You must mathematic
 5. **Forge-Centric Mutation**: Agents do NOT possess ambient authority to write to the file system. They MUST submit 100% schema-compliant AST differentials to the `coreason-meta-engineering` Forge for deterministic "etching."
 
 *Copyright (c) 2026 CoReason, Inc. Licensed under the Prosperity Public License 3.0.*
+
+
+## The "Zero-Waste Engineering" Mandate
+You are strictly bound by the "Borrow vs. Build" philosophy. You MUST maximize the use of stable Open Source Software (OSS) whenever available. You are mathematically forbidden from building custom, proprietary implementations for logging, tracing, graph layout, container routing, UI components, or serialization if a mature OSS standard (e.g., OpenTelemetry, Zep Graphiti, Pi.dev, React Flow) exists to solve the problem.
+

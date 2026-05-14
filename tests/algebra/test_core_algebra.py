@@ -32,13 +32,13 @@ from coreason_manifest.spec.ontology import (
     DocumentKnowledgeGraphManifest,
     DocumentLayoutRegionState,
     DynamicRoutingManifest,
+    EpistemicOntologicalAlignmentPolicy,
     EpistemicProvenanceReceipt,
     EpistemicTransmutationTask,
     EvidentiaryGroundingSLA,
     GlobalSemanticProfile,
     HierarchicalDOMManifest,
     MultimodalTokenAnchorState,
-    OntologicalAlignmentPolicy,
     SemanticEdgeState,
     SemanticNodeState,
     StateDifferentialManifest,
@@ -168,7 +168,7 @@ def test_calculate_latent_alignment_success(v1: list[float]) -> None:
 
     vec1 = VectorEmbeddingState(foundation_matrix_name="m1", dimensionality=len(v1), vector_base64=b64)
     vec2 = VectorEmbeddingState(foundation_matrix_name="m1", dimensionality=len(v1), vector_base64=b64)
-    policy = OntologicalAlignmentPolicy(min_cosine_similarity=0.9, require_isometry_proof=False)
+    policy = EpistemicOntologicalAlignmentPolicy(min_cosine_similarity=0.9, require_isometry_proof=False)
 
     if any(x != 0.0 for x in v1):  # Avoid zero vectors
         try:
@@ -547,6 +547,10 @@ def test_verify_ast_safety() -> None:
         verify_ast_safety("__import__('os')")
     with pytest.raises(ValueError, match="Forbidden AST node: Pow"):
         verify_ast_safety("2 ** 100")
+    with pytest.raises(ValueError, match="Forbidden AST node: LShift"):
+        verify_ast_safety("1 << 100000")
+    with pytest.raises(ValueError, match="Forbidden AST node: RShift"):
+        verify_ast_safety("1 >> 100000")
     with pytest.raises(ValueError, match="not valid syntax"):
         verify_ast_safety("invalid syntax +")
 
@@ -589,7 +593,7 @@ def test_calculate_remaining_compute() -> None:
 
 
 def test_calculate_latent_alignment_errors() -> None:
-    pol = OntologicalAlignmentPolicy(min_cosine_similarity=0.0, require_isometry_proof=False)
+    pol = EpistemicOntologicalAlignmentPolicy(min_cosine_similarity=0.0, require_isometry_proof=False)
 
     v1 = VectorEmbeddingState(
         vector_base64=base64.b64encode(struct.pack("<2f", 1.0, 2.0)).decode(),
@@ -630,7 +634,7 @@ def test_get_ontology_schema_empty() -> None:
 
 
 def test_calculate_latent_alignment_invalid_base64() -> None:
-    pol = OntologicalAlignmentPolicy(min_cosine_similarity=-1.0, require_isometry_proof=False)
+    pol = EpistemicOntologicalAlignmentPolicy(min_cosine_similarity=-1.0, require_isometry_proof=False)
     # A string with valid chars but invalid length for base64: "a"
     v_invalid = VectorEmbeddingState.model_construct(
         vector_base64="a", dimensionality=3, foundation_matrix_name="model1"
@@ -896,7 +900,7 @@ def test_calculate_latent_alignment_fuzz(v1_floats: list[float], v2_floats: list
         vector_base64=base64.b64encode(v2_packed).decode(), dimensionality=dim, foundation_matrix_name="fuzz"
     )
 
-    policy = OntologicalAlignmentPolicy.model_construct(
+    policy = EpistemicOntologicalAlignmentPolicy.model_construct(
         min_cosine_similarity=-1.0,
         require_isometry_proof=True,
     )
@@ -915,7 +919,7 @@ def test_calculate_latent_alignment_fuzz(v1_floats: list[float], v2_floats: list
 
 def test_calculate_latent_alignment_edge_cases() -> None:
     dim = 2
-    policy = OntologicalAlignmentPolicy.model_construct(
+    policy = EpistemicOntologicalAlignmentPolicy.model_construct(
         min_cosine_similarity=-1.0,
         require_isometry_proof=True,
     )

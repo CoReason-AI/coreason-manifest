@@ -22,7 +22,7 @@ from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
     EpistemicLedgerState,
-    OntologicalAlignmentPolicy,
+    EpistemicOntologicalAlignmentPolicy,
     StateDifferentialManifest,
     StateMutationIntent,
     TamperFaultEvent,
@@ -76,7 +76,7 @@ def test_calculate_latent_alignment(vec1_list: list[float], vec2_list: list[floa
 
     v1 = VectorEmbeddingState(vector_base64=b1, dimensionality=dim, foundation_matrix_name="model1")
     v2 = VectorEmbeddingState(vector_base64=b2, dimensionality=dim, foundation_matrix_name="model1")
-    policy = OntologicalAlignmentPolicy(min_cosine_similarity=min_similarity, require_isometry_proof=False)
+    policy = EpistemicOntologicalAlignmentPolicy(min_cosine_similarity=min_similarity, require_isometry_proof=False)
 
     mag1 = math.sqrt(sum(x * x for x in vec1_list))
     mag2 = math.sqrt(sum(x * x for x in vec2_list))
