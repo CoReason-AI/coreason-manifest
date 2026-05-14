@@ -323,9 +323,7 @@ type SemanticVersionState = Annotated[
     ),
 ]
 
-# DEPRECATED: SpanStatusCodeProfile is deprecated in favor of standard OpenTelemetry SDK status code enumeration.
-# This will be removed in a future minor version.
-type SpanStatusCodeProfile = Literal["unset", "ok", "error"]
+
 
 
 _BYTES_MAPPING: dict[str, int] = {"float32": 4, "float64": 8, "int8": 1, "uint8": 1, "int32": 4, "int64": 8}
