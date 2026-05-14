@@ -323,10 +323,6 @@ type SemanticVersionState = Annotated[
     ),
 ]
 
-# DEPRECATED: SpanStatusCodeProfile is deprecated in favor of standard OpenTelemetry SDK status code enumeration.
-# This will be removed in a future minor version.
-type SpanStatusCodeProfile = Literal["unset", "ok", "error"]
-
 
 _BYTES_MAPPING: dict[str, int] = {"float32": 4, "float64": 8, "int8": 1, "uint8": 1, "int32": 4, "int64": 8}
 
@@ -680,6 +676,11 @@ class CoreasonBaseState(BaseModel):
         strict=True,
         json_schema_extra=_inject_topological_lock,
         populate_by_name=True,
+    )
+
+    tenant_cid: Annotated[str, StringConstraints(min_length=4, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        default="889955217295c2bfef2d6812071b633b0819477e67f57853febf116f69f30531",
+        description='The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}',
     )
 
     def __hash__(self) -> int:
@@ -12100,9 +12101,7 @@ class WorkflowManifest(CoreasonBaseState):
     governance: GlobalGovernancePolicy | None = Field(
         default=None, description="Macro-economic circuit breakers and TTL limits for the swarm."
     )
-    tenant_cid: Annotated[str, StringConstraints(min_length=1, max_length=255, pattern="^[a-zA-Z0-9_.:-]+$")] | None = (
-        Field(default=None, description="The enterprise tenant boundary for this execution.")
-    )
+
     session_cid: (
         Annotated[str, StringConstraints(min_length=1, max_length=255, pattern="^[a-zA-Z0-9_.:-]+$")] | None
     ) = Field(default=None, description="The ephemeral session boundary for this execution.")
