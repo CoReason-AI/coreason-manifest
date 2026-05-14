@@ -690,6 +690,7 @@
           "dowhy_intervention_intent": "#/$defs/DoWhyInterventionIntent",
           "drafting": "#/$defs/DraftingIntent",
           "empirical_falsification_contract": "#/$defs/EmpiricalFalsificationContract",
+          "epistemic_ontological_normalization": "#/$defs/EpistemicOntologicalNormalizationIntent",
           "epistemic_transmutation_task": "#/$defs/EpistemicTransmutationTask",
           "epistemic_upsampling_task": "#/$defs/EpistemicUpsamplingTask",
           "escalation": "#/$defs/EscalationIntent",
@@ -706,7 +707,6 @@
           "mcp_client_intent": "#/$defs/MCPClientIntent",
           "neurosymbolic_inference": "#/$defs/NeurosymbolicInferenceIntent",
           "ontological_crosswalk": "#/$defs/OntologicalCrosswalkIntent",
-          "ontological_normalization": "#/$defs/OntologicalNormalizationIntent",
           "ontology_discovery": "#/$defs/OntologyDiscoveryIntent",
           "override": "#/$defs/OverrideIntent",
           "quarantine_intent": "#/$defs/QuarantineIntent",
@@ -717,11 +717,11 @@
           "semantic_mapping_proposal": "#/$defs/SemanticMappingHeuristicIntent",
           "sparql_query": "#/$defs/SPARQLQueryIntent",
           "spatial_kinematic": "#/$defs/SpatialKinematicActionIntent",
+          "spatial_taxonomic_restructure": "#/$defs/SpatialTaxonomicRestructureIntent",
           "state_mutation_intent": "#/$defs/StateMutationIntent",
           "substrate_hydration": "#/$defs/SubstrateHydrationManifest",
           "system_2_remediation": "#/$defs/System2RemediationIntent",
           "task_announcement": "#/$defs/TaskAnnouncementIntent",
-          "taxonomic_restructure": "#/$defs/TaxonomicRestructureIntent",
           "temporal_invalidation": "#/$defs/TemporalEdgeInvalidationIntent",
           "topological_projection": "#/$defs/TopologicalProjectionIntent",
           "zero_trust_contract": "#/$defs/EpistemicZeroTrustContract"
@@ -760,7 +760,7 @@
           "$ref": "#/$defs/SemanticDiscoveryIntent"
         },
         {
-          "$ref": "#/$defs/TaxonomicRestructureIntent"
+          "$ref": "#/$defs/SpatialTaxonomicRestructureIntent"
         },
         {
           "$ref": "#/$defs/LatentProjectionIntent"
@@ -862,7 +862,7 @@
           "$ref": "#/$defs/StateMutationIntent"
         },
         {
-          "$ref": "#/$defs/OntologicalNormalizationIntent"
+          "$ref": "#/$defs/EpistemicOntologicalNormalizationIntent"
         },
         {
           "$ref": "#/$defs/FederatedDiscoveryIntent"
@@ -7764,6 +7764,40 @@
       "title": "EpistemicLogEvent",
       "type": "object"
     },
+    "EpistemicOntologicalNormalizationIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A non-monotonic hypothesis requesting the transformation of unstructured or dirty public data into a pristine, mathematically bounded resource.\n\nCAUSAL AFFORDANCE: Triggers the execution of proprietary ETL and semantic vectorization pipelines within the sovereign VPC.\n\nEPISTEMIC BOUNDS: Forces absolute structural isomorphism by demanding that the resulting artifact perfectly matches the geometries declared in the target_ontology_urn. URN is clamped to 2000 chars.\n\nMCP ROUTING TRIGGERS: Semantic Crosswalk, ETL Pipeline, Data Normalization, Knowledge Graph Extraction",
+      "properties": {
+        "topology_class": {
+          "const": "epistemic_ontological_normalization",
+          "default": "epistemic_ontological_normalization",
+          "description": "Discriminator for the EpistemicOntologicalNormalizationIntent topology.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "source_artifact_cid": {
+          "description": "The Content Identifier (CID) of the raw ingested data artifact.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Source Artifact Cid",
+          "type": "string"
+        },
+        "target_ontology_urn": {
+          "description": "The formal URN declaring the target ontological geometry for structural isomorphism.",
+          "maxLength": 2000,
+          "pattern": "^urn:coreason:ontology:.*$",
+          "title": "Target Ontology Urn",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_artifact_cid",
+        "target_ontology_urn"
+      ],
+      "title": "EpistemicOntologicalNormalizationIntent",
+      "type": "object"
+    },
     "EpistemicPromotionEvent": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents Hippocampal-Neocortical Consolidation, proving the successful extraction and transfer of generalized knowledge from short-term episodic traces into the permanent semantic graph.\n\nCAUSAL AFFORDANCE: Emits a permanent Merkle-DAG coordinate (`crystallized_semantic_node_cid`) that downstream agents can zero-shot reference, severing the need to reload raw source logs into active context.\n\nEPISTEMIC BOUNDS: Mathematical chain of custody bound to the strictly sorted array of `source_episodic_event_cids`. Token efficiency proven by `compression_ratio` float (`le=1.0`) guaranteeing Shannon Entropy reduction.\n\nMCP ROUTING TRIGGERS: Hippocampal Consolidation, Knowledge Distillation, Semantic Memory, Shannon Entropy Compression, Epistemic Promotion",
@@ -13960,40 +13994,6 @@
       "title": "OntologicalCrosswalkIntent",
       "type": "object"
     },
-    "OntologicalNormalizationIntent": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A non-monotonic hypothesis requesting the transformation of unstructured or dirty public data into a pristine, mathematically bounded resource.\n\nCAUSAL AFFORDANCE: Triggers the execution of proprietary ETL and semantic vectorization pipelines within the sovereign VPC.\n\nEPISTEMIC BOUNDS: Forces absolute structural isomorphism by demanding that the resulting artifact perfectly matches the geometries declared in the target_ontology_urn. URN is clamped to 2000 chars.\n\nMCP ROUTING TRIGGERS: Semantic Crosswalk, ETL Pipeline, Data Normalization, Knowledge Graph Extraction",
-      "properties": {
-        "topology_class": {
-          "const": "ontological_normalization",
-          "default": "ontological_normalization",
-          "description": "Discriminator for the OntologicalNormalizationIntent topology.",
-          "title": "Topology Class",
-          "type": "string"
-        },
-        "source_artifact_cid": {
-          "description": "The Content Identifier (CID) of the raw ingested data artifact.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Source Artifact Cid",
-          "type": "string"
-        },
-        "target_ontology_urn": {
-          "description": "The formal URN declaring the target ontological geometry for structural isomorphism.",
-          "maxLength": 2000,
-          "pattern": "^urn:coreason:ontology:.*$",
-          "title": "Target Ontology Urn",
-          "type": "string"
-        }
-      },
-      "required": [
-        "source_artifact_cid",
-        "target_ontology_urn"
-      ],
-      "title": "OntologicalNormalizationIntent",
-      "type": "object"
-    },
     "OntologicalReificationReceipt": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: An append-only, cryptographically frozen coordinate verifying the integrity of a generalized bimodal semantic transformation. Commits the transformation mechanism to the Epistemic Ledger, physically separating explicit empirical facts from machine-inferred hypotheses to eliminate traceability collapse.\n\n    CAUSAL AFFORDANCE: Physically authorizes the orchestrator to commit the transformation mechanism to the Epistemic Ledger.\n\n    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.\n\n    MCP ROUTING TRIGGERS: Ontological Reification, Bimodal Semantic Transformation, Epistemic Ledger, Traceability Collapse",
@@ -17070,6 +17070,40 @@
       "title": "SpatialRenderMaterial",
       "type": "object"
     },
+    "SpatialTaxonomicRestructureIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Executes a kinetic Graph Isomorphism transformation, dynamically mutating the UI's spatial organization via heuristic regrouping without altering the underlying epistemic truth.\n\nCAUSAL AFFORDANCE: Forces the Hollow Data Plane to immediately discard the current semantic manifold and re-render the hierarchical projection according to the newly synthesized `target_taxonomy` and spatial heuristic.\n\nEPISTEMIC BOUNDS: Execution is rigidly constrained by the `restructure_heuristic`, strictly bounded to a Literal automaton `[\"chronological\", \"entity_centric\", \"semantic_cluster\", \"confidence_decay\"]`, mathematically preventing out-of-distribution UI mutations.\n\nMCP ROUTING TRIGGERS: Graph Isomorphism, UI State Mutation, Heuristic Regrouping, Dynamic Manifold, Spatial Reorganization",
+      "properties": {
+        "topology_class": {
+          "const": "spatial_taxonomic_restructure",
+          "default": "spatial_taxonomic_restructure",
+          "description": "Strict discriminator for dynamic UI regrouping.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "restructure_heuristic": {
+          "description": "The SOTA mathematical heuristic used to project the new manifold.",
+          "enum": [
+            "chronological",
+            "entity_centric",
+            "semantic_cluster",
+            "confidence_decay"
+          ],
+          "title": "Restructure Heuristic",
+          "type": "string"
+        },
+        "target_taxonomy": {
+          "$ref": "#/$defs/GenerativeTaxonomyManifest",
+          "description": "The newly synthesized topology projected to the frontend."
+        }
+      },
+      "required": [
+        "restructure_heuristic",
+        "target_taxonomy"
+      ],
+      "title": "SpatialTaxonomicRestructureIntent",
+      "type": "object"
+    },
     "SpatialToolManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the discrete formalization of a Gibsonian Affordance within the agent's Reinforcement Learning Action Space ($A$). As a ...Manifest suffix, this is a declarative, frozen N-dimensional coordinate of a capability.\n\nCAUSAL AFFORDANCE: Unlocks a specific, localized DoWhy Do-Operator intervention ($do(X=x)$) mapped to an external kinetic capability. Governed by side_effects, permissions, and an optional execution SLA.\n\nEPISTEMIC BOUNDS: The operational perimeter is rigidly confined by `input_schema` and `output_schema` (dictionaries bounded to `max_length=1000` properties). The `is_preemptible` boolean (default=False) establishes a physical Halting Problem limit by authorizing the orchestrator to abort execution mid-flight.\n\nMCP ROUTING TRIGGERS: Gibsonian Affordance, MDP Action Space, DoWhy Do-Operator, Capability-Based Security, Halting Problem",
@@ -18438,40 +18472,6 @@
         "semantic_label"
       ],
       "title": "TaxonomicNodeState",
-      "type": "object"
-    },
-    "TaxonomicRestructureIntent": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Executes a kinetic Graph Isomorphism transformation, dynamically mutating the UI's spatial organization via heuristic regrouping without altering the underlying epistemic truth.\n\nCAUSAL AFFORDANCE: Forces the Hollow Data Plane to immediately discard the current semantic manifold and re-render the hierarchical projection according to the newly synthesized `target_taxonomy` and spatial heuristic.\n\nEPISTEMIC BOUNDS: Execution is rigidly constrained by the `restructure_heuristic`, strictly bounded to a Literal automaton `[\"chronological\", \"entity_centric\", \"semantic_cluster\", \"confidence_decay\"]`, mathematically preventing out-of-distribution UI mutations.\n\nMCP ROUTING TRIGGERS: Graph Isomorphism, UI State Mutation, Heuristic Regrouping, Dynamic Manifold, Spatial Reorganization",
-      "properties": {
-        "topology_class": {
-          "const": "taxonomic_restructure",
-          "default": "taxonomic_restructure",
-          "description": "Strict discriminator for dynamic UI regrouping.",
-          "title": "Topology Class",
-          "type": "string"
-        },
-        "restructure_heuristic": {
-          "description": "The SOTA mathematical heuristic used to project the new manifold.",
-          "enum": [
-            "chronological",
-            "entity_centric",
-            "semantic_cluster",
-            "confidence_decay"
-          ],
-          "title": "Restructure Heuristic",
-          "type": "string"
-        },
-        "target_taxonomy": {
-          "$ref": "#/$defs/GenerativeTaxonomyManifest",
-          "description": "The newly synthesized topology projected to the frontend."
-        }
-      },
-      "required": [
-        "restructure_heuristic",
-        "target_taxonomy"
-      ],
-      "title": "TaxonomicRestructureIntent",
       "type": "object"
     },
     "TaxonomicRoutingPolicy": {

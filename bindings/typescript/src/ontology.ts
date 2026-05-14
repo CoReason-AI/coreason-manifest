@@ -634,7 +634,7 @@ export type AnyIntent =
   | AdjudicationIntent
   | EscalationIntent
   | SemanticDiscoveryIntent
-  | TaxonomicRestructureIntent
+  | SpatialTaxonomicRestructureIntent
   | LatentProjectionIntent
   | LatentSchemaInferenceIntent
   | HumanDirectiveIntent
@@ -668,7 +668,7 @@ export type AnyIntent =
   | MCPClientIntent
   | RollbackIntent
   | StateMutationIntent
-  | OntologicalNormalizationIntent
+  | EpistemicOntologicalNormalizationIntent
   | FederatedDiscoveryIntent;
 /**
  * Discriminator for temporal edge invalidation.
@@ -782,7 +782,7 @@ export type RequiredStructuralTypes = string[];
 /**
  * Strict discriminator for dynamic UI regrouping.
  */
-export type TopologyClass23 = "taxonomic_restructure";
+export type TopologyClass23 = "spatial_taxonomic_restructure";
 /**
  * The SOTA mathematical heuristic used to project the new manifold.
  */
@@ -1754,9 +1754,9 @@ export type From = string | null;
  */
 export type ZeroTrustReceiptCid = string | null;
 /**
- * Discriminator for the OntologicalNormalizationIntent topology.
+ * Discriminator for the EpistemicOntologicalNormalizationIntent topology.
  */
-export type TopologyClass59 = "ontological_normalization";
+export type TopologyClass59 = "epistemic_ontological_normalization";
 /**
  * The Content Identifier (CID) of the raw ingested data artifact.
  */
@@ -5562,6 +5562,7 @@ export interface CoReasonSharedKernelOntology {
   EpistemicHydrationPolicy?: EpistemicHydrationPolicy;
   EpistemicLedgerState?: EpistemicLedgerState;
   EpistemicLogEvent?: EpistemicLogEvent;
+  EpistemicOntologicalNormalizationIntent?: EpistemicOntologicalNormalizationIntent;
   EpistemicPromotionEvent?: EpistemicPromotionEvent;
   EpistemicProvenanceReceipt?: EpistemicProvenanceReceipt;
   EpistemicProxyState?: EpistemicProxyState;
@@ -5675,7 +5676,6 @@ export interface CoReasonSharedKernelOntology {
   ObservationEvent?: ObservationEvent;
   OntologicalAlignmentPolicy?: OntologicalAlignmentPolicy;
   OntologicalCrosswalkIntent?: OntologicalCrosswalkIntent;
-  OntologicalNormalizationIntent?: OntologicalNormalizationIntent;
   OntologicalReificationReceipt?: OntologicalReificationReceipt;
   OntologicalSurfaceProjectionManifest?: OntologicalSurfaceProjectionManifest;
   OntologyDiscoveryIntent?: OntologyDiscoveryIntent;
@@ -5740,6 +5740,7 @@ export interface CoReasonSharedKernelOntology {
   SpatialKinematicActionIntent?: SpatialKinematicActionIntent;
   SpatialReferenceFrameManifest?: SpatialReferenceFrameManifest;
   SpatialRenderMaterial?: SpatialRenderMaterial;
+  SpatialTaxonomicRestructureIntent?: SpatialTaxonomicRestructureIntent;
   SpatialToolManifest?: SpatialToolManifest;
   SpeculativeExecutionPolicy?: SpeculativeExecutionPolicy;
   StateContract?: StateContract;
@@ -5766,7 +5767,6 @@ export interface CoReasonSharedKernelOntology {
   TaskAnnouncementIntent?: TaskAnnouncementIntent;
   TaskAwardReceipt?: TaskAwardReceipt;
   TaxonomicNodeState?: TaxonomicNodeState;
-  TaxonomicRestructureIntent?: TaxonomicRestructureIntent;
   TaxonomicRoutingPolicy?: TaxonomicRoutingPolicy;
   TelemetryBackpressureContract?: TelemetryBackpressureContract1;
   TelemetryContextProfile?: TelemetryContextProfile1;
@@ -6745,7 +6745,7 @@ export interface VectorEmbeddingState1 {
  *
  * MCP ROUTING TRIGGERS: Graph Isomorphism, UI State Mutation, Heuristic Regrouping, Dynamic Manifold, Spatial Reorganization
  */
-export interface TaxonomicRestructureIntent {
+export interface SpatialTaxonomicRestructureIntent {
   topology_class?: TopologyClass23;
   restructure_heuristic: RestructureHeuristic;
   target_taxonomy: GenerativeTaxonomyManifest;
@@ -8123,7 +8123,7 @@ export interface StateMutationIntent {
  *
  * MCP ROUTING TRIGGERS: Semantic Crosswalk, ETL Pipeline, Data Normalization, Knowledge Graph Extraction
  */
-export interface OntologicalNormalizationIntent {
+export interface EpistemicOntologicalNormalizationIntent {
   topology_class?: TopologyClass59;
   source_artifact_cid: SourceArtifactCid1;
   target_ontology_urn: TargetOntologyUrn;

@@ -6168,7 +6168,7 @@ class LatentSchemaInferenceIntent(CoreasonBaseState):
     )
 
 
-class TaxonomicRestructureIntent(CoreasonBaseState):
+class SpatialTaxonomicRestructureIntent(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Executes a kinetic Graph Isomorphism transformation, dynamically mutating the UI's spatial organization via heuristic regrouping without altering the underlying epistemic truth.
 
@@ -6180,8 +6180,8 @@ class TaxonomicRestructureIntent(CoreasonBaseState):
 
     """
 
-    topology_class: Literal["taxonomic_restructure"] = Field(
-        default="taxonomic_restructure", description="Strict discriminator for dynamic UI regrouping."
+    topology_class: Literal["spatial_taxonomic_restructure"] = Field(
+        default="spatial_taxonomic_restructure", description="Strict discriminator for dynamic UI regrouping."
     )
     restructure_heuristic: Literal["chronological", "entity_centric", "semantic_cluster", "confidence_decay"] = Field(
         description="The SOTA mathematical heuristic used to project the new manifold."
@@ -6765,7 +6765,7 @@ type AnyIntent = Annotated[
     | AdjudicationIntent
     | EscalationIntent
     | SemanticDiscoveryIntent
-    | TaxonomicRestructureIntent
+    | SpatialTaxonomicRestructureIntent
     | LatentProjectionIntent
     | LatentSchemaInferenceIntent
     | HumanDirectiveIntent
@@ -6799,7 +6799,7 @@ type AnyIntent = Annotated[
     | MCPClientIntent
     | RollbackIntent
     | StateMutationIntent
-    | OntologicalNormalizationIntent
+    | EpistemicOntologicalNormalizationIntent
     | FederatedDiscoveryIntent,
     Field(discriminator="topology_class"),
 ]
@@ -13541,7 +13541,7 @@ class OracleExecutionReceipt(CoreasonBaseState):
     )
 
 
-class OntologicalNormalizationIntent(CoreasonBaseState):
+class EpistemicOntologicalNormalizationIntent(CoreasonBaseState):
     """
     AGENT INSTRUCTION: A non-monotonic hypothesis requesting the transformation of unstructured or dirty public data into a pristine, mathematically bounded resource.
 
@@ -13552,9 +13552,9 @@ class OntologicalNormalizationIntent(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Semantic Crosswalk, ETL Pipeline, Data Normalization, Knowledge Graph Extraction
     """
 
-    topology_class: Literal["ontological_normalization"] = Field(
-        default="ontological_normalization",
-        description="Discriminator for the OntologicalNormalizationIntent topology.",
+    topology_class: Literal["epistemic_ontological_normalization"] = Field(
+        default="epistemic_ontological_normalization",
+        description="Discriminator for the EpistemicOntologicalNormalizationIntent topology.",
     )
     source_artifact_cid: Annotated[
         str, StringConstraints(min_length=1, max_length=128, pattern=r"^[a-zA-Z0-9_.:-]+$")
@@ -14167,7 +14167,7 @@ TemporalGraphCRDTManifest.model_rebuild()
 MCPToolDefinition.model_rebuild()
 ContinuousManifoldMappingContract.model_rebuild()
 OracleExecutionReceipt.model_rebuild()
-OntologicalNormalizationIntent.model_rebuild()
+EpistemicOntologicalNormalizationIntent.model_rebuild()
 FederatedDiscoveryIntent.model_rebuild()
 EpistemicRigidityPolicy.model_rebuild()
 DeliberativeEnvelope.model_rebuild()
