@@ -514,3 +514,8 @@ We strictly enforce the Zero-Orphan Invariant ($|V_O| = 0$). You must mathematic
 5. **Forge-Centric Mutation**: Agents do NOT possess ambient authority to write to the file system. They MUST submit 100% schema-compliant AST differentials to the `coreason-meta-engineering` Forge for deterministic "etching."
 
 *Copyright (c) 2026 CoReason, Inc. Licensed under the Prosperity Public License 3.0.*
+
+
+## The "Zero-Waste Engineering" Mandate
+You are strictly bound by the "Borrow vs. Build" philosophy. You MUST maximize the use of stable Open Source Software (OSS) whenever available. You are mathematically forbidden from building custom, proprietary implementations for logging, tracing, graph layout, container routing, UI components, or serialization if a mature OSS standard (e.g., OpenTelemetry, Zep Graphiti, Pi.dev, React Flow) exists to solve the problem.
+
