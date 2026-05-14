@@ -30,11 +30,12 @@ jobs:
 
       - name: Run Deep Fuzzing (ci-deep profile)
         run: >-
-          uv run pytest tests/fuzzing/
+          uv run pytest tests/ontology/test_hypothesis.py
           --hypothesis-profile=ci-deep
           -x
           --tb=long
           --no-header
+          --no-cov
           -q
 
       - name: Upload Hypothesis Database
