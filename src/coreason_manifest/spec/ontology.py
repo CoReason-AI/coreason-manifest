@@ -2285,6 +2285,7 @@ class EpistemicUpsamplingTask(CoreasonBaseState):
 
     MCP ROUTING TRIGGERS: Abductive Reasoning, Information Entropy, Semantic Expansion, Epistemic Uncertainty Reduction, Knowledge Consolidation
     """
+
     topology_class: Literal["epistemic_upsampling_task"] = Field(default="epistemic_upsampling_task")
     r"""
     AGENT INSTRUCTION: Authorizes a connectionist agent to execute an abductive leap, reversing lossy compression via context.
@@ -2796,6 +2797,7 @@ class RollbackIntent(CoreasonBaseState):
 
     MCP ROUTING TRIGGERS: Non-Monotonic Logic, State Rollback, Epistemic Quarantine, Temporal Invalidation, Fault Recovery
     """
+
     topology_class: Literal["rollback_intent"] = Field(default="rollback_intent")
     """
     AGENT INSTRUCTION: A kinetic execution trigger initiating a macroscopic PyWhy/DoWhy
@@ -2843,6 +2845,7 @@ class StateMutationIntent(CoreasonBaseState):
 
     MCP ROUTING TRIGGERS: State Transition, Merkle-DAG Mutation, Kinetic Execution, Design-by-Contract, Supervisory Control
     """
+
     topology_class: Literal["state_mutation_intent"] = Field(default="state_mutation_intent")
     """
     AGENT INSTRUCTION: Implements the formal RFC 6902 JSON Patch standard to execute atomic,
@@ -3457,6 +3460,7 @@ class AnalogicalMappingTask(CoreasonBaseState):
 
     MCP ROUTING TRIGGERS: Analogical Reasoning, Isomorphism Discovery, Structure Mapping Theory, Zero-Shot Inference, Knowledge Transfer
     """
+
     topology_class: Literal["analogical_mapping_task"] = Field(default="analogical_mapping_task")
     """
     AGENT INSTRUCTION: Formalizes Structure-Mapping Theory (Gentner) to execute
@@ -3687,6 +3691,7 @@ class BoundedJSONRPCIntent(CoreasonBaseState):
 
     MCP ROUTING TRIGGERS: JSON-RPC, IPC Security, Payload Validation, Structural Contract, Kinetic Execution Bridge
     """
+
     topology_class: Literal["bounded_json_rpc_intent"] = Field(default="bounded_json_rpc_intent")
     """
     AGENT INSTRUCTION: Enforces the formal JSON-RPC 2.0 specification as a stateless,
@@ -5019,6 +5024,7 @@ class SchemaDrivenExtractionSLA(CoreasonBaseState):
 
     MCP ROUTING TRIGGERS: Constrained Decoding, AOT FSM, Schema Enforcement, Logit Masking, Deterministic Extraction
     """
+
     schema_registry_uri: AnyUrl = Field(
         description="RFC 8785 canonicalized URI to the exact Pydantic template or LinkML definition."
     )
@@ -5050,6 +5056,7 @@ class EvidentiaryGroundingSLA(CoreasonBaseState):
 
     MCP ROUTING TRIGGERS: Evidentiary Grounding, Hallucination Prevention, Truth Maintenance, Evidence Retrieval, Epistemic Justification
     """
+
     minimum_nli_entailment_score: float = Field(ge=0.0, le=1.0)
     require_independent_sources: int = Field(ge=1, le=10, default=1)
     ungrounded_link_action: Literal["sever_edge", "flag_for_human", "decay_weight"] = Field(default="sever_edge")
@@ -5102,6 +5109,7 @@ class EpistemicTransmutationTask(CoreasonBaseState):
 
     MCP ROUTING TRIGGERS: Semantic Transmutation, Multimodal Extraction, Entropy Reduction, Knowledge Consolidation, Pydantic Mapping
     """
+
     topology_class: Literal["epistemic_transmutation_task"] = Field(default="epistemic_transmutation_task")
     """
     AGENT INSTRUCTION: Orchestrates Cross-Modal Representation Alignment,
@@ -6612,6 +6620,7 @@ class DocumentKnowledgeGraphManifest(CoreasonBaseState):
 
     MCP ROUTING TRIGGERS: Knowledge Graph, Document Extraction, Semantic Relations, Hierarchical Mapping, TDA Projection
     """
+
     topology_class: Literal["document_knowledge_graph"] = "document_knowledge_graph"
     graph_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
     source_artifact_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
@@ -6638,6 +6647,7 @@ class CausalPropagationIntent(CoreasonBaseState):
 
     MCP ROUTING TRIGGERS: Causal Propagation, What-If Analysis, Counterfactual Reasoning, Directed Graph Traversal, Edge Activation
     """
+
     topology_class: Literal["causal_propagation"] = "causal_propagation"
     target_graph_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
     task_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
@@ -6664,6 +6674,7 @@ class BeliefModulationReceipt(CoreasonBaseState):
 
     MCP ROUTING TRIGGERS: Belief Update, Dempster-Shafer, Evidence Fusion, Uncertainty Modulation, Knowledge Integration
     """
+
     topology_class: Literal["belief_modulation"] = "belief_modulation"
     receipt_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
@@ -6759,6 +6770,7 @@ class RDFSerializationIntent(CoreasonBaseState):
 
     MCP ROUTING TRIGGERS: RDF Export, Semantic Web, Interoperability, Triplestore Integration, Knowledge Sharing
     """
+
     topology_class: Literal["rdf_serialization"] = "rdf_serialization"
     export_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
     target_graph_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
@@ -6787,6 +6799,7 @@ class RDFExportReceipt(CoreasonBaseState):
 
     MCP ROUTING TRIGGERS: Export Verification, Audit Trail, RDF Integrity, Data Provenance, Semantic Web Compliance
     """
+
     topology_class: Literal["rdf_export_receipt"] = "rdf_export_receipt"
     export_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
@@ -7061,6 +7074,7 @@ class DoWhyInterventionIntent(CoreasonBaseState):
 
     MCP ROUTING TRIGGERS: Causal Intervention, Do-Operator, Treatment Effect, Counterfactual Analysis, Structural Causal Model
     """
+
     topology_class: Literal["dowhy_intervention_intent"] = Field(default="dowhy_intervention_intent")
     """
     AGENT INSTRUCTION: Represents an intent to perform a causal intervention using DoWhy.

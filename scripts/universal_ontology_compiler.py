@@ -88,13 +88,13 @@ def evaluate_epistemic_compliance() -> None:
         lines = content.splitlines()
         if not lines:
             continue
-        
+
         has_header = False
-        if lines[0].startswith(header):
+        if lines[0].startswith(header) or (
+            lines[0].startswith("#!") and len(lines) > 1 and lines[1].startswith(header)
+        ):
             has_header = True
-        elif lines[0].startswith("#!") and len(lines) > 1 and lines[1].startswith(header):
-            has_header = True
-            
+
         if not has_header:
             print(f"[HEADER ERROR] {filepath.relative_to(REPO_ROOT)}")
             header_errors += 1
