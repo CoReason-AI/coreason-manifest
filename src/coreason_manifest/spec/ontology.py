@@ -649,7 +649,7 @@ class RefusalToReasonEvent(ValueError):  # noqa: N818
     """
 
 
-class TopologicalParadoxFalsification(RefusalToReasonEvent):
+class EpistemicTopologicalParadoxFalsificationEvent(RefusalToReasonEvent):
     """
     AGENT INSTRUCTION: Exception raised when a topological loop is detected natively in a DAG topology.
 
@@ -734,7 +734,7 @@ type JsonPrimitiveState = (
 )
 
 
-class DeliberativeEnvelope[T](CoreasonBaseState):
+class CognitiveDeliberativeEnvelopeState[T](CoreasonBaseState):
     """
     AGENT INSTRUCTION: A Generic two-stage generation wrapper that neutralizes the Format Restriction Penalty (Semantic Tax) during Constrained Decoding. The Sovereign LLM Proxy's XGrammar AOT FSM bitmask MUST be physically toggled between the two fields: DISABLED for `deliberation_trace`, then ENABLED for `payload`. This class models the architectural pattern documented in the Decoupled Reasoning and Formatting specification.
 
@@ -1200,7 +1200,7 @@ class VolumetricBoundingProfile(CoreasonBaseState):
         return self
 
 
-class SpatialRenderMaterial(CoreasonBaseState):
+class SpatialRenderMaterialState(CoreasonBaseState):
     """
     AGENT INSTRUCTION: A mathematically pure, physics-agnostic material reference for spatial rendering.
 
@@ -1225,7 +1225,7 @@ class SpatialRenderMaterial(CoreasonBaseState):
     def ensure_material_definition(self) -> Self:
         """At least one of material_urn or compiled_shader_cid must be provided."""
         if self.material_urn is None and self.compiled_shader_cid is None:
-            raise ValueError("SpatialRenderMaterial requires either a material_urn or a compiled_shader_cid.")
+            raise ValueError("SpatialRenderMaterialState requires either a material_urn or a compiled_shader_cid.")
         return self
 
 
@@ -2276,6 +2276,15 @@ class ContextualizedSourceState(CoreasonBaseState):
 
 
 class EpistemicUpsamplingTask(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Orchestrates the abductive upsampling of sparse episodic logs into dense, structured property matrices.
+
+    CAUSAL AFFORDANCE: Unlocks the physical capability to expand implicit semantic relations into explicit, traversable graph edges.
+
+    EPISTEMIC BOUNDS: Task execution is bounded by the max_risk_tolerance policy and requires a valid EpistemicProvenanceReceipt.
+
+    MCP ROUTING TRIGGERS: Abductive Reasoning, Information Entropy, Semantic Expansion, Epistemic Uncertainty Reduction, Knowledge Consolidation
+    """
     topology_class: Literal["epistemic_upsampling_task"] = Field(default="epistemic_upsampling_task")
     r"""
     AGENT INSTRUCTION: Authorizes a connectionist agent to execute an abductive leap, reversing lossy compression via context.
@@ -2778,6 +2787,15 @@ class MultimodalTokenAnchorState(CoreasonBaseState):
 
 
 class RollbackIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Triggers a non-monotonic state transition to revert the execution graph to a prior cryptographically verified checkpoint.
+
+    CAUSAL AFFORDANCE: Physically invalidates all temporal edges created after the target checkpoint_cid, neutralizing detected fractures.
+
+    EPISTEMIC BOUNDS: Requires a signed AdjudicationReceipt from a Verifier node and is bounded by the max_cascade_depth parameter.
+
+    MCP ROUTING TRIGGERS: Non-Monotonic Logic, State Rollback, Epistemic Quarantine, Temporal Invalidation, Fault Recovery
+    """
     topology_class: Literal["rollback_intent"] = Field(default="rollback_intent")
     """
     AGENT INSTRUCTION: A kinetic execution trigger initiating a macroscopic PyWhy/DoWhy
@@ -2816,6 +2834,15 @@ class RollbackIntent(CoreasonBaseState):
 
 
 class StateMutationIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declares a required modification to a specific node state within the kinetic execution plane.
+
+    CAUSAL AFFORDANCE: Enables the orchestrator to proposal structural changes to the Merkle-DAG, which must be validated before etching.
+
+    EPISTEMIC BOUNDS: Mutative state is bounded by the shared_state_contract of the parent topology. Hallucinated keys are blocked.
+
+    MCP ROUTING TRIGGERS: State Transition, Merkle-DAG Mutation, Kinetic Execution, Design-by-Contract, Supervisory Control
+    """
     topology_class: Literal["state_mutation_intent"] = Field(default="state_mutation_intent")
     """
     AGENT INSTRUCTION: Implements the formal RFC 6902 JSON Patch standard to execute atomic,
@@ -3421,6 +3448,15 @@ class AmbientState(CoreasonBaseState):
 
 
 class AnalogicalMappingTask(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Executes a structure-preserving mapping between two disparate cognitive domains to discover latent isomorphisms.
+
+    CAUSAL AFFORDANCE: Projects semantic relations from a Source Manifold to a Target Manifold, enabling zero-shot inference in novel domains.
+
+    EPISTEMIC BOUNDS: Mapping must preserve the topological invariants defined in the Source Domain Graph to be considered valid.
+
+    MCP ROUTING TRIGGERS: Analogical Reasoning, Isomorphism Discovery, Structure Mapping Theory, Zero-Shot Inference, Knowledge Transfer
+    """
     topology_class: Literal["analogical_mapping_task"] = Field(default="analogical_mapping_task")
     """
     AGENT INSTRUCTION: Formalizes Structure-Mapping Theory (Gentner) to execute
@@ -3642,6 +3678,15 @@ class BoundedInterventionScopePolicy(CoreasonBaseState):
 
 
 class BoundedJSONRPCIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Encapsulates a JSON-RPC 2.0 intent within strict Pydantic boundaries to prevent schema-less payload injection.
+
+    CAUSAL AFFORDANCE: Forces external kinetic tools to adhere to the Swarm's structural contracts, providing a secure IPC bridge.
+
+    EPISTEMIC BOUNDS: Payload is strictly validated against the target tool's input_schema. Arbitrary JSON properties are forbidden.
+
+    MCP ROUTING TRIGGERS: JSON-RPC, IPC Security, Payload Validation, Structural Contract, Kinetic Execution Bridge
+    """
     topology_class: Literal["bounded_json_rpc_intent"] = Field(default="bounded_json_rpc_intent")
     """
     AGENT INSTRUCTION: Enforces the formal JSON-RPC 2.0 specification as a stateless,
@@ -4007,7 +4052,7 @@ class CausalDirectedEdgeState(CoreasonBaseState):
     predicate_curie: Annotated[str, StringConstraints(pattern=r"^[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$")] = Field(
         json_schema_extra={"rdf_edge_property": True}
     )
-    belief_vector: DempsterShaferBeliefVector | None = Field(default=None)
+    belief_vector: EpistemicDempsterShaferBeliefVectorState | None = Field(default=None)
     grounding_sla: EvidentiaryGroundingSLA | None = Field(default=None)
 
     @model_validator(mode="after")
@@ -4892,7 +4937,7 @@ class EpistemicScanningPolicy(CoreasonBaseState):
     )
 
 
-class LinkMLValidationSLA(CoreasonBaseState):
+class EpistemicSemanticValidationSLA(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Instructs the Ontological Grounding Specialist to enforce bipartite crosswalks against academic schemas.
 
@@ -4959,12 +5004,21 @@ class CrosswalkResolutionReceipt(CoreasonBaseState):
         Annotated[str, StringConstraints(max_length=2000)],
         Annotated[str, StringConstraints(pattern=r"^[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$")],
     ] = Field(description="Strict dictionary mapping the original strings to formal W3C CURIEs.")
-    grounding_confidence: DempsterShaferBeliefVector = Field(
+    grounding_confidence: EpistemicDempsterShaferBeliefVectorState = Field(
         description="Quantifies the semantic alignment and epistemic conflict of the applied crosswalk."
     )
 
 
 class SchemaDrivenExtractionSLA(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A Service Level Agreement governing the deterministic extraction of semantic states via schema-constrained decoding.
+
+    CAUSAL AFFORDANCE: Guarantees that the extraction engine will only emit tokens that satisfy the target structural grammar.
+
+    EPISTEMIC BOUNDS: Bounded by the XGrammar AOT FSM bitmask at the inference layer. Probability of schema violation is mathematically zero.
+
+    MCP ROUTING TRIGGERS: Constrained Decoding, AOT FSM, Schema Enforcement, Logit Masking, Deterministic Extraction
+    """
     schema_registry_uri: AnyUrl = Field(
         description="RFC 8785 canonicalized URI to the exact Pydantic template or LinkML definition."
     )
@@ -4973,7 +5027,7 @@ class SchemaDrivenExtractionSLA(CoreasonBaseState):
     )
     max_schema_retries: int = Field(ge=0, le=18446744073709551615)
     validation_failure_action: Literal["quarantine_chunk", "escalate_to_human", "drop_edge"]
-    linkml_governance: LinkMLValidationSLA | None = Field(
+    linkml_governance: EpistemicSemanticValidationSLA | None = Field(
         default=None, description="The structural shape constraints for the graph."
     )
 
@@ -4981,12 +5035,21 @@ class SchemaDrivenExtractionSLA(CoreasonBaseState):
     def enforce_linkml_for_ontogpt(self) -> Self:
         if self.extraction_framework == "urn:coreason:extraction:ontogpt_spires" and self.linkml_governance is None:
             raise ValueError(
-                "Epistemic Violation: Using the 'urn:coreason:extraction:ontogpt_spires' framework mathematically requires a LinkMLValidationSLA to govern shape constraints."
+                "Epistemic Violation: Using the 'urn:coreason:extraction:ontogpt_spires' framework mathematically requires a EpistemicSemanticValidationSLA to govern shape constraints."
             )
         return self
 
 
 class EvidentiaryGroundingSLA(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A Service Level Agreement requiring every extracted claim to be grounded in verifiable episodic or external evidence.
+
+    CAUSAL AFFORDANCE: Physically prevents the generation of hallucinations by requiring a valid EpistemicProvenanceReceipt for all attributes.
+
+    EPISTEMIC BOUNDS: Grounding is verified via a cross-check against the EpistemicLedgerState. Ungrounded claims trigger a violation event.
+
+    MCP ROUTING TRIGGERS: Evidentiary Grounding, Hallucination Prevention, Truth Maintenance, Evidence Retrieval, Epistemic Justification
+    """
     minimum_nli_entailment_score: float = Field(ge=0.0, le=1.0)
     require_independent_sources: int = Field(ge=1, le=10, default=1)
     ungrounded_link_action: Literal["sever_edge", "flag_for_human", "decay_weight"] = Field(default="sever_edge")
@@ -5030,6 +5093,15 @@ class OpticalParsingSLA(CoreasonBaseState):
 
 
 class EpistemicTransmutationTask(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Orchestrates the physical transmutation of raw multimodal artifacts into rigid, Pydantic-structured property matrices.
+
+    CAUSAL AFFORDANCE: Converts high-entropy entropy into low-entropy semantic state, feeding the Knowledge Plane's consolidation loop.
+
+    EPISTEMIC BOUNDS: Transmutation is bounded by the target schema definition. Unmapped raw data is quarantined for later inference.
+
+    MCP ROUTING TRIGGERS: Semantic Transmutation, Multimodal Extraction, Entropy Reduction, Knowledge Consolidation, Pydantic Mapping
+    """
     topology_class: Literal["epistemic_transmutation_task"] = Field(default="epistemic_transmutation_task")
     """
     AGENT INSTRUCTION: Orchestrates Cross-Modal Representation Alignment,
@@ -5466,7 +5538,15 @@ class FitnessObjectiveProfile(CoreasonBaseState):
 
 
 class FalsificationContract(CoreasonBaseState):
-    """AGENT INSTRUCTION: A contract deploying constraint oracles to hunt for counter-models to falsify a hypothesis."""
+    """
+    AGENT INSTRUCTION: A contract deploying constraint oracles to hunt for counter-models to falsify a hypothesis.
+
+    CAUSAL AFFORDANCE: Unlocks the physical capability to invalidate a belief state by finding a single mathematical contradiction (counter-model) within the defined search space.
+
+    EPISTEMIC BOUNDS: Evaluation is strictly delegated to a `clingo` or `z3` solver. The `counter_model_receipt_cid` must satisfy the Curry-Howard correspondence verified by a Verifier node.
+
+    MCP ROUTING TRIGGERS: Proof by Contradiction, Counter-Model Discovery, Epistemic Falsification, Constraint Programming, Non-Monotonic Reasoning
+    """
 
     topology_class: Literal["falsification_contract"] = Field(default="falsification_contract")
     falsification_solver: Literal["clingo", "z3"] = Field(
@@ -6081,7 +6161,7 @@ class SpatialTaxonomicNodeState(CoreasonBaseState):
         default_factory=list,
         description="The mathematical chain of custody binding this virtual coordinate back to physical vectors.",
     )
-    render_material: SpatialRenderMaterial | None = Field(
+    render_material: SpatialRenderMaterialState | None = Field(
         default=None,
         description="The physics-agnostic visual identity or shader governing the spatial rendering of this node.",
     )
@@ -6523,6 +6603,15 @@ class FormalVerificationReceipt(CoreasonBaseState):
 
 
 class DocumentKnowledgeGraphManifest(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Formalizes a Knowledge Graph extracted from a single document or corpus, preserving hierarchical and semantic relations.
+
+    CAUSAL AFFORDANCE: Projects a document's latent structure as a traversable Directed Acyclic Graph (DAG) for downstream reasoning.
+
+    EPISTEMIC BOUNDS: Graph density and reachability are bounded by the document's explicit structural tokens (e.g., headings, links).
+
+    MCP ROUTING TRIGGERS: Knowledge Graph, Document Extraction, Semantic Relations, Hierarchical Mapping, TDA Projection
+    """
     topology_class: Literal["document_knowledge_graph"] = "document_knowledge_graph"
     graph_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
     source_artifact_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
@@ -6540,6 +6629,15 @@ class DocumentKnowledgeGraphManifest(CoreasonBaseState):
 
 
 class CausalPropagationIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Triggers a causal traversal of the graph to propagate state changes and evaluate downstream effects.
+
+    CAUSAL AFFORDANCE: Enables the orchestrator to perform what-if analysis and counterfactual reasoning by simulating edge activations.
+
+    EPISTEMIC BOUNDS: Propagation is bounded by the DoWhy causal DAG. Non-causal edges are ignored to prevent superstitious correlation.
+
+    MCP ROUTING TRIGGERS: Causal Propagation, What-If Analysis, Counterfactual Reasoning, Directed Graph Traversal, Edge Activation
+    """
     topology_class: Literal["causal_propagation"] = "causal_propagation"
     target_graph_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
     task_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
@@ -6557,6 +6655,15 @@ class CausalPropagationIntent(CoreasonBaseState):
 
 
 class BeliefModulationReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Records the successful update of a Dempster-Shafer belief vector following the ingestion of new evidence.
+
+    CAUSAL AFFORDANCE: Updates the swarm's internal probability distribution, affecting future routing decisions and risk evaluations.
+
+    EPISTEMIC BOUNDS: Modulation must follow the Dempster-Shafer rule of combination to ensure mathematical consistency.
+
+    MCP ROUTING TRIGGERS: Belief Update, Dempster-Shafer, Evidence Fusion, Uncertainty Modulation, Knowledge Integration
+    """
     topology_class: Literal["belief_modulation"] = "belief_modulation"
     receipt_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
@@ -6568,7 +6675,7 @@ class BeliefModulationReceipt(CoreasonBaseState):
         description="Causal Ancestry markers required to resolve decentralized event ordering.",
     )
     target_graph_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
-    grounded_edges: dict[Annotated[str, StringConstraints(max_length=255)], DempsterShaferBeliefVector]
+    grounded_edges: dict[Annotated[str, StringConstraints(max_length=255)], EpistemicDempsterShaferBeliefVectorState]
     severed_edge_cids: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]]
 
     @model_validator(mode="after")
@@ -6643,6 +6750,15 @@ class SPARQLQueryResultReceipt(CoreasonBaseState):
 
 
 class RDFSerializationIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Triggers the export of internal Pydantic states into standardized RDF (Resource Description Framework) formats.
+
+    CAUSAL AFFORDANCE: Enables interoperability with external semantic web tools and triplestores by projecting the Merkle-DAG as triples.
+
+    EPISTEMIC BOUNDS: Export is limited to public or authorized nodes as defined by the FederatedSecurityMacroManifest.
+
+    MCP ROUTING TRIGGERS: RDF Export, Semantic Web, Interoperability, Triplestore Integration, Knowledge Sharing
+    """
     topology_class: Literal["rdf_serialization"] = "rdf_serialization"
     export_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
     target_graph_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
@@ -6662,6 +6778,15 @@ class RDFSerializationIntent(CoreasonBaseState):
 
 
 class RDFExportReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Records the successful serialization and export of a specific sub-graph into an RDF artifact.
+
+    CAUSAL AFFORDANCE: Provides a verifiable audit trail for external data transfers and confirms the integrity of the exported triples.
+
+    EPISTEMIC BOUNDS: Includes a cryptographic hash of the RDF artifact to prevent tampering during transit to external substrates.
+
+    MCP ROUTING TRIGGERS: Export Verification, Audit Trail, RDF Integrity, Data Provenance, Semantic Web Compliance
+    """
     topology_class: Literal["rdf_export_receipt"] = "rdf_export_receipt"
     export_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
@@ -6927,6 +7052,15 @@ class InterventionIntent(CoreasonBaseState):
 
 
 class DoWhyInterventionIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declares the intent to perform a causal intervention (the do-operator) on a specific variable in the DAG.
+
+    CAUSAL AFFORDANCE: Forces a state change that ignores the variable's natural causes, enabling the estimation of true causal effects.
+
+    EPISTEMIC BOUNDS: Intervention must be performed on a variable that is identified as treatable within the DoWhy structural model.
+
+    MCP ROUTING TRIGGERS: Causal Intervention, Do-Operator, Treatment Effect, Counterfactual Analysis, Structural Causal Model
+    """
     topology_class: Literal["dowhy_intervention_intent"] = Field(default="dowhy_intervention_intent")
     """
     AGENT INSTRUCTION: Represents an intent to perform a causal intervention using DoWhy.
@@ -7205,7 +7339,7 @@ class CognitiveHumanNodeProfile(CoreasonBaseState):
     markov_blanket: MarkovBlanketRenderingPolicy | None = Field(
         default=None, description="The epistemic isolation boundary guarding this agent's internal generative states."
     )
-    render_material: SpatialRenderMaterial | None = Field(
+    render_material: SpatialRenderMaterialState | None = Field(
         default=None,
         description="The physics-agnostic visual identity or shader governing the spatial rendering of this node.",
     )
@@ -7272,7 +7406,7 @@ class MemoizedNodeProfile(CoreasonBaseState):
     markov_blanket: MarkovBlanketRenderingPolicy | None = Field(
         default=None, description="The epistemic isolation boundary guarding this agent's internal generative states."
     )
-    render_material: SpatialRenderMaterial | None = Field(
+    render_material: SpatialRenderMaterialState | None = Field(
         default=None,
         description="The physics-agnostic visual identity or shader governing the spatial rendering of this node.",
     )
@@ -7338,7 +7472,7 @@ class CognitiveSystemNodeProfile(CoreasonBaseState):
     markov_blanket: MarkovBlanketRenderingPolicy | None = Field(
         default=None, description="The epistemic isolation boundary guarding this agent's internal generative states."
     )
-    render_material: SpatialRenderMaterial | None = Field(
+    render_material: SpatialRenderMaterialState | None = Field(
         default=None,
         description="The physics-agnostic visual identity or shader governing the spatial rendering of this node.",
     )
@@ -8497,7 +8631,7 @@ class CompositeNodeProfile(CoreasonBaseState):
     markov_blanket: MarkovBlanketRenderingPolicy | None = Field(
         default=None, description="The epistemic isolation boundary guarding this agent's internal generative states."
     )
-    render_material: SpatialRenderMaterial | None = Field(
+    render_material: SpatialRenderMaterialState | None = Field(
         default=None,
         description="The physics-agnostic visual identity or shader governing the spatial rendering of this node.",
     )
@@ -9374,7 +9508,7 @@ class StdioTransportProfile(CoreasonBaseState):
 type MCPTransportProfile = StdioTransportProfile | SSETransportProfile | HTTPTransportProfile
 
 
-class CausalGraphDefinition(CoreasonBaseState):
+class EpistemicCausalGraphDefinitionState(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Generic graph representation compatible with DoWhy (PyWhy).
 
@@ -9433,7 +9567,7 @@ class HypothesisGenerationEvent(CoreasonBaseState):
     status: Literal["active", "falsified", "verified"] = Field(
         default="active", description="The current validity state of this hypothesis in the EpistemicLedgerState."
     )
-    causal_model: CausalGraphDefinition | None = Field(
+    causal_model: EpistemicCausalGraphDefinitionState | None = Field(
         default=None,
         description="The formal DAG representing the agent's structural assumptions about the environment.",
     )
@@ -10370,7 +10504,7 @@ class SemanticEdgeState(CoreasonBaseState):
     predicate_curie: Annotated[str, StringConstraints(pattern=r"^[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$")] = Field(
         json_schema_extra={"rdf_edge_property": True}
     )
-    belief_vector: DempsterShaferBeliefVector | None = Field(default=None)
+    belief_vector: EpistemicDempsterShaferBeliefVectorState | None = Field(default=None)
     grounding_sla: EvidentiaryGroundingSLA | None = Field(default=None)
     embedding: VectorEmbeddingState | None = Field(
         default=None,
@@ -10579,7 +10713,7 @@ class CognitiveAgentNodeProfile(CoreasonBaseState):
     markov_blanket: MarkovBlanketRenderingPolicy | None = Field(
         default=None, description="The epistemic isolation boundary guarding this agent's internal generative states."
     )
-    render_material: SpatialRenderMaterial | None = Field(
+    render_material: SpatialRenderMaterialState | None = Field(
         default=None,
         description="The physics-agnostic visual identity or shader governing the spatial rendering of this node.",
     )
@@ -11102,11 +11236,11 @@ class DAGTopologyManifest(CoreasonBaseState):
                 for source, target in self.edges:
                     graph.add_edge(node_map[source], node_map[target], None)
                 if not _rx.is_directed_acyclic_graph(graph):
-                    raise TopologicalParadoxFalsification("Graph contains cycles")
+                    raise EpistemicTopologicalParadoxFalsificationEvent("Graph contains cycles")
                 max_calculated_depth = (_rx.dag_longest_path_length(graph) + 1) if len(self.nodes) > 0 else 0
             else:
                 if not _pure_python_is_dag(adjacency):
-                    raise TopologicalParadoxFalsification("Graph contains cycles")
+                    raise EpistemicTopologicalParadoxFalsificationEvent("Graph contains cycles")
                 max_calculated_depth = (_pure_python_longest_path_length(adjacency) + 1) if len(self.nodes) > 0 else 0
 
             if max_calculated_depth > self.max_depth:
@@ -13294,8 +13428,16 @@ class EpistemicZeroTrustReceipt(CoreasonBaseState):
         return self
 
 
-class MCPToolDefinition(CoreasonBaseState):
-    """AGENT INSTRUCTION: A formal Substrate Projection representing an executable Model Context Protocol (MCP) tool."""
+class EpistemicMCPToolDefinitionState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A formal Substrate Projection representing an executable Model Context Protocol (MCP) tool.
+
+    CAUSAL AFFORDANCE: Exposes a kinetic capability to the swarm, allowing agents to execute external operations through a standardized, zero-trust IPC interface.
+
+    EPISTEMIC BOUNDS: Tool interaction is strictly bounded by the `input_schema`. Input validation is mechanically enforced via JSON Schema prior to execution to prevent injection attacks.
+
+    MCP ROUTING TRIGGERS: Model Context Protocol, Kinetic Tooling, Substrate Projection, Capability Discovery, Zero-Trust Execution
+    """
 
     topology_class: Literal["mcp_tool_definition"] = Field(default="mcp_tool_definition")
     event_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
@@ -13458,7 +13600,7 @@ HTEEstimationReceipt.model_rebuild()
 
 type AnyStateEvent = Annotated[
     TemporalGraphCRDTManifest
-    | MCPToolDefinition
+    | EpistemicMCPToolDefinitionState
     | CrosswalkResolutionReceipt
     | EpistemicZeroTrustReceipt
     | ObservationEvent
@@ -13629,7 +13771,7 @@ class EvidentiaryCitationState(CoreasonBaseState):
     )
 
 
-class DempsterShaferBeliefVector(CoreasonBaseState):
+class EpistemicDempsterShaferBeliefVectorState(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Replaces monolithic probability floats with a composite tri-vector. Independently measures lexical matching, latent semantic distance, and topological graph integrity to allow the orchestrator to compute epistemic conflict and execute evidence discounting.
 
@@ -13734,7 +13876,7 @@ class EpistemicOntologicalReificationReceipt(CoreasonBaseState):
     algorithmic_mechanism: TransformationMechanismProfile = Field(
         description="The deterministic or probabilistic engine used to execute the transmutation."
     )
-    belief_vector: DempsterShaferBeliefVector = Field(
+    belief_vector: EpistemicDempsterShaferBeliefVectorState = Field(
         description="The composite Dempster-Shafer tri-vector capturing independent confidence dimensions and calculated epistemic conflict."
     )
     is_latent_inference: bool = Field(
@@ -14066,7 +14208,7 @@ SE3TransformProfile.model_rebuild()
 VolumetricBoundingProfile.model_rebuild()
 ViewportProjectionContract.model_rebuild()
 
-SpatialRenderMaterial.model_rebuild()
+SpatialRenderMaterialState.model_rebuild()
 KinematicDeltaManifest.model_rebuild()
 SpatialBillboardContract.model_rebuild()
 VolumetricEdgeProfile.model_rebuild()
@@ -14100,7 +14242,7 @@ NeurosymbolicInferenceIntent.model_rebuild()
 EpistemicUpsamplingTask.model_rebuild()
 VolumetricPartitionState.model_rebuild()
 
-DempsterShaferBeliefVector.model_rebuild()
+EpistemicDempsterShaferBeliefVectorState.model_rebuild()
 EmpiricalStatisticalProfile.model_rebuild()
 SemanticRelationalVectorState.model_rebuild()
 AtomicPropositionState.model_rebuild()
@@ -14153,7 +14295,7 @@ FormalVerificationContract.model_rebuild()
 EvidentiaryGroundingSLA.model_rebuild()
 EpistemicAxiomVerificationReceipt.model_rebuild()
 
-LinkMLValidationSLA.model_rebuild()
+EpistemicSemanticValidationSLA.model_rebuild()
 EpistemicOntologicalCrosswalkIntent.model_rebuild()
 CrosswalkResolutionReceipt.model_rebuild()
 
@@ -14165,11 +14307,11 @@ SPARQLQueryResultReceipt.model_rebuild()
 TemporalConflictResolutionPolicy.model_rebuild()
 TemporalEdgeInvalidationIntent.model_rebuild()
 TemporalGraphCRDTManifest.model_rebuild()
-MCPToolDefinition.model_rebuild()
+EpistemicMCPToolDefinitionState.model_rebuild()
 ContinuousManifoldMappingContract.model_rebuild()
 OracleExecutionReceipt.model_rebuild()
 EpistemicOntologicalNormalizationIntent.model_rebuild()
 FederatedDiscoveryIntent.model_rebuild()
 EpistemicRigidityPolicy.model_rebuild()
-DeliberativeEnvelope.model_rebuild()
+CognitiveDeliberativeEnvelopeState.model_rebuild()
 StrategicThoughtNodeIntent.model_rebuild()

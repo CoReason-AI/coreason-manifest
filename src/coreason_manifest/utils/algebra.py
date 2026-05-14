@@ -45,7 +45,7 @@ from coreason_manifest.spec.ontology import (
     EpistemicOntologicalAlignmentPolicy,
     EpistemicTransmutationTask,
     ManifestViolationReceipt,
-    MCPToolDefinition,
+    EpistemicMCPToolDefinitionState,
     StateMutationIntent,
     System2RemediationIntent,
     TamperFaultEvent,
@@ -54,7 +54,7 @@ from coreason_manifest.spec.ontology import (
 )
 
 SCHEMA_REGISTRY: dict[str, type[BaseModel]] = {
-    "mcp_tool_definition": MCPToolDefinition,
+    "mcp_tool_definition": EpistemicMCPToolDefinitionState,
     "step8_vision": DocumentLayoutManifest,
     "state_differential": StateMutationIntent,
     "cognitive_sync": CognitiveStateProfile,

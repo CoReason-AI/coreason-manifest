@@ -13,7 +13,7 @@ from pydantic import AnyUrl, TypeAdapter
 
 from coreason_manifest.spec.ontology import (
     EpistemicOntologicalCrosswalkIntent,
-    LinkMLValidationSLA,
+    EpistemicSemanticValidationSLA,
     SchemaDrivenExtractionSLA,
 )
 
@@ -47,7 +47,7 @@ def test_schema_driven_extraction_sla_validation() -> None:
         extraction_framework="urn:coreason:extraction:ontogpt_spires",
         max_schema_retries=3,
         validation_failure_action="drop_edge",
-        linkml_governance=LinkMLValidationSLA(
+        linkml_governance=EpistemicSemanticValidationSLA(
             linkml_schema_uri=url_adapter.validate_python("https://example.com/linkml")
         ),
     )
