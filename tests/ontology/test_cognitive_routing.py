@@ -17,8 +17,8 @@ from pydantic import ValidationError
 
 from coreason_manifest.spec.ontology import (
     InterventionPolicy,
-    OntologicalSurfaceProjectionManifest,
     SpatialHardwareProfile,
+    SpatialOntologicalSurfaceProjectionManifest,
 )
 
 
@@ -81,6 +81,6 @@ class TestOntologicalSurfaceProjectionManifest:
     """Exercise structural uniqueness and canonical sort validators."""
 
     def test_empty_projection(self) -> None:
-        obj = OntologicalSurfaceProjectionManifest(projection_cid="proj-1")
+        obj = SpatialOntologicalSurfaceProjectionManifest(projection_cid="proj-1")
         assert obj.action_spaces == []
         assert obj.supported_personas == []

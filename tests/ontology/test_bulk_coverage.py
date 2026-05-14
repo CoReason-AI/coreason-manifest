@@ -32,8 +32,6 @@ from coreason_manifest.spec.ontology import (
     BackpressurePolicy,
     # Belief
     BeliefMutationEvent,
-    # Browser
-    BrowserDOMState,
     # Causal
     CausalDirectedEdgeState,
     # Circuit Breaker
@@ -59,6 +57,8 @@ from coreason_manifest.spec.ontology import (
     RoutingFrontierPolicy,
     # SAE
     ScalePolicy,
+    # Browser
+    SpatialBrowserDOMState,
     # Terminal condition
     TerminalConditionContract,
 )
@@ -232,7 +232,7 @@ class TestBulkInstantiation:
         assert obj.event_cid == "bm-1"
 
     def test_browser_dom_state(self) -> None:
-        obj = BrowserDOMState(
+        obj = SpatialBrowserDOMState(
             current_url="https://example.com",
             viewport_size=(1920, 1080),
             dom_hash="d" * 64,

@@ -15,7 +15,7 @@ import unittest.mock
 import pytest
 
 from coreason_manifest.spec.ontology import (
-    OntologicalAlignmentPolicy,
+    EpistemicOntologicalAlignmentPolicy,
     VectorEmbeddingState,
 )
 from coreason_manifest.utils import algebra
@@ -38,7 +38,7 @@ def test_get_ontology_schema_cached_object() -> None:
 
 
 def test_calculate_latent_alignment_v2_invalid_base64() -> None:
-    pol = OntologicalAlignmentPolicy(min_cosine_similarity=-1.0, require_isometry_proof=False)
+    pol = EpistemicOntologicalAlignmentPolicy(min_cosine_similarity=-1.0, require_isometry_proof=False)
     v1 = VectorEmbeddingState.model_construct(
         vector_base64=base64.b64encode(struct.pack("<3f", 1.0, 0.0, 0.0)).decode(),
         dimensionality=3,

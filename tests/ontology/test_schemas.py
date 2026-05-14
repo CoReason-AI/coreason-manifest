@@ -12,8 +12,8 @@ import pytest
 from pydantic import AnyUrl, TypeAdapter
 
 from coreason_manifest.spec.ontology import (
+    EpistemicOntologicalCrosswalkIntent,
     LinkMLValidationSLA,
-    OntologicalCrosswalkIntent,
     SchemaDrivenExtractionSLA,
 )
 
@@ -21,7 +21,7 @@ url_adapter = TypeAdapter(AnyUrl)
 
 
 def test_ontological_crosswalk_intent_sorting() -> None:
-    intent = OntologicalCrosswalkIntent(
+    intent = EpistemicOntologicalCrosswalkIntent(
         target_graph_cid="bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
         source_strings=["zebra", "apple", "banana"],
         target_ontology_registries=["HP", "CHEBI", "MONDO"],

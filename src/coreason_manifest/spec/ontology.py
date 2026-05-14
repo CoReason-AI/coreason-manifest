@@ -584,7 +584,7 @@ def _inject_cognitive_routing_cluster(schema: dict[str, Any]) -> None:
     _inject_topological_lock(schema)
     schema["x-domain-cluster"] = "cognitive_routing"
     schema["x-synergistic-classes"] = [
-        "TaxonomicRoutingPolicy",
+        "CognitiveTaxonomicRoutingPolicy",
         "CognitiveAgentNodeProfile",
         "SemanticRelationalVectorState",
     ]
@@ -621,7 +621,7 @@ def _inject_dag_examples_and_routing_cluster(schema: dict[str, Any]) -> None:
     _inject_dag_examples(schema)
     schema["x-domain-cluster"] = "cognitive_routing"
     schema["x-synergistic-classes"] = [
-        "TaxonomicRoutingPolicy",
+        "CognitiveTaxonomicRoutingPolicy",
         "CognitiveAgentNodeProfile",
         "SemanticRelationalVectorState",
     ]
@@ -631,7 +631,7 @@ def _inject_workflow_examples_and_routing_cluster(schema: dict[str, Any]) -> Non
     _inject_workflow_examples(schema)
     schema["x-domain-cluster"] = "cognitive_routing"
     schema["x-synergistic-classes"] = [
-        "TaxonomicRoutingPolicy",
+        "CognitiveTaxonomicRoutingPolicy",
         "CognitiveAgentNodeProfile",
         "SemanticRelationalVectorState",
     ]
@@ -3686,7 +3686,7 @@ class BoundedJSONRPCIntent(CoreasonBaseState):
         return _validate_payload_bounds(v)
 
 
-class OntologyDiscoveryIntent(BoundedJSONRPCIntent):
+class EpistemicOntologyDiscoveryIntent(BoundedJSONRPCIntent):
     """
     AGENT INSTRUCTION: Authorizes a Semantic Watchdog Agent to perform strict out-of-band polling against external semantic registries to monitor for ontological deprecation or semantic drift.
     """
@@ -3740,7 +3740,7 @@ class SemanticMappingHeuristicIntent(CoreasonBaseState):
     )
     justification_evidence_cids: list[NodeCIDState] = Field(
         min_length=1,
-        description="Explicit pointers to the AtomicPropositionState or OntologicalReificationReceipt nodes that causally justify this new mapping rule.",
+        description="Explicit pointers to the AtomicPropositionState or EpistemicOntologicalReificationReceipt nodes that causally justify this new mapping rule.",
     )
 
     @model_validator(mode="after")
@@ -3749,7 +3749,7 @@ class SemanticMappingHeuristicIntent(CoreasonBaseState):
         return self
 
 
-class BrowserDOMState(CoreasonBaseState):
+class SpatialBrowserDOMState(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Defines the exogenous structural boundary of a headless browser environment within a Partially Observable Markov Decision Process (POMDP).
 
@@ -4649,7 +4649,7 @@ class ContextualSemanticResolutionIntent(CoreasonBaseState):
     )
 
 
-class DraftingIntent(CoreasonBaseState):
+class CognitiveDraftingIntent(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Implements Fristonian Active Inference to minimize Expected Free Energy. Triggered when the swarm detects a catastrophic Epistemic Gap and lacks the structural parameters necessary to reduce Shannon Entropy autonomously.
 
@@ -4906,7 +4906,7 @@ class LinkMLValidationSLA(CoreasonBaseState):
     linkml_schema_uri: AnyUrl
 
 
-class OntologicalCrosswalkIntent(CoreasonBaseState):
+class EpistemicOntologicalCrosswalkIntent(CoreasonBaseState):
     """
     AGENT INSTRUCTION: A kinetic trigger instructing the orchestrator to route an array of ungrounded text entities through a grounding oracle (OntoGPT/OAK) to map them to formal ontology CURIEs.
 
@@ -4917,7 +4917,7 @@ class OntologicalCrosswalkIntent(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Bipartite Ontological Mapping, Grounding Oracle, CURIE Resolution, Isometry Thresholding, Semantic Crosswalk
     """
 
-    topology_class: Literal["ontological_crosswalk"] = "ontological_crosswalk"
+    topology_class: Literal["epistemic_ontological_crosswalk"] = "epistemic_ontological_crosswalk"
     target_graph_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
     source_strings: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
         min_length=1, description="The ungrounded natural language concepts extracted by the LLM."
@@ -5997,7 +5997,7 @@ class HypothesisStakeReceipt(CoreasonBaseState):
     implied_probability: float = Field(ge=0.0, le=1.0, description="The agent's calculated internal confidence score.")
 
 
-class HumanDirectiveIntent(CoreasonBaseState):
+class FederatedHumanDirectiveIntent(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Translates unstructured human goals into the deterministic physics required to trigger the Agentic Forge.
 
@@ -6025,7 +6025,7 @@ class HumanDirectiveIntent(CoreasonBaseState):
     )
 
 
-class SemanticIntent(CoreasonBaseState):
+class CognitiveSemanticIntent(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Formalizes Synchronous Epistemic Signaling within a Mixed-Initiative Control paradigm. Indicates that the presented manifold requires acknowledgment without reciprocal causal action.
 
@@ -6049,7 +6049,7 @@ class SemanticIntent(CoreasonBaseState):
     )
 
 
-class TaxonomicNodeState(CoreasonBaseState):
+class SpatialTaxonomicNodeState(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Implements Hierarchical Agglomerative Clustering to project continuous,
     dense latent vector spaces into a deterministic, discrete N-ary tree structure. As a
@@ -6096,7 +6096,7 @@ class TaxonomicNodeState(CoreasonBaseState):
         return self
 
 
-class GenerativeTaxonomyManifest(CoreasonBaseState):
+class SpatialGenerativeTaxonomyManifest(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Acts as a macroscopic Topological Data Analysis (TDA) manifold
     projection, mapping continuous vector geometries into a discrete, traversable Directed
@@ -6121,10 +6121,10 @@ class GenerativeTaxonomyManifest(CoreasonBaseState):
     )
     root_node_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
         Field(
-            description="The globally unique decentralized identifier (DID) anchoring the top-level TaxonomicNodeState initiating the tree.",
+            description="The globally unique decentralized identifier (DID) anchoring the top-level SpatialTaxonomicNodeState initiating the tree.",
         )
     )
-    nodes: dict[Annotated[str, StringConstraints(max_length=255)], TaxonomicNodeState] = Field(
+    nodes: dict[Annotated[str, StringConstraints(max_length=255)], SpatialTaxonomicNodeState] = Field(
         max_length=1000, description="Flat dictionary matrix containing all nodes within the manifold."
     )
 
@@ -6186,12 +6186,12 @@ class SpatialTaxonomicRestructureIntent(CoreasonBaseState):
     restructure_heuristic: Literal["chronological", "entity_centric", "semantic_cluster", "confidence_decay"] = Field(
         description="The SOTA mathematical heuristic used to project the new manifold."
     )
-    target_taxonomy: GenerativeTaxonomyManifest = Field(
+    target_taxonomy: SpatialGenerativeTaxonomyManifest = Field(
         description="The newly synthesized topology projected to the frontend."
     )
 
 
-class TaxonomicRoutingPolicy(CoreasonBaseState):
+class CognitiveTaxonomicRoutingPolicy(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Implements a deterministic Softmax Router Gate, leveraging Cognitive Load Theory to map high-entropy natural language intents into explicitly bounded spatial organizing frameworks.
 
@@ -6448,7 +6448,7 @@ class EpistemicZeroTrustContract(CoreasonBaseState):
 
 
 type AnyPresentationIntent = Annotated[
-    SemanticIntent | DraftingIntent | AdjudicationIntent | EscalationIntent, Field(discriminator="topology_class")
+    CognitiveSemanticIntent | CognitiveDraftingIntent | AdjudicationIntent | EscalationIntent, Field(discriminator="topology_class")
 ]
 
 
@@ -6758,19 +6758,19 @@ type AnyIntent = Annotated[
     | EpistemicZeroTrustContract
     | EmpiricalFalsificationContract
     | FalsificationContract
-    | OntologicalCrosswalkIntent
+    | EpistemicOntologicalCrosswalkIntent
     | EpistemicZeroTrustContract
-    | SemanticIntent
-    | DraftingIntent
+    | CognitiveSemanticIntent
+    | CognitiveDraftingIntent
     | AdjudicationIntent
     | EscalationIntent
     | SemanticDiscoveryIntent
     | SpatialTaxonomicRestructureIntent
     | LatentProjectionIntent
     | LatentSchemaInferenceIntent
-    | HumanDirectiveIntent
+    | FederatedHumanDirectiveIntent
     | ContextualSemanticResolutionIntent
-    | OntologyDiscoveryIntent
+    | EpistemicOntologyDiscoveryIntent
     | SemanticMappingHeuristicIntent
     | ContinuousSpatialMutationIntent
     | AgentBidIntent
@@ -7197,7 +7197,7 @@ class CognitiveHumanNodeProfile(CoreasonBaseState):
         default=None,
         description="Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
     )
-    semantic_zoom: SemanticZoomProfile | None = Field(
+    semantic_zoom: SpatialSemanticZoomProfile | None = Field(
         default=None,
         description="The mathematical Information Bottleneck thresholds dictating the semantic degradation of this specific node.",
     )
@@ -7264,7 +7264,7 @@ class MemoizedNodeProfile(CoreasonBaseState):
         default=None,
         description="Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
     )
-    semantic_zoom: SemanticZoomProfile | None = Field(
+    semantic_zoom: SpatialSemanticZoomProfile | None = Field(
         default=None,
         description="The mathematical Information Bottleneck thresholds dictating the semantic degradation of this specific node.",
     )
@@ -7330,7 +7330,7 @@ class CognitiveSystemNodeProfile(CoreasonBaseState):
         default=None,
         description="Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
     )
-    semantic_zoom: SemanticZoomProfile | None = Field(
+    semantic_zoom: SpatialSemanticZoomProfile | None = Field(
         default=None,
         description="The mathematical Information Bottleneck thresholds dictating the semantic degradation of this specific node.",
     )
@@ -7878,7 +7878,7 @@ class ProceduralMetadataManifest(CoreasonBaseState):
     )
 
 
-class OntologicalSurfaceProjectionManifest(CoreasonBaseState):
+class SpatialOntologicalSurfaceProjectionManifest(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Formalizes a Bipartite Graph Projection of Gibsonian Affordances, establishing the mathematically bounded subgraph of all capabilities currently valid for the agent.
 
@@ -8489,7 +8489,7 @@ class CompositeNodeProfile(CoreasonBaseState):
         default=None,
         description="Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
     )
-    semantic_zoom: SemanticZoomProfile | None = Field(
+    semantic_zoom: SpatialSemanticZoomProfile | None = Field(
         default=None,
         description="The mathematical Information Bottleneck thresholds dictating the semantic degradation of this specific node.",
     )
@@ -8727,7 +8727,7 @@ class DynamicManifoldProjectionManifest(CoreasonBaseState):
     thermodynamic_burn_mapping: AnyPanelProfile = Field(
         description="Tracks the KinematicDeltaManifest against the human's allocated_budget_magnitude."
     )
-    viewport_zoom_profile: SemanticZoomProfile = Field(
+    viewport_zoom_profile: SpatialSemanticZoomProfile = Field(
         description="Governs Spectral Graph Coarsening as the human alters their Euclidean distance from the graph."
     )
 
@@ -9041,7 +9041,7 @@ class SelfCorrectionPolicy(CoreasonBaseState):
     rollback_on_failure: bool = Field(description="Whether to rollback to the previous state on failure.")
 
 
-class SemanticFirewallPolicy(CoreasonBaseState):
+class EpistemicSemanticFirewallPolicy(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Implements an execution-layer Semantic Firewall guarding against
     adversarial control-flow overrides and prompt injection attacks. As a ...Policy suffix,
@@ -9079,7 +9079,7 @@ class SemanticFirewallPolicy(CoreasonBaseState):
         return self
 
 
-class SemanticFlowPolicy(CoreasonBaseState):
+class EpistemicSemanticFlowPolicy(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Establishes the macroscopic Payload Loss Prevention (PLP) and
     Lattice-Based Information Flow Control (IFC) bounds across the entire execution graph.
@@ -9087,7 +9087,7 @@ class SemanticFlowPolicy(CoreasonBaseState):
     orchestrator must enforce globally.
 
     CAUSAL AFFORDANCE: Projects a unified defensive mesh that aggregates RedactionPolicy
-    rules, an optional SemanticFirewallPolicy intercept, and tensor-level SaeLatentPolicy
+    rules, an optional EpistemicSemanticFirewallPolicy intercept, and tensor-level SaeLatentPolicy
     firewalls to comprehensively sanitize all graph edges. The active toggle controls
     whether enforcement is live.
 
@@ -9104,7 +9104,7 @@ class SemanticFlowPolicy(CoreasonBaseState):
     )
     active: bool = Field(default=True, description="Whether this policy is currently enforcing data sanitization.")
     # RedactionPolicy has been superseded by NeMo Guardrails (EpistemicGuardrailsManifest).
-    semantic_firewall: SemanticFirewallPolicy | None = Field(
+    semantic_firewall: EpistemicSemanticFirewallPolicy | None = Field(
         default=None, description="The active cognitive defense perimeter against adversarial control-flow overrides."
     )
     latent_firewalls: list[SaeLatentPolicy] = Field(
@@ -9307,7 +9307,7 @@ class StateContract(CoreasonBaseState):
     )
 
 
-class OntologicalAlignmentPolicy(CoreasonBaseState):
+class EpistemicOntologicalAlignmentPolicy(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Implements Vector Space Isometry and Earth Mover's Distance
     bounds to mathematically verify semantic compatibility across disjoint neural
@@ -9871,7 +9871,7 @@ class TerminalBufferState(CoreasonBaseState):
 
 
 type AnyToolchainState = Annotated[
-    BrowserDOMState | TerminalBufferState,
+    SpatialBrowserDOMState | TerminalBufferState,
     Field(
         discriminator="topology_class",
         description="A discriminated union of Causal Actuators defining strict perimeters for Exogenous Perturbations to the causal graph.",
@@ -10571,7 +10571,7 @@ class CognitiveAgentNodeProfile(CoreasonBaseState):
         default=None,
         description="Passive, untyped extension point for vertical domain context. Strictly bounded to prevent JSON-bomb memory leaks. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
     )
-    semantic_zoom: SemanticZoomProfile | None = Field(
+    semantic_zoom: SpatialSemanticZoomProfile | None = Field(
         default=None,
         description="The mathematical Information Bottleneck thresholds dictating the semantic degradation of this specific node.",
     )
@@ -10763,7 +10763,7 @@ type AnyNodeProfile = Annotated[
 ]
 
 
-class SemanticZoomProfile(CoreasonBaseState):
+class SpatialSemanticZoomProfile(CoreasonBaseState):
     r"""
     AGENT INSTRUCTION: Formalizes the Information Bottleneck principle to execute Semantic Zooming. It defines the exact Euclidean distance thresholds at which a node's semantic payload deterministically degrades to preserve computational entropy.
 
@@ -10964,7 +10964,7 @@ class CouncilTopologyManifest(CoreasonBaseState):
     shared_state_contract: StateContract | None = Field(
         default=None, description="The schema-on-write contract governing the internal state of this topology."
     )
-    semantic_flow: SemanticFlowPolicy | None = Field(
+    semantic_flow: EpistemicSemanticFlowPolicy | None = Field(
         default=None,
         description="The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology.",
     )
@@ -10983,7 +10983,7 @@ class CouncilTopologyManifest(CoreasonBaseState):
     consensus_policy: ConsensusPolicy | None = Field(
         default=None, description="The explicit ruleset governing how the council resolves disagreements."
     )
-    ontological_alignment: OntologicalAlignmentPolicy | None = Field(
+    ontological_alignment: EpistemicOntologicalAlignmentPolicy | None = Field(
         default=None,
         description="The pre-flight execution gate forcing agents to mathematically align their latent semantics before participating in the topology.",
     )
@@ -11038,7 +11038,7 @@ class DAGTopologyManifest(CoreasonBaseState):
     shared_state_contract: StateContract | None = Field(
         default=None, description="The schema-on-write contract governing the internal state of this topology."
     )
-    semantic_flow: SemanticFlowPolicy | None = Field(
+    semantic_flow: EpistemicSemanticFlowPolicy | None = Field(
         default=None,
         description="The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology.",
     )
@@ -11144,7 +11144,7 @@ class DigitalTwinTopologyManifest(CoreasonBaseState):
     shared_state_contract: StateContract | None = Field(
         default=None, description="The schema-on-write contract governing the internal state of this topology."
     )
-    semantic_flow: SemanticFlowPolicy | None = Field(
+    semantic_flow: EpistemicSemanticFlowPolicy | None = Field(
         default=None,
         description="The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology.",
     )
@@ -11198,7 +11198,7 @@ class EvaluatorOptimizerTopologyManifest(CoreasonBaseState):
     shared_state_contract: StateContract | None = Field(
         default=None, description="The schema-on-write contract governing the internal state of this topology."
     )
-    semantic_flow: SemanticFlowPolicy | None = Field(
+    semantic_flow: EpistemicSemanticFlowPolicy | None = Field(
         default=None,
         description="The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology.",
     )
@@ -11266,7 +11266,7 @@ class EvolutionaryTopologyManifest(CoreasonBaseState):
     shared_state_contract: StateContract | None = Field(
         default=None, description="The schema-on-write contract governing the internal state of this topology."
     )
-    semantic_flow: SemanticFlowPolicy | None = Field(
+    semantic_flow: EpistemicSemanticFlowPolicy | None = Field(
         default=None,
         description="The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology.",
     )
@@ -11324,7 +11324,7 @@ class SMPCTopologyManifest(CoreasonBaseState):
     shared_state_contract: StateContract | None = Field(
         default=None, description="The schema-on-write contract governing the internal state of this topology."
     )
-    semantic_flow: SemanticFlowPolicy | None = Field(
+    semantic_flow: EpistemicSemanticFlowPolicy | None = Field(
         default=None,
         description="The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology.",
     )
@@ -11344,7 +11344,7 @@ class SMPCTopologyManifest(CoreasonBaseState):
         min_length=2,
         description="The strict ordered array of NodeIdentifierStates participating in the Secure Multi-Party Computation ring.",
     )
-    ontological_alignment: OntologicalAlignmentPolicy | None = Field(
+    ontological_alignment: EpistemicOntologicalAlignmentPolicy | None = Field(
         default=None,
         description="The pre-flight execution gate forcing agents to mathematically align their latent semantics before participating in the topology.",
     )
@@ -11384,7 +11384,7 @@ class SwarmTopologyManifest(CoreasonBaseState):
     shared_state_contract: StateContract | None = Field(
         default=None, description="The schema-on-write contract governing the internal state of this topology."
     )
-    semantic_flow: SemanticFlowPolicy | None = Field(
+    semantic_flow: EpistemicSemanticFlowPolicy | None = Field(
         default=None,
         description="The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology.",
     )
@@ -11599,7 +11599,7 @@ class NeurosymbolicIngestionTopologyManifest(CoreasonBaseState):
     shared_state_contract: StateContract | None = Field(
         default=None, description="The schema-on-write contract governing the internal state."
     )
-    semantic_flow: SemanticFlowPolicy | None = Field(
+    semantic_flow: EpistemicSemanticFlowPolicy | None = Field(
         default=None, description="The structural Payload Loss Prevention (PLP) contract."
     )
     observability: ObservabilityLODPolicy | None = Field(
@@ -11684,7 +11684,7 @@ class CapabilityForgeTopologyManifest(CoreasonBaseState):
     shared_state_contract: StateContract | None = Field(
         default=None, description="The schema-on-write contract governing the internal state of this topology."
     )
-    semantic_flow: SemanticFlowPolicy | None = Field(
+    semantic_flow: EpistemicSemanticFlowPolicy | None = Field(
         default=None,
         description="The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology.",
     )
@@ -11734,7 +11734,7 @@ class CapabilityForgeTopologyManifest(CoreasonBaseState):
 
 class IntentElicitationTopologyManifest(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Zero-Cost Macro-Topology that translates unstructured, high-entropy human multimodal input into a mathematically verified, zero-entropy HumanDirectiveIntent.
+    AGENT INSTRUCTION: Zero-Cost Macro-Topology that translates unstructured, high-entropy human multimodal input into a mathematically verified, zero-entropy FederatedHumanDirectiveIntent.
 
     CAUSAL AFFORDANCE: Unrolls a cyclic Directed Graph that orchestrates Multimodal Transmutation, Metacognitive Scanning (Shannon Entropy measurement), and Schema-on-Write Drafting (Human Interrogation) before yielding to the Agentic Forge.
 
@@ -11759,7 +11759,7 @@ class IntentElicitationTopologyManifest(CoreasonBaseState):
     shared_state_contract: StateContract | None = Field(
         default=None, description="The schema-on-write contract governing the internal state of this topology."
     )
-    semantic_flow: SemanticFlowPolicy | None = Field(
+    semantic_flow: EpistemicSemanticFlowPolicy | None = Field(
         default=None,
         description="The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology.",
     )
@@ -11778,7 +11778,7 @@ class IntentElicitationTopologyManifest(CoreasonBaseState):
         description="The system node responsible for executing the EpistemicTransmutationTask."
     )
     scanner_node_cid: NodeCIDState = Field(description="The agent node actively running the EpistemicScanningPolicy.")
-    human_oracle_cid: NodeCIDState = Field(description="The human UI node receiving the DraftingIntent.")
+    human_oracle_cid: NodeCIDState = Field(description="The human UI node receiving the CognitiveDraftingIntent.")
     max_clarification_loops: int = Field(
         default=5,
         ge=1,
@@ -11842,7 +11842,7 @@ class NeurosymbolicVerificationTopologyManifest(CoreasonBaseState):
     shared_state_contract: StateContract | None = Field(
         default=None, description="The schema-on-write contract governing the internal state of this topology."
     )
-    semantic_flow: SemanticFlowPolicy | None = Field(
+    semantic_flow: EpistemicSemanticFlowPolicy | None = Field(
         default=None,
         description="The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology.",
     )
@@ -12052,7 +12052,7 @@ class EpistemicQuarantineSnapshot(CoreasonBaseState):
         default_factory=list,
         description="Empathetic models of other agents to compress and target outgoing communications.",
     )
-    affordance_projection: OntologicalSurfaceProjectionManifest | None = Field(
+    affordance_projection: SpatialOntologicalSurfaceProjectionManifest | None = Field(
         default=None,
         description="The mathematically bounded subgraph of capabilities currently available to the agent.",
     )
@@ -12351,7 +12351,7 @@ class EpistemicTelemetryEvent(CoreasonBaseState):
         description="The exact topological action the human operator performed on the projected manifold."
     )
     target_node_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
-        Field(description="The specific TaxonomicNodeState CID that was manipulated.")
+        Field(description="The specific SpatialTaxonomicNodeState CID that was manipulated.")
     )
     dwell_duration_ms: int | None = Field(
         le=18446744073709551615,
@@ -12487,7 +12487,7 @@ class IntentClassificationReceipt(CoreasonBaseState):
     bounded routing heuristic. As a ...Receipt suffix, this is an append-only Merkle-DAG coordinate.
 
     CAUSAL AFFORDANCE: Commits the LLM's Softmax classification verdict to the Epistemic Ledger,
-    authorizing the TaxonomicRoutingPolicy or router gate to physically execute the targeted
+    authorizing the CognitiveTaxonomicRoutingPolicy or router gate to physically execute the targeted
     topology or sub-agent.
 
     EPISTEMIC BOUNDS: The raw_input_string is physically clamped (max_length=100000) to prevent
@@ -12519,7 +12519,7 @@ class IntentClassificationReceipt(CoreasonBaseState):
     confidence_score: float = Field(ge=0.0, le=1.0, description="The probabilistic certainty of the classification.")
     routing_policy_cid: (
         Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] | None
-    ) = Field(default=None, description="The TaxonomicRoutingPolicy CID that governed this classification.")
+    ) = Field(default=None, description="The CognitiveTaxonomicRoutingPolicy CID that governed this classification.")
 
 
 class EpistemicAxiomVerificationReceipt(CoreasonBaseState):
@@ -13113,7 +13113,7 @@ class AdjudicationReceipt(CoreasonBaseState):
 
 class CustodyReceipt(CoreasonBaseState):
     r"""
-    AGENT INSTRUCTION: A cryptographically frozen historical fact representing the successful execution of an SemanticFlowPolicy redaction on the Merkle-DAG. Enforced as fully immutable via `ConfigDict(frozen=True)`.
+    AGENT INSTRUCTION: A cryptographically frozen historical fact representing the successful execution of an EpistemicSemanticFlowPolicy redaction on the Merkle-DAG. Enforced as fully immutable via `ConfigDict(frozen=True)`.
 
     CAUSAL AFFORDANCE: Unlocks strict audit compliance by mathematically mapping the optional toxic `pre_redaction_hash` to the mandatory safe `post_redaction_hash`, proving non-repudiation via the `applied_policy_cid`.
 
@@ -13142,7 +13142,7 @@ class CustodyReceipt(CoreasonBaseState):
     applied_policy_cid: Annotated[
         str, StringConstraints(min_length=1, max_length=255, pattern="^[a-zA-Z0-9_.:-]+$")
     ] = Field(
-        description="The deterministic capability pointer representing the SemanticFlowPolicy successfully applied."
+        description="The deterministic capability pointer representing the EpistemicSemanticFlowPolicy successfully applied."
     )
     pre_redaction_hash: (
         Annotated[str, StringConstraints(min_length=1, max_length=255, pattern="^[a-f0-9]{64}$")] | None
@@ -13481,7 +13481,7 @@ type AnyStateEvent = Annotated[
     | CausalExplanationEvent
     | IntentClassificationReceipt
     | SemanticRelationalVectorState
-    | OntologicalReificationReceipt
+    | EpistemicOntologicalReificationReceipt
     | CircuitBreakerEvent
     | ExogenousEpistemicEvent
     | EpistemicLogEvent
@@ -13706,7 +13706,7 @@ class EpistemicStarvationEvent(CoreasonBaseState):
         return self
 
 
-class OntologicalReificationReceipt(CoreasonBaseState):
+class EpistemicOntologicalReificationReceipt(CoreasonBaseState):
     """
     AGENT INSTRUCTION: An append-only, cryptographically frozen coordinate verifying the integrity of a generalized bimodal semantic transformation. Commits the transformation mechanism to the Epistemic Ledger, physically separating explicit empirical facts from machine-inferred hypotheses to eliminate traceability collapse.
 
@@ -14045,7 +14045,7 @@ EpistemicFlowStateReceipt.model_rebuild()
 DifferentiableLogicPolicy.model_rebuild()
 CausalExplanationEvent.model_rebuild()
 LatentSchemaInferenceIntent.model_rebuild()
-HumanDirectiveIntent.model_rebuild()
+FederatedHumanDirectiveIntent.model_rebuild()
 IntentClassificationReceipt.model_rebuild()
 ReasoningEngineeringPolicy.model_rebuild()
 ContinuousObservationState.model_rebuild()
@@ -14071,7 +14071,7 @@ SpatialBillboardContract.model_rebuild()
 VolumetricEdgeProfile.model_rebuild()
 
 KinematicDerivativeProfile.model_rebuild()
-SemanticZoomProfile.model_rebuild()
+SpatialSemanticZoomProfile.model_rebuild()
 MarkovBlanketRenderingPolicy.model_rebuild()
 TelemetryBackpressureContract.model_rebuild()
 ObservabilityLODPolicy.model_rebuild()
@@ -14105,14 +14105,14 @@ SemanticRelationalVectorState.model_rebuild()
 AtomicPropositionState.model_rebuild()
 ContextualSemanticResolutionIntent.model_rebuild()
 PostCoordinatedSemanticState.model_rebuild()
-OntologicalReificationReceipt.model_rebuild()
+EpistemicOntologicalReificationReceipt.model_rebuild()
 
 
 GlobalSemanticInvariantProfile.model_rebuild()
 MultimodalArtifactReceipt.model_rebuild()
 DiscourseNodeState.model_rebuild()
 DiscourseTreeManifest.model_rebuild()
-OntologyDiscoveryIntent.model_rebuild()
+EpistemicOntologyDiscoveryIntent.model_rebuild()
 SemanticMappingHeuristicIntent.model_rebuild()
 
 StochasticNodeState.model_rebuild()
@@ -14153,7 +14153,7 @@ EvidentiaryGroundingSLA.model_rebuild()
 EpistemicAxiomVerificationReceipt.model_rebuild()
 
 LinkMLValidationSLA.model_rebuild()
-OntologicalCrosswalkIntent.model_rebuild()
+EpistemicOntologicalCrosswalkIntent.model_rebuild()
 CrosswalkResolutionReceipt.model_rebuild()
 
 EvidentiaryCitationState.model_rebuild()

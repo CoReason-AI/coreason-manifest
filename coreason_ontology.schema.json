@@ -688,8 +688,9 @@
           "contextual_semantic_resolution": "#/$defs/ContextualSemanticResolutionIntent",
           "continuous_spatial_mutation": "#/$defs/ContinuousSpatialMutationIntent",
           "dowhy_intervention_intent": "#/$defs/DoWhyInterventionIntent",
-          "drafting": "#/$defs/DraftingIntent",
+          "drafting": "#/$defs/CognitiveDraftingIntent",
           "empirical_falsification_contract": "#/$defs/EmpiricalFalsificationContract",
+          "epistemic_ontological_crosswalk": "#/$defs/EpistemicOntologicalCrosswalkIntent",
           "epistemic_ontological_normalization": "#/$defs/EpistemicOntologicalNormalizationIntent",
           "epistemic_transmutation_task": "#/$defs/EpistemicTransmutationTask",
           "epistemic_upsampling_task": "#/$defs/EpistemicUpsamplingTask",
@@ -700,14 +701,13 @@
           "forced_adjudication": "#/$defs/AdjudicationIntent",
           "formal_logic_premise": "#/$defs/FormalLogicPremise",
           "fyi": "#/$defs/FYIIntent",
-          "human_directive": "#/$defs/HumanDirectiveIntent",
-          "informational": "#/$defs/SemanticIntent",
+          "human_directive": "#/$defs/FederatedHumanDirectiveIntent",
+          "informational": "#/$defs/CognitiveSemanticIntent",
           "latent_projection": "#/$defs/LatentProjectionIntent",
           "latent_schema_inference": "#/$defs/LatentSchemaInferenceIntent",
           "mcp_client_intent": "#/$defs/MCPClientIntent",
           "neurosymbolic_inference": "#/$defs/NeurosymbolicInferenceIntent",
-          "ontological_crosswalk": "#/$defs/OntologicalCrosswalkIntent",
-          "ontology_discovery": "#/$defs/OntologyDiscoveryIntent",
+          "ontology_discovery": "#/$defs/EpistemicOntologyDiscoveryIntent",
           "override": "#/$defs/OverrideIntent",
           "quarantine_intent": "#/$defs/QuarantineIntent",
           "rdf_serialization": "#/$defs/RDFSerializationIntent",
@@ -742,13 +742,13 @@
           "$ref": "#/$defs/FalsificationContract"
         },
         {
-          "$ref": "#/$defs/OntologicalCrosswalkIntent"
+          "$ref": "#/$defs/EpistemicOntologicalCrosswalkIntent"
         },
         {
-          "$ref": "#/$defs/SemanticIntent"
+          "$ref": "#/$defs/CognitiveSemanticIntent"
         },
         {
-          "$ref": "#/$defs/DraftingIntent"
+          "$ref": "#/$defs/CognitiveDraftingIntent"
         },
         {
           "$ref": "#/$defs/AdjudicationIntent"
@@ -769,13 +769,13 @@
           "$ref": "#/$defs/LatentSchemaInferenceIntent"
         },
         {
-          "$ref": "#/$defs/HumanDirectiveIntent"
+          "$ref": "#/$defs/FederatedHumanDirectiveIntent"
         },
         {
           "$ref": "#/$defs/ContextualSemanticResolutionIntent"
         },
         {
-          "$ref": "#/$defs/OntologyDiscoveryIntent"
+          "$ref": "#/$defs/EpistemicOntologyDiscoveryIntent"
         },
         {
           "$ref": "#/$defs/SemanticMappingHeuristicIntent"
@@ -920,19 +920,19 @@
     "AnyPresentationIntent": {
       "discriminator": {
         "mapping": {
-          "drafting": "#/$defs/DraftingIntent",
+          "drafting": "#/$defs/CognitiveDraftingIntent",
           "escalation": "#/$defs/EscalationIntent",
           "forced_adjudication": "#/$defs/AdjudicationIntent",
-          "informational": "#/$defs/SemanticIntent"
+          "informational": "#/$defs/CognitiveSemanticIntent"
         },
         "propertyName": "topology_class"
       },
       "oneOf": [
         {
-          "$ref": "#/$defs/SemanticIntent"
+          "$ref": "#/$defs/CognitiveSemanticIntent"
         },
         {
-          "$ref": "#/$defs/DraftingIntent"
+          "$ref": "#/$defs/CognitiveDraftingIntent"
         },
         {
           "$ref": "#/$defs/AdjudicationIntent"
@@ -980,7 +980,7 @@
           "intent_classification": "#/$defs/IntentClassificationReceipt",
           "mcp_tool_definition": "#/$defs/MCPToolDefinition",
           "observation": "#/$defs/ObservationEvent",
-          "ontological_reification": "#/$defs/OntologicalReificationReceipt",
+          "ontological_reification": "#/$defs/EpistemicOntologicalReificationReceipt",
           "oracle_execution_receipt": "#/$defs/OracleExecutionReceipt",
           "persistence_commit": "#/$defs/PersistenceCommitReceipt",
           "post_coordinated_concept": "#/$defs/PostCoordinatedSemanticState",
@@ -1073,7 +1073,7 @@
           "$ref": "#/$defs/SemanticRelationalVectorState"
         },
         {
-          "$ref": "#/$defs/OntologicalReificationReceipt"
+          "$ref": "#/$defs/EpistemicOntologicalReificationReceipt"
         },
         {
           "$ref": "#/$defs/CircuitBreakerEvent"
@@ -1144,14 +1144,14 @@
       "description": "A discriminated union of Causal Actuators defining strict perimeters for Exogenous Perturbations to the causal graph.",
       "discriminator": {
         "mapping": {
-          "browser": "#/$defs/BrowserDOMState",
+          "browser": "#/$defs/SpatialBrowserDOMState",
           "terminal": "#/$defs/TerminalBufferState"
         },
         "propertyName": "topology_class"
       },
       "oneOf": [
         {
-          "$ref": "#/$defs/BrowserDOMState"
+          "$ref": "#/$defs/SpatialBrowserDOMState"
         },
         {
           "$ref": "#/$defs/TerminalBufferState"
@@ -2011,78 +2011,6 @@
       "title": "BoundedJSONRPCIntent",
       "type": "object"
     },
-    "BrowserDOMState": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the exogenous structural boundary of a headless browser environment within a Partially Observable Markov Decision Process (POMDP).\n\nCAUSAL AFFORDANCE: Exposes the deterministic coordinate space (`viewport_size`, `dom_hash`, `accessibility_tree_hash`) enabling spatial kinematics and visual grounding.\n\nEPISTEMIC BOUNDS: `dom_hash` rigidly locked to SHA-256 pattern.\n\nMCP ROUTING TRIGGERS: Exogenous Perturbation, DOM Topography, Spatial Execution Bound, Accessibility Tree",
-      "properties": {
-        "topology_class": {
-          "const": "browser",
-          "default": "browser",
-          "description": "Discriminator for Causal Actuators representing structural shifts.",
-          "title": "Topology Class",
-          "type": "string"
-        },
-        "current_url": {
-          "description": "Spatial Execution Bounds where the agent interacts.",
-          "maxLength": 2000,
-          "title": "Current Url",
-          "type": "string"
-        },
-        "viewport_size": {
-          "description": "Capability Perimeters detailing bounding coordinates.",
-          "maxItems": 1000,
-          "minItems": 2,
-          "prefixItems": [
-            {
-              "type": "integer"
-            },
-            {
-              "type": "integer"
-            }
-          ],
-          "title": "Viewport Size",
-          "type": "array"
-        },
-        "dom_hash": {
-          "description": "The SHA-256 hash acting as the structural manifestation vector.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-f0-9]{64}$",
-          "title": "Dom Hash",
-          "type": "string"
-        },
-        "accessibility_tree_hash": {
-          "description": "The SHA-256 hash of the accessibility tree defining Exogenous Perturbations to the state space.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-f0-9]{64}$",
-          "title": "Accessibility Tree Hash",
-          "type": "string"
-        },
-        "screenshot_cid": {
-          "anyOf": [
-            {
-              "maxLength": 2000,
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the snapshot representation.",
-          "title": "Screenshot Cid"
-        }
-      },
-      "required": [
-        "current_url",
-        "viewport_size",
-        "dom_hash",
-        "accessibility_tree_hash"
-      ],
-      "title": "BrowserDOMState",
-      "type": "object"
-    },
     "BudgetExhaustionEvent": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents the definitive algorithmic circuit breaker (Optimal Stopping boundary) triggered the exact millisecond thermodynamic token burn mathematically exceeds the locked Proof-of-Stake escrow.\n\nCAUSAL AFFORDANCE: Instantly collapses the active Latent Scratchpad trajectory and physically severs the kinetic execution loop, preventing Sybil griefing attacks against the swarm's compute pool.\n\nEPISTEMIC BOUNDS: Cryptographically targets the specific `exhausted_escrow_cid` and the exact `final_burn_receipt_cid` (CID regex) that pushed the thermodynamic ledger into a negative state, providing an undeniable audit trail.\n\nMCP ROUTING TRIGGERS: Optimal Stopping Theory, Escrow Exhaustion, Sybil Resistance, Algorithmic Circuit Breaker, Generation Halting",
@@ -2264,7 +2192,7 @@
         "semantic_flow": {
           "anyOf": [
             {
-              "$ref": "#/$defs/SemanticFlowPolicy"
+              "$ref": "#/$defs/EpistemicSemanticFlowPolicy"
             },
             {
               "type": "null"
@@ -2882,7 +2810,7 @@
         "semantic_zoom": {
           "anyOf": [
             {
-              "$ref": "#/$defs/SemanticZoomProfile"
+              "$ref": "#/$defs/SpatialSemanticZoomProfile"
             },
             {
               "type": "null"
@@ -3263,6 +3191,54 @@
       "title": "CognitiveDetailedBalanceContract",
       "type": "object"
     },
+    "CognitiveDraftingIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Fristonian Active Inference to minimize Expected Free Energy. Triggered when the swarm detects a catastrophic Epistemic Gap and lacks the structural parameters necessary to reduce Shannon Entropy autonomously.\n\nCAUSAL AFFORDANCE: Emits a structural query to an external human oracle to explicitly solicit data. It suspends autonomous trajectory generation until the missing semantic dimensions are actively projected back into the working memory partition.\n\nEPISTEMIC BOUNDS: The human's unstructured cognitive entropy is aggressively forced through a mathematical funnel via the `resolution_schema`. This schema is volumetrically clamped by the `enforce_payload_topology` hook to prevent AST explosion during input parsing.\n\nMCP ROUTING TRIGGERS: Active Inference, Expected Free Energy, Shannon Entropy Reduction, Zero-Shot Elicitation, Epistemic Gap",
+      "properties": {
+        "topology_class": {
+          "const": "drafting",
+          "default": "drafting",
+          "description": "Discriminator for requesting specific missing context from a human.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "context_prompt": {
+          "description": "The prompt explaining what information the swarm is missing.",
+          "maxLength": 2000,
+          "title": "Context Prompt",
+          "type": "string"
+        },
+        "resolution_schema": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonPrimitiveState"
+          },
+          "description": "The strict JSON Schema the human's input must satisfy before the graph can resume. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
+          "maxProperties": 1000,
+          "propertyNames": {
+            "maxLength": 255
+          },
+          "title": "Resolution Schema",
+          "type": "object"
+        },
+        "timeout_action": {
+          "description": "The action to take if the human fails to provide the draft.",
+          "enum": [
+            "rollback",
+            "proceed_default",
+            "terminate"
+          ],
+          "title": "Timeout Action",
+          "type": "string"
+        }
+      },
+      "required": [
+        "context_prompt",
+        "resolution_schema",
+        "timeout_action"
+      ],
+      "title": "CognitiveDraftingIntent",
+      "type": "object"
+    },
     "CognitiveDualVerificationReceipt": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes a Byzantine-tolerant Multi-Agent Debate and Consensus\nprotocol (the \"Two-Man Rule\") to eliminate single-point epistemic failures. As a\n...Receipt suffix, this is a frozen historical fact on the Merkle-DAG.\n\nCAUSAL AFFORDANCE: Authorizes the final cryptographic lock on a reasoning trace or\nsemantic payload, proving that two independent cognitive agents achieved symmetric\nfactual alignment via trace_factual_alignment (bool).\n\nEPISTEMIC BOUNDS: The @model_validator enforce_dual_key_lock mathematically\nguarantees zero-trust isolation by demanding that primary_verifier_cid and\nsecondary_verifier_cid (both NodeCIDState) resolve to completely distinct\nDecentralized Identifiers (DIDs).\n\nMCP ROUTING TRIGGERS: Multi-Agent Debate, Byzantine Tolerance, Dual-Key\nCryptography, Symmetric Consensus, Zero-Trust Evaluation",
@@ -3357,7 +3333,7 @@
         "semantic_zoom": {
           "anyOf": [
             {
-              "$ref": "#/$defs/SemanticZoomProfile"
+              "$ref": "#/$defs/SpatialSemanticZoomProfile"
             },
             {
               "type": "null"
@@ -3594,6 +3570,41 @@
       "title": "CognitiveSamplingPolicy",
       "type": "object"
     },
+    "CognitiveSemanticIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Synchronous Epistemic Signaling within a Mixed-Initiative Control paradigm. Indicates that the presented manifold requires acknowledgment without reciprocal causal action.\n\nCAUSAL AFFORDANCE: Conditionally suspends the continuous execution DAG to project a read-only observational state manifold to the human operator. Resumption is dynamically governed by the deterministic `timeout_action`.\n\nEPISTEMIC BOUNDS: The semantic payload (`message`) is physically clamped to `max_length=2000` to prevent UI dictionary bombing. The `timeout_action` is locked to a strict Finite State Machine Literal `[\"rollback\", \"proceed_default\", \"terminate\"]`.\n\nMCP ROUTING TRIGGERS: Synchronous Epistemic Signaling, Mixed-Initiative Control, Finite State Machine, Oracle Projection, Halting Problem",
+      "properties": {
+        "topology_class": {
+          "const": "informational",
+          "default": "informational",
+          "description": "The discriminative topological boundary for read-only informational handoffs.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "message": {
+          "description": "The context or summary to display to the human operator.",
+          "maxLength": 2000,
+          "title": "Message",
+          "type": "string"
+        },
+        "timeout_action": {
+          "description": "The orchestrator's automatic fallback if the human does not acknowledge the intent in time.",
+          "enum": [
+            "rollback",
+            "proceed_default",
+            "terminate"
+          ],
+          "title": "Timeout Action",
+          "type": "string"
+        }
+      },
+      "required": [
+        "message",
+        "timeout_action"
+      ],
+      "title": "CognitiveSemanticIntent",
+      "type": "object"
+    },
     "CognitiveStateProfile": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Tracks the continuous Partially Observable Markov Decision Process (POMDP) belief distribution and dictates the active cognitive heuristic.\n\nCAUSAL AFFORDANCE: Orchestrates multi-dimensional state progression, determining if the agent explores via high `divergence_tolerance` or exploits via constrained caution vectors. Embeds steering and routing contracts for mechanistic control.\n\nEPISTEMIC BOUNDS: Relies on strict Pydantic bounding of internal indices (`urgency_index`, `caution_index`, `divergence_tolerance`) to continuous probability distributions mathematically locked between `[ge=0.0, le=1.0]`.\n\nMCP ROUTING TRIGGERS: POMDP, Continuous Belief Distribution, Heuristic Routing, State Progression, Cognitive Constraining",
@@ -3698,7 +3709,7 @@
       "type": "object",
       "x-domain-cluster": "cognitive_routing",
       "x-synergistic-classes": [
-        "TaxonomicRoutingPolicy",
+        "CognitiveTaxonomicRoutingPolicy",
         "CognitiveAgentNodeProfile",
         "SemanticRelationalVectorState"
       ]
@@ -3771,7 +3782,7 @@
         "semantic_zoom": {
           "anyOf": [
             {
-              "$ref": "#/$defs/SemanticZoomProfile"
+              "$ref": "#/$defs/SpatialSemanticZoomProfile"
             },
             {
               "type": "null"
@@ -3852,6 +3863,56 @@
         "description"
       ],
       "title": "CognitiveSystemNodeProfile",
+      "type": "object"
+    },
+    "CognitiveTaxonomicRoutingPolicy": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements a deterministic Softmax Router Gate, leveraging Cognitive Load Theory to map high-entropy natural language intents into explicitly bounded spatial organizing frameworks.\n\nCAUSAL AFFORDANCE: Preemptively routes classified intents to optimized taxonomic layouts, mechanically preventing token exhaustion and attention dilution in downstream processing nodes before compute is allocated.\n\nEPISTEMIC BOUNDS: The `intent_to_heuristic_matrix` physically restricts state-space explosion by capping at `max_length=1000` dictionary properties. The matrix keys are strictly bounded to 255 characters via `StringConstraints` to mathematically prevent Dictionary Bombing.\n\nMCP ROUTING TRIGGERS: Softmax Gating, Cognitive Load Theory, Pre-Flight Routing, Dictionary Bombing Prevention, Token Exhaustion Mitigation",
+      "properties": {
+        "policy_cid": {
+          "description": "Unique identifier for this pre-flight routing policy.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Policy Cid",
+          "type": "string"
+        },
+        "intent_to_heuristic_matrix": {
+          "additionalProperties": {
+            "enum": [
+              "chronological",
+              "entity_centric",
+              "semantic_cluster",
+              "confidence_decay"
+            ],
+            "type": "string"
+          },
+          "description": "Strict dictionary binding classified natural language intents to bounded spatial heuristics.",
+          "maxProperties": 1000,
+          "propertyNames": {
+            "maxLength": 255
+          },
+          "title": "Intent To Heuristic Matrix",
+          "type": "object"
+        },
+        "fallback_heuristic": {
+          "description": "The deterministic default applied if intent classification falls below the safety threshold.",
+          "enum": [
+            "chronological",
+            "entity_centric",
+            "semantic_cluster",
+            "confidence_decay"
+          ],
+          "title": "Fallback Heuristic",
+          "type": "string"
+        }
+      },
+      "required": [
+        "policy_cid",
+        "intent_to_heuristic_matrix",
+        "fallback_heuristic"
+      ],
+      "title": "CognitiveTaxonomicRoutingPolicy",
       "type": "object"
     },
     "CognitiveTierProfile": {
@@ -4001,7 +4062,7 @@
         "semantic_zoom": {
           "anyOf": [
             {
-              "$ref": "#/$defs/SemanticZoomProfile"
+              "$ref": "#/$defs/SpatialSemanticZoomProfile"
             },
             {
               "type": "null"
@@ -4820,7 +4881,7 @@
         "semantic_flow": {
           "anyOf": [
             {
-              "$ref": "#/$defs/SemanticFlowPolicy"
+              "$ref": "#/$defs/EpistemicSemanticFlowPolicy"
             },
             {
               "type": "null"
@@ -4879,7 +4940,7 @@
         "ontological_alignment": {
           "anyOf": [
             {
-              "$ref": "#/$defs/OntologicalAlignmentPolicy"
+              "$ref": "#/$defs/EpistemicOntologicalAlignmentPolicy"
             },
             {
               "type": "null"
@@ -5159,7 +5220,7 @@
     },
     "CustodyReceipt": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing the successful execution of an SemanticFlowPolicy redaction on the Merkle-DAG. Enforced as fully immutable via `ConfigDict(frozen=True)`.\n\nCAUSAL AFFORDANCE: Unlocks strict audit compliance by mathematically mapping the optional toxic `pre_redaction_hash` to the mandatory safe `post_redaction_hash`, proving non-repudiation via the `applied_policy_cid`.\n\nEPISTEMIC BOUNDS: Temporal geometry strictly clamped to `redaction_timestamp_unix_nano` (`ge=0, le=253402300799000000000`). Both hashes are locked to immutable SHA-256 hexadecimal bounds (`^[a-f0-9]{64}$`). `pre_redaction_hash` is optional (`default=None`) for isolated audit vaults.\n\nMCP ROUTING TRIGGERS: Chain of Custody, Cryptographic Provenance, Merkle-DAG Audit, Non-Repudiation, Data Isomorphism",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing the successful execution of an EpistemicSemanticFlowPolicy redaction on the Merkle-DAG. Enforced as fully immutable via `ConfigDict(frozen=True)`.\n\nCAUSAL AFFORDANCE: Unlocks strict audit compliance by mathematically mapping the optional toxic `pre_redaction_hash` to the mandatory safe `post_redaction_hash`, proving non-repudiation via the `applied_policy_cid`.\n\nEPISTEMIC BOUNDS: Temporal geometry strictly clamped to `redaction_timestamp_unix_nano` (`ge=0, le=253402300799000000000`). Both hashes are locked to immutable SHA-256 hexadecimal bounds (`^[a-f0-9]{64}$`). `pre_redaction_hash` is optional (`default=None`) for isolated audit vaults.\n\nMCP ROUTING TRIGGERS: Chain of Custody, Cryptographic Provenance, Merkle-DAG Audit, Non-Repudiation, Data Isomorphism",
       "properties": {
         "event_cid": {
           "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
@@ -5199,7 +5260,7 @@
           "type": "string"
         },
         "applied_policy_cid": {
-          "description": "The deterministic capability pointer representing the SemanticFlowPolicy successfully applied.",
+          "description": "The deterministic capability pointer representing the EpistemicSemanticFlowPolicy successfully applied.",
           "maxLength": 255,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
@@ -5419,7 +5480,7 @@
         "semantic_flow": {
           "anyOf": [
             {
-              "$ref": "#/$defs/SemanticFlowPolicy"
+              "$ref": "#/$defs/EpistemicSemanticFlowPolicy"
             },
             {
               "type": "null"
@@ -5515,7 +5576,7 @@
       "type": "object",
       "x-domain-cluster": "cognitive_routing",
       "x-synergistic-classes": [
-        "TaxonomicRoutingPolicy",
+        "CognitiveTaxonomicRoutingPolicy",
         "CognitiveAgentNodeProfile",
         "SemanticRelationalVectorState"
       ]
@@ -5910,7 +5971,7 @@
         "semantic_flow": {
           "anyOf": [
             {
-              "$ref": "#/$defs/SemanticFlowPolicy"
+              "$ref": "#/$defs/EpistemicSemanticFlowPolicy"
             },
             {
               "type": "null"
@@ -6439,54 +6500,6 @@
       "title": "DocumentLayoutRegionState",
       "type": "object"
     },
-    "DraftingIntent": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Fristonian Active Inference to minimize Expected Free Energy. Triggered when the swarm detects a catastrophic Epistemic Gap and lacks the structural parameters necessary to reduce Shannon Entropy autonomously.\n\nCAUSAL AFFORDANCE: Emits a structural query to an external human oracle to explicitly solicit data. It suspends autonomous trajectory generation until the missing semantic dimensions are actively projected back into the working memory partition.\n\nEPISTEMIC BOUNDS: The human's unstructured cognitive entropy is aggressively forced through a mathematical funnel via the `resolution_schema`. This schema is volumetrically clamped by the `enforce_payload_topology` hook to prevent AST explosion during input parsing.\n\nMCP ROUTING TRIGGERS: Active Inference, Expected Free Energy, Shannon Entropy Reduction, Zero-Shot Elicitation, Epistemic Gap",
-      "properties": {
-        "topology_class": {
-          "const": "drafting",
-          "default": "drafting",
-          "description": "Discriminator for requesting specific missing context from a human.",
-          "title": "Topology Class",
-          "type": "string"
-        },
-        "context_prompt": {
-          "description": "The prompt explaining what information the swarm is missing.",
-          "maxLength": 2000,
-          "title": "Context Prompt",
-          "type": "string"
-        },
-        "resolution_schema": {
-          "additionalProperties": {
-            "$ref": "#/$defs/JsonPrimitiveState"
-          },
-          "description": "The strict JSON Schema the human's input must satisfy before the graph can resume. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
-          "maxProperties": 1000,
-          "propertyNames": {
-            "maxLength": 255
-          },
-          "title": "Resolution Schema",
-          "type": "object"
-        },
-        "timeout_action": {
-          "description": "The action to take if the human fails to provide the draft.",
-          "enum": [
-            "rollback",
-            "proceed_default",
-            "terminate"
-          ],
-          "title": "Timeout Action",
-          "type": "string"
-        }
-      },
-      "required": [
-        "context_prompt",
-        "resolution_schema",
-        "timeout_action"
-      ],
-      "title": "DraftingIntent",
-      "type": "object"
-    },
     "DynamicConvergenceSLA": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the mathematical Optimal Stopping Theory boundaries for Monte\nCarlo Tree Search (MCTS) and test-time compute scaling. As an ...SLA suffix, this object\nenforces rigid mathematical boundaries that the orchestrator must respect globally.\n\nCAUSAL AFFORDANCE: Triggers an early termination circuit breaker on reasoning trajectories\nwhen the gradient of the Process Reward Model (PRM) score falls below the epsilon delta,\nhalting unnecessary probability wave expansion and preserving VRAM.\n\nEPISTEMIC BOUNDS: Mathematically constrained by convergence_delta_epsilon (ge=0.0, le=1.0)\nover a strictly positive lookback_window_steps (gt=0, le=18446744073709551615). Physically mandates\na minimum_reasoning_steps burn-in period (gt=0, le=18446744073709551615) to prevent premature\ncollapse before the latent space is adequately explored.\n\nMCP ROUTING TRIGGERS: Optimal Stopping Theory, MCTS, PRM Convergence, Circuit Breaker,\nBellman Equation",
@@ -6582,7 +6595,7 @@
           "description": "Tracks the KinematicDeltaManifest against the human's allocated_budget_magnitude."
         },
         "viewport_zoom_profile": {
-          "$ref": "#/$defs/SemanticZoomProfile",
+          "$ref": "#/$defs/SpatialSemanticZoomProfile",
           "description": "Governs Spectral Graph Coarsening as the human alters their Euclidean distance from the graph."
         }
       },
@@ -7764,6 +7777,96 @@
       "title": "EpistemicLogEvent",
       "type": "object"
     },
+    "EpistemicOntologicalAlignmentPolicy": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Vector Space Isometry and Earth Mover's Distance\nbounds to mathematically verify semantic compatibility across disjoint neural\nmodels before allowing multi-agent graph coupling. As a ...Policy suffix, this\ndefines rigid mathematical boundaries.\n\nCAUSAL AFFORDANCE: Mechanically severs federated discovery attempts if the\nparticipating agents' internal embedding distances fall below the required\nthreshold. A fallback_state_contract (StateContract | None, default=None)\nforces agents to use canonical JSON Schemas when geometries are\nincommensurable.\n\nEPISTEMIC BOUNDS: The min_cosine_similarity is strictly clamped\n(ge=-1.0, le=1.0). The require_isometry_proof boolean (no default) enforces\nrigid projection validation prior to semantic mapping.\n\nMCP ROUTING TRIGGERS: Vector Space Isometry, Earth Mover's Distance, Latent\nSemantic Alignment, Zero-Trust Federation, Geometric Projection",
+      "properties": {
+        "min_cosine_similarity": {
+          "description": "The absolute minimum latent vector similarity required to allow swarm communication.",
+          "maximum": 1.0,
+          "minimum": -1.0,
+          "title": "Min Cosine Similarity",
+          "type": "number"
+        },
+        "require_isometry_proof": {
+          "description": "If True, the orchestrator must reject dimensional projections that fall below a safe isometry preservation score.",
+          "title": "Require Isometry Proof",
+          "type": "boolean"
+        },
+        "fallback_state_contract": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StateContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The rigid external JSON schema to force agents to use if their latent vector geometries are hopelessly incommensurable."
+        }
+      },
+      "required": [
+        "min_cosine_similarity",
+        "require_isometry_proof"
+      ],
+      "title": "EpistemicOntologicalAlignmentPolicy",
+      "type": "object"
+    },
+    "EpistemicOntologicalCrosswalkIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A kinetic trigger instructing the orchestrator to route an array of ungrounded text entities through a grounding oracle (OntoGPT/OAK) to map them to formal ontology CURIEs.\n\nCAUSAL AFFORDANCE: Authorizes the runtime to execute Bipartite Ontological Mapping, collapsing high-entropy natural language strings into zero-entropy Semantic Web identifiers.\n\nEPISTEMIC BOUNDS: The search space is rigidly clamped by the `target_ontology_registries` array (e.g., ['MONDO', 'HP']). The `minimum_isometry_threshold` physically restricts acceptable mappings to a strictly positive cosine/BM25 similarity (`ge=0.0, le=1.0`).\n\nMCP ROUTING TRIGGERS: Bipartite Ontological Mapping, Grounding Oracle, CURIE Resolution, Isometry Thresholding, Semantic Crosswalk",
+      "properties": {
+        "topology_class": {
+          "const": "epistemic_ontological_crosswalk",
+          "default": "epistemic_ontological_crosswalk",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "target_graph_cid": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Target Graph Cid",
+          "type": "string"
+        },
+        "source_strings": {
+          "description": "The ungrounded natural language concepts extracted by the LLM.",
+          "items": {
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Source Strings",
+          "type": "array"
+        },
+        "target_ontology_registries": {
+          "description": "The strictly typed standard ontology namespaces to search (e.g., 'MONDO', 'CHEBI').",
+          "items": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Target Ontology Registries",
+          "type": "array"
+        },
+        "minimum_isometry_threshold": {
+          "description": "The semantic distance threshold required to automatically accept a mapping.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Minimum Isometry Threshold",
+          "type": "number"
+        }
+      },
+      "required": [
+        "target_graph_cid",
+        "source_strings",
+        "target_ontology_registries",
+        "minimum_isometry_threshold"
+      ],
+      "title": "EpistemicOntologicalCrosswalkIntent",
+      "type": "object"
+    },
     "EpistemicOntologicalNormalizationIntent": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A non-monotonic hypothesis requesting the transformation of unstructured or dirty public data into a pristine, mathematically bounded resource.\n\nCAUSAL AFFORDANCE: Triggers the execution of proprietary ETL and semantic vectorization pipelines within the sovereign VPC.\n\nEPISTEMIC BOUNDS: Forces absolute structural isomorphism by demanding that the resulting artifact perfectly matches the geometries declared in the target_ontology_urn. URN is clamped to 2000 chars.\n\nMCP ROUTING TRIGGERS: Semantic Crosswalk, ETL Pipeline, Data Normalization, Knowledge Graph Extraction",
@@ -7796,6 +7899,178 @@
         "target_ontology_urn"
       ],
       "title": "EpistemicOntologicalNormalizationIntent",
+      "type": "object"
+    },
+    "EpistemicOntologicalReificationReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: An append-only, cryptographically frozen coordinate verifying the integrity of a generalized bimodal semantic transformation. Commits the transformation mechanism to the Epistemic Ledger, physically separating explicit empirical facts from machine-inferred hypotheses to eliminate traceability collapse.\n\n    CAUSAL AFFORDANCE: Physically authorizes the orchestrator to commit the transformation mechanism to the Epistemic Ledger.\n\n    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.\n\n    MCP ROUTING TRIGGERS: Ontological Reification, Bimodal Semantic Transformation, Epistemic Ledger, Traceability Collapse",
+      "properties": {
+        "topology_class": {
+          "const": "ontological_reification",
+          "default": "ontological_reification",
+          "description": "Discriminator for the reification receipt.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "event_cid": {
+          "description": "Cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Event Cid",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "The precise temporal coordinate of the event realization.",
+          "title": "Timestamp",
+          "type": "number"
+        },
+        "source_data_hash": {
+          "description": "The undeniable SHA-256 hash of the pre-transmutation artifact, unstructured text chunk, or telemetry row.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Source Data Hash",
+          "type": "string"
+        },
+        "target_namespace": {
+          "description": "The standardized semantic ontology namespace the data was projected into.",
+          "maxLength": 2000,
+          "title": "Target Namespace",
+          "type": "string"
+        },
+        "algorithmic_mechanism": {
+          "$ref": "#/$defs/TransformationMechanismProfile",
+          "description": "The deterministic or probabilistic engine used to execute the transmutation."
+        },
+        "belief_vector": {
+          "$ref": "#/$defs/DempsterShaferBeliefVector",
+          "description": "The composite Dempster-Shafer tri-vector capturing independent confidence dimensions and calculated epistemic conflict."
+        },
+        "is_latent_inference": {
+          "default": false,
+          "description": "CRITICAL: Explicit flag required if the edge or node was generated by an AI reasoning agent via transitive closure or abduction rather than extracted as an explicit empirical fact. Eliminates hallucinations of certainty.",
+          "title": "Is Latent Inference",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "event_cid",
+        "timestamp",
+        "source_data_hash",
+        "target_namespace",
+        "algorithmic_mechanism",
+        "belief_vector"
+      ],
+      "title": "EpistemicOntologicalReificationReceipt",
+      "type": "object"
+    },
+    "EpistemicOntologyDiscoveryIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Authorizes a Semantic Watchdog Agent to perform strict out-of-band polling against external semantic registries to monitor for ontological deprecation or semantic drift.",
+      "properties": {
+        "topology_class": {
+          "const": "ontology_discovery",
+          "default": "ontology_discovery",
+          "description": "Discriminator for external ontology polling.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "jsonrpc": {
+          "const": "2.0",
+          "description": "JSON-RPC version.",
+          "title": "Jsonrpc",
+          "type": "string"
+        },
+        "method": {
+          "description": "Method to be invoked.",
+          "maxLength": 1000,
+          "title": "Method",
+          "type": "string"
+        },
+        "params": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/JsonPrimitiveState"
+              },
+              "maxProperties": 86400000,
+              "propertyNames": {
+                "maxLength": 255
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Payload parameters. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
+          "title": "Params"
+        },
+        "id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_.:-]+$",
+              "type": "string"
+            },
+            {
+              "maximum": 18446744073709551615,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Unique request identifier.",
+          "title": "Id"
+        },
+        "target_registry_uri": {
+          "description": "The standard ontology registry endpoint (e.g., EBI-OLS, BioPortal).",
+          "format": "uri",
+          "maxLength": 2083,
+          "minLength": 1,
+          "title": "Target Registry Uri",
+          "type": "string"
+        },
+        "query_concept_cid": {
+          "description": "The internal standard CID the agent is checking for deprecation or semantic drift.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Query Concept Cid",
+          "type": "string"
+        },
+        "expected_response_schema": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/JsonPrimitiveState"
+              },
+              "propertyNames": {
+                "maxLength": 255
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional strict schema expected from the external RDF/OWL registry.",
+          "title": "Expected Response Schema"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "method",
+        "target_registry_uri",
+        "query_concept_cid"
+      ],
+      "title": "EpistemicOntologyDiscoveryIntent",
       "type": "object"
     },
     "EpistemicPromotionEvent": {
@@ -8067,7 +8342,7 @@
         "affordance_projection": {
           "anyOf": [
             {
-              "$ref": "#/$defs/OntologicalSurfaceProjectionManifest"
+              "$ref": "#/$defs/SpatialOntologicalSurfaceProjectionManifest"
             },
             {
               "type": "null"
@@ -8410,6 +8685,89 @@
       "title": "EpistemicSeedInjectionPolicy",
       "type": "object"
     },
+    "EpistemicSemanticFirewallPolicy": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements an execution-layer Semantic Firewall guarding against\nadversarial control-flow overrides and prompt injection attacks. As a ...Policy suffix,\nthis object defines rigid mathematical boundaries that the orchestrator must enforce\nglobally.\n\nCAUSAL AFFORDANCE: Intercepts and physically severs incoming observation topologies if\ntheir classification matches forbidden_intents, executing the deterministic\naction_on_violation (Literal[\"drop\", \"quarantine\", \"redact\"]).\n\nEPISTEMIC BOUNDS: VRAM exhaustion is mathematically prevented by capping max_input_tokens\n(gt=0, le=18446744073709551615). The forbidden_intents array is deterministically sorted by the\n@model_validator to preserve RFC 8785 canonical hashing.\n\nMCP ROUTING TRIGGERS: Semantic Firewall, Prompt Injection Defense, Adversarial Override,\nZero-Trust Perimeter, Control-Flow Hijacking",
+      "properties": {
+        "max_input_tokens": {
+          "description": "The absolute physical ceiling of tokens allowed in a single ingress payload.",
+          "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
+          "title": "Max Input Tokens",
+          "type": "integer"
+        },
+        "forbidden_intents": {
+          "description": "A strict array of semantic intents (e.g., 'role_override', 'system_prompt_leak') that trigger immediate quarantine.",
+          "items": {
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "title": "Forbidden Intents",
+          "type": "array"
+        },
+        "action_on_violation": {
+          "description": "The deterministic action the orchestrator must take if a firewall rule is violated.",
+          "enum": [
+            "drop",
+            "quarantine",
+            "redact"
+          ],
+          "title": "Action On Violation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "max_input_tokens",
+        "action_on_violation"
+      ],
+      "title": "EpistemicSemanticFirewallPolicy",
+      "type": "object"
+    },
+    "EpistemicSemanticFlowPolicy": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes the macroscopic Payload Loss Prevention (PLP) and\nLattice-Based Information Flow Control (IFC) bounds across the entire execution graph.\nAs a ...Policy suffix, this object defines rigid mathematical boundaries that the\norchestrator must enforce globally.\n\nCAUSAL AFFORDANCE: Projects a unified defensive mesh that aggregates RedactionPolicy\nrules, an optional EpistemicSemanticFirewallPolicy intercept, and tensor-level SaeLatentPolicy\nfirewalls to comprehensively sanitize all graph edges. The active toggle controls\nwhether enforcement is live.\n\nEPISTEMIC BOUNDS: Ensures absolute deterministic evaluation by utilizing a\n@model_validator to physically sort the rules array by rule_cid and the latent_firewalls\narray by target_feature_index, guaranteeing an invariant Merkle root.\n\nMCP ROUTING TRIGGERS: Information Flow Control, Payload Loss Prevention, Lattice-Based\nSecurity, Biba Integrity Model, Defense-in-Depth",
+      "properties": {
+        "policy_cid": {
+          "description": "Unique identifier for this macroscopic flow control policy.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Policy Cid",
+          "type": "string"
+        },
+        "active": {
+          "default": true,
+          "description": "Whether this policy is currently enforcing data sanitization.",
+          "title": "Active",
+          "type": "boolean"
+        },
+        "semantic_firewall": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EpistemicSemanticFirewallPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The active cognitive defense perimeter against adversarial control-flow overrides."
+        },
+        "latent_firewalls": {
+          "description": "The strict array of tensor-level mechanistic firewalls monitoring the forward pass for adversarial intent.",
+          "items": {
+            "$ref": "#/$defs/SaeLatentPolicy"
+          },
+          "title": "Latent Firewalls",
+          "type": "array"
+        }
+      },
+      "required": [
+        "policy_cid"
+      ],
+      "title": "EpistemicSemanticFlowPolicy",
+      "type": "object"
+    },
     "EpistemicStarvationEvent": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: An append-only historical coordinate recording the definitive failure of empirical validation.\n\nCAUSAL AFFORDANCE: Acts as the kinetic trigger for non-monotonic Truth Maintenance. By dropping belief mass to zero, it forces the orchestrator to emit a DefeasibleCascadeEvent to prune the ungrounded edge from the graph.\n\nEPISTEMIC BOUNDS: The `failed_citations` array mathematically proves that an exhaustive search was attempted but no retrieved snippet breached the required SLA threshold. The array is deterministically sorted for invariant hashing.\n\nMCP ROUTING TRIGGERS: Epistemic Starvation, Natural Language Inference, Truth Maintenance System, Defeasible Logic, Belief Mass Depletion",
@@ -8504,7 +8862,7 @@
           "type": "string"
         },
         "target_node_cid": {
-          "description": "The specific TaxonomicNodeState CID that was manipulated.",
+          "description": "The specific SpatialTaxonomicNodeState CID that was manipulated.",
           "maxLength": 128,
           "minLength": 1,
           "pattern": "^[a-zA-Z0-9_.:-]+$",
@@ -9059,7 +9417,7 @@
         "semantic_flow": {
           "anyOf": [
             {
-              "$ref": "#/$defs/SemanticFlowPolicy"
+              "$ref": "#/$defs/EpistemicSemanticFlowPolicy"
             },
             {
               "type": "null"
@@ -9398,7 +9756,7 @@
         "semantic_flow": {
           "anyOf": [
             {
-              "$ref": "#/$defs/SemanticFlowPolicy"
+              "$ref": "#/$defs/EpistemicSemanticFlowPolicy"
             },
             {
               "type": "null"
@@ -9838,6 +10196,43 @@
       "title": "FederatedDiscoveryIntent",
       "type": "object"
     },
+    "FederatedHumanDirectiveIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Translates unstructured human goals into the deterministic physics required to trigger the Agentic Forge.\n\nCAUSAL AFFORDANCE: Maps an unstructured human objective to a dense VectorEmbeddingState target, initiating capability generation.\n\nEPISTEMIC BOUNDS: `allocated_budget_magnitude` is strictly bounded between 1 and 1,000,000,000 to lock escrow. Discriminator locked to `Literal[\"human_directive\"]`.\n\nMCP ROUTING TRIGGERS: Human-in-the-Loop, Intent Translation, Agentic Forge, Objective Setting, Budget Allocation",
+      "properties": {
+        "topology_class": {
+          "const": "human_directive",
+          "default": "human_directive",
+          "description": "Discriminator type for a human directive.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "natural_language_goal": {
+          "description": "The raw, unstructured human objective.",
+          "maxLength": 5000,
+          "title": "Natural Language Goal",
+          "type": "string"
+        },
+        "allocated_budget_magnitude": {
+          "description": "The absolute thermodynamic token budget the human is locking in escrow.",
+          "maximum": 18446744073709551615,
+          "minimum": 1,
+          "title": "Allocated Budget Magnitude",
+          "type": "integer"
+        },
+        "target_qos": {
+          "$ref": "#/$defs/QoSClassificationProfile",
+          "description": "The priority classification for Spot Market compute routing."
+        }
+      },
+      "required": [
+        "natural_language_goal",
+        "allocated_budget_magnitude",
+        "target_qos"
+      ],
+      "title": "FederatedHumanDirectiveIntent",
+      "type": "object"
+    },
     "FitnessObjectiveProfile": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines a specific mathematical objective function (fitness dimension)\nwithin a multi-objective optimization landscape for evaluating agent phenotypes. As a\n...Profile suffix, this is a declarative, frozen snapshot of an evaluation geometry.\n\nCAUSAL AFFORDANCE: Provides the mathematical vector (OptimizationDirectionProfile:\nminimize/maximize) and scalar weight required by the orchestrator to score an agent's\nexecution telemetry, ultimately determining its survival on the Pareto Efficiency\nfrontier.\n\nEPISTEMIC BOUNDS: The relative influence of this objective is mathematically clamped by\nthe weight field (le=1.0, default=1.0) to prevent gradient or reward explosion during\nfitness aggregation. The target_metric is bounded to max_length=2000.\n\nMCP ROUTING TRIGGERS: Fitness Landscape, Objective Function, Multi-Objective\nOptimization, Phenotype Scoring, Pareto Efficiency",
@@ -10089,47 +10484,6 @@
         "max_synthetic_tokens"
       ],
       "title": "GenerativeManifoldSLA",
-      "type": "object"
-    },
-    "GenerativeTaxonomyManifest": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as a macroscopic Topological Data Analysis (TDA) manifold\nprojection, mapping continuous vector geometries into a discrete, traversable Directed\nAcyclic Graph (DAG). As a ...Manifest suffix, this defines a frozen, N-dimensional\ncoordinate state.\n\nCAUSAL AFFORDANCE: Projects the comprehensive Virtual File System (VFS) state to the\nhuman UI or agentic context, structurally proving the geometric relations of all\nsubordinate TaxonomicNodeStates.\n\nEPISTEMIC BOUNDS: The nodes matrix is physically capped at max_length=1000\nproperties to prevent memory overflow. The @model_validator mathematically verifies DAG\nintegrity by ensuring the root_node_cid explicitly exists within the projection matrix,\npreventing ghost nodes.\n\nMCP ROUTING TRIGGERS: Manifold Learning, Topological Data Analysis, Directed Acyclic\nGraph, Generative Taxonomy, Holographic Projection",
-      "properties": {
-        "manifest_cid": {
-          "description": "Unique Content Identifier (CID) for this generated taxonomy.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Manifest Cid",
-          "type": "string"
-        },
-        "root_node_cid": {
-          "description": "The globally unique decentralized identifier (DID) anchoring the top-level TaxonomicNodeState initiating the tree.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Root Node Cid",
-          "type": "string"
-        },
-        "nodes": {
-          "additionalProperties": {
-            "$ref": "#/$defs/TaxonomicNodeState"
-          },
-          "description": "Flat dictionary matrix containing all nodes within the manifold.",
-          "maxProperties": 1000,
-          "propertyNames": {
-            "maxLength": 255
-          },
-          "title": "Nodes",
-          "type": "object"
-        }
-      },
-      "required": [
-        "manifest_cid",
-        "root_node_cid",
-        "nodes"
-      ],
-      "title": "GenerativeTaxonomyManifest",
       "type": "object"
     },
     "GlobalGovernancePolicy": {
@@ -10775,43 +11129,6 @@
       "title": "HomomorphicEncryptionProfile",
       "type": "object"
     },
-    "HumanDirectiveIntent": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Translates unstructured human goals into the deterministic physics required to trigger the Agentic Forge.\n\nCAUSAL AFFORDANCE: Maps an unstructured human objective to a dense VectorEmbeddingState target, initiating capability generation.\n\nEPISTEMIC BOUNDS: `allocated_budget_magnitude` is strictly bounded between 1 and 1,000,000,000 to lock escrow. Discriminator locked to `Literal[\"human_directive\"]`.\n\nMCP ROUTING TRIGGERS: Human-in-the-Loop, Intent Translation, Agentic Forge, Objective Setting, Budget Allocation",
-      "properties": {
-        "topology_class": {
-          "const": "human_directive",
-          "default": "human_directive",
-          "description": "Discriminator type for a human directive.",
-          "title": "Topology Class",
-          "type": "string"
-        },
-        "natural_language_goal": {
-          "description": "The raw, unstructured human objective.",
-          "maxLength": 5000,
-          "title": "Natural Language Goal",
-          "type": "string"
-        },
-        "allocated_budget_magnitude": {
-          "description": "The absolute thermodynamic token budget the human is locking in escrow.",
-          "maximum": 18446744073709551615,
-          "minimum": 1,
-          "title": "Allocated Budget Magnitude",
-          "type": "integer"
-        },
-        "target_qos": {
-          "$ref": "#/$defs/QoSClassificationProfile",
-          "description": "The priority classification for Spot Market compute routing."
-        }
-      },
-      "required": [
-        "natural_language_goal",
-        "allocated_budget_magnitude",
-        "target_qos"
-      ],
-      "title": "HumanDirectiveIntent",
-      "type": "object"
-    },
     "HypothesisGenerationEvent": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Instantiates an abductive reasoning branch governed by Popperian Falsification and Bayesian updating on the Merkle-DAG.\n\nCAUSAL AFFORDANCE: Commits a formalized causal premise into the EpistemicLedgerState, unlocking the orchestration of empirical testing via active inference to falsify or verify the embedded causal model.\n\nEPISTEMIC BOUNDS: `bayesian_prior` is clamped `[ge=0.0, le=1.0]`. Identity is cryptographically locked via `hypothesis_cid` (128-char CID). `falsification_conditions` deterministically sorted by `@model_validator`.\n\nMCP ROUTING TRIGGERS: Abductive Reasoning, Popperian Falsification, Bayesian Prior, Causal Hypothesis, Epistemic Commitment",
@@ -11094,7 +11411,7 @@
     },
     "IntentClassificationReceipt": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing the non-monotonic\ncollapse of a high-entropy human natural language string into a discrete, mathematically\nbounded routing heuristic. As a ...Receipt suffix, this is an append-only Merkle-DAG coordinate.\n\nCAUSAL AFFORDANCE: Commits the LLM's Softmax classification verdict to the Epistemic Ledger,\nauthorizing the TaxonomicRoutingPolicy or router gate to physically execute the targeted\ntopology or sub-agent.\n\nEPISTEMIC BOUNDS: The raw_input_string is physically clamped (max_length=100000) to prevent\ncontext window buffer overflows. The classification confidence is strictly bound to a\nnormalized float (ge=0.0, le=1.0).\n\nMCP ROUTING TRIGGERS: Intent Classification, Softmax Gating, High-Entropy Parsing,\nRouting Heuristic, Semantic Wave Collapse",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing the non-monotonic\ncollapse of a high-entropy human natural language string into a discrete, mathematically\nbounded routing heuristic. As a ...Receipt suffix, this is an append-only Merkle-DAG coordinate.\n\nCAUSAL AFFORDANCE: Commits the LLM's Softmax classification verdict to the Epistemic Ledger,\nauthorizing the CognitiveTaxonomicRoutingPolicy or router gate to physically execute the targeted\ntopology or sub-agent.\n\nEPISTEMIC BOUNDS: The raw_input_string is physically clamped (max_length=100000) to prevent\ncontext window buffer overflows. The classification confidence is strictly bound to a\nnormalized float (ge=0.0, le=1.0).\n\nMCP ROUTING TRIGGERS: Intent Classification, Softmax Gating, High-Entropy Parsing,\nRouting Heuristic, Semantic Wave Collapse",
       "properties": {
         "event_cid": {
           "description": "A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
@@ -11150,7 +11467,7 @@
             }
           ],
           "default": null,
-          "description": "The TaxonomicRoutingPolicy CID that governed this classification.",
+          "description": "The CognitiveTaxonomicRoutingPolicy CID that governed this classification.",
           "title": "Routing Policy Cid"
         }
       },
@@ -11166,7 +11483,7 @@
     },
     "IntentElicitationTopologyManifest": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Zero-Cost Macro-Topology that translates unstructured, high-entropy human multimodal input into a mathematically verified, zero-entropy HumanDirectiveIntent.\n\nCAUSAL AFFORDANCE: Unrolls a cyclic Directed Graph that orchestrates Multimodal Transmutation, Metacognitive Scanning (Shannon Entropy measurement), and Schema-on-Write Drafting (Human Interrogation) before yielding to the Agentic Forge.\n\nEPISTEMIC BOUNDS: The max_clarification_loops physical Halting Problem guillotine is mathematically clamped between 1 and 18446744073709551615. Physical execution safety is delegated to runtime Admission Controllers.\n\nMCP ROUTING TRIGGERS: Intent Elicitation, Zero-Entropy Distillation, Cyclical Routing, Human Interrogation, Multimodal Transmutation",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Zero-Cost Macro-Topology that translates unstructured, high-entropy human multimodal input into a mathematically verified, zero-entropy FederatedHumanDirectiveIntent.\n\nCAUSAL AFFORDANCE: Unrolls a cyclic Directed Graph that orchestrates Multimodal Transmutation, Metacognitive Scanning (Shannon Entropy measurement), and Schema-on-Write Drafting (Human Interrogation) before yielding to the Agentic Forge.\n\nEPISTEMIC BOUNDS: The max_clarification_loops physical Halting Problem guillotine is mathematically clamped between 1 and 18446744073709551615. Physical execution safety is delegated to runtime Admission Controllers.\n\nMCP ROUTING TRIGGERS: Intent Elicitation, Zero-Entropy Distillation, Cyclical Routing, Human Interrogation, Multimodal Transmutation",
       "properties": {
         "epistemic_enforcement": {
           "anyOf": [
@@ -11244,7 +11561,7 @@
         "semantic_flow": {
           "anyOf": [
             {
-              "$ref": "#/$defs/SemanticFlowPolicy"
+              "$ref": "#/$defs/EpistemicSemanticFlowPolicy"
             },
             {
               "type": "null"
@@ -11290,7 +11607,7 @@
         },
         "human_oracle_cid": {
           "$ref": "#/$defs/NodeCIDState",
-          "description": "The human UI node receiving the DraftingIntent."
+          "description": "The human UI node receiving the CognitiveDraftingIntent."
         },
         "max_clarification_loops": {
           "default": 5,
@@ -12907,7 +13224,7 @@
         "semantic_zoom": {
           "anyOf": [
             {
-              "$ref": "#/$defs/SemanticZoomProfile"
+              "$ref": "#/$defs/SpatialSemanticZoomProfile"
             },
             {
               "type": "null"
@@ -13467,7 +13784,7 @@
         "semantic_flow": {
           "anyOf": [
             {
-              "$ref": "#/$defs/SemanticFlowPolicy"
+              "$ref": "#/$defs/EpistemicSemanticFlowPolicy"
             },
             {
               "type": "null"
@@ -13618,7 +13935,7 @@
         "semantic_flow": {
           "anyOf": [
             {
-              "$ref": "#/$defs/SemanticFlowPolicy"
+              "$ref": "#/$defs/EpistemicSemanticFlowPolicy"
             },
             {
               "type": "null"
@@ -13902,311 +14219,6 @@
         "payload"
       ],
       "title": "ObservationEvent",
-      "type": "object"
-    },
-    "OntologicalAlignmentPolicy": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Vector Space Isometry and Earth Mover's Distance\nbounds to mathematically verify semantic compatibility across disjoint neural\nmodels before allowing multi-agent graph coupling. As a ...Policy suffix, this\ndefines rigid mathematical boundaries.\n\nCAUSAL AFFORDANCE: Mechanically severs federated discovery attempts if the\nparticipating agents' internal embedding distances fall below the required\nthreshold. A fallback_state_contract (StateContract | None, default=None)\nforces agents to use canonical JSON Schemas when geometries are\nincommensurable.\n\nEPISTEMIC BOUNDS: The min_cosine_similarity is strictly clamped\n(ge=-1.0, le=1.0). The require_isometry_proof boolean (no default) enforces\nrigid projection validation prior to semantic mapping.\n\nMCP ROUTING TRIGGERS: Vector Space Isometry, Earth Mover's Distance, Latent\nSemantic Alignment, Zero-Trust Federation, Geometric Projection",
-      "properties": {
-        "min_cosine_similarity": {
-          "description": "The absolute minimum latent vector similarity required to allow swarm communication.",
-          "maximum": 1.0,
-          "minimum": -1.0,
-          "title": "Min Cosine Similarity",
-          "type": "number"
-        },
-        "require_isometry_proof": {
-          "description": "If True, the orchestrator must reject dimensional projections that fall below a safe isometry preservation score.",
-          "title": "Require Isometry Proof",
-          "type": "boolean"
-        },
-        "fallback_state_contract": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/StateContract"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The rigid external JSON schema to force agents to use if their latent vector geometries are hopelessly incommensurable."
-        }
-      },
-      "required": [
-        "min_cosine_similarity",
-        "require_isometry_proof"
-      ],
-      "title": "OntologicalAlignmentPolicy",
-      "type": "object"
-    },
-    "OntologicalCrosswalkIntent": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A kinetic trigger instructing the orchestrator to route an array of ungrounded text entities through a grounding oracle (OntoGPT/OAK) to map them to formal ontology CURIEs.\n\nCAUSAL AFFORDANCE: Authorizes the runtime to execute Bipartite Ontological Mapping, collapsing high-entropy natural language strings into zero-entropy Semantic Web identifiers.\n\nEPISTEMIC BOUNDS: The search space is rigidly clamped by the `target_ontology_registries` array (e.g., ['MONDO', 'HP']). The `minimum_isometry_threshold` physically restricts acceptable mappings to a strictly positive cosine/BM25 similarity (`ge=0.0, le=1.0`).\n\nMCP ROUTING TRIGGERS: Bipartite Ontological Mapping, Grounding Oracle, CURIE Resolution, Isometry Thresholding, Semantic Crosswalk",
-      "properties": {
-        "topology_class": {
-          "const": "ontological_crosswalk",
-          "default": "ontological_crosswalk",
-          "title": "Topology Class",
-          "type": "string"
-        },
-        "target_graph_cid": {
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Target Graph Cid",
-          "type": "string"
-        },
-        "source_strings": {
-          "description": "The ungrounded natural language concepts extracted by the LLM.",
-          "items": {
-            "maxLength": 2000,
-            "type": "string"
-          },
-          "minItems": 1,
-          "title": "Source Strings",
-          "type": "array"
-        },
-        "target_ontology_registries": {
-          "description": "The strictly typed standard ontology namespaces to search (e.g., 'MONDO', 'CHEBI').",
-          "items": {
-            "maxLength": 255,
-            "type": "string"
-          },
-          "minItems": 1,
-          "title": "Target Ontology Registries",
-          "type": "array"
-        },
-        "minimum_isometry_threshold": {
-          "description": "The semantic distance threshold required to automatically accept a mapping.",
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "title": "Minimum Isometry Threshold",
-          "type": "number"
-        }
-      },
-      "required": [
-        "target_graph_cid",
-        "source_strings",
-        "target_ontology_registries",
-        "minimum_isometry_threshold"
-      ],
-      "title": "OntologicalCrosswalkIntent",
-      "type": "object"
-    },
-    "OntologicalReificationReceipt": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: An append-only, cryptographically frozen coordinate verifying the integrity of a generalized bimodal semantic transformation. Commits the transformation mechanism to the Epistemic Ledger, physically separating explicit empirical facts from machine-inferred hypotheses to eliminate traceability collapse.\n\n    CAUSAL AFFORDANCE: Physically authorizes the orchestrator to commit the transformation mechanism to the Epistemic Ledger.\n\n    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.\n\n    MCP ROUTING TRIGGERS: Ontological Reification, Bimodal Semantic Transformation, Epistemic Ledger, Traceability Collapse",
-      "properties": {
-        "topology_class": {
-          "const": "ontological_reification",
-          "default": "ontological_reification",
-          "description": "Discriminator for the reification receipt.",
-          "title": "Topology Class",
-          "type": "string"
-        },
-        "event_cid": {
-          "description": "Cryptographic Lineage Watermark binding this node to the Merkle-DAG.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Event Cid",
-          "type": "string"
-        },
-        "timestamp": {
-          "description": "The precise temporal coordinate of the event realization.",
-          "title": "Timestamp",
-          "type": "number"
-        },
-        "source_data_hash": {
-          "description": "The undeniable SHA-256 hash of the pre-transmutation artifact, unstructured text chunk, or telemetry row.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-f0-9]{64}$",
-          "title": "Source Data Hash",
-          "type": "string"
-        },
-        "target_namespace": {
-          "description": "The standardized semantic ontology namespace the data was projected into.",
-          "maxLength": 2000,
-          "title": "Target Namespace",
-          "type": "string"
-        },
-        "algorithmic_mechanism": {
-          "$ref": "#/$defs/TransformationMechanismProfile",
-          "description": "The deterministic or probabilistic engine used to execute the transmutation."
-        },
-        "belief_vector": {
-          "$ref": "#/$defs/DempsterShaferBeliefVector",
-          "description": "The composite Dempster-Shafer tri-vector capturing independent confidence dimensions and calculated epistemic conflict."
-        },
-        "is_latent_inference": {
-          "default": false,
-          "description": "CRITICAL: Explicit flag required if the edge or node was generated by an AI reasoning agent via transitive closure or abduction rather than extracted as an explicit empirical fact. Eliminates hallucinations of certainty.",
-          "title": "Is Latent Inference",
-          "type": "boolean"
-        }
-      },
-      "required": [
-        "event_cid",
-        "timestamp",
-        "source_data_hash",
-        "target_namespace",
-        "algorithmic_mechanism",
-        "belief_vector"
-      ],
-      "title": "OntologicalReificationReceipt",
-      "type": "object"
-    },
-    "OntologicalSurfaceProjectionManifest": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes a Bipartite Graph Projection of Gibsonian Affordances, establishing the mathematically bounded subgraph of all capabilities currently valid for the agent.\n\nCAUSAL AFFORDANCE: Injects a dynamic Action Space manifold into the agent's working memory, authorizing the invocation of strictly defined toolsets and procedural manifolds.\n\nEPISTEMIC BOUNDS: Structural integrity is mathematically guaranteed by the `@model_validator`, which enforces unique `action_space_cids` and deterministically sorts `action_spaces`, `supported_personas`, and `available_procedural_manifolds` by their CIDs, ensuring invariant RFC 8785 hashing.\n\nMCP ROUTING TRIGGERS: Gibsonian Affordances, Bipartite Graph Projection, Action Space Manifold, RFC 8785 Canonicalization, Holographic Subgraph",
-      "properties": {
-        "projection_cid": {
-          "description": "A cryptographic Lineage Watermark bounding this specific capability set.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Projection Cid",
-          "type": "string"
-        },
-        "action_spaces": {
-          "description": "The full, machine-readable declaration of accessible tools and MCP servers.",
-          "items": {
-            "$ref": "#/$defs/CognitiveActionSpaceManifest"
-          },
-          "title": "Action Spaces",
-          "type": "array"
-        },
-        "supported_personas": {
-          "description": "The strict array of foundational model personas available.",
-          "items": {
-            "$ref": "#/$defs/ProfileCIDState"
-          },
-          "title": "Supported Personas",
-          "type": "array"
-        },
-        "available_procedural_manifolds": {
-          "description": "The lightweight progressive disclosure tier for procedural skills.",
-          "items": {
-            "$ref": "#/$defs/ProceduralMetadataManifest"
-          },
-          "title": "Available Procedural Manifolds",
-          "type": "array"
-        }
-      },
-      "required": [
-        "projection_cid"
-      ],
-      "title": "OntologicalSurfaceProjectionManifest",
-      "type": "object"
-    },
-    "OntologyDiscoveryIntent": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Authorizes a Semantic Watchdog Agent to perform strict out-of-band polling against external semantic registries to monitor for ontological deprecation or semantic drift.",
-      "properties": {
-        "topology_class": {
-          "const": "ontology_discovery",
-          "default": "ontology_discovery",
-          "description": "Discriminator for external ontology polling.",
-          "title": "Topology Class",
-          "type": "string"
-        },
-        "jsonrpc": {
-          "const": "2.0",
-          "description": "JSON-RPC version.",
-          "title": "Jsonrpc",
-          "type": "string"
-        },
-        "method": {
-          "description": "Method to be invoked.",
-          "maxLength": 1000,
-          "title": "Method",
-          "type": "string"
-        },
-        "params": {
-          "anyOf": [
-            {
-              "additionalProperties": {
-                "$ref": "#/$defs/JsonPrimitiveState"
-              },
-              "maxProperties": 86400000,
-              "propertyNames": {
-                "maxLength": 255
-              },
-              "type": "object"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Payload parameters. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion.",
-          "title": "Params"
-        },
-        "id": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "pattern": "^[a-zA-Z0-9_.:-]+$",
-              "type": "string"
-            },
-            {
-              "maximum": 18446744073709551615,
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Unique request identifier.",
-          "title": "Id"
-        },
-        "target_registry_uri": {
-          "description": "The standard ontology registry endpoint (e.g., EBI-OLS, BioPortal).",
-          "format": "uri",
-          "maxLength": 2083,
-          "minLength": 1,
-          "title": "Target Registry Uri",
-          "type": "string"
-        },
-        "query_concept_cid": {
-          "description": "The internal standard CID the agent is checking for deprecation or semantic drift.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Query Concept Cid",
-          "type": "string"
-        },
-        "expected_response_schema": {
-          "anyOf": [
-            {
-              "additionalProperties": {
-                "$ref": "#/$defs/JsonPrimitiveState"
-              },
-              "propertyNames": {
-                "maxLength": 255
-              },
-              "type": "object"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Optional strict schema expected from the external RDF/OWL registry.",
-          "title": "Expected Response Schema"
-        }
-      },
-      "required": [
-        "jsonrpc",
-        "method",
-        "target_registry_uri",
-        "query_concept_cid"
-      ],
-      "title": "OntologyDiscoveryIntent",
       "type": "object"
     },
     "OpticalMappingContract": {
@@ -15546,7 +15558,7 @@
         "semantic_flow": {
           "anyOf": [
             {
-              "$ref": "#/$defs/SemanticFlowPolicy"
+              "$ref": "#/$defs/EpistemicSemanticFlowPolicy"
             },
             {
               "type": "null"
@@ -15604,7 +15616,7 @@
         "ontological_alignment": {
           "anyOf": [
             {
-              "$ref": "#/$defs/OntologicalAlignmentPolicy"
+              "$ref": "#/$defs/EpistemicOntologicalAlignmentPolicy"
             },
             {
               "type": "null"
@@ -16234,124 +16246,6 @@
       "title": "SemanticEdgeState",
       "type": "object"
     },
-    "SemanticFirewallPolicy": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements an execution-layer Semantic Firewall guarding against\nadversarial control-flow overrides and prompt injection attacks. As a ...Policy suffix,\nthis object defines rigid mathematical boundaries that the orchestrator must enforce\nglobally.\n\nCAUSAL AFFORDANCE: Intercepts and physically severs incoming observation topologies if\ntheir classification matches forbidden_intents, executing the deterministic\naction_on_violation (Literal[\"drop\", \"quarantine\", \"redact\"]).\n\nEPISTEMIC BOUNDS: VRAM exhaustion is mathematically prevented by capping max_input_tokens\n(gt=0, le=18446744073709551615). The forbidden_intents array is deterministically sorted by the\n@model_validator to preserve RFC 8785 canonical hashing.\n\nMCP ROUTING TRIGGERS: Semantic Firewall, Prompt Injection Defense, Adversarial Override,\nZero-Trust Perimeter, Control-Flow Hijacking",
-      "properties": {
-        "max_input_tokens": {
-          "description": "The absolute physical ceiling of tokens allowed in a single ingress payload.",
-          "exclusiveMinimum": 0,
-          "maximum": 18446744073709551615,
-          "title": "Max Input Tokens",
-          "type": "integer"
-        },
-        "forbidden_intents": {
-          "description": "A strict array of semantic intents (e.g., 'role_override', 'system_prompt_leak') that trigger immediate quarantine.",
-          "items": {
-            "maxLength": 2000,
-            "type": "string"
-          },
-          "title": "Forbidden Intents",
-          "type": "array"
-        },
-        "action_on_violation": {
-          "description": "The deterministic action the orchestrator must take if a firewall rule is violated.",
-          "enum": [
-            "drop",
-            "quarantine",
-            "redact"
-          ],
-          "title": "Action On Violation",
-          "type": "string"
-        }
-      },
-      "required": [
-        "max_input_tokens",
-        "action_on_violation"
-      ],
-      "title": "SemanticFirewallPolicy",
-      "type": "object"
-    },
-    "SemanticFlowPolicy": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Establishes the macroscopic Payload Loss Prevention (PLP) and\nLattice-Based Information Flow Control (IFC) bounds across the entire execution graph.\nAs a ...Policy suffix, this object defines rigid mathematical boundaries that the\norchestrator must enforce globally.\n\nCAUSAL AFFORDANCE: Projects a unified defensive mesh that aggregates RedactionPolicy\nrules, an optional SemanticFirewallPolicy intercept, and tensor-level SaeLatentPolicy\nfirewalls to comprehensively sanitize all graph edges. The active toggle controls\nwhether enforcement is live.\n\nEPISTEMIC BOUNDS: Ensures absolute deterministic evaluation by utilizing a\n@model_validator to physically sort the rules array by rule_cid and the latent_firewalls\narray by target_feature_index, guaranteeing an invariant Merkle root.\n\nMCP ROUTING TRIGGERS: Information Flow Control, Payload Loss Prevention, Lattice-Based\nSecurity, Biba Integrity Model, Defense-in-Depth",
-      "properties": {
-        "policy_cid": {
-          "description": "Unique identifier for this macroscopic flow control policy.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Policy Cid",
-          "type": "string"
-        },
-        "active": {
-          "default": true,
-          "description": "Whether this policy is currently enforcing data sanitization.",
-          "title": "Active",
-          "type": "boolean"
-        },
-        "semantic_firewall": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/SemanticFirewallPolicy"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The active cognitive defense perimeter against adversarial control-flow overrides."
-        },
-        "latent_firewalls": {
-          "description": "The strict array of tensor-level mechanistic firewalls monitoring the forward pass for adversarial intent.",
-          "items": {
-            "$ref": "#/$defs/SaeLatentPolicy"
-          },
-          "title": "Latent Firewalls",
-          "type": "array"
-        }
-      },
-      "required": [
-        "policy_cid"
-      ],
-      "title": "SemanticFlowPolicy",
-      "type": "object"
-    },
-    "SemanticIntent": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Synchronous Epistemic Signaling within a Mixed-Initiative Control paradigm. Indicates that the presented manifold requires acknowledgment without reciprocal causal action.\n\nCAUSAL AFFORDANCE: Conditionally suspends the continuous execution DAG to project a read-only observational state manifold to the human operator. Resumption is dynamically governed by the deterministic `timeout_action`.\n\nEPISTEMIC BOUNDS: The semantic payload (`message`) is physically clamped to `max_length=2000` to prevent UI dictionary bombing. The `timeout_action` is locked to a strict Finite State Machine Literal `[\"rollback\", \"proceed_default\", \"terminate\"]`.\n\nMCP ROUTING TRIGGERS: Synchronous Epistemic Signaling, Mixed-Initiative Control, Finite State Machine, Oracle Projection, Halting Problem",
-      "properties": {
-        "topology_class": {
-          "const": "informational",
-          "default": "informational",
-          "description": "The discriminative topological boundary for read-only informational handoffs.",
-          "title": "Topology Class",
-          "type": "string"
-        },
-        "message": {
-          "description": "The context or summary to display to the human operator.",
-          "maxLength": 2000,
-          "title": "Message",
-          "type": "string"
-        },
-        "timeout_action": {
-          "description": "The orchestrator's automatic fallback if the human does not acknowledge the intent in time.",
-          "enum": [
-            "rollback",
-            "proceed_default",
-            "terminate"
-          ],
-          "title": "Timeout Action",
-          "type": "string"
-        }
-      },
-      "required": [
-        "message",
-        "timeout_action"
-      ],
-      "title": "SemanticIntent",
-      "type": "object"
-    },
     "SemanticMappingHeuristicIntent": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A formal cryptographic petition submitted by an agent to update the swarm's internal graph logic. Compiles discovered literature and external API responses into a mathematically verifiable semantic mapping rule (e.g., SWRL).\n\n    CAUSAL AFFORDANCE: Physically authorizes the orchestrator to inject a new heuristic into the swarm's global hypothesis space.\n\n    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.\n\n    MCP ROUTING TRIGGERS: Semantic Mapping, Heuristic Injection, Cryptographic Petition, Swarm Logic",
@@ -16390,7 +16284,7 @@
           "type": "string"
         },
         "justification_evidence_cids": {
-          "description": "Explicit pointers to the AtomicPropositionState or OntologicalReificationReceipt nodes that causally justify this new mapping rule.",
+          "description": "Explicit pointers to the AtomicPropositionState or EpistemicOntologicalReificationReceipt nodes that causally justify this new mapping rule.",
           "items": {
             "$ref": "#/$defs/NodeCIDState"
           },
@@ -16670,37 +16564,6 @@
       "pattern": "^\\d+\\.\\d+\\.\\d+$",
       "type": "string"
     },
-    "SemanticZoomProfile": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes the Information Bottleneck principle to execute Semantic Zooming. It defines the exact Euclidean distance thresholds at which a node's semantic payload deterministically degrades to preserve computational entropy.\n\nCAUSAL AFFORDANCE: Instructs the spatial projection engine to dynamically collapse high-entropy unstructured text into low-entropy scalars or categorical labels as the observer's SE(3) camera recedes.\n\nEPISTEMIC BOUNDS: The thresholds are bounded to continuous physical distance in meters (`ge=0.0`). A strict mathematical invariant guaranteed by a `@model_validator` enforces spatial monotonicity: micro < meso < macro.\n\nMCP ROUTING TRIGGERS: Information Bottleneck, Semantic Compression, Euclidean Distance, Level of Detail, Entropy Degradation",
-      "properties": {
-        "macro_distance_threshold": {
-          "description": "The Euclidean distance in meters at which the node collapses into a pure scalar or color-coded coordinate representation.",
-          "minimum": 0.0,
-          "title": "Macro Distance Threshold",
-          "type": "number"
-        },
-        "meso_distance_threshold": {
-          "description": "The distance at which the node displays only its localized taxonomic label and boundary, stripping raw textual payloads.",
-          "minimum": 0.0,
-          "title": "Meso Distance Threshold",
-          "type": "number"
-        },
-        "micro_distance_threshold": {
-          "description": "The close-proximity boundary where full N-dimensional tensors and unstructured text blocks are mathematically hydrated into the observer's plane.",
-          "minimum": 0.0,
-          "title": "Micro Distance Threshold",
-          "type": "number"
-        }
-      },
-      "required": [
-        "macro_distance_threshold",
-        "meso_distance_threshold",
-        "micro_distance_threshold"
-      ],
-      "title": "SemanticZoomProfile",
-      "type": "object"
-    },
     "ShapleyAttributionReceipt": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Cooperative Game Theory to compute the exact Shapley\nvalue ($\\phi_i$) for a specific agent's marginal contribution to a collective outcome.\nAs a ...Receipt suffix, this is an append-only coordinate on the Merkle-DAG.\n\nCAUSAL AFFORDANCE: Unlocks deterministic credit assignment and thermodynamic reward\ndistribution, allowing the orchestrator to equitably distribute escrow payouts or\npolicy gradient updates to the participating target_node_cid (NodeCIDState).\n\nEPISTEMIC BOUNDS: normalized_contribution_percentage is strictly clamped (ge=0.0,\nle=1.0). The causal_attribution_score has only le=1.0 (no ge bound). The Monte Carlo\napproximation confidence bounds (confidence_interval_lower/upper) are capped at\nle=18446744073709551615.0.\n\nMCP ROUTING TRIGGERS: Cooperative Game Theory, Shapley Value, Credit Assignment,\nMarginal Contribution, Monte Carlo Approximation",
@@ -16857,6 +16720,119 @@
       "title": "SpatialBillboardContract",
       "type": "object"
     },
+    "SpatialBrowserDOMState": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the exogenous structural boundary of a headless browser environment within a Partially Observable Markov Decision Process (POMDP).\n\nCAUSAL AFFORDANCE: Exposes the deterministic coordinate space (`viewport_size`, `dom_hash`, `accessibility_tree_hash`) enabling spatial kinematics and visual grounding.\n\nEPISTEMIC BOUNDS: `dom_hash` rigidly locked to SHA-256 pattern.\n\nMCP ROUTING TRIGGERS: Exogenous Perturbation, DOM Topography, Spatial Execution Bound, Accessibility Tree",
+      "properties": {
+        "topology_class": {
+          "const": "browser",
+          "default": "browser",
+          "description": "Discriminator for Causal Actuators representing structural shifts.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "current_url": {
+          "description": "Spatial Execution Bounds where the agent interacts.",
+          "maxLength": 2000,
+          "title": "Current Url",
+          "type": "string"
+        },
+        "viewport_size": {
+          "description": "Capability Perimeters detailing bounding coordinates.",
+          "maxItems": 1000,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "integer"
+            }
+          ],
+          "title": "Viewport Size",
+          "type": "array"
+        },
+        "dom_hash": {
+          "description": "The SHA-256 hash acting as the structural manifestation vector.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Dom Hash",
+          "type": "string"
+        },
+        "accessibility_tree_hash": {
+          "description": "The SHA-256 hash of the accessibility tree defining Exogenous Perturbations to the state space.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Accessibility Tree Hash",
+          "type": "string"
+        },
+        "screenshot_cid": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the snapshot representation.",
+          "title": "Screenshot Cid"
+        }
+      },
+      "required": [
+        "current_url",
+        "viewport_size",
+        "dom_hash",
+        "accessibility_tree_hash"
+      ],
+      "title": "SpatialBrowserDOMState",
+      "type": "object"
+    },
+    "SpatialGenerativeTaxonomyManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Acts as a macroscopic Topological Data Analysis (TDA) manifold\nprojection, mapping continuous vector geometries into a discrete, traversable Directed\nAcyclic Graph (DAG). As a ...Manifest suffix, this defines a frozen, N-dimensional\ncoordinate state.\n\nCAUSAL AFFORDANCE: Projects the comprehensive Virtual File System (VFS) state to the\nhuman UI or agentic context, structurally proving the geometric relations of all\nsubordinate TaxonomicNodeStates.\n\nEPISTEMIC BOUNDS: The nodes matrix is physically capped at max_length=1000\nproperties to prevent memory overflow. The @model_validator mathematically verifies DAG\nintegrity by ensuring the root_node_cid explicitly exists within the projection matrix,\npreventing ghost nodes.\n\nMCP ROUTING TRIGGERS: Manifold Learning, Topological Data Analysis, Directed Acyclic\nGraph, Generative Taxonomy, Holographic Projection",
+      "properties": {
+        "manifest_cid": {
+          "description": "Unique Content Identifier (CID) for this generated taxonomy.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Manifest Cid",
+          "type": "string"
+        },
+        "root_node_cid": {
+          "description": "The globally unique decentralized identifier (DID) anchoring the top-level SpatialTaxonomicNodeState initiating the tree.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Root Node Cid",
+          "type": "string"
+        },
+        "nodes": {
+          "additionalProperties": {
+            "$ref": "#/$defs/SpatialTaxonomicNodeState"
+          },
+          "description": "Flat dictionary matrix containing all nodes within the manifold.",
+          "maxProperties": 1000,
+          "propertyNames": {
+            "maxLength": 255
+          },
+          "title": "Nodes",
+          "type": "object"
+        }
+      },
+      "required": [
+        "manifest_cid",
+        "root_node_cid",
+        "nodes"
+      ],
+      "title": "SpatialGenerativeTaxonomyManifest",
+      "type": "object"
+    },
     "SpatialHardwareProfile": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A declarative, frozen snapshot of the physical hardware boundaries and thermodynamic constraints required to instantiate this node. As a ...Profile suffix, this defines a rigid mathematical boundary.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator's provisioning layer to allocate exact silicon resources (Compute Tier, VRAM, and Accelerator Type) before allowing the node to execute generative operations.\n\nEPISTEMIC BOUNDS: VRAM allocation is physically bounded by min_vram_gb (gt=0.0). The URN-patterned compute_tier and accelerator_type fields provide extensible silicon identification without ephemeral enumeration coupling. The provider_whitelist is deterministically sorted for invariant RFC 8785 hashing.\n\nMCP ROUTING TRIGGERS: Thermodynamic Bounding, VRAM Allocation, Spot Market Routing, Hardware Provisioning, Silicon Constraints",
@@ -16986,6 +16962,49 @@
       "title": "SpatialKinematicActionIntent",
       "type": "object"
     },
+    "SpatialOntologicalSurfaceProjectionManifest": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes a Bipartite Graph Projection of Gibsonian Affordances, establishing the mathematically bounded subgraph of all capabilities currently valid for the agent.\n\nCAUSAL AFFORDANCE: Injects a dynamic Action Space manifold into the agent's working memory, authorizing the invocation of strictly defined toolsets and procedural manifolds.\n\nEPISTEMIC BOUNDS: Structural integrity is mathematically guaranteed by the `@model_validator`, which enforces unique `action_space_cids` and deterministically sorts `action_spaces`, `supported_personas`, and `available_procedural_manifolds` by their CIDs, ensuring invariant RFC 8785 hashing.\n\nMCP ROUTING TRIGGERS: Gibsonian Affordances, Bipartite Graph Projection, Action Space Manifold, RFC 8785 Canonicalization, Holographic Subgraph",
+      "properties": {
+        "projection_cid": {
+          "description": "A cryptographic Lineage Watermark bounding this specific capability set.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Projection Cid",
+          "type": "string"
+        },
+        "action_spaces": {
+          "description": "The full, machine-readable declaration of accessible tools and MCP servers.",
+          "items": {
+            "$ref": "#/$defs/CognitiveActionSpaceManifest"
+          },
+          "title": "Action Spaces",
+          "type": "array"
+        },
+        "supported_personas": {
+          "description": "The strict array of foundational model personas available.",
+          "items": {
+            "$ref": "#/$defs/ProfileCIDState"
+          },
+          "title": "Supported Personas",
+          "type": "array"
+        },
+        "available_procedural_manifolds": {
+          "description": "The lightweight progressive disclosure tier for procedural skills.",
+          "items": {
+            "$ref": "#/$defs/ProceduralMetadataManifest"
+          },
+          "title": "Available Procedural Manifolds",
+          "type": "array"
+        }
+      },
+      "required": [
+        "projection_cid"
+      ],
+      "title": "SpatialOntologicalSurfaceProjectionManifest",
+      "type": "object"
+    },
     "SpatialReferenceFrameManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes a Federated Pose Graph anchor. Establishes a deterministic localized origin point (e.g., a physical room geometry or SLAM feature map) allowing disjoint spatial topologies to mathematically synchronize.\n\nCAUSAL AFFORDANCE: Instructs the spatial orchestrator to align the tracking coordinate systems of multiple observer devices by computing the affine transformation matrix between this shared cryptographic anchor and their local origins.\n\nEPISTEMIC BOUNDS: The semantic locus is cryptographically locked to a 128-char CID (`frame_cid`). The alignment math is strictly bounded to the `anchor_protocol` literal automaton. An optional `physical_room_hash` prevents holographic spoofing across zero-trust domains.\n\nMCP ROUTING TRIGGERS: Federated Pose Graph, Spatial Reference Frame, SLAM Anchor, Relative Coordinate Geometry, Origin Point",
@@ -17070,6 +17089,93 @@
       "title": "SpatialRenderMaterial",
       "type": "object"
     },
+    "SpatialSemanticZoomProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes the Information Bottleneck principle to execute Semantic Zooming. It defines the exact Euclidean distance thresholds at which a node's semantic payload deterministically degrades to preserve computational entropy.\n\nCAUSAL AFFORDANCE: Instructs the spatial projection engine to dynamically collapse high-entropy unstructured text into low-entropy scalars or categorical labels as the observer's SE(3) camera recedes.\n\nEPISTEMIC BOUNDS: The thresholds are bounded to continuous physical distance in meters (`ge=0.0`). A strict mathematical invariant guaranteed by a `@model_validator` enforces spatial monotonicity: micro < meso < macro.\n\nMCP ROUTING TRIGGERS: Information Bottleneck, Semantic Compression, Euclidean Distance, Level of Detail, Entropy Degradation",
+      "properties": {
+        "macro_distance_threshold": {
+          "description": "The Euclidean distance in meters at which the node collapses into a pure scalar or color-coded coordinate representation.",
+          "minimum": 0.0,
+          "title": "Macro Distance Threshold",
+          "type": "number"
+        },
+        "meso_distance_threshold": {
+          "description": "The distance at which the node displays only its localized taxonomic label and boundary, stripping raw textual payloads.",
+          "minimum": 0.0,
+          "title": "Meso Distance Threshold",
+          "type": "number"
+        },
+        "micro_distance_threshold": {
+          "description": "The close-proximity boundary where full N-dimensional tensors and unstructured text blocks are mathematically hydrated into the observer's plane.",
+          "minimum": 0.0,
+          "title": "Micro Distance Threshold",
+          "type": "number"
+        }
+      },
+      "required": [
+        "macro_distance_threshold",
+        "meso_distance_threshold",
+        "micro_distance_threshold"
+      ],
+      "title": "SpatialSemanticZoomProfile",
+      "type": "object"
+    },
+    "SpatialTaxonomicNodeState": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Hierarchical Agglomerative Clustering to project continuous,\ndense latent vector spaces into a deterministic, discrete N-ary tree structure. As a\n...State suffix, this is a declarative, frozen snapshot of a specific geometric coordinate.\n\nCAUSAL AFFORDANCE: Establishes a strictly bounded, navigable spatial coordinate within\nthe Virtual File System (VFS), allowing agents to traverse high-dimensional semantic\nspaces without consuming excessive context window tokens.\n\nEPISTEMIC BOUNDS: Spatial geometry is locked via node_cid (a strictly typed 128-character\nCID). The children_node_cids array is deterministically sorted, and the leaf_provenance\narray is sorted by source_event_cid, both via @model_validator to guarantee invariant\nRFC 8785 canonical hashing.\n\nMCP ROUTING TRIGGERS: Dimensionality Reduction, Hierarchical Clustering, N-ary Tree,\nVirtual File System, Semantic Coordinate",
+      "properties": {
+        "node_cid": {
+          "description": "A Content Identifier (CID) bounding this specific taxonomic coordinate.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Node Cid",
+          "type": "string"
+        },
+        "semantic_label": {
+          "description": "The human-legible, dynamically synthesized categorical label (e.g., 'High Risk Policies').",
+          "maxLength": 2000,
+          "title": "Semantic Label",
+          "type": "string"
+        },
+        "children_node_cids": {
+          "description": "Explicit array of child node CIDs to enforce the Directed Acyclic Graph.",
+          "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Children Node Cids",
+          "type": "array"
+        },
+        "leaf_provenance": {
+          "description": "The mathematical chain of custody binding this virtual coordinate back to physical vectors.",
+          "items": {
+            "$ref": "#/$defs/EpistemicProvenanceReceipt"
+          },
+          "title": "Leaf Provenance",
+          "type": "array"
+        },
+        "render_material": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SpatialRenderMaterial"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The physics-agnostic visual identity or shader governing the spatial rendering of this node."
+        }
+      },
+      "required": [
+        "node_cid",
+        "semantic_label"
+      ],
+      "title": "SpatialTaxonomicNodeState",
+      "type": "object"
+    },
     "SpatialTaxonomicRestructureIntent": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Executes a kinetic Graph Isomorphism transformation, dynamically mutating the UI's spatial organization via heuristic regrouping without altering the underlying epistemic truth.\n\nCAUSAL AFFORDANCE: Forces the Hollow Data Plane to immediately discard the current semantic manifold and re-render the hierarchical projection according to the newly synthesized `target_taxonomy` and spatial heuristic.\n\nEPISTEMIC BOUNDS: Execution is rigidly constrained by the `restructure_heuristic`, strictly bounded to a Literal automaton `[\"chronological\", \"entity_centric\", \"semantic_cluster\", \"confidence_decay\"]`, mathematically preventing out-of-distribution UI mutations.\n\nMCP ROUTING TRIGGERS: Graph Isomorphism, UI State Mutation, Heuristic Regrouping, Dynamic Manifold, Spatial Reorganization",
@@ -17093,7 +17199,7 @@
           "type": "string"
         },
         "target_taxonomy": {
-          "$ref": "#/$defs/GenerativeTaxonomyManifest",
+          "$ref": "#/$defs/SpatialGenerativeTaxonomyManifest",
           "description": "The newly synthesized topology projected to the frontend."
         }
       },
@@ -17980,7 +18086,7 @@
         "semantic_flow": {
           "anyOf": [
             {
-              "$ref": "#/$defs/SemanticFlowPolicy"
+              "$ref": "#/$defs/EpistemicSemanticFlowPolicy"
             },
             {
               "type": "null"
@@ -18416,112 +18522,6 @@
         "cleared_price_magnitude"
       ],
       "title": "TaskAwardReceipt",
-      "type": "object"
-    },
-    "TaxonomicNodeState": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Hierarchical Agglomerative Clustering to project continuous,\ndense latent vector spaces into a deterministic, discrete N-ary tree structure. As a\n...State suffix, this is a declarative, frozen snapshot of a specific geometric coordinate.\n\nCAUSAL AFFORDANCE: Establishes a strictly bounded, navigable spatial coordinate within\nthe Virtual File System (VFS), allowing agents to traverse high-dimensional semantic\nspaces without consuming excessive context window tokens.\n\nEPISTEMIC BOUNDS: Spatial geometry is locked via node_cid (a strictly typed 128-character\nCID). The children_node_cids array is deterministically sorted, and the leaf_provenance\narray is sorted by source_event_cid, both via @model_validator to guarantee invariant\nRFC 8785 canonical hashing.\n\nMCP ROUTING TRIGGERS: Dimensionality Reduction, Hierarchical Clustering, N-ary Tree,\nVirtual File System, Semantic Coordinate",
-      "properties": {
-        "node_cid": {
-          "description": "A Content Identifier (CID) bounding this specific taxonomic coordinate.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Node Cid",
-          "type": "string"
-        },
-        "semantic_label": {
-          "description": "The human-legible, dynamically synthesized categorical label (e.g., 'High Risk Policies').",
-          "maxLength": 2000,
-          "title": "Semantic Label",
-          "type": "string"
-        },
-        "children_node_cids": {
-          "description": "Explicit array of child node CIDs to enforce the Directed Acyclic Graph.",
-          "items": {
-            "maxLength": 128,
-            "minLength": 1,
-            "type": "string"
-          },
-          "title": "Children Node Cids",
-          "type": "array"
-        },
-        "leaf_provenance": {
-          "description": "The mathematical chain of custody binding this virtual coordinate back to physical vectors.",
-          "items": {
-            "$ref": "#/$defs/EpistemicProvenanceReceipt"
-          },
-          "title": "Leaf Provenance",
-          "type": "array"
-        },
-        "render_material": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/SpatialRenderMaterial"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The physics-agnostic visual identity or shader governing the spatial rendering of this node."
-        }
-      },
-      "required": [
-        "node_cid",
-        "semantic_label"
-      ],
-      "title": "TaxonomicNodeState",
-      "type": "object"
-    },
-    "TaxonomicRoutingPolicy": {
-      "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements a deterministic Softmax Router Gate, leveraging Cognitive Load Theory to map high-entropy natural language intents into explicitly bounded spatial organizing frameworks.\n\nCAUSAL AFFORDANCE: Preemptively routes classified intents to optimized taxonomic layouts, mechanically preventing token exhaustion and attention dilution in downstream processing nodes before compute is allocated.\n\nEPISTEMIC BOUNDS: The `intent_to_heuristic_matrix` physically restricts state-space explosion by capping at `max_length=1000` dictionary properties. The matrix keys are strictly bounded to 255 characters via `StringConstraints` to mathematically prevent Dictionary Bombing.\n\nMCP ROUTING TRIGGERS: Softmax Gating, Cognitive Load Theory, Pre-Flight Routing, Dictionary Bombing Prevention, Token Exhaustion Mitigation",
-      "properties": {
-        "policy_cid": {
-          "description": "Unique identifier for this pre-flight routing policy.",
-          "maxLength": 128,
-          "minLength": 1,
-          "pattern": "^[a-zA-Z0-9_.:-]+$",
-          "title": "Policy Cid",
-          "type": "string"
-        },
-        "intent_to_heuristic_matrix": {
-          "additionalProperties": {
-            "enum": [
-              "chronological",
-              "entity_centric",
-              "semantic_cluster",
-              "confidence_decay"
-            ],
-            "type": "string"
-          },
-          "description": "Strict dictionary binding classified natural language intents to bounded spatial heuristics.",
-          "maxProperties": 1000,
-          "propertyNames": {
-            "maxLength": 255
-          },
-          "title": "Intent To Heuristic Matrix",
-          "type": "object"
-        },
-        "fallback_heuristic": {
-          "description": "The deterministic default applied if intent classification falls below the safety threshold.",
-          "enum": [
-            "chronological",
-            "entity_centric",
-            "semantic_cluster",
-            "confidence_decay"
-          ],
-          "title": "Fallback Heuristic",
-          "type": "string"
-        }
-      },
-      "required": [
-        "policy_cid",
-        "intent_to_heuristic_matrix",
-        "fallback_heuristic"
-      ],
-      "title": "TaxonomicRoutingPolicy",
       "type": "object"
     },
     "TelemetryBackpressureContract": {
@@ -20213,7 +20213,7 @@
       "type": "object",
       "x-domain-cluster": "cognitive_routing",
       "x-synergistic-classes": [
-        "TaxonomicRoutingPolicy",
+        "CognitiveTaxonomicRoutingPolicy",
         "CognitiveAgentNodeProfile",
         "SemanticRelationalVectorState"
       ]

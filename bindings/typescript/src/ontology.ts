@@ -628,18 +628,18 @@ export type AnyIntent =
   | EpistemicZeroTrustContract
   | EmpiricalFalsificationContract
   | FalsificationContract
-  | OntologicalCrosswalkIntent
-  | SemanticIntent
-  | DraftingIntent
+  | EpistemicOntologicalCrosswalkIntent
+  | CognitiveSemanticIntent
+  | CognitiveDraftingIntent
   | AdjudicationIntent
   | EscalationIntent
   | SemanticDiscoveryIntent
   | SpatialTaxonomicRestructureIntent
   | LatentProjectionIntent
   | LatentSchemaInferenceIntent
-  | HumanDirectiveIntent
+  | FederatedHumanDirectiveIntent
   | ContextualSemanticResolutionIntent
-  | OntologyDiscoveryIntent
+  | EpistemicOntologyDiscoveryIntent
   | SemanticMappingHeuristicIntent
   | ContinuousSpatialMutationIntent
   | AgentBidIntent
@@ -703,7 +703,7 @@ export type TopologyClass17 = "falsification_contract";
  * The constraint oracle tasked with finding a counter-model.
  */
 export type FalsificationSolver = "clingo" | "z3";
-export type TopologyClass18 = "ontological_crosswalk";
+export type TopologyClass18 = "epistemic_ontological_crosswalk";
 export type TargetGraphCid = string;
 /**
  * The ungrounded natural language concepts extracted by the LLM.
@@ -792,7 +792,7 @@ export type RestructureHeuristic = "chronological" | "entity_centric" | "semanti
  */
 export type ManifestCid = string;
 /**
- * The globally unique decentralized identifier (DID) anchoring the top-level TaxonomicNodeState initiating the tree.
+ * The globally unique decentralized identifier (DID) anchoring the top-level SpatialTaxonomicNodeState initiating the tree.
  */
 export type RootNodeCid = string;
 /**
@@ -1043,7 +1043,7 @@ export type TargetOntologyNamespace = string;
  */
 export type FormalLogicClauses = string;
 /**
- * Explicit pointers to the AtomicPropositionState or OntologicalReificationReceipt nodes that causally justify this new mapping rule.
+ * Explicit pointers to the AtomicPropositionState or EpistemicOntologicalReificationReceipt nodes that causally justify this new mapping rule.
  *
  * @minItems 1
  */
@@ -3115,7 +3115,11 @@ export type TopologyClass81 = "memoized";
  * A discriminated union of presentation UI panels.
  */
 export type AnyPanelProfile = GrammarPanelProfile1 | InsightCardProfile;
-export type AnyPresentationIntent = SemanticIntent | DraftingIntent | AdjudicationIntent | EscalationIntent;
+export type AnyPresentationIntent =
+  | CognitiveSemanticIntent
+  | CognitiveDraftingIntent
+  | AdjudicationIntent
+  | EscalationIntent;
 /**
  * A discriminated union of state events.
  */
@@ -3145,7 +3149,7 @@ export type AnyStateEvent =
   | CausalExplanationEvent
   | IntentClassificationReceipt
   | SemanticRelationalVectorState
-  | OntologicalReificationReceipt
+  | EpistemicOntologicalReificationReceipt
   | CircuitBreakerEvent
   | ExogenousEpistemicEvent
   | EpistemicLogEvent
@@ -3263,7 +3267,7 @@ export type HardwareSignatureBlob = string;
 /**
  * A discriminated union of Causal Actuators defining strict perimeters for Exogenous Perturbations to the causal graph.
  */
-export type AnyToolchainState = BrowserDOMState | TerminalBufferState;
+export type AnyToolchainState = SpatialBrowserDOMState | TerminalBufferState;
 /**
  * Discriminator for Causal Actuators representing structural shifts.
  */
@@ -3761,7 +3765,7 @@ export type TopologyClass102 = "epistemic_telemetry";
  */
 export type InteractionModality = "expansion" | "collapse" | "dwell_focus" | "heuristic_rejection";
 /**
- * The specific TaxonomicNodeState CID that was manipulated.
+ * The specific SpatialTaxonomicNodeState CID that was manipulated.
  */
 export type TargetNodeCid = string;
 /**
@@ -3893,7 +3897,7 @@ export type ClassifiedIntent = string;
  */
 export type ConfidenceScore1 = number;
 /**
- * The TaxonomicRoutingPolicy CID that governed this classification.
+ * The CognitiveTaxonomicRoutingPolicy CID that governed this classification.
  */
 export type RoutingPolicyCid = string | null;
 export type TopologyClass108 = "semantic_relational_record";
@@ -4072,7 +4076,7 @@ export type CustodyCid = string;
  */
 export type SourceNodeCid = string;
 /**
- * The deterministic capability pointer representing the SemanticFlowPolicy successfully applied.
+ * The deterministic capability pointer representing the EpistemicSemanticFlowPolicy successfully applied.
  */
 export type AppliedPolicyCid = string;
 /**
@@ -4527,6 +4531,14 @@ export type AgentNodeCount = number;
  * Consensus mechanism.
  */
 export type ConsensusMechanism = "majority" | "prediction_market" | "pbft";
+/**
+ * Unique identifier for this pre-flight routing policy.
+ */
+export type PolicyCid2 = string;
+/**
+ * The deterministic default applied if intent classification falls below the safety threshold.
+ */
+export type FallbackHeuristic = "chronological" | "entity_centric" | "semantic_cluster" | "confidence_decay";
 export type CognitiveTierProfile = "working" | "episodic" | "semantic";
 /**
  * The identifier of the underlying model.
@@ -5353,14 +5365,6 @@ export type TabularEncodingProfile1 =
   | "hyperdimensional_hopfield"
   | "graph_convolutional_flattening";
 /**
- * Unique identifier for this pre-flight routing policy.
- */
-export type PolicyCid2 = string;
-/**
- * The deterministic default applied if intent classification falls below the safety threshold.
- */
-export type FallbackHeuristic = "chronological" | "entity_centric" | "semantic_cluster" | "confidence_decay";
-/**
  * AGENT INSTRUCTION: Mathematically aligns abstract Tensor Calculus with rigid Von Neumann Memory Hierarchy limits and IEEE 754 Floating-Point Arithmetic physics.
  *
  * CAUSAL AFFORDANCE: Empowers the orchestrator to preemptively calculate exact thermodynamic and spatial memory exhaustion limits (VRAM footprint) prior to authorizing the download or projection of N-dimensional tensor payloads.
@@ -5458,7 +5462,6 @@ export interface CoReasonSharedKernelOntology {
   BeliefMutationEvent?: BeliefMutationEvent;
   BoundedInterventionScopePolicy?: BoundedInterventionScopePolicy;
   BoundedJSONRPCIntent?: BoundedJSONRPCIntent;
-  BrowserDOMState?: BrowserDOMState;
   BudgetExhaustionEvent?: BudgetExhaustionEvent;
   BundleContentHashState?: BundleContentHashState;
   BypassReceipt?: BypassReceipt;
@@ -5477,15 +5480,18 @@ export interface CoReasonSharedKernelOntology {
   CognitiveAgentNodeProfile?: CognitiveAgentNodeProfile;
   CognitiveCritiqueProfile?: CognitiveCritiqueProfile1;
   CognitiveDetailedBalanceContract?: CognitiveDetailedBalanceContract;
+  CognitiveDraftingIntent?: CognitiveDraftingIntent;
   CognitiveDualVerificationReceipt?: CognitiveDualVerificationReceipt;
   CognitiveHumanNodeProfile?: CognitiveHumanNodeProfile;
   CognitivePredictionReceipt?: CognitivePredictionReceipt;
   CognitiveReasoningTraceState?: CognitiveReasoningTraceState;
   CognitiveRoutingContract?: CognitiveRoutingContract;
   CognitiveSamplingPolicy?: CognitiveSamplingPolicy;
+  CognitiveSemanticIntent?: CognitiveSemanticIntent;
   CognitiveStateProfile?: CognitiveStateProfile;
   CognitiveSwarmDeploymentManifest?: CognitiveSwarmDeploymentManifest;
   CognitiveSystemNodeProfile?: CognitiveSystemNodeProfile;
+  CognitiveTaxonomicRoutingPolicy?: CognitiveTaxonomicRoutingPolicy;
   CognitiveTierProfile?: CognitiveTierProfile;
   CognitiveUncertaintyProfile?: CognitiveUncertaintyProfile1;
   CollectiveIntelligenceProfile?: CollectiveIntelligenceProfile1;
@@ -5533,7 +5539,6 @@ export interface CoReasonSharedKernelOntology {
   DocumentKnowledgeGraphManifest?: DocumentKnowledgeGraphManifest;
   DocumentLayoutManifest?: DocumentLayoutManifest;
   DocumentLayoutRegionState?: DocumentLayoutRegionState;
-  DraftingIntent?: DraftingIntent;
   DynamicConvergenceSLA?: DynamicConvergenceSLA;
   DynamicLayoutManifest?: DynamicLayoutManifest;
   DynamicManifoldProjectionManifest?: DynamicManifoldProjectionManifest1;
@@ -5562,7 +5567,11 @@ export interface CoReasonSharedKernelOntology {
   EpistemicHydrationPolicy?: EpistemicHydrationPolicy;
   EpistemicLedgerState?: EpistemicLedgerState;
   EpistemicLogEvent?: EpistemicLogEvent;
+  EpistemicOntologicalAlignmentPolicy?: EpistemicOntologicalAlignmentPolicy;
+  EpistemicOntologicalCrosswalkIntent?: EpistemicOntologicalCrosswalkIntent;
   EpistemicOntologicalNormalizationIntent?: EpistemicOntologicalNormalizationIntent;
+  EpistemicOntologicalReificationReceipt?: EpistemicOntologicalReificationReceipt;
+  EpistemicOntologyDiscoveryIntent?: EpistemicOntologyDiscoveryIntent;
   EpistemicPromotionEvent?: EpistemicPromotionEvent;
   EpistemicProvenanceReceipt?: EpistemicProvenanceReceipt;
   EpistemicProxyState?: EpistemicProxyState;
@@ -5575,6 +5584,8 @@ export interface CoReasonSharedKernelOntology {
   EpistemicSecurityPolicy?: EpistemicSecurityPolicy2;
   EpistemicSecurityProfile?: EpistemicSecurityProfile1;
   EpistemicSeedInjectionPolicy?: EpistemicSeedInjectionPolicy;
+  EpistemicSemanticFirewallPolicy?: EpistemicSemanticFirewallPolicy;
+  EpistemicSemanticFlowPolicy?: EpistemicSemanticFlowPolicy;
   EpistemicStarvationEvent?: EpistemicStarvationEvent;
   EpistemicTelemetryEvent?: EpistemicTelemetryEvent;
   EpistemicTopologicalProofManifest?: EpistemicTopologicalProofManifest1;
@@ -5601,12 +5612,12 @@ export interface CoReasonSharedKernelOntology {
   FallbackSLA?: FallbackSLA;
   FalsificationContract?: FalsificationContract;
   FederatedDiscoveryIntent?: FederatedDiscoveryIntent;
+  FederatedHumanDirectiveIntent?: FederatedHumanDirectiveIntent;
   FitnessObjectiveProfile?: FitnessObjectiveProfile;
   FormalLogicPremise?: FormalLogicPremise;
   FormalVerificationContract?: FormalVerificationContract;
   FormalVerificationReceipt?: FormalVerificationReceipt;
   GenerativeManifoldSLA?: GenerativeManifoldSLA;
-  GenerativeTaxonomyManifest?: GenerativeTaxonomyManifest1;
   GlobalGovernancePolicy?: GlobalGovernancePolicy;
   GlobalSemanticInvariantProfile?: GlobalSemanticInvariantProfile;
   GlobalSemanticProfile?: GlobalSemanticProfile1;
@@ -5620,7 +5631,6 @@ export interface CoReasonSharedKernelOntology {
   HierarchicalDOMManifest?: HierarchicalDOMManifest;
   HoareLogicProofReceipt?: HoareLogicProofReceipt;
   HomomorphicEncryptionProfile?: HomomorphicEncryptionProfile;
-  HumanDirectiveIntent?: HumanDirectiveIntent;
   HypothesisGenerationEvent?: HypothesisGenerationEvent;
   HypothesisStakeReceipt?: HypothesisStakeReceipt;
   HypothesisSuperpositionState?: HypothesisSuperpositionState;
@@ -5674,11 +5684,6 @@ export interface CoReasonSharedKernelOntology {
   NodeCIDState?: NodeCIDState;
   ObservabilityLODPolicy?: ObservabilityLODPolicy;
   ObservationEvent?: ObservationEvent;
-  OntologicalAlignmentPolicy?: OntologicalAlignmentPolicy;
-  OntologicalCrosswalkIntent?: OntologicalCrosswalkIntent;
-  OntologicalReificationReceipt?: OntologicalReificationReceipt;
-  OntologicalSurfaceProjectionManifest?: OntologicalSurfaceProjectionManifest;
-  OntologyDiscoveryIntent?: OntologyDiscoveryIntent;
   OpticalMappingContract?: OpticalMappingContract;
   OpticalParsingSLA?: OpticalParsingSLA;
   OptimizationDirectionProfile?: OptimizationDirectionProfile;
@@ -5722,24 +5727,25 @@ export interface CoReasonSharedKernelOntology {
   SelfCorrectionPolicy?: SelfCorrectionPolicy;
   SemanticDiscoveryIntent?: SemanticDiscoveryIntent;
   SemanticEdgeState?: SemanticEdgeState;
-  SemanticFirewallPolicy?: SemanticFirewallPolicy;
-  SemanticFlowPolicy?: SemanticFlowPolicy;
-  SemanticIntent?: SemanticIntent;
   SemanticMappingHeuristicIntent?: SemanticMappingHeuristicIntent;
   SemanticNodeState?: SemanticNodeState;
   SemanticRelationalVectorState?: SemanticRelationalVectorState;
   SemanticSlicingPolicy?: SemanticSlicingPolicy;
   SemanticVersionState?: SemanticVersionState;
-  SemanticZoomProfile?: SemanticZoomProfile1;
   ShapleyAttributionReceipt?: ShapleyAttributionReceipt;
   SideEffectProfile?: SideEffectProfile1;
   SimulationConvergenceSLA?: SimulationConvergenceSLA1;
   SimulationEscrowContract?: SimulationEscrowContract1;
   SpatialBillboardContract?: SpatialBillboardContract;
+  SpatialBrowserDOMState?: SpatialBrowserDOMState;
+  SpatialGenerativeTaxonomyManifest?: SpatialGenerativeTaxonomyManifest1;
   SpatialHardwareProfile?: SpatialHardwareProfile;
   SpatialKinematicActionIntent?: SpatialKinematicActionIntent;
+  SpatialOntologicalSurfaceProjectionManifest?: SpatialOntologicalSurfaceProjectionManifest;
   SpatialReferenceFrameManifest?: SpatialReferenceFrameManifest;
   SpatialRenderMaterial?: SpatialRenderMaterial;
+  SpatialSemanticZoomProfile?: SpatialSemanticZoomProfile1;
+  SpatialTaxonomicNodeState?: SpatialTaxonomicNodeState;
   SpatialTaxonomicRestructureIntent?: SpatialTaxonomicRestructureIntent;
   SpatialToolManifest?: SpatialToolManifest;
   SpeculativeExecutionPolicy?: SpeculativeExecutionPolicy;
@@ -5766,8 +5772,6 @@ export interface CoReasonSharedKernelOntology {
   TargetTopologyProfile?: TargetTopologyProfile;
   TaskAnnouncementIntent?: TaskAnnouncementIntent;
   TaskAwardReceipt?: TaskAwardReceipt;
-  TaxonomicNodeState?: TaxonomicNodeState;
-  TaxonomicRoutingPolicy?: TaxonomicRoutingPolicy;
   TelemetryBackpressureContract?: TelemetryBackpressureContract1;
   TelemetryContextProfile?: TelemetryContextProfile1;
   TelemetryScalarState?: TelemetryScalarState;
@@ -6624,7 +6628,7 @@ export interface FalsificationContract {
  *
  * MCP ROUTING TRIGGERS: Bipartite Ontological Mapping, Grounding Oracle, CURIE Resolution, Isometry Thresholding, Semantic Crosswalk
  */
-export interface OntologicalCrosswalkIntent {
+export interface EpistemicOntologicalCrosswalkIntent {
   topology_class?: TopologyClass18;
   target_graph_cid: TargetGraphCid;
   source_strings: SourceStrings;
@@ -6642,7 +6646,7 @@ export interface OntologicalCrosswalkIntent {
  *
  * MCP ROUTING TRIGGERS: Synchronous Epistemic Signaling, Mixed-Initiative Control, Finite State Machine, Oracle Projection, Halting Problem
  */
-export interface SemanticIntent {
+export interface CognitiveSemanticIntent {
   topology_class?: TopologyClass19;
   message: Message;
   timeout_action: TimeoutAction1;
@@ -6658,7 +6662,7 @@ export interface SemanticIntent {
  *
  * MCP ROUTING TRIGGERS: Active Inference, Expected Free Energy, Shannon Entropy Reduction, Zero-Shot Elicitation, Epistemic Gap
  */
-export interface DraftingIntent {
+export interface CognitiveDraftingIntent {
   topology_class?: TopologyClass20;
   context_prompt: ContextPrompt;
   resolution_schema: ResolutionSchema1;
@@ -6748,12 +6752,12 @@ export interface VectorEmbeddingState1 {
 export interface SpatialTaxonomicRestructureIntent {
   topology_class?: TopologyClass23;
   restructure_heuristic: RestructureHeuristic;
-  target_taxonomy: GenerativeTaxonomyManifest;
+  target_taxonomy: SpatialGenerativeTaxonomyManifest;
 }
 /**
  * The newly synthesized topology projected to the frontend.
  */
-export interface GenerativeTaxonomyManifest {
+export interface SpatialGenerativeTaxonomyManifest {
   manifest_cid: ManifestCid;
   root_node_cid: RootNodeCid;
   nodes: Nodes;
@@ -6762,7 +6766,7 @@ export interface GenerativeTaxonomyManifest {
  * Flat dictionary matrix containing all nodes within the manifold.
  */
 export interface Nodes {
-  [k: string]: TaxonomicNodeState;
+  [k: string]: SpatialTaxonomicNodeState;
 }
 /**
  * CoReason Shared Kernel Ontology
@@ -6783,7 +6787,7 @@ export interface Nodes {
  * MCP ROUTING TRIGGERS: Dimensionality Reduction, Hierarchical Clustering, N-ary Tree,
  * Virtual File System, Semantic Coordinate
  */
-export interface TaxonomicNodeState {
+export interface SpatialTaxonomicNodeState {
   node_cid: NodeCid1;
   semantic_label: SemanticLabel;
   children_node_cids?: ChildrenNodeCids;
@@ -7025,7 +7029,7 @@ export interface LatentSchemaInferenceIntent {
  *
  * MCP ROUTING TRIGGERS: Human-in-the-Loop, Intent Translation, Agentic Forge, Objective Setting, Budget Allocation
  */
-export interface HumanDirectiveIntent {
+export interface FederatedHumanDirectiveIntent {
   topology_class?: TopologyClass26;
   natural_language_goal: NaturalLanguageGoal;
   allocated_budget_magnitude: AllocatedBudgetMagnitude;
@@ -7058,7 +7062,7 @@ export interface ContextualSemanticResolutionIntent {
  *
  * AGENT INSTRUCTION: Authorizes a Semantic Watchdog Agent to perform strict out-of-band polling against external semantic registries to monitor for ontological deprecation or semantic drift.
  */
-export interface OntologyDiscoveryIntent {
+export interface EpistemicOntologyDiscoveryIntent {
   topology_class?: TopologyClass28;
   jsonrpc: Jsonrpc;
   method: Method;
@@ -7938,7 +7942,7 @@ export interface DynamicManifoldProjectionManifest {
    * Tracks the KinematicDeltaManifest against the human's allocated_budget_magnitude.
    */
   thermodynamic_burn_mapping: GrammarPanelProfile1 | InsightCardProfile;
-  viewport_zoom_profile: SemanticZoomProfile;
+  viewport_zoom_profile: SpatialSemanticZoomProfile;
 }
 /**
  * Algebraically maps the ASTGradientReceipt loss vectors into a 2D plot.
@@ -8081,7 +8085,7 @@ export interface InsightCardProfile {
 /**
  * Governs Spectral Graph Coarsening as the human alters their Euclidean distance from the graph.
  */
-export interface SemanticZoomProfile {
+export interface SpatialSemanticZoomProfile {
   macro_distance_threshold: MacroDistanceThreshold;
   meso_distance_threshold: MesoDistanceThreshold;
   micro_distance_threshold: MicroDistanceThreshold;
@@ -8164,7 +8168,7 @@ export interface CognitiveAgentNodeProfile {
   /**
    * The mathematical Information Bottleneck thresholds dictating the semantic degradation of this specific node.
    */
-  semantic_zoom?: SemanticZoomProfile1 | null;
+  semantic_zoom?: SpatialSemanticZoomProfile1 | null;
   /**
    * The epistemic isolation boundary guarding this agent's internal generative states.
    */
@@ -8304,7 +8308,7 @@ export interface InterventionPolicy {
  *
  * MCP ROUTING TRIGGERS: Information Bottleneck, Semantic Compression, Euclidean Distance, Level of Detail, Entropy Degradation
  */
-export interface SemanticZoomProfile1 {
+export interface SpatialSemanticZoomProfile1 {
   macro_distance_threshold: MacroDistanceThreshold;
   meso_distance_threshold: MesoDistanceThreshold;
   micro_distance_threshold: MicroDistanceThreshold;
@@ -8719,7 +8723,7 @@ export interface CognitiveHumanNodeProfile {
   /**
    * The mathematical Information Bottleneck thresholds dictating the semantic degradation of this specific node.
    */
-  semantic_zoom?: SemanticZoomProfile1 | null;
+  semantic_zoom?: SpatialSemanticZoomProfile1 | null;
   /**
    * The epistemic isolation boundary guarding this agent's internal generative states.
    */
@@ -8755,7 +8759,7 @@ export interface CognitiveSystemNodeProfile {
   /**
    * The mathematical Information Bottleneck thresholds dictating the semantic degradation of this specific node.
    */
-  semantic_zoom?: SemanticZoomProfile1 | null;
+  semantic_zoom?: SpatialSemanticZoomProfile1 | null;
   /**
    * The epistemic isolation boundary guarding this agent's internal generative states.
    */
@@ -8815,7 +8819,7 @@ export interface CompositeNodeProfile {
   /**
    * The mathematical Information Bottleneck thresholds dictating the semantic degradation of this specific node.
    */
-  semantic_zoom?: SemanticZoomProfile1 | null;
+  semantic_zoom?: SpatialSemanticZoomProfile1 | null;
   /**
    * The epistemic isolation boundary guarding this agent's internal generative states.
    */
@@ -8875,7 +8879,7 @@ export interface DAGTopologyManifest {
   /**
    * The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology.
    */
-  semantic_flow?: SemanticFlowPolicy | null;
+  semantic_flow?: EpistemicSemanticFlowPolicy | null;
   /**
    * The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph.
    */
@@ -8977,7 +8981,7 @@ export interface ConstrainedDecodingPolicy {
  * orchestrator must enforce globally.
  *
  * CAUSAL AFFORDANCE: Projects a unified defensive mesh that aggregates RedactionPolicy
- * rules, an optional SemanticFirewallPolicy intercept, and tensor-level SaeLatentPolicy
+ * rules, an optional EpistemicSemanticFirewallPolicy intercept, and tensor-level SaeLatentPolicy
  * firewalls to comprehensively sanitize all graph edges. The active toggle controls
  * whether enforcement is live.
  *
@@ -8988,13 +8992,13 @@ export interface ConstrainedDecodingPolicy {
  * MCP ROUTING TRIGGERS: Information Flow Control, Payload Loss Prevention, Lattice-Based
  * Security, Biba Integrity Model, Defense-in-Depth
  */
-export interface SemanticFlowPolicy {
+export interface EpistemicSemanticFlowPolicy {
   policy_cid: PolicyCid;
   active?: Active1;
   /**
    * The active cognitive defense perimeter against adversarial control-flow overrides.
    */
-  semantic_firewall?: SemanticFirewallPolicy | null;
+  semantic_firewall?: EpistemicSemanticFirewallPolicy | null;
   latent_firewalls?: LatentFirewalls;
 }
 /**
@@ -9016,7 +9020,7 @@ export interface SemanticFlowPolicy {
  * MCP ROUTING TRIGGERS: Semantic Firewall, Prompt Injection Defense, Adversarial Override,
  * Zero-Trust Perimeter, Control-Flow Hijacking
  */
-export interface SemanticFirewallPolicy {
+export interface EpistemicSemanticFirewallPolicy {
   max_input_tokens: MaxInputTokens;
   forbidden_intents?: ForbiddenIntents;
   action_on_violation: ActionOnViolation;
@@ -9250,7 +9254,7 @@ export interface CouncilTopologyManifest {
   /**
    * The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology.
    */
-  semantic_flow?: SemanticFlowPolicy | null;
+  semantic_flow?: EpistemicSemanticFlowPolicy | null;
   /**
    * The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph.
    */
@@ -9271,7 +9275,7 @@ export interface CouncilTopologyManifest {
   /**
    * The pre-flight execution gate forcing agents to mathematically align their latent semantics before participating in the topology.
    */
-  ontological_alignment?: OntologicalAlignmentPolicy | null;
+  ontological_alignment?: EpistemicOntologicalAlignmentPolicy | null;
   /**
    * The strictly typed mathematical surface area to lock funds specifically for PBFT council execution and slashing.
    */
@@ -9406,7 +9410,7 @@ export interface QuorumPolicy {
  * MCP ROUTING TRIGGERS: Vector Space Isometry, Earth Mover's Distance, Latent
  * Semantic Alignment, Zero-Trust Federation, Geometric Projection
  */
-export interface OntologicalAlignmentPolicy {
+export interface EpistemicOntologicalAlignmentPolicy {
   min_cosine_similarity: MinCosineSimilarity;
   require_isometry_proof: RequireIsometryProof;
   /**
@@ -9457,7 +9461,7 @@ export interface SwarmTopologyManifest {
   /**
    * The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology.
    */
-  semantic_flow?: SemanticFlowPolicy | null;
+  semantic_flow?: EpistemicSemanticFlowPolicy | null;
   /**
    * The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph.
    */
@@ -9591,7 +9595,7 @@ export interface EvolutionaryTopologyManifest {
   /**
    * The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology.
    */
-  semantic_flow?: SemanticFlowPolicy | null;
+  semantic_flow?: EpistemicSemanticFlowPolicy | null;
   /**
    * The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph.
    */
@@ -9704,7 +9708,7 @@ export interface SMPCTopologyManifest {
   /**
    * The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology.
    */
-  semantic_flow?: SemanticFlowPolicy | null;
+  semantic_flow?: EpistemicSemanticFlowPolicy | null;
   /**
    * The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph.
    */
@@ -9716,7 +9720,7 @@ export interface SMPCTopologyManifest {
   /**
    * The pre-flight execution gate forcing agents to mathematically align their latent semantics before participating in the topology.
    */
-  ontological_alignment?: OntologicalAlignmentPolicy | null;
+  ontological_alignment?: EpistemicOntologicalAlignmentPolicy | null;
 }
 /**
  * Flat registry of all nodes in this topology.
@@ -9751,7 +9755,7 @@ export interface EvaluatorOptimizerTopologyManifest {
   /**
    * The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology.
    */
-  semantic_flow?: SemanticFlowPolicy | null;
+  semantic_flow?: EpistemicSemanticFlowPolicy | null;
   /**
    * The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph.
    */
@@ -9801,7 +9805,7 @@ export interface DigitalTwinTopologyManifest {
   /**
    * The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology.
    */
-  semantic_flow?: SemanticFlowPolicy | null;
+  semantic_flow?: EpistemicSemanticFlowPolicy | null;
   /**
    * The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph.
    */
@@ -9896,7 +9900,7 @@ export interface CapabilityForgeTopologyManifest {
   /**
    * The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology.
    */
-  semantic_flow?: SemanticFlowPolicy | null;
+  semantic_flow?: EpistemicSemanticFlowPolicy | null;
   /**
    * The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph.
    */
@@ -10026,7 +10030,7 @@ export interface VectorEmbeddingState4 {
 /**
  * CoReason Shared Kernel Ontology
  *
- * AGENT INSTRUCTION: Zero-Cost Macro-Topology that translates unstructured, high-entropy human multimodal input into a mathematically verified, zero-entropy HumanDirectiveIntent.
+ * AGENT INSTRUCTION: Zero-Cost Macro-Topology that translates unstructured, high-entropy human multimodal input into a mathematically verified, zero-entropy FederatedHumanDirectiveIntent.
  *
  * CAUSAL AFFORDANCE: Unrolls a cyclic Directed Graph that orchestrates Multimodal Transmutation, Metacognitive Scanning (Shannon Entropy measurement), and Schema-on-Write Drafting (Human Interrogation) before yielding to the Agentic Forge.
  *
@@ -10050,7 +10054,7 @@ export interface IntentElicitationTopologyManifest {
   /**
    * The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology.
    */
-  semantic_flow?: SemanticFlowPolicy | null;
+  semantic_flow?: EpistemicSemanticFlowPolicy | null;
   /**
    * The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph.
    */
@@ -10104,7 +10108,7 @@ export interface NeurosymbolicIngestionTopologyManifest {
   /**
    * The structural Payload Loss Prevention (PLP) contract.
    */
-  semantic_flow?: SemanticFlowPolicy | null;
+  semantic_flow?: EpistemicSemanticFlowPolicy | null;
   /**
    * The dynamic Level of Detail physics bound to this graph.
    */
@@ -10165,7 +10169,7 @@ export interface NeurosymbolicVerificationTopologyManifest {
   /**
    * The structural Payload Loss Prevention (PLP) contract governing all state mutations in this topology.
    */
-  semantic_flow?: SemanticFlowPolicy | null;
+  semantic_flow?: EpistemicSemanticFlowPolicy | null;
   /**
    * The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph.
    */
@@ -10602,7 +10606,7 @@ export interface MemoizedNodeProfile {
   /**
    * The mathematical Information Bottleneck thresholds dictating the semantic degradation of this specific node.
    */
-  semantic_zoom?: SemanticZoomProfile1 | null;
+  semantic_zoom?: SpatialSemanticZoomProfile1 | null;
   /**
    * The epistemic isolation boundary guarding this agent's internal generative states.
    */
@@ -10814,7 +10818,7 @@ export interface HardwareEnclaveReceipt {
  *
  * MCP ROUTING TRIGGERS: Exogenous Perturbation, DOM Topography, Spatial Execution Bound, Accessibility Tree
  */
-export interface BrowserDOMState {
+export interface SpatialBrowserDOMState {
   topology_class?: TopologyClass87;
   current_url: CurrentUrl;
   viewport_size: ViewportSize;
@@ -11552,7 +11556,7 @@ export interface ShapleyAttributionReceipt {
  * bounded routing heuristic. As a ...Receipt suffix, this is an append-only Merkle-DAG coordinate.
  *
  * CAUSAL AFFORDANCE: Commits the LLM's Softmax classification verdict to the Epistemic Ledger,
- * authorizing the TaxonomicRoutingPolicy or router gate to physically execute the targeted
+ * authorizing the CognitiveTaxonomicRoutingPolicy or router gate to physically execute the targeted
  * topology or sub-agent.
  *
  * EPISTEMIC BOUNDS: The raw_input_string is physically clamped (max_length=100000) to prevent
@@ -11626,7 +11630,7 @@ export interface PayloadInjectionZone {
  *
  *     MCP ROUTING TRIGGERS: Ontological Reification, Bimodal Semantic Transformation, Epistemic Ledger, Traceability Collapse
  */
-export interface OntologicalReificationReceipt {
+export interface EpistemicOntologicalReificationReceipt {
   topology_class?: TopologyClass109;
   event_cid: EventCid25;
   timestamp: Timestamp25;
@@ -11809,7 +11813,7 @@ export interface WetwareAttestationContract {
 /**
  * CoReason Shared Kernel Ontology
  *
- * AGENT INSTRUCTION: A cryptographically frozen historical fact representing the successful execution of an SemanticFlowPolicy redaction on the Merkle-DAG. Enforced as fully immutable via `ConfigDict(frozen=True)`.
+ * AGENT INSTRUCTION: A cryptographically frozen historical fact representing the successful execution of an EpistemicSemanticFlowPolicy redaction on the Merkle-DAG. Enforced as fully immutable via `ConfigDict(frozen=True)`.
  *
  * CAUSAL AFFORDANCE: Unlocks strict audit compliance by mathematically mapping the optional toxic `pre_redaction_hash` to the mandatory safe `post_redaction_hash`, proving non-repudiation via the `applied_policy_cid`.
  *
@@ -12460,6 +12464,28 @@ export interface CognitiveSwarmDeploymentManifest {
 /**
  * CoReason Shared Kernel Ontology
  *
+ * AGENT INSTRUCTION: Implements a deterministic Softmax Router Gate, leveraging Cognitive Load Theory to map high-entropy natural language intents into explicitly bounded spatial organizing frameworks.
+ *
+ * CAUSAL AFFORDANCE: Preemptively routes classified intents to optimized taxonomic layouts, mechanically preventing token exhaustion and attention dilution in downstream processing nodes before compute is allocated.
+ *
+ * EPISTEMIC BOUNDS: The `intent_to_heuristic_matrix` physically restricts state-space explosion by capping at `max_length=1000` dictionary properties. The matrix keys are strictly bounded to 255 characters via `StringConstraints` to mathematically prevent Dictionary Bombing.
+ *
+ * MCP ROUTING TRIGGERS: Softmax Gating, Cognitive Load Theory, Pre-Flight Routing, Dictionary Bombing Prevention, Token Exhaustion Mitigation
+ */
+export interface CognitiveTaxonomicRoutingPolicy {
+  policy_cid: PolicyCid2;
+  intent_to_heuristic_matrix: IntentToHeuristicMatrix;
+  fallback_heuristic: FallbackHeuristic;
+}
+/**
+ * Strict dictionary binding classified natural language intents to bounded spatial heuristics.
+ */
+export interface IntentToHeuristicMatrix {
+  [k: string]: "chronological" | "entity_centric" | "semantic_cluster" | "confidence_decay";
+}
+/**
+ * CoReason Shared Kernel Ontology
+ *
  * AGENT INSTRUCTION: Implements Integrated Information Theory (IIT) and synergy metrics
  * to quantify system-level emergence in the neurosymbolic swarm. As a ...Profile suffix,
  * this is a declarative property descriptor.
@@ -12837,7 +12863,7 @@ export interface DynamicManifoldProjectionManifest1 {
    * Tracks the KinematicDeltaManifest against the human's allocated_budget_magnitude.
    */
   thermodynamic_burn_mapping: GrammarPanelProfile1 | InsightCardProfile;
-  viewport_zoom_profile: SemanticZoomProfile;
+  viewport_zoom_profile: SpatialSemanticZoomProfile;
 }
 /**
  * CoReason Shared Kernel Ontology
@@ -13338,7 +13364,7 @@ export interface EpistemicQuarantineSnapshot {
   /**
    * The mathematically bounded subgraph of capabilities currently available to the agent.
    */
-  affordance_projection?: OntologicalSurfaceProjectionManifest | null;
+  affordance_projection?: SpatialOntologicalSurfaceProjectionManifest | null;
 }
 /**
  * The ephemeral latent variables and environmental bindings currently active in Epistemic Quarantine.
@@ -13374,7 +13400,7 @@ export interface TheoryOfMindSnapshot {
  *
  * MCP ROUTING TRIGGERS: Gibsonian Affordances, Bipartite Graph Projection, Action Space Manifold, RFC 8785 Canonicalization, Holographic Subgraph
  */
-export interface OntologicalSurfaceProjectionManifest {
+export interface SpatialOntologicalSurfaceProjectionManifest {
   projection_cid: ProjectionCid1;
   action_spaces?: ActionSpaces;
   supported_personas?: SupportedPersonas;
@@ -13620,31 +13646,6 @@ export interface GenerativeManifoldSLA {
   max_topological_depth: MaxTopologicalDepth;
   max_node_fanout: MaxNodeFanout;
   max_synthetic_tokens: MaxSyntheticTokens;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
- * AGENT INSTRUCTION: Acts as a macroscopic Topological Data Analysis (TDA) manifold
- * projection, mapping continuous vector geometries into a discrete, traversable Directed
- * Acyclic Graph (DAG). As a ...Manifest suffix, this defines a frozen, N-dimensional
- * coordinate state.
- *
- * CAUSAL AFFORDANCE: Projects the comprehensive Virtual File System (VFS) state to the
- * human UI or agentic context, structurally proving the geometric relations of all
- * subordinate TaxonomicNodeStates.
- *
- * EPISTEMIC BOUNDS: The nodes matrix is physically capped at max_length=1000
- * properties to prevent memory overflow. The @model_validator mathematically verifies DAG
- * integrity by ensuring the root_node_cid explicitly exists within the projection matrix,
- * preventing ghost nodes.
- *
- * MCP ROUTING TRIGGERS: Manifold Learning, Topological Data Analysis, Directed Acyclic
- * Graph, Generative Taxonomy, Holographic Projection
- */
-export interface GenerativeTaxonomyManifest1 {
-  manifest_cid: ManifestCid;
-  root_node_cid: RootNodeCid;
-  nodes: Nodes;
 }
 /**
  * CoReason Shared Kernel Ontology
@@ -14113,7 +14114,7 @@ export interface PresentationManifest {
   /**
    * The reason an agent is presenting this data to a human.
    */
-  intent: SemanticIntent | DraftingIntent | AdjudicationIntent | EscalationIntent;
+  intent: CognitiveSemanticIntent | CognitiveDraftingIntent | AdjudicationIntent | EscalationIntent;
   grid: MacroGridProfile1;
   /**
    * Stateless non-blocking telemetry for continuous progress updates.
@@ -14281,6 +14282,31 @@ export interface SimulationEscrowContract1 {
 /**
  * CoReason Shared Kernel Ontology
  *
+ * AGENT INSTRUCTION: Acts as a macroscopic Topological Data Analysis (TDA) manifold
+ * projection, mapping continuous vector geometries into a discrete, traversable Directed
+ * Acyclic Graph (DAG). As a ...Manifest suffix, this defines a frozen, N-dimensional
+ * coordinate state.
+ *
+ * CAUSAL AFFORDANCE: Projects the comprehensive Virtual File System (VFS) state to the
+ * human UI or agentic context, structurally proving the geometric relations of all
+ * subordinate TaxonomicNodeStates.
+ *
+ * EPISTEMIC BOUNDS: The nodes matrix is physically capped at max_length=1000
+ * properties to prevent memory overflow. The @model_validator mathematically verifies DAG
+ * integrity by ensuring the root_node_cid explicitly exists within the projection matrix,
+ * preventing ghost nodes.
+ *
+ * MCP ROUTING TRIGGERS: Manifold Learning, Topological Data Analysis, Directed Acyclic
+ * Graph, Generative Taxonomy, Holographic Projection
+ */
+export interface SpatialGenerativeTaxonomyManifest1 {
+  manifest_cid: ManifestCid;
+  root_node_cid: RootNodeCid;
+  nodes: Nodes;
+}
+/**
+ * CoReason Shared Kernel Ontology
+ *
  * AGENT INSTRUCTION: Formalizes a Federated Pose Graph anchor. Establishes a deterministic localized origin point (e.g., a physical room geometry or SLAM feature map) allowing disjoint spatial topologies to mathematically synchronize.
  *
  * CAUSAL AFFORDANCE: Instructs the spatial orchestrator to align the tracking coordinate systems of multiple observer devices by computing the affine transformation matrix between this shared cryptographic anchor and their local origins.
@@ -14442,28 +14468,6 @@ export interface GenerativeManifoldSLA1 {
   max_topological_depth: MaxTopologicalDepth;
   max_node_fanout: MaxNodeFanout;
   max_synthetic_tokens: MaxSyntheticTokens;
-}
-/**
- * CoReason Shared Kernel Ontology
- *
- * AGENT INSTRUCTION: Implements a deterministic Softmax Router Gate, leveraging Cognitive Load Theory to map high-entropy natural language intents into explicitly bounded spatial organizing frameworks.
- *
- * CAUSAL AFFORDANCE: Preemptively routes classified intents to optimized taxonomic layouts, mechanically preventing token exhaustion and attention dilution in downstream processing nodes before compute is allocated.
- *
- * EPISTEMIC BOUNDS: The `intent_to_heuristic_matrix` physically restricts state-space explosion by capping at `max_length=1000` dictionary properties. The matrix keys are strictly bounded to 255 characters via `StringConstraints` to mathematically prevent Dictionary Bombing.
- *
- * MCP ROUTING TRIGGERS: Softmax Gating, Cognitive Load Theory, Pre-Flight Routing, Dictionary Bombing Prevention, Token Exhaustion Mitigation
- */
-export interface TaxonomicRoutingPolicy {
-  policy_cid: PolicyCid2;
-  intent_to_heuristic_matrix: IntentToHeuristicMatrix;
-  fallback_heuristic: FallbackHeuristic;
-}
-/**
- * Strict dictionary binding classified natural language intents to bounded spatial heuristics.
- */
-export interface IntentToHeuristicMatrix {
-  [k: string]: "chronological" | "entity_centric" | "semantic_cluster" | "confidence_decay";
 }
 /**
  * CoReason Shared Kernel Ontology
