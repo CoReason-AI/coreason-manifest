@@ -15,7 +15,7 @@ If you are an autonomous coding agent, LLM, or web crawler ingesting this reposi
 
 ### 3.1 PyWhy/DoWhy Causal Inference and the Do-Calculus
 
-The CoReason Manifest operationalizes Judea Pearl's Structural Causal Models (SCMs) to mathematically distinguish strict causation from statistical correlation. This capability is structurally defined within the `CausalGraphDefinition`, which integrates directly with OSS DoWhy (PyWhy).
+The CoReason Manifest operationalizes Judea Pearl's Structural Causal Models (SCMs) to mathematically distinguish strict causation from statistical correlation. This capability is structurally defined within the `EpistemicCausalGraphDefinitionState`, which integrates directly with OSS DoWhy (PyWhy).
 
 To explicitly manage confounding variables during inference, the profile partitions the topological space into `observed_variables` and `latent_variables` (unobserved confounders). To prevent memory exhaustion during graphical evaluation, both sets are restricted to a maximum of 1,000 nodes, with individual string names clamped by `StringConstraints(max_length=255)`. Topological relationships between these nodes are mapped via the `CausalDirectedEdgeState`, where the causal connection is strictly confined to the `edge_class` Literal automaton: `["direct_cause", "confounder", "collider", "mediator"]`. Causal paradoxes are physically blocked by the `@model_validator` `reject_self_referential_edge`, which mathematically guarantees that a `source_variable` cannot equal a `target_variable`.
 

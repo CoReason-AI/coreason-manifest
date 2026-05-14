@@ -42,10 +42,10 @@ from coreason_manifest.spec.ontology import (
     CoreasonBaseState,
     DocumentLayoutManifest,
     DynamicRoutingManifest,
+    EpistemicMCPToolDefinitionState,
+    EpistemicOntologicalAlignmentPolicy,
     EpistemicTransmutationTask,
     ManifestViolationReceipt,
-    MCPToolDefinition,
-    OntologicalAlignmentPolicy,
     StateMutationIntent,
     System2RemediationIntent,
     TamperFaultEvent,
@@ -54,7 +54,7 @@ from coreason_manifest.spec.ontology import (
 )
 
 SCHEMA_REGISTRY: dict[str, type[BaseModel]] = {
-    "mcp_tool_definition": MCPToolDefinition,
+    "mcp_tool_definition": EpistemicMCPToolDefinitionState,
     "step8_vision": DocumentLayoutManifest,
     "state_differential": StateMutationIntent,
     "cognitive_sync": CognitiveStateProfile,
@@ -268,7 +268,7 @@ def calculate_remaining_compute(ledger: ontology.EpistemicLedgerState, initial_e
 
 
 def calculate_latent_alignment(
-    v1: VectorEmbeddingState, v2: VectorEmbeddingState, policy: OntologicalAlignmentPolicy
+    v1: VectorEmbeddingState, v2: VectorEmbeddingState, policy: EpistemicOntologicalAlignmentPolicy
 ) -> float:
     """
     A pure algebraic functor to calculate cosine similarity of two vectors.

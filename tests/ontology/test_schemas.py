@@ -12,8 +12,8 @@ import pytest
 from pydantic import AnyUrl, TypeAdapter
 
 from coreason_manifest.spec.ontology import (
-    LinkMLValidationSLA,
-    OntologicalCrosswalkIntent,
+    EpistemicOntologicalCrosswalkIntent,
+    EpistemicSemanticValidationSLA,
     SchemaDrivenExtractionSLA,
 )
 
@@ -21,7 +21,7 @@ url_adapter = TypeAdapter(AnyUrl)
 
 
 def test_ontological_crosswalk_intent_sorting() -> None:
-    intent = OntologicalCrosswalkIntent(
+    intent = EpistemicOntologicalCrosswalkIntent(
         target_graph_cid="bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
         source_strings=["zebra", "apple", "banana"],
         target_ontology_registries=["HP", "CHEBI", "MONDO"],
@@ -47,7 +47,7 @@ def test_schema_driven_extraction_sla_validation() -> None:
         extraction_framework="urn:coreason:extraction:ontogpt_spires",
         max_schema_retries=3,
         validation_failure_action="drop_edge",
-        linkml_governance=LinkMLValidationSLA(
+        linkml_governance=EpistemicSemanticValidationSLA(
             linkml_schema_uri=url_adapter.validate_python("https://example.com/linkml")
         ),
     )

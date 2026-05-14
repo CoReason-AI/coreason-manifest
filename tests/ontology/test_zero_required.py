@@ -24,7 +24,7 @@ from coreason_manifest.spec.ontology import (
     MultimodalTokenAnchorState,
     OpticalParsingSLA,
     SpatialHardwareProfile,
-    SpatialRenderMaterial,
+    SpatialRenderMaterialState,
     StateVectorProfile,
     TerminalConditionContract,
 )
@@ -70,7 +70,7 @@ class TestZeroRequiredFieldModels:
         assert obj is not None
 
     def test_spatial_render_material(self) -> None:
-        obj = SpatialRenderMaterial(material_urn="urn:coreason:material:default")
+        obj = SpatialRenderMaterialState(material_urn="urn:coreason:material:default")
         assert obj is not None
 
     def test_state_vector_profile(self) -> None:
