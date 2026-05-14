@@ -6448,7 +6448,8 @@ class EpistemicZeroTrustContract(CoreasonBaseState):
 
 
 type AnyPresentationIntent = Annotated[
-    CognitiveSemanticIntent | CognitiveDraftingIntent | AdjudicationIntent | EscalationIntent, Field(discriminator="topology_class")
+    CognitiveSemanticIntent | CognitiveDraftingIntent | AdjudicationIntent | EscalationIntent,
+    Field(discriminator="topology_class"),
 ]
 
 
