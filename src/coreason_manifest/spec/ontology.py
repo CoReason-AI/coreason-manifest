@@ -6473,6 +6473,10 @@ class EpistemicConstraintPolicy(CoreasonBaseState):
                     )  # pragma: no cover
                 if isinstance(node, ast.Pow):
                     raise ValueError("Kinetic execution bleed detected: Forbidden AST node Pow")  # pragma: no cover
+                if isinstance(node, (ast.LShift, ast.RShift)):
+                    raise ValueError(
+                        f"Kinetic execution bleed detected: Forbidden AST node {type(node).__name__}"
+                    )  # pragma: no cover
                 if isinstance(node, ast.Attribute) and node.attr.startswith("__"):
                     raise ValueError(
                         f"Kinetic execution bleed detected: Forbidden attribute {node.attr}"
