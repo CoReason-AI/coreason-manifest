@@ -3247,7 +3247,7 @@ class EphemeralNamespacePartitionState(CoreasonBaseState):
     @model_validator(mode="after")
     def validate_cryptographic_hashes(self) -> Self:
         for h in self.authorized_bytecode_hashes:
-            if not re.match("^[a-f0-9]{64}$", h):
+            if not re.fullmatch(r"^[a-f0-9]{64}$", h):
                 raise ValueError(f"Invalid SHA-256 hash in whitelist: {h}")
         return self
 
