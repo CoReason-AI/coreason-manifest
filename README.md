@@ -17,6 +17,10 @@
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 [![Forks](https://img.shields.io/github/forks/CoReason-AI/coreason-manifest.svg)](https://github.com/CoReason-AI/coreason-manifest/network/members)
 [![Powered By: AI](https://img.shields.io/badge/Powered%20By-CoReason%20AI-FF4500.svg)](https://coreason.ai)
+[![OSV-Scanner](https://img.shields.io/github/actions/workflow/status/CoReason-AI/coreason-manifest/osv-scanner.yml?branch=main&label=OSV-Scanner)](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/osv-scanner.yml)
+[![Trivy](https://img.shields.io/github/actions/workflow/status/CoReason-AI/coreason-manifest/trivy.yml?branch=main&label=Trivy)](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/trivy.yml)
+[![TruffleHog](https://img.shields.io/github/actions/workflow/status/CoReason-AI/coreason-manifest/trufflehog.yml?branch=main&label=TruffleHog)](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/trufflehog.yml)
+[![OWASP ZAP](https://img.shields.io/github/actions/workflow/status/CoReason-AI/coreason-manifest/dast.yml?branch=main&label=OWASP%20ZAP)](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/dast.yml)
 <br>
 [![OpenSSF Scorecard](https://img.shields.io/ossf-scorecard/github.com/CoReason-AI/coreason-manifest?label=OpenSSF)](https://scorecard.dev/viewer/?uri=github.com/CoReason-AI/coreason-manifest)
 ![Egress Filtered](https://img.shields.io/badge/Egress_Filtered-Step--Security-blue)
@@ -202,3 +206,4 @@ Licensed under the **Prosperity Public License 3.0**.
 For full license details, see the `LICENSE` file. For commercial licensing exceptions or inquiries, please explicitly contact `license@coreason.ai` or `gowtham.rao@coreason.ai`.
 
 *(Genesis Commit: Initialized per CoReason Clean Room Protocol PIP-001 on 2026-01-01).*
+
