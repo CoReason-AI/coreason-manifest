@@ -195,8 +195,8 @@ def _sync_versions(project_root: Path) -> str:
             print("Detected dynamic versioning. Attempting to retrieve version via 'hatch version'...")
             try:
                 # Try hatch first
-                result = subprocess.run(  # nosec B603 B607 # noqa: S607
-                    ["hatch", "version"],
+                result = subprocess.run(
+                    ["hatch", "version"],  # nosec B603 B607 # noqa: S607
                     cwd=project_root,
                     capture_output=True,
                     text=True,
@@ -206,8 +206,8 @@ def _sync_versions(project_root: Path) -> str:
             except (subprocess.CalledProcessError, FileNotFoundError):
                 print("  'hatch' not found or failed. Falling back to 'git describe'...")
                 try:
-                    result = subprocess.run(  # nosec B603 B607 # noqa: S607
-                        ["git", "describe", "--tags", "--always"],
+                    result = subprocess.run(
+                        ["git", "describe", "--tags", "--always"],  # nosec B603 B607 # noqa: S607
                         cwd=project_root,
                         capture_output=True,
                         text=True,
