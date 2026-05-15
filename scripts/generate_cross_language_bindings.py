@@ -28,6 +28,8 @@ import subprocess
 import sys
 import tempfile
 import typing
+import re
+import tomllib
 from pathlib import Path
 
 
@@ -175,10 +177,58 @@ def _generate_rust(schema_path: str, rust_out: str) -> None:
     print(f"  -> {rust_out}: {line_count:,} lines")
 
 
+def _sync_versions(project_root: Path) -> str:
+    """Read the version from pyproject.toml and synchronize bindings."""
+    pyproject_path = project_root / "pyproject.toml"
+    with open(pyproject_path, "rb") as f:
+        data = tomllib.load(f)
+    version = data["project"]["version"]
+    print(f"Synchronizing ecosystem to version: {version}")
+
+    # TypeScript package.json
+    ts_pkg_path = project_root / "bindings/typescript/package.json"
+    if ts_pkg_path.exists():
+        with open(ts_pkg_path, encoding="utf-8") as f:
+            ts_pkg = json.load(f)
+        ts_pkg["version"] = version
+        with open(ts_pkg_path, "w", encoding="utf-8") as f:
+            json.dump(ts_pkg, f, indent=2)
+            f.write("\n")
+        print(f"  -> {ts_pkg_path.relative_to(project_root)} updated.")
+
+    # Rust Cargo.toml
+    rust_cargo_path = project_root / "bindings/rust/Cargo.toml"
+    if rust_cargo_path.exists():
+        content = rust_cargo_path.read_text(encoding="utf-8")
+        new_content = re.sub(r'^version = ".*?"', f'version = "{version}"', content, flags=re.M)
+        rust_cargo_path.write_text(new_content, encoding="utf-8")
+        print(f"  -> {rust_cargo_path.relative_to(project_root)} updated.")
+
+    return str(version)
+
+
+def _update_lockfiles(project_root: Path) -> None:
+    """Update uv and cargo lockfiles to ensure environment consistency."""
+    print("Updating lockfiles...")
+    
+    # UV Lock
+    subprocess.run(["uv", "lock", "--upgrade-package", "coreason-manifest"], cwd=project_root, check=True)
+    print("  -> uv.lock updated.")
+
+    # Cargo Lock
+    rust_dir = project_root / "bindings/rust"
+    if rust_dir.exists() and (rust_dir / "Cargo.toml").exists():
+        subprocess.run(["cargo", "update"], cwd=rust_dir, check=True)
+        print("  -> Cargo.lock updated.")
+
+
 def main() -> None:
     # Ensure we are working from the project root
     project_root = Path(__file__).resolve().parent.parent
     os.chdir(project_root)
+
+    version = _sync_versions(project_root)
+    _update_lockfiles(project_root)
 
     schema_file = "coreason_ontology.schema.json"
     ts_out = "bindings/typescript/src/ontology.ts"
