@@ -19038,7 +19038,7 @@
     },
     "SemanticRelationalVectorState": {
       "additionalProperties": false,
-      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents the untyped payload injection zone for harmonized structured telemetry.\n\n    CAUSAL AFFORDANCE: Permits specialized downstream agents to project and decode specific industry payloads (e.g., OMOP CDM, FIX protocol) while preserving universal mathematical traversal of the graph.\n\n    EPISTEMIC BOUNDS: The payload_injection_zone is routed through the volumetric hardware guillotine.\n\n    MCP ROUTING TRIGGERS: Semantic Relational Record, Payload Injection, Hardware Guillotine, Structured Telemetry",
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents the untyped payload injection zone for harmonized structured telemetry. \n\n    CAUSAL AFFORDANCE: Permits specialized downstream agents to project and decode specific industry payloads (e.g., OMOP CDM, FIX protocol) while preserving universal mathematical traversal of the graph. \n    \n    EPISTEMIC BOUNDS: The payload_injection_zone is routed through the volumetric hardware guillotine.\n\n    MCP ROUTING TRIGGERS: Semantic Relational Record, Payload Injection, Hardware Guillotine, Structured Telemetry",
       "properties": {
         "tenant_cid": {
           "default": "889955217295c2bfef2d6812071b633b0819477e67f57853febf116f69f30531",

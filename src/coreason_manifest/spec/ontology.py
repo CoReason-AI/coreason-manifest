@@ -3270,7 +3270,7 @@ class EphemeralNamespacePartitionState(CoreasonBaseState):
     @model_validator(mode="after")
     def validate_cryptographic_hashes(self) -> Self:
         for h in self.authorized_bytecode_hashes:
-            if not re.match("^[a-f0-9]{64}$", h):
+            if not re.fullmatch(r"^[a-f0-9]{64}$", h):
                 raise ValueError(f"Invalid SHA-256 hash in whitelist: {h}")
         return self
 
@@ -3789,11 +3789,11 @@ class EpistemicOntologyDiscoveryIntent(BoundedJSONRPCIntent):
 class SemanticMappingHeuristicIntent(CoreasonBaseState):
     """
     AGENT INSTRUCTION: A formal cryptographic petition submitted by an agent to update the swarm's internal graph logic. Compiles discovered literature and external API responses into a mathematically verifiable semantic mapping rule (e.g., SWRL).
-
+    
         CAUSAL AFFORDANCE: Physically authorizes the orchestrator to inject a new heuristic into the swarm's global hypothesis space.
-
+    
         EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
-
+    
         MCP ROUTING TRIGGERS: Semantic Mapping, Heuristic Injection, Cryptographic Petition, Swarm Logic
     """
 
@@ -4691,11 +4691,11 @@ class SemanticDiscoveryIntent(CoreasonBaseState):
 class ContextualSemanticResolutionIntent(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Acts as the kinetic trigger forcing the orchestrator to dynamically resolve a raw, untyped SemanticRelationalVectorState against a global standard ontology using optimal transport metrics, entirely bypassing legacy ETL string-matching.
-
+    
         CAUSAL AFFORDANCE: Physically authorizes the orchestrator to execute the defined optimal transport resolution.
-
+    
         EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
-
+    
         MCP ROUTING TRIGGERS: Semantic Resolution, Optimal Transport, ETL Bypass, Dynamic Ontology
     """
 
@@ -9896,11 +9896,11 @@ class TemporalBoundsProfile(CoreasonBaseState):
 class GlobalSemanticInvariantProfile(CoreasonBaseState):
     """
     AGENT INSTRUCTION: A macroscopic topological container that persists global contextual qualifiers (e.g., patient cohorts, operational environments, temporal scopes) across the Merkle-DAG, shielding downstream atomic propositions from context collapse.
-
+    
         CAUSAL AFFORDANCE: Instructs the orchestrator's verification engine to natively execute mathematical dominance checks between a payload's classification and its context.
-
+    
         EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
-
+    
         MCP ROUTING TRIGGERS: Contextual Qualifiers, Topological Container, Semantic Invariant, Context Collapse
     """
 
@@ -9941,11 +9941,11 @@ class GlobalSemanticInvariantProfile(CoreasonBaseState):
 class DiscourseNodeState(CoreasonBaseState):
     """
     AGENT INSTRUCTION: A structural vertex defining a distinct rhetorical block of text within a document, enabling hierarchical parsing and graph-based traversal of discourse.
-
+    
         CAUSAL AFFORDANCE: Instructs the orchestrator to allocate memory for a distinct rhetorical block of text.
-
+    
         EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
-
+    
         MCP ROUTING TRIGGERS: Rhetorical Block, Discourse Parsing, Graph Traversal, Structural Vertex
     """
 
@@ -9970,11 +9970,11 @@ class DiscourseNodeState(CoreasonBaseState):
 class DiscourseTreeManifest(CoreasonBaseState):
     """
     AGENT INSTRUCTION: A verifiable Directed Acyclic Graph (DAG) mapping the hierarchical geometry of human discourse. Deprecates flat-sequence extraction to solve rhetorical flattening.
-
+    
         CAUSAL AFFORDANCE: Instructs the orchestrator to enforce a strict Directed Acyclic Graph (DAG) for discourse representation.
-
+    
         EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
-
+    
         MCP ROUTING TRIGGERS: Discourse Geometry, Rhetorical Flattening, Directed Acyclic Graph, Hierarchical Extraction
     """
 
@@ -11613,11 +11613,11 @@ class SwarmTopologyManifest(CoreasonBaseState):
 class CognitiveSwarmDeploymentManifest(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Simplifies bootstrapping a multi-agent routing topology.
-
+    
         CAUSAL AFFORDANCE: Physically authorizes the orchestrator to deploy a multi-agent routing topology.
-
+    
         EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
-
+    
         MCP ROUTING TRIGGERS: Cognitive Swarm, Agent Deployment, Routing Topology, Bootstrapping Macro
     """
 
@@ -11998,11 +11998,11 @@ class IntentElicitationTopologyManifest(CoreasonBaseState):
 class NeurosymbolicVerificationTopologyManifest(CoreasonBaseState):
     """
     AGENT INSTRUCTION: A Zero-Cost Macro abstraction enforcing a strict Bipartite Graph for Proposer-Verifier loops. Isolates connectionist generation from symbolic validation and bounds cyclic computation.
-
+    
         CAUSAL AFFORDANCE: Instructs the orchestrator to enforce a strict Bipartite Graph for Proposer-Verifier loops.
-
+    
         EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
-
+    
         MCP ROUTING TRIGGERS: Proposer-Verifier Loop, Bipartite Graph, Symbolic Validation, Cyclic Computation
     """
 
@@ -13099,11 +13099,11 @@ class DifferentiableLogicPolicy(CoreasonBaseState):
 class PostCoordinatedSemanticState(CoreasonBaseState):
     """
     AGENT INSTRUCTION: The definitive output of a successful latent manifold alignment. Represents a dynamic assembly of a standardized entity (Base Concept + Contextual Modifiers) to achieve infinite semantic specificity without requiring an infinitely large pre-coordinated vocabulary.
-
+    
         CAUSAL AFFORDANCE: Physically authorizes the orchestrator to assemble a standardized entity with contextual modifiers.
-
+    
         EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
-
+    
         MCP ROUTING TRIGGERS: Post-Coordinated Semantics, Latent Manifold Alignment, Semantic Specificity, Entity Assembly
     """
 
@@ -13138,11 +13138,11 @@ class PostCoordinatedSemanticState(CoreasonBaseState):
 class EmpiricalStatisticalProfile(CoreasonBaseState):
     """
     AGENT INSTRUCTION: An explicit mathematical boundary extracted from text that limits the certainty or scope of a proposition. Physically prevents agents from performing epistemic smoothing.
-
+    
         CAUSAL AFFORDANCE: Physically authorizes the orchestrator to impose explicit mathematical boundaries on propositions.
-
+    
         EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
-
+    
         MCP ROUTING TRIGGERS: Empirical Statistics, Mathematical Boundary, Epistemic Smoothing, Proposition Certainty
     """
 
@@ -13166,11 +13166,11 @@ class EmpiricalStatisticalProfile(CoreasonBaseState):
 class AtomicPropositionState(CoreasonBaseState):
     """
     AGENT INSTRUCTION: A declarative, frozen snapshot of a standalone, verifiable statement extracted from unstructured discourse. Transmutes probabilistic 'bags-of-words' into a discrete, traversable node within the Labeled Property Graph (LPG).
-
+    
         CAUSAL AFFORDANCE: Instructs the orchestrator to persist a verifiable statement as a discrete node within the LPG.
-
+    
         EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
-
+    
         MCP ROUTING TRIGGERS: Atomic Proposition, Discourse Extraction, Labeled Property Graph, Verifiable Statement
     """
 
@@ -13893,11 +13893,11 @@ class EvidentiaryCitationState(CoreasonBaseState):
 class EpistemicDempsterShaferBeliefVectorState(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Replaces monolithic probability floats with a composite tri-vector. Independently measures lexical matching, latent semantic distance, and topological graph integrity to allow the orchestrator to compute epistemic conflict and execute evidence discounting.
-
+    
         CAUSAL AFFORDANCE: Instructs the orchestrator to independently measure lexical matching, latent semantic distance, and topological graph integrity.
-
+    
         EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.
-
+    
         MCP ROUTING TRIGGERS: Dempster-Shafer, Epistemic Conflict, Evidence Discounting, Composite Tri-Vector
     """
 
@@ -14006,12 +14006,12 @@ class EpistemicOntologicalReificationReceipt(CoreasonBaseState):
 
 class SemanticRelationalVectorState(CoreasonBaseState):
     """
-    AGENT INSTRUCTION: Represents the untyped payload injection zone for harmonized structured telemetry.
-
-        CAUSAL AFFORDANCE: Permits specialized downstream agents to project and decode specific industry payloads (e.g., OMOP CDM, FIX protocol) while preserving universal mathematical traversal of the graph.
-
+    AGENT INSTRUCTION: Represents the untyped payload injection zone for harmonized structured telemetry. 
+    
+        CAUSAL AFFORDANCE: Permits specialized downstream agents to project and decode specific industry payloads (e.g., OMOP CDM, FIX protocol) while preserving universal mathematical traversal of the graph. 
+        
         EPISTEMIC BOUNDS: The payload_injection_zone is routed through the volumetric hardware guillotine.
-
+    
         MCP ROUTING TRIGGERS: Semantic Relational Record, Payload Injection, Hardware Guillotine, Structured Telemetry
     """
 
