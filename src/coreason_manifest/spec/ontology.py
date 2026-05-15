@@ -735,6 +735,25 @@ type JsonPrimitiveState = (
 )
 
 
+class IdentityContextProxy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A rigid ontological boundary that mathematically decouples the upstream Identity Provider (OIDC/SAML) from the deterministic swarm logic. Holds the strictly validated JWT payload and the SPIFFE/SPIRE execution taint.
+
+    CAUSAL AFFORDANCE: Enables the `coreason-runtime` to pass identity claims across the zero-trust execution boundary and through WASM enclaves without coupling to specific enterprise IdP vendors. Unlocks externalized Open Policy Agent (OPA) validation.
+
+    EPISTEMIC BOUNDS: The `jwt_payload` is a strongly typed dictionary representing the validated claims. The `execution_taint` is bounded to a predefined set of SPIFFE trust levels.
+
+    MCP ROUTING TRIGGERS: OIDC, Zero-Trust Architecture, SPIFFE/SPIRE, Epistemic Quarantine, Identity Decoupling, Open Policy Agent
+    """
+
+    jwt_payload: dict[str, JsonPrimitiveState] = Field(
+        ..., description="The cryptographically validated JSON Web Token (JWT) claims extracted from the external Identity Provider."
+    )
+    execution_taint: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^spiffe://[a-zA-Z0-9_.:/-]+$")] = Field(
+        ..., description="The SPIFFE/SPIRE Identity Protocol execution taint dictating the thread's clearance level within the WASM enclave."
+    )
+
+
 class CognitiveDeliberativeEnvelopeState[T](CoreasonBaseState):
     """
     AGENT INSTRUCTION: A Generic two-stage generation wrapper that neutralizes the Format Restriction Penalty (Semantic Tax) during Constrained Decoding. The Sovereign LLM Proxy's XGrammar AOT FSM bitmask MUST be physically toggled between the two fields: DISABLED for `deliberation_trace`, then ENABLED for `payload`. This class models the architectural pattern documented in the Decoupled Reasoning and Formatting specification.
