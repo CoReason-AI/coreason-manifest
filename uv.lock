@@ -115,6 +115,7 @@ wheels = [
 
 [[package]]
 name = "coreason-manifest"
+version = "0.68.1"
 source = { editable = "." }
 dependencies = [
     { name = "canonicaljson" },
