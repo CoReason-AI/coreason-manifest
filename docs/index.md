@@ -13,8 +13,9 @@ If you are an autonomous coding agent, LLM, or web crawler ingesting this reposi
 
 # Preface
 
-# CoReason Manifest: The Epistemic Plane
+# CoReason Manifest: The Knowledge Plane
 
-Welcome to the **Epistemic Plane** (`coreason-manifest`). This repository operates as the strictly bound **Universal Unified Ontology** and **Invariant Core** within the CoReason Tripartite Cybernetic Manifold.
+Welcome to the **Knowledge Plane** (`coreason-manifest`). This repository operates as the strictly bound **Universal Unified Ontology** and **Invariant Core** within the CoReason Tripartite Cybernetic Manifold.
 
 *If `coreason-runtime` is the cell and `coreason-ecosystem` is the autonomic nervous system, `coreason-manifest` is the DNA—the mathematical, causal, and spatial boundaries that define reality for the entire reasoning mesh.*
+

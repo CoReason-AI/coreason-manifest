@@ -1,4 +1,4 @@
-# coreason-manifest (The Epistemic Plane)
+# coreason-manifest (The Knowledge Plane)
 
 [![PyPI - Version](https://img.shields.io/pypi/v/coreason-manifest)](https://pypi.org/project/coreason-manifest/)
 [![CI](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/ci.yml)
@@ -30,7 +30,7 @@
 [![Advanced Security](https://img.shields.io/github/actions/workflow/status/CoReason-AI/coreason-manifest/advanced-security.yml?branch=main&logo=github&label=Advanced%20Security)](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/advanced-security.yml)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-green)](./SECURITY.md)
 
-**The definitive Epistemic Plane and universal ontology of the CoReason ecosystem.**
+**The definitive Knowledge Plane and universal ontology of the CoReason ecosystem.**
 
 `coreason-manifest` is a State-of-the-Art (SOTA) 2026+ neurosymbolic architecture component acting as the **Universal Unified Ontology**. It is a strictly bounded, AI-native, pure structural data library that defines the mathematical, causal, and spatial boundaries of the reasoning mesh.
 
@@ -206,4 +206,5 @@ Licensed under the **Prosperity Public License 3.0**.
 For full license details, see the `LICENSE` file. For commercial licensing exceptions or inquiries, please explicitly contact `license@coreason.ai` or `gowtham.rao@coreason.ai`.
 
 *(Genesis Commit: Initialized per CoReason Clean Room Protocol PIP-001 on 2026-01-01).*
+
 
