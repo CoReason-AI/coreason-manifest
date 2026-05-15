@@ -747,10 +747,14 @@ class IdentityContextProxy(CoreasonBaseState):
     """
 
     jwt_payload: dict[str, JsonPrimitiveState] = Field(
-        ..., description="The cryptographically validated JSON Web Token (JWT) claims extracted from the external Identity Provider."
+        ...,
+        description="The cryptographically validated JSON Web Token (JWT) claims extracted from the external Identity Provider.",
     )
-    execution_taint: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^spiffe://[a-zA-Z0-9_.:/-]+$")] = Field(
-        ..., description="The SPIFFE/SPIRE Identity Protocol execution taint dictating the thread's clearance level within the WASM enclave."
+    execution_taint: Annotated[
+        str, StringConstraints(min_length=1, max_length=128, pattern="^spiffe://[a-zA-Z0-9_.:/-]+$")
+    ] = Field(
+        ...,
+        description="The SPIFFE/SPIRE Identity Protocol execution taint dictating the thread's clearance level within the WASM enclave.",
     )
 
 
@@ -6963,7 +6967,10 @@ type AnyIntent = Annotated[
     | RollbackIntent
     | StateMutationIntent
     | EpistemicOntologicalNormalizationIntent
-    | FederatedDiscoveryIntent,
+    | FederatedDiscoveryIntent
+    | NavigationalDiscoveryIntent
+    | ExploratoryDiscoveryIntent
+    | ExhaustiveDiscoveryIntent,
     Field(discriminator="topology_class"),
 ]
 

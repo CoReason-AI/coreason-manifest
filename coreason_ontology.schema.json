@@ -812,6 +812,8 @@
           "epistemic_transmutation_task": "#/$defs/EpistemicTransmutationTask",
           "epistemic_upsampling_task": "#/$defs/EpistemicUpsamplingTask",
           "escalation": "#/$defs/EscalationIntent",
+          "exhaustive_discovery_intent": "#/$defs/ExhaustiveDiscoveryIntent",
+          "exploratory_discovery_intent": "#/$defs/ExploratoryDiscoveryIntent",
           "fallback_intent": "#/$defs/FallbackIntent",
           "falsification_contract": "#/$defs/FalsificationContract",
           "federated_discovery_intent": "#/$defs/FederatedDiscoveryIntent",
@@ -823,6 +825,7 @@
           "latent_projection": "#/$defs/LatentProjectionIntent",
           "latent_schema_inference": "#/$defs/LatentSchemaInferenceIntent",
           "mcp_client_intent": "#/$defs/MCPClientIntent",
+          "navigational_discovery_intent": "#/$defs/NavigationalDiscoveryIntent",
           "neurosymbolic_inference": "#/$defs/NeurosymbolicInferenceIntent",
           "ontology_discovery": "#/$defs/EpistemicOntologyDiscoveryIntent",
           "override": "#/$defs/OverrideIntent",
@@ -983,6 +986,15 @@
         },
         {
           "$ref": "#/$defs/FederatedDiscoveryIntent"
+        },
+        {
+          "$ref": "#/$defs/NavigationalDiscoveryIntent"
+        },
+        {
+          "$ref": "#/$defs/ExploratoryDiscoveryIntent"
+        },
+        {
+          "$ref": "#/$defs/ExhaustiveDiscoveryIntent"
         }
       ]
     },
@@ -13190,6 +13202,43 @@
       ],
       "title": "IdeationPhaseProfile",
       "type": "string"
+    },
+    "IdentityContextProxy": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A rigid ontological boundary that mathematically decouples the upstream Identity Provider (OIDC/SAML) from the deterministic swarm logic. Holds the strictly validated JWT payload and the SPIFFE/SPIRE execution taint.\n\nCAUSAL AFFORDANCE: Enables the `coreason-runtime` to pass identity claims across the zero-trust execution boundary and through WASM enclaves without coupling to specific enterprise IdP vendors. Unlocks externalized Open Policy Agent (OPA) validation.\n\nEPISTEMIC BOUNDS: The `jwt_payload` is a strongly typed dictionary representing the validated claims. The `execution_taint` is bounded to a predefined set of SPIFFE trust levels.\n\nMCP ROUTING TRIGGERS: OIDC, Zero-Trust Architecture, SPIFFE/SPIRE, Epistemic Quarantine, Identity Decoupling, Open Policy Agent",
+      "properties": {
+        "tenant_cid": {
+          "default": "889955217295c2bfef2d6812071b633b0819477e67f57853febf116f69f30531",
+          "description": "The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\"date_of_incorporation\":\"2025-10-16\",\"file_number\":\"10369312\",\"jurisdiction\":\"US-DE\",\"legal_name\":\"CoReason, Inc.\"}",
+          "maxLength": 128,
+          "minLength": 4,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Tenant Cid",
+          "type": "string"
+        },
+        "jwt_payload": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonPrimitiveState"
+          },
+          "description": "The cryptographically validated JSON Web Token (JWT) claims extracted from the external Identity Provider.",
+          "title": "Jwt Payload",
+          "type": "object"
+        },
+        "execution_taint": {
+          "description": "The SPIFFE/SPIRE Identity Protocol execution taint dictating the thread's clearance level within the WASM enclave.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^spiffe://[a-zA-Z0-9_.:/-]+$",
+          "title": "Execution Taint",
+          "type": "string"
+        }
+      },
+      "required": [
+        "jwt_payload",
+        "execution_taint"
+      ],
+      "title": "IdentityContextProxy",
+      "type": "object"
     },
     "IllocutionaryForceProfile": {
       "description": "AGENT INSTRUCTION: Mathematically categorizes the structural intent of a proposition to prevent reasoning agents from hallucinating contextual truth values. Dictates whether the swarm evaluates the node as an empirical fact, a normative constraint, a guaranteed promise, or a simulation.",

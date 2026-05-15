@@ -433,7 +433,7 @@ def evaluate_topological_reachability() -> None:
         "PresentationManifest",
         "DynamicManifoldProjectionManifest",
         "MCPClientIntent",
-        "OntologyDiscoveryIntent",
+        "EpistemicOntologyDiscoveryIntent",
         "SemanticMappingHeuristicIntent",
         "FederatedCIDFetchIntent",
         "TerminalCognitiveEvent",
@@ -486,6 +486,10 @@ def evaluate_topological_reachability() -> None:
         "SyntheticGenerationProfile",
         "NDimensionalTensorManifest",
         "CognitiveDeliberativeEnvelopeState",
+        "IdentityContextProxy",
+        "NavigationalDiscoveryIntent",
+        "ExploratoryDiscoveryIntent",
+        "ExhaustiveDiscoveryIntent",
     ]
     reachable_indices = set()
     for root in root_nodes:
