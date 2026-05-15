@@ -266,7 +266,19 @@ def _update_lockfiles(project_root: Path) -> None:
     rust_dir = project_root / "bindings/rust"
     if rust_dir.exists() and (rust_dir / "Cargo.toml").exists():
         cargo_bin = shutil.which("cargo") or "cargo"
-        subprocess.run([cargo_bin, "update"], cwd=rust_dir, check=True)  # nosec B603 # noqa: S603
+        try:
+            subprocess.run(  # nosec B603 # noqa: S603
+                [cargo_bin, "update"],
+                cwd=rust_dir,
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+        except subprocess.CalledProcessError as e:
+            print(f"Error: 'cargo update' failed with exit status {e.returncode}")
+            print(f"Stdout: {e.stdout}")
+            print(f"Stderr: {e.stderr}")
+            raise
         print("  -> Cargo.lock updated.")
 
 
