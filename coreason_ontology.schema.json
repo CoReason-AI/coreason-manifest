@@ -4477,6 +4477,95 @@
       "title": "CollectiveIntelligenceProfile",
       "type": "object"
     },
+    "CommercialLicenseIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A structural request to acquire or validate a sovereign commercial exception to the standard Prosperity Public License 3.0.\n\nCAUSAL AFFORDANCE: Instructs the ecosystem gateway to negotiate a cryptographic token validating the tenant's right to assign sovereign IP to its own network bounds.\n\nEPISTEMIC BOUNDS: The `target_tenant_cid` specifies the downstream consumer of the license.\n\nMCP ROUTING TRIGGERS: Commercial Exclusivity, Cryptographic License, Token Supersession, JWT Issuance",
+      "properties": {
+        "tenant_cid": {
+          "default": "889955217295c2bfef2d6812071b633b0819477e67f57853febf116f69f30531",
+          "description": "The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\"date_of_incorporation\":\"2025-10-16\",\"file_number\":\"10369312\",\"jurisdiction\":\"US-DE\",\"legal_name\":\"CoReason, Inc.\"}",
+          "maxLength": 128,
+          "minLength": 4,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Tenant Cid",
+          "type": "string"
+        },
+        "target_tenant_cid": {
+          "description": "The downstream sovereign tenant requesting the commercial exception.",
+          "pattern": "^urn:tenant:[a-zA-Z0-9_.-]+$",
+          "title": "Target Tenant Cid",
+          "type": "string"
+        },
+        "requested_entitlements": {
+          "description": "The specific access rights requested (e.g., 'IP_SOVEREIGNTY_EXCEPTION').",
+          "items": {
+            "type": "string"
+          },
+          "title": "Requested Entitlements",
+          "type": "array"
+        }
+      },
+      "required": [
+        "target_tenant_cid"
+      ],
+      "title": "CommercialLicenseIntent",
+      "type": "object"
+    },
+    "CommercialLicenseState": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The strict geometric representation of a cryptographically validated Commercial License JWT.\n\nCAUSAL AFFORDANCE: Empowers the coreason-ecosystem gateway to suppress the AST Guillotine, unlocking IP sovereignty for newly forged capabilities.\n\nEPISTEMIC BOUNDS: The `exp` is a strict integer timestamp. The `supersedes` list mathematically prevents token replay attacks.\n\nMCP ROUTING TRIGGERS: License Validation, Air-Gapped PKI, Zero-Trust Architecture, Token Rotation, IP Sovereignty",
+      "properties": {
+        "tenant_cid": {
+          "default": "889955217295c2bfef2d6812071b633b0819477e67f57853febf116f69f30531",
+          "description": "The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\"date_of_incorporation\":\"2025-10-16\",\"file_number\":\"10369312\",\"jurisdiction\":\"US-DE\",\"legal_name\":\"CoReason, Inc.\"}",
+          "maxLength": 128,
+          "minLength": 4,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Tenant Cid",
+          "type": "string"
+        },
+        "jti": {
+          "description": "The unique cryptographic identifier of this specific JWT token.",
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Jti",
+          "type": "string"
+        },
+        "supersedes": {
+          "description": "An array of older JWT IDs that this token explicitly invalidates.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Supersedes",
+          "type": "array"
+        },
+        "exp": {
+          "description": "The absolute UNIX epoch timestamp when this commercial exception mechanically terminates.",
+          "title": "Exp",
+          "type": "integer"
+        },
+        "entitlements": {
+          "description": "The granted access rights (e.g., 'COMMERCIAL_USE', 'IP_SOVEREIGNTY_EXCEPTION').",
+          "items": {
+            "type": "string"
+          },
+          "title": "Entitlements",
+          "type": "array"
+        },
+        "issued_by": {
+          "description": "The intermediate certificate authority or exact DID that signed this token.",
+          "title": "Issued By",
+          "type": "string"
+        }
+      },
+      "required": [
+        "jti",
+        "exp",
+        "issued_by"
+      ],
+      "title": "CommercialLicenseState",
+      "type": "object"
+    },
     "CompositeNodeProfile": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements a Fractal Graph Abstraction, allowing the recursive encapsulation of entire workflow sub-topologies within a single, unified macroscopic vertex.\n\nCAUSAL AFFORDANCE: Instructs the orchestrator to suspend the parent graph, injecting state variables into the isolated topology (`AnyTopologyManifest`) via `input_mappings`, and extracting terminal output via `output_mappings`.\n\nEPISTEMIC BOUNDS: The `@model_validator` `_enforce_canonical_sort_mappings` deterministically sorts `input_mappings` by `parent_key` and `output_mappings` by `child_key`, guaranteeing zero-variance RFC 8785 canonical Merkle-DAG hashes across distributed nodes.\n\nMCP ROUTING TRIGGERS: Fractal Graph Abstraction, Recursive Encapsulation, State Projection, Bijective Mapping, Sub-Topology",

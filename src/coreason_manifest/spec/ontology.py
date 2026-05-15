@@ -14321,6 +14321,11 @@ class CommercialLicenseIntent(CoreasonBaseState):
         default_factory=list, description="The specific access rights requested (e.g., 'IP_SOVEREIGNTY_EXCEPTION')."
     )
 
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "requested_entitlements", sorted(self.requested_entitlements))
+        return self
+
 
 class CommercialLicenseState(CoreasonBaseState):
     """
@@ -14349,6 +14354,12 @@ class CommercialLicenseState(CoreasonBaseState):
         description="The granted access rights (e.g., 'COMMERCIAL_USE', 'IP_SOVEREIGNTY_EXCEPTION').",
     )
     issued_by: str = Field(description="The intermediate certificate authority or exact DID that signed this token.")
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "supersedes", sorted(self.supersedes))
+        object.__setattr__(self, "entitlements", sorted(self.entitlements))
+        return self
 
 
 CognitiveDualVerificationReceipt.model_rebuild()
