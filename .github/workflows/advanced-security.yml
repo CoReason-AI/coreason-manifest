@@ -87,3 +87,4 @@ jobs:
           fail-on-severity: 'high'
           deny-licenses: 'GPL-2.0, GPL-3.0, AGPL-3.0, OSL-3.0, CPAL-1.0'
 
+
