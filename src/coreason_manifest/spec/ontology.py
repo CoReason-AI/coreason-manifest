@@ -7271,7 +7271,7 @@ class SpatialHardwareProfile(CoreasonBaseState):
     )
     provider_whitelist: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
         default=["vast", "aws", "gcp", "azure", "oci"],
-        description="The explicit array of cloud infrastructure providers authorized to run this node.",
+        description="The explicit array of cloud infrastructure providers authorized to run this node. (Default: ['vast', 'aws', 'gcp', 'azure', 'oci'])",
     )
 
     @model_validator(mode="after")

@@ -1417,7 +1417,7 @@ export type CoreasonNetworkMode = "P2P" | "STRICT_GENESIS";
  */
 export type AcceleratorType = string;
 /**
- * The explicit array of cloud infrastructure providers authorized to run this node.
+ * The explicit array of cloud infrastructure providers authorized to run this node. (Default: ['vast', 'aws', 'gcp', 'azure', 'oci'])
  */
 export type ProviderWhitelist = string[];
 /**
