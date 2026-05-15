@@ -23,13 +23,13 @@ bindings always match the current schema.
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
 import tempfile
-import typing
-import re
 import tomllib
+import typing
 from pathlib import Path
 
 
@@ -200,7 +200,7 @@ def _sync_versions(project_root: Path) -> str:
     rust_cargo_path = project_root / "bindings/rust/Cargo.toml"
     if rust_cargo_path.exists():
         content = rust_cargo_path.read_text(encoding="utf-8")
-        new_content = re.sub(r'^version = ".*?"', f'version = "{version}"', content, flags=re.M)
+        new_content = re.sub(r'^version = ".*?"', f'version = "{version}"', content, flags=re.MULTILINE)
         rust_cargo_path.write_text(new_content, encoding="utf-8")
         print(f"  -> {rust_cargo_path.relative_to(project_root)} updated.")
 
@@ -212,13 +212,15 @@ def _update_lockfiles(project_root: Path) -> None:
     print("Updating lockfiles...")
     
     # UV Lock
-    subprocess.run(["uv", "lock", "--upgrade-package", "coreason-manifest"], cwd=project_root, check=True)
+    uv_bin = shutil.which("uv") or "uv"
+    subprocess.run([uv_bin, "lock", "--upgrade-package", "coreason-manifest"], cwd=project_root, check=True)  # nosec B603 # noqa: S603
     print("  -> uv.lock updated.")
 
     # Cargo Lock
     rust_dir = project_root / "bindings/rust"
     if rust_dir.exists() and (rust_dir / "Cargo.toml").exists():
-        subprocess.run(["cargo", "update"], cwd=rust_dir, check=True)
+        cargo_bin = shutil.which("cargo") or "cargo"
+        subprocess.run([cargo_bin, "update"], cwd=rust_dir, check=True)  # nosec B603 # noqa: S603
         print("  -> Cargo.lock updated.")
 
 
@@ -227,7 +229,7 @@ def main() -> None:
     project_root = Path(__file__).resolve().parent.parent
     os.chdir(project_root)
 
-    version = _sync_versions(project_root)
+    _sync_versions(project_root)
     _update_lockfiles(project_root)
 
     schema_file = "coreason_ontology.schema.json"
