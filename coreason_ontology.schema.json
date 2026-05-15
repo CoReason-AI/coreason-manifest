@@ -11441,6 +11441,46 @@
       "title": "ExecutionSubstrateProfile",
       "type": "object"
     },
+    "ExhaustiveDiscoveryIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A recall-oriented discovery intent rooted in Systematic Review theory. Used when the swarm requires a complete, unfiltered topological map of a specific network partition.\n\nCAUSAL AFFORDANCE: Executes a full matrix sweep to enumerate all available capabilities within a specified boundary, ensuring 100% recall.\n\nEPISTEMIC BOUNDS: Bounded by the namespace_prefix to prevent global namespace exhaustion. Does not evaluate semantic congruence.\n\nMCP ROUTING TRIGGERS: Recall-Oriented Search, Systematic Review, Topological Mapping, Exhaustive Enumeration.",
+      "properties": {
+        "tenant_cid": {
+          "default": "889955217295c2bfef2d6812071b633b0819477e67f57853febf116f69f30531",
+          "description": "The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\"date_of_incorporation\":\"2025-10-16\",\"file_number\":\"10369312\",\"jurisdiction\":\"US-DE\",\"legal_name\":\"CoReason, Inc.\"}",
+          "maxLength": 128,
+          "minLength": 4,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Tenant Cid",
+          "type": "string"
+        },
+        "topology_class": {
+          "const": "exhaustive_discovery_intent",
+          "default": "exhaustive_discovery_intent",
+          "description": "Discriminator for the ExhaustiveDiscoveryIntent topology.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "namespace_prefix": {
+          "description": "The topological boundary condition (e.g., 'urn:coreason:actionspace:solver:') to exhaustively enumerate.",
+          "maxLength": 1000,
+          "minLength": 1,
+          "title": "Namespace Prefix",
+          "type": "string"
+        },
+        "include_quarantined": {
+          "default": false,
+          "description": "Boolean override to include capabilities with QUARANTINED or RETRACTED epistemic statuses in the recall matrix.",
+          "title": "Include Quarantined",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "namespace_prefix"
+      ],
+      "title": "ExhaustiveDiscoveryIntent",
+      "type": "object"
+    },
     "ExogenousEpistemicEvent": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes Nassim Taleb's Black Swan Theory by injecting\nOut-of-Distribution (OOD) epistemic shocks into the causal graph. As an ...Event suffix,\nthis is an append-only coordinate on the Merkle-DAG that the LLM must never hallucinate\na mutation to.\n\nCAUSAL AFFORDANCE: Forces the active reasoning topology to process a high-entropy\nsynthetic_payload, actively testing the swarm's non-monotonic truth maintenance,\ndefeasible reasoning, and overall topological resilience.\n\nEPISTEMIC BOUNDS: Cryptographically targets a specific Merkle root via target_node_hash\n(strict SHA-256 pattern ^[a-f0-9]{64}$) and bounds the Variational Free Energy via\nbayesian_surprise_score [ge=0.0, le=1.0, allow_inf_nan=False]. The @model_validator\nphysically guarantees execution is halted if the attached escrow is not strictly positive.\n\nMCP ROUTING TRIGGERS: Black Swan Theory, Out-of-Distribution Shock, Variational Free\nEnergy, Exogenous Perturbation, Epistemic Stress Test",
@@ -11526,6 +11566,56 @@
         "escrow"
       ],
       "title": "ExogenousEpistemicEvent",
+      "type": "object"
+    },
+    "ExploratoryDiscoveryIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A high-entropy discovery intent rooted in Exploratory Search and Epistemic Foraging theory. Used to navigate the latent vector space when the exact topological coordinate is unknown.\n\nCAUSAL AFFORDANCE: Triggers the Semantic Router to compute cosine similarity against the compiled_matrix.arrow embeddings, returning a Pareto-optimal frontier of related capabilities.\n\nEPISTEMIC BOUNDS: The search perimeter is volumetrically clamped by max_results (le=50) and minimum_congruence_score (ge=0.0, le=1.0).\n\nMCP ROUTING TRIGGERS: Exploratory Search, Semantic Routing, Epistemic Foraging, Dense Vector Retrieval.",
+      "properties": {
+        "tenant_cid": {
+          "default": "889955217295c2bfef2d6812071b633b0819477e67f57853febf116f69f30531",
+          "description": "The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\"date_of_incorporation\":\"2025-10-16\",\"file_number\":\"10369312\",\"jurisdiction\":\"US-DE\",\"legal_name\":\"CoReason, Inc.\"}",
+          "maxLength": 128,
+          "minLength": 4,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Tenant Cid",
+          "type": "string"
+        },
+        "topology_class": {
+          "const": "exploratory_discovery_intent",
+          "default": "exploratory_discovery_intent",
+          "description": "Discriminator for the ExploratoryDiscoveryIntent topology.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "semantic_query": {
+          "description": "The continuous natural language query to be projected into the latent vector space.",
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Semantic Query",
+          "type": "string"
+        },
+        "minimum_congruence_score": {
+          "default": 0.7,
+          "description": "The strict mathematical floor for cosine similarity congruence.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Minimum Congruence Score",
+          "type": "number"
+        },
+        "max_results": {
+          "default": 5,
+          "description": "Volumetric constraint on the number of returned topological candidates.",
+          "maximum": 50,
+          "minimum": 1,
+          "title": "Max Results",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "semantic_query"
+      ],
+      "title": "ExploratoryDiscoveryIntent",
       "type": "object"
     },
     "FYIIntent": {
@@ -11766,7 +11856,7 @@
         },
         "minimum_epistemic_status": {
           "default": "DRAFT",
-          "description": "The minimum SRB governance lifecycle phase required for projected capabilities (DRAFT / SRB_APPROVED / CLIENT_APPROVED / PUBLISHED).",
+          "description": "The minimum SRB governance lifecycle phase required for projected capabilities (DRAFT / SRB_APPROVED / CLIENT_APPROVED / PUBLISHED / DEPRECATED / QUARANTINED / RETRACTED).",
           "title": "Minimum Epistemic Status",
           "type": "string"
         }
@@ -15581,6 +15671,40 @@
         "storage_uri"
       ],
       "title": "NDimensionalTensorManifest",
+      "type": "object"
+    },
+    "NavigationalDiscoveryIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A zero-entropy discovery intent rooted in Known-Item Search theory. Used when the orchestrator possesses the exact URN or CID and requires absolute topological precision.\n\nCAUSAL AFFORDANCE: Bypasses the Semantic Router and executes an O(1) hash table lookup against the registry matrix.\n\nEPISTEMIC BOUNDS: Bounded strictly by a single target_urn. Must return exactly 1 or 0 results.\n\nMCP ROUTING TRIGGERS: Known-Item Search, Navigational Intent, Exact Match Routing, O(1) Resolution.",
+      "properties": {
+        "tenant_cid": {
+          "default": "889955217295c2bfef2d6812071b633b0819477e67f57853febf116f69f30531",
+          "description": "The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\"date_of_incorporation\":\"2025-10-16\",\"file_number\":\"10369312\",\"jurisdiction\":\"US-DE\",\"legal_name\":\"CoReason, Inc.\"}",
+          "maxLength": 128,
+          "minLength": 4,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Tenant Cid",
+          "type": "string"
+        },
+        "topology_class": {
+          "const": "navigational_discovery_intent",
+          "default": "navigational_discovery_intent",
+          "description": "Discriminator for the NavigationalDiscoveryIntent topology.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "target_urn": {
+          "description": "The exact topological coordinate required to fulfill the Navigational Intent.",
+          "maxLength": 2000,
+          "pattern": "^urn:coreason:.*$",
+          "title": "Target Urn",
+          "type": "string"
+        }
+      },
+      "required": [
+        "target_urn"
+      ],
+      "title": "NavigationalDiscoveryIntent",
       "type": "object"
     },
     "NeuralAuditAttestationReceipt": {
