@@ -23,10 +23,12 @@ bindings always match the current schema.
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
 import tempfile
+import tomllib
 import typing
 from pathlib import Path
 
@@ -175,10 +177,118 @@ def _generate_rust(schema_path: str, rust_out: str) -> None:
     print(f"  -> {rust_out}: {line_count:,} lines")
 
 
+def _sync_versions(project_root: Path) -> str:
+    """Read the version from pyproject.toml and synchronize bindings.
+
+    Handles both static versions and dynamic versions (vcs-based).
+    """
+    pyproject_path = project_root / "pyproject.toml"
+    with open(pyproject_path, "rb") as f:
+        data = tomllib.load(f)
+
+    version = data.get("project", {}).get("version")
+
+    if not version:
+        # If version is missing, check if it's dynamic
+        dynamic = data.get("project", {}).get("dynamic", [])
+        if "version" in dynamic:
+            print("Detected dynamic versioning. Attempting to retrieve version via 'hatch version'...")
+            try:
+                # Try hatch first
+                result = subprocess.run(
+                    ["hatch", "version"],  # nosec B603 B607 # noqa: S607
+                    cwd=project_root,
+                    capture_output=True,
+                    text=True,
+                    check=True,
+                )
+                version = result.stdout.strip()
+            except (
+                subprocess.CalledProcessError,
+                FileNotFoundError,
+            ):
+                print("  'hatch' not found or failed. Falling back to 'git describe'...")
+                try:
+                    result = subprocess.run(
+                        ["git", "describe", "--tags", "--always"],  # nosec B603 B607 # noqa: S607
+                        cwd=project_root,
+                        capture_output=True,
+                        text=True,
+                        check=True,
+                    )
+                    version = result.stdout.strip()
+                except (
+                    subprocess.CalledProcessError,
+                    FileNotFoundError,
+                ):
+                    print("  'git' failed. Defaulting to '0.0.0-dev' (quarantine mode).")
+                    version = "0.0.0-dev"
+        else:
+            raise KeyError("Project version not found and not marked as dynamic.")
+
+    # Normalize version for Rust (strip leading 'v', ensure SemVer-ish)
+    version = version.removeprefix("v")
+
+    print(f"Synchronizing ecosystem to version: {version}")
+
+    # TypeScript package.json
+    ts_pkg_path = project_root / "bindings/typescript/package.json"
+    if ts_pkg_path.exists():
+        with open(ts_pkg_path, encoding="utf-8") as f:
+            ts_pkg = json.load(f)
+        ts_pkg["version"] = version
+        with open(ts_pkg_path, "w", encoding="utf-8") as f:
+            json.dump(ts_pkg, f, indent=2)
+            f.write("\n")
+        print(f"  -> {ts_pkg_path.relative_to(project_root)} updated.")
+
+    # Rust Cargo.toml
+    rust_cargo_path = project_root / "bindings/rust/Cargo.toml"
+    if rust_cargo_path.exists():
+        content = rust_cargo_path.read_text(encoding="utf-8")
+        new_content = re.sub(r'^version = ".*?"', f'version = "{version}"', content, flags=re.MULTILINE)
+        rust_cargo_path.write_text(new_content, encoding="utf-8")
+        print(f"  -> {rust_cargo_path.relative_to(project_root)} updated.")
+
+    return str(version)
+
+
+def _update_lockfiles(project_root: Path) -> None:
+    """Update uv and cargo lockfiles to ensure environment consistency."""
+    print("Updating lockfiles...")
+
+    # UV Lock
+    uv_bin = shutil.which("uv") or "uv"
+    subprocess.run([uv_bin, "lock", "--upgrade-package", "coreason-manifest"], cwd=project_root, check=True)  # nosec B603 # noqa: S603
+    print("  -> uv.lock updated.")
+
+    # Cargo Lock
+    rust_dir = project_root / "bindings/rust"
+    if rust_dir.exists() and (rust_dir / "Cargo.toml").exists():
+        cargo_bin = shutil.which("cargo") or "cargo"
+        try:
+            subprocess.run(  # nosec B603 # noqa: S603
+                [cargo_bin, "update"],
+                cwd=rust_dir,
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+        except subprocess.CalledProcessError as e:
+            print(f"Error: 'cargo update' failed with exit status {e.returncode}")
+            print(f"Stdout: {e.stdout}")
+            print(f"Stderr: {e.stderr}")
+            raise
+        print("  -> Cargo.lock updated.")
+
+
 def main() -> None:
     # Ensure we are working from the project root
     project_root = Path(__file__).resolve().parent.parent
     os.chdir(project_root)
+
+    _sync_versions(project_root)
+    _update_lockfiles(project_root)
 
     schema_file = "coreason_ontology.schema.json"
     ts_out = "bindings/typescript/src/ontology.ts"

@@ -31,6 +31,8 @@ from pydantic import (
     model_validator,
 )
 
+COREASON_GLOBAL_TENANT_CID = "889955217295c2bfef2d6812071b633b0819477e67f57853febf116f69f30531"
+
 # ---------------------------------------------------------------------------
 # Pure-Python DAG utilities (fallback when rustworkx is unavailable,
 # e.g. on free-threaded Python 3.14t where no C-extension wheels exist).
@@ -679,7 +681,7 @@ class CoreasonBaseState(BaseModel):
     )
 
     tenant_cid: Annotated[str, StringConstraints(min_length=4, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        default="889955217295c2bfef2d6812071b633b0819477e67f57853febf116f69f30531",
+        default=COREASON_GLOBAL_TENANT_CID,
         description='The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}',
     )
 
@@ -14297,6 +14299,69 @@ EpistemicDomainGraphManifest.model_rebuild()
 EpistemicTopologicalProofManifest.model_rebuild()
 CognitiveSamplingPolicy.model_rebuild()
 CognitiveReasoningTraceState.model_rebuild()
+
+
+class CommercialLicenseIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A structural request to acquire or validate a sovereign commercial exception to the standard Prosperity Public License 3.0.
+
+    CAUSAL AFFORDANCE: Instructs the ecosystem gateway to negotiate a cryptographic token validating the tenant's right to assign sovereign IP to its own network bounds.
+
+    EPISTEMIC BOUNDS: The `target_tenant_cid` specifies the downstream consumer of the license.
+
+    MCP ROUTING TRIGGERS: Commercial Exclusivity, Cryptographic License, Token Supersession, JWT Issuance
+    """
+
+    __action_space_urn__: str = "urn:coreason:state:governance:commercial_license_intent:v1"
+
+    target_tenant_cid: Annotated[str, StringConstraints(pattern="^urn:tenant:[a-zA-Z0-9_.-]+$")] = Field(
+        description="The downstream sovereign tenant requesting the commercial exception."
+    )
+    requested_entitlements: list[str] = Field(
+        default_factory=list, description="The specific access rights requested (e.g., 'IP_SOVEREIGNTY_EXCEPTION')."
+    )
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "requested_entitlements", sorted(self.requested_entitlements))
+        return self
+
+
+class CommercialLicenseState(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: The strict geometric representation of a cryptographically validated Commercial License JWT.
+
+    CAUSAL AFFORDANCE: Empowers the coreason-ecosystem gateway to suppress the AST Guillotine, unlocking IP sovereignty for newly forged capabilities.
+
+    EPISTEMIC BOUNDS: The `exp` is a strict integer timestamp. The `supersedes` list mathematically prevents token replay attacks.
+
+    MCP ROUTING TRIGGERS: License Validation, Air-Gapped PKI, Zero-Trust Architecture, Token Rotation, IP Sovereignty
+    """
+
+    __action_space_urn__: str = "urn:coreason:state:governance:commercial_license_state:v1"
+
+    jti: Annotated[str, StringConstraints(min_length=1, max_length=128)] = Field(
+        description="The unique cryptographic identifier of this specific JWT token."
+    )
+    supersedes: list[str] = Field(
+        default_factory=list, description="An array of older JWT IDs that this token explicitly invalidates."
+    )
+    exp: int = Field(
+        description="The absolute UNIX epoch timestamp when this commercial exception mechanically terminates."
+    )
+    entitlements: list[str] = Field(
+        default_factory=list,
+        description="The granted access rights (e.g., 'COMMERCIAL_USE', 'IP_SOVEREIGNTY_EXCEPTION').",
+    )
+    issued_by: str = Field(description="The intermediate certificate authority or exact DID that signed this token.")
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "supersedes", sorted(self.supersedes))
+        object.__setattr__(self, "entitlements", sorted(self.entitlements))
+        return self
+
+
 CognitiveDualVerificationReceipt.model_rebuild()
 EpistemicGroundedTaskManifest.model_rebuild()
 EpistemicCurriculumManifest.model_rebuild()
@@ -14434,3 +14499,5 @@ FederatedDiscoveryIntent.model_rebuild()
 EpistemicRigidityPolicy.model_rebuild()
 CognitiveDeliberativeEnvelopeState.model_rebuild()
 StrategicThoughtNodeIntent.model_rebuild()
+CommercialLicenseIntent.model_rebuild()
+CommercialLicenseState.model_rebuild()

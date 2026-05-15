@@ -1,34 +1,38 @@
-# CoReason Manifest
+# coreason-manifest (The Knowledge Plane)
 
-[![PyPI](https://img.shields.io/pypi/v/coreason-manifest?style=flat-square&logo=pypi&logoColor=white&label=PyPI)](https://pypi.org/project/coreason-manifest/)
-[![PyPI Downloads](https://img.shields.io/pypi/dm/coreason-manifest?style=flat-square)](https://pypi.org/project/coreason-manifest/)
-[![Crates.io](https://img.shields.io/crates/v/coreason-manifest?style=flat-square&logo=rust&label=Crates.io)](https://crates.io/crates/coreason-manifest)
-[![Crates Downloads](https://img.shields.io/crates/dv/coreason-manifest?style=flat-square&logo=rust)](https://crates.io/crates/coreason-manifest)
-[![npm](https://img.shields.io/npm/v/@coreason/coreason-manifest?style=flat-square&logo=npm&label=npm)](https://www.npmjs.com/package/@coreason/coreason-manifest)
-[![npm Downloads](https://img.shields.io/npm/dw/@coreason/coreason-manifest?style=flat-square&logo=npm)](https://www.npmjs.com/package/@coreason/coreason-manifest)
-[![npm Types](https://img.shields.io/npm/types/@coreason/coreason-manifest?style=flat-square&logo=typescript)](https://www.npmjs.com/package/@coreason/coreason-manifest)
-[![Node Version](https://img.shields.io/node/v/@coreason/coreason-manifest?style=flat-square&logo=nodedotjs)](https://www.npmjs.com/package/@coreason/coreason-manifest)
+[![PyPI - Version](https://img.shields.io/pypi/v/coreason-manifest)](https://pypi.org/project/coreason-manifest/)
+[![CI](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/ci.yml)
+[![Documentation](https://img.shields.io/badge/docs-GitHub_Pages-blue.svg)](https://coreason-ai.github.io/coreason-manifest/)
+[![Crates.io](https://img.shields.io/crates/v/coreason-manifest?logo=rust&label=Crates.io)](https://crates.io/crates/coreason-manifest)
+[![npm](https://img.shields.io/npm/v/@coreason/coreason-manifest?logo=npm&label=npm)](https://www.npmjs.com/package/@coreason/coreason-manifest)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/coreason-manifest)](https://pypi.org/project/coreason-manifest/)
+[![Downloads](https://img.shields.io/pypi/dm/coreason-manifest)](https://pypi.org/project/coreason-manifest/)
+[![License: Prosperity 3.0](https://img.shields.io/badge/License-Prosperity_3.0-blue.svg)](https://prosperitylicense.com/versions/3.0.0)
+<br>
+[![Coverage](https://img.shields.io/codecov/c/github/CoReason-AI/coreason-manifest?logo=codecov&logoColor=white&label=Coverage)](https://app.codecov.io/gh/CoReason-AI/coreason-manifest)
+[![CodeQL](https://img.shields.io/github/actions/workflow/status/CoReason-AI/coreason-manifest/codeql.yml?branch=main&logo=github&label=CodeQL)](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/codeql.yml)
+[![Security Audit](https://img.shields.io/github/actions/workflow/status/CoReason-AI/coreason-manifest/security.yml?branch=main&logo=github&label=Security%20Audit)](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/security.yml)
+[![Security: Bandit](https://img.shields.io/badge/security-bandit-yellow.svg)](https://github.com/PyCQA/bandit)
+<br>
+[![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
+[![Forks](https://img.shields.io/github/forks/CoReason-AI/coreason-manifest.svg)](https://github.com/CoReason-AI/coreason-manifest/network/members)
+[![Powered By: AI](https://img.shields.io/badge/Powered%20By-CoReason%20AI-FF4500.svg)](https://coreason.ai)
+[![OSV-Scanner](https://img.shields.io/github/actions/workflow/status/CoReason-AI/coreason-manifest/osv-scanner.yml?branch=main&label=OSV-Scanner)](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/osv-scanner.yml)
+[![Trivy](https://img.shields.io/github/actions/workflow/status/CoReason-AI/coreason-manifest/trivy.yml?branch=main&label=Trivy)](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/trivy.yml)
+[![TruffleHog](https://img.shields.io/github/actions/workflow/status/CoReason-AI/coreason-manifest/trufflehog.yml?branch=main&label=TruffleHog)](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/trufflehog.yml)
+[![OWASP ZAP](https://img.shields.io/github/actions/workflow/status/CoReason-AI/coreason-manifest/dast.yml?branch=main&label=OWASP%20ZAP)](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/dast.yml)
+<br>
+[![OpenSSF Scorecard](https://img.shields.io/ossf-scorecard/github.com/CoReason-AI/coreason-manifest?label=OpenSSF)](https://scorecard.dev/viewer/?uri=github.com/CoReason-AI/coreason-manifest)
+![Egress Filtered](https://img.shields.io/badge/Egress_Filtered-Step--Security-blue)
+[![SLSA Level 3](https://img.shields.io/badge/SLSA-Level%203-blue?logo=slsa)](https://slsa.dev/spec/v1.0/levels)
+[![Signed by Sigstore](https://img.shields.io/badge/Signed_by-Sigstore-blueviolet?logo=sigstore)](https://sigstore.dev/)
+[![SBOM](https://img.shields.io/badge/SBOM-SPDX_Included-brightgreen?logo=databricks)](https://spdx.dev/)
+[![Advanced Security](https://img.shields.io/github/actions/workflow/status/CoReason-AI/coreason-manifest/advanced-security.yml?branch=main&logo=github&label=Advanced%20Security)](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/advanced-security.yml)
+[![Security Policy](https://img.shields.io/badge/Security-Policy-green)](./SECURITY.md)
 
-[![CI](https://img.shields.io/github/actions/workflow/status/CoReason-AI/coreason-manifest/ci.yml?branch=main&style=flat-square&logo=github&label=CI)](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/ci.yml)
-![Platforms](https://img.shields.io/badge/platforms-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey?style=flat-square)
-[![Coverage](https://img.shields.io/codecov/c/github/CoReason-AI/coreason-manifest?style=flat-square&logo=codecov&logoColor=white&label=Coverage)](https://app.codecov.io/gh/CoReason-AI/coreason-manifest)
-[![Security Audit](https://img.shields.io/github/actions/workflow/status/CoReason-AI/coreason-manifest/security.yml?branch=main&style=flat-square&logo=github&label=Security%20Audit)](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/security.yml)
-[![CodeQL](https://img.shields.io/github/actions/workflow/status/CoReason-AI/coreason-manifest/codeql.yml?branch=main&style=flat-square&logo=github&label=CodeQL)](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/codeql.yml)
-[![Security: Bandit](https://img.shields.io/badge/security-bandit-yellow.svg?style=flat-square)](https://github.com/PyCQA/bandit)
-[![SLSA Level 3](https://img.shields.io/badge/SLSA-Level%203-blue?style=flat-square&logo=slsa)](https://slsa.dev/spec/v1.0/levels)
-[![Signed by Sigstore](https://img.shields.io/badge/Signed_by-Sigstore-blueviolet?style=flat-square&logo=sigstore)](https://sigstore.dev/)
-[![SBOM](https://img.shields.io/badge/SBOM-SPDX_Included-brightgreen?style=flat-square&logo=databricks)](https://spdx.dev/)
-[![OpenSSF Scorecard](https://img.shields.io/ossf-scorecard/github.com/CoReason-AI/coreason-manifest?style=flat-square&label=OpenSSF)](https://scorecard.dev/viewer/?uri=github.com/CoReason-AI/coreason-manifest)
-![Egress Filtered](https://img.shields.io/badge/Egress_Filtered-Step--Security-blue?style=flat-square)
-[![Advanced Security](https://img.shields.io/github/actions/workflow/status/CoReason-AI/coreason-manifest/advanced-security.yml?branch=main&style=flat-square&logo=github&label=Advanced%20Security)](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/advanced-security.yml)
-![OSS-Fuzz](https://img.shields.io/badge/OSS--Fuzz-Pending-lightgray?style=flat-square)
-![CII Best Practices](https://img.shields.io/badge/CII_Best_Practices-Pending-lightgray?style=flat-square)
+**The definitive Knowledge Plane and universal ontology of the CoReason ecosystem.**
 
-![Python Versions](https://img.shields.io/pypi/pyversions/coreason-manifest?style=flat-square&logo=python&logoColor=white)
-![Status](https://img.shields.io/pypi/status/coreason-manifest?style=flat-square)
-![Format](https://img.shields.io/pypi/format/coreason-manifest?style=flat-square)
-[![License](https://img.shields.io/badge/License-Prosperity%203.0-blue?style=flat-square)](./LICENSE)
-[![Security Policy](https://img.shields.io/badge/Security-Policy-green?style=flat-square)](./SECURITY.md)
+`coreason-manifest` is a State-of-the-Art (SOTA) 2026+ neurosymbolic architecture component acting as the **Universal Unified Ontology**. It is a strictly bounded, AI-native, pure structural data library that defines the mathematical, causal, and spatial boundaries of the reasoning mesh.
 
 
 > **"This package is the definitive source of truth. If it isn't in the manifest, it doesn't exist. If it violates the manifest, it doesn't run."**
@@ -202,3 +206,5 @@ Licensed under the **Prosperity Public License 3.0**.
 For full license details, see the `LICENSE` file. For commercial licensing exceptions or inquiries, please explicitly contact `license@coreason.ai` or `gowtham.rao@coreason.ai`.
 
 *(Genesis Commit: Initialized per CoReason Clean Room Protocol PIP-001 on 2026-01-01).*
+
+

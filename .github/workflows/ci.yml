@@ -4,9 +4,7 @@ on:
   push:
   pull_request:
 
-permissions:
-  contents: read
-  pull-requests: read
+permissions: read-all
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -19,16 +17,21 @@ jobs:
   lint-and-audit:
     name: Lint and Audit (Zero-Pollution Tooling Injection)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
       - name: Harden Runner (Endpoint Network Security)
-        uses: step-security/harden-runner@v2
+        uses: step-security/harden-runner@c95a14d0e5bab51a9f56296a4eb0e416910cd350 # v2.19.3
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
           enable-cache: true
           python-version: "3.14"
@@ -52,12 +55,14 @@ jobs:
         run: uv run python scripts/enforce_cryptographic_determinism.py
 
       - name: Setup Node.js (For json-schema-to-typescript)
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.1
         with:
           node-version: '24.x'
 
       - name: Setup Rust (For Cargo Typify/Fmt)
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # v1
+        with:
+          toolchain: stable
 
       - name: Install cargo-typify
         run: cargo install cargo-typify
@@ -68,7 +73,8 @@ jobs:
       - name: Enforce Absolute Type Isomorphism (Drift Guillotine)
         run: |
           git add bindings/
-          git diff --staged --exit-code
+          # We ignore version changes in package.json and Cargo.toml as they are dynamic
+          git diff --staged --exit-code -I '^  "version":' -I '^version ='
 
       - name: Deptry Check
         run: uv run deptry src/
@@ -77,7 +83,7 @@ jobs:
         run: uv run zensical build
 
       - name: Docs Link Validation
-        uses: lycheeverse/lychee-action@v2
+        uses: lycheeverse/lychee-action@f613c4a64e50d792e0b31ec34bbcbba12263c6a6 # v2.3.0
         with:
           args: >-
             --verbose
@@ -92,18 +98,20 @@ jobs:
   schema-contracts:
     name: Schema Contracts (Semantic Backward-Compatibility)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Harden Runner (Endpoint Network Security)
-        uses: step-security/harden-runner@v2
+        uses: step-security/harden-runner@c95a14d0e5bab51a9f56296a4eb0e416910cd350 # v2.19.3
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
           enable-cache: true
           python-version: "3.14"
@@ -120,16 +128,21 @@ jobs:
   security-sast:
     name: Security SAST (AI-Specific Fuzzing & Architectural Gate)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read # Required for gh pr diff
     steps:
       - name: Harden Runner (Endpoint Network Security)
-        uses: step-security/harden-runner@v2
+        uses: step-security/harden-runner@c95a14d0e5bab51a9f56296a4eb0e416910cd350 # v2.19.3
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
           enable-cache: true
           python-version: "3.14"
@@ -157,6 +170,8 @@ jobs:
     name: Test (Ubuntu) - Python ${{ matrix.python-version }}
     needs: [lint-and-audit, schema-contracts]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -164,14 +179,16 @@ jobs:
 
     steps:
       - name: Harden Runner (Endpoint Network Security)
-        uses: step-security/harden-runner@v2
+        uses: step-security/harden-runner@c95a14d0e5bab51a9f56296a4eb0e416910cd350 # v2.19.3
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
           enable-cache: true
           python-version: ${{ matrix.python-version }}
@@ -206,6 +223,8 @@ jobs:
     name: Python ${{ matrix.python-version }} on ${{ matrix.os }}
     needs: test-ubuntu
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -217,14 +236,16 @@ jobs:
 
     steps:
       - name: Harden Runner (Endpoint Network Security)
-        uses: step-security/harden-runner@v2
+        uses: step-security/harden-runner@c95a14d0e5bab51a9f56296a4eb0e416910cd350 # v2.19.3
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
           enable-cache: true
           python-version: ${{ matrix.python-version }}
@@ -262,16 +283,20 @@ jobs:
     name: Reproducible Builds (Determinism Verification)
     needs: [test-ubuntu, test-extended]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Harden Runner (Endpoint Network Security)
-        uses: step-security/harden-runner@v2
+        uses: step-security/harden-runner@c95a14d0e5bab51a9f56296a4eb0e416910cd350 # v2.19.3
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
           enable-cache: true
           python-version: "3.14"
@@ -299,3 +324,5 @@ jobs:
             exit 1
           fi
           echo "Deterministic build verified."
+
+
