@@ -195,7 +195,7 @@ def _sync_versions(project_root: Path) -> str:
             print("Detected dynamic versioning. Attempting to retrieve version via 'hatch version'...")
             try:
                 # Try hatch first
-                result = subprocess.run(
+                result = subprocess.run(  # nosec B603 B607 # noqa: S607
                     ["hatch", "version"],
                     cwd=project_root,
                     capture_output=True,
@@ -206,7 +206,7 @@ def _sync_versions(project_root: Path) -> str:
             except (subprocess.CalledProcessError, FileNotFoundError):
                 print("  'hatch' not found or failed. Falling back to 'git describe'...")
                 try:
-                    result = subprocess.run(
+                    result = subprocess.run(  # nosec B603 B607 # noqa: S607
                         ["git", "describe", "--tags", "--always"],
                         cwd=project_root,
                         capture_output=True,
@@ -221,8 +221,7 @@ def _sync_versions(project_root: Path) -> str:
             raise KeyError("Project version not found and not marked as dynamic.")
 
     # Normalize version for Rust (strip leading 'v', ensure SemVer-ish)
-    if version.startswith("v"):
-        version = version[1:]
+    version = version.removeprefix("v")
 
     print(f"Synchronizing ecosystem to version: {version}")
 
