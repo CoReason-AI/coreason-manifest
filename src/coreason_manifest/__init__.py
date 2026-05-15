@@ -12,7 +12,7 @@ coreason-manifest: The Epistemic Plane.
 
 This package provides the Universal Unified Ontology for the CoReason AI
 swarm ecosystem. It is a strictly bounded, AI-native, pure structural data
-library that defines the mathematical, causal, and spatial boundaries of 
+library that defines the mathematical, causal, and spatial boundaries of
 reality within the Tripartite Cybernetic Manifold.
 
 Part of the CoReason Tripartite Cybernetic Manifold.
