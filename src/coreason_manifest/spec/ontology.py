@@ -7270,7 +7270,7 @@ class SpatialHardwareProfile(CoreasonBaseState):
         description="The rigid silicon precision format required to execute this node's neural circuits.",
     )
     provider_whitelist: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
-        default_factory=lambda: ["vast", "aws", "gcp", "azure", "oci"],
+        default=["vast", "aws", "gcp", "azure", "oci"],
         description="The explicit array of cloud infrastructure providers authorized to run this node.",
     )
 

@@ -19522,6 +19522,13 @@
           "type": "string"
         },
         "provider_whitelist": {
+          "default": [
+            "vast",
+            "aws",
+            "gcp",
+            "azure",
+            "oci"
+          ],
           "description": "The explicit array of cloud infrastructure providers authorized to run this node.",
           "items": {
             "maxLength": 255,
