@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "coreason_manifest"
-dynamic = ["version"]
-description = "This package is the definitive source of truth. If it isn't in the manifest, it doesn't exist. If it violates the manifest, it doesn't run."
+version = "0.67.0"
+description = "Coreason Data Plane and Epistemic Ontology"
 readme = "README.md"
 requires-python = ">=3.14"
 license = { file = "LICENSE" }
