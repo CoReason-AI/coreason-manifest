@@ -26,6 +26,4 @@ jobs:
         uses: trufflesecurity/trufflehog@0fa069c12f0c7baf431041cd1e564a9c5058846c
         with:
           path: ./
-          base: "${{ github.event.repository.default_branch }}"
-          head: HEAD
           extra_args: --debug --only-verified
