@@ -22,7 +22,7 @@ jobs:
       pull-requests: read
     steps:
       - name: Harden Runner (Endpoint Network Security)
-        uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2.19.3
+        uses: step-security/harden-runner@c95a14d0e5bab51a9f56296a4eb0e416910cd350 # v2.19.3
         with:
           egress-policy: audit
 
@@ -102,7 +102,7 @@ jobs:
       contents: read
     steps:
       - name: Harden Runner (Endpoint Network Security)
-        uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2.19.3
+        uses: step-security/harden-runner@c95a14d0e5bab51a9f56296a4eb0e416910cd350 # v2.19.3
         with:
           egress-policy: audit
 
@@ -133,7 +133,7 @@ jobs:
       pull-requests: read # Required for gh pr diff
     steps:
       - name: Harden Runner (Endpoint Network Security)
-        uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2.19.3
+        uses: step-security/harden-runner@c95a14d0e5bab51a9f56296a4eb0e416910cd350 # v2.19.3
         with:
           egress-policy: audit
 
@@ -179,7 +179,7 @@ jobs:
 
     steps:
       - name: Harden Runner (Endpoint Network Security)
-        uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2.19.3
+        uses: step-security/harden-runner@c95a14d0e5bab51a9f56296a4eb0e416910cd350 # v2.19.3
         with:
           egress-policy: audit
 
@@ -236,7 +236,7 @@ jobs:
 
     steps:
       - name: Harden Runner (Endpoint Network Security)
-        uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2.19.3
+        uses: step-security/harden-runner@c95a14d0e5bab51a9f56296a4eb0e416910cd350 # v2.19.3
         with:
           egress-policy: audit
 
@@ -287,7 +287,7 @@ jobs:
       contents: read
     steps:
       - name: Harden Runner (Endpoint Network Security)
-        uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2.19.3
+        uses: step-security/harden-runner@c95a14d0e5bab51a9f56296a4eb0e416910cd350 # v2.19.3
         with:
           egress-policy: audit
 
@@ -324,3 +324,4 @@ jobs:
             exit 1
           fi
           echo "Deterministic build verified."
+
