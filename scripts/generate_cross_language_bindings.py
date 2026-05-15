@@ -210,7 +210,7 @@ def _sync_versions(project_root: Path) -> str:
 def _update_lockfiles(project_root: Path) -> None:
     """Update uv and cargo lockfiles to ensure environment consistency."""
     print("Updating lockfiles...")
-    
+
     # UV Lock
     uv_bin = shutil.which("uv") or "uv"
     subprocess.run([uv_bin, "lock", "--upgrade-package", "coreason-manifest"], cwd=project_root, check=True)  # nosec B603 # noqa: S603
