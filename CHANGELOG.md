@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.54.1](https://github.com/CoReason-AI/coreason-manifest/compare/v0.54.0...v0.54.1) (2026-05-13)
+## [0.54.1](https://github.com/CoReason-AI/coreason-manifest/releases) (2026-05-13)
 
 
 ### Features
