@@ -9,4 +9,3 @@
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
 from coreason_manifest.spec.ontology import *  # noqa: F403
-__version__ = "0.64.0"
