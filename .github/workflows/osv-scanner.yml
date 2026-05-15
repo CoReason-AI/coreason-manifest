@@ -15,4 +15,4 @@ permissions:
 jobs:
   scan:
     name: OSV-Scanner
-    uses: "google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v1.9.1"
+    uses: "google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@daa2c68f50d845057895a9c300e42478481c1d26" # v1.9.1
