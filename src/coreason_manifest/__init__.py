@@ -8,7 +8,6 @@
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
-__version__ = "0.67.0"
 __all__ = ["spec", "models"]
 
 from coreason_manifest.spec.ontology import *  # noqa: F403
