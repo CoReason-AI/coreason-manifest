@@ -735,6 +735,29 @@ type JsonPrimitiveState = (
 )
 
 
+class IdentityContextProxy(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A rigid ontological boundary that mathematically decouples the upstream Identity Provider (OIDC/SAML) from the deterministic swarm logic. Holds the strictly validated JWT payload and the SPIFFE/SPIRE execution taint.
+
+    CAUSAL AFFORDANCE: Enables the `coreason-runtime` to pass identity claims across the zero-trust execution boundary and through WASM enclaves without coupling to specific enterprise IdP vendors. Unlocks externalized Open Policy Agent (OPA) validation.
+
+    EPISTEMIC BOUNDS: The `jwt_payload` is a strongly typed dictionary representing the validated claims. The `execution_taint` is bounded to a predefined set of SPIFFE trust levels.
+
+    MCP ROUTING TRIGGERS: OIDC, Zero-Trust Architecture, SPIFFE/SPIRE, Epistemic Quarantine, Identity Decoupling, Open Policy Agent
+    """
+
+    jwt_payload: dict[str, JsonPrimitiveState] = Field(
+        ...,
+        description="The cryptographically validated JSON Web Token (JWT) claims extracted from the external Identity Provider.",
+    )
+    execution_taint: Annotated[
+        str, StringConstraints(min_length=1, max_length=128, pattern="^spiffe://[a-zA-Z0-9_.:/-]+$")
+    ] = Field(
+        ...,
+        description="The SPIFFE/SPIRE Identity Protocol execution taint dictating the thread's clearance level within the WASM enclave.",
+    )
+
+
 class CognitiveDeliberativeEnvelopeState[T](CoreasonBaseState):
     """
     AGENT INSTRUCTION: A Generic two-stage generation wrapper that neutralizes the Format Restriction Penalty (Semantic Tax) during Constrained Decoding. The Sovereign LLM Proxy's XGrammar AOT FSM bitmask MUST be physically toggled between the two fields: DISABLED for `deliberation_trace`, then ENABLED for `payload`. This class models the architectural pattern documented in the Decoupled Reasoning and Formatting specification.
@@ -6944,7 +6967,10 @@ type AnyIntent = Annotated[
     | RollbackIntent
     | StateMutationIntent
     | EpistemicOntologicalNormalizationIntent
-    | FederatedDiscoveryIntent,
+    | FederatedDiscoveryIntent
+    | NavigationalDiscoveryIntent
+    | ExploratoryDiscoveryIntent
+    | ExhaustiveDiscoveryIntent,
     Field(discriminator="topology_class"),
 ]
 
@@ -7270,8 +7296,8 @@ class SpatialHardwareProfile(CoreasonBaseState):
         description="The rigid silicon precision format required to execute this node's neural circuits.",
     )
     provider_whitelist: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
-        default_factory=lambda: ["vast", "aws", "gcp", "azure"],
-        description="The explicit array of cloud infrastructure providers authorized to run this node.",
+        default=["vast", "aws", "gcp", "azure", "oci"],
+        description="The explicit array of cloud infrastructure providers authorized to run this node. (Default: ['vast', 'aws', 'gcp', 'azure', 'oci'])",
     )
 
     @model_validator(mode="after")
@@ -13749,7 +13775,7 @@ class FederatedDiscoveryIntent(CoreasonBaseState):
         description=(
             "The minimum SRB governance lifecycle phase required for "
             "projected capabilities "
-            "(DRAFT / SRB_APPROVED / CLIENT_APPROVED / PUBLISHED)."
+            "(DRAFT / SRB_APPROVED / CLIENT_APPROVED / PUBLISHED / DEPRECATED / QUARANTINED / RETRACTED)."
         ),
     )
 
@@ -13757,6 +13783,82 @@ class FederatedDiscoveryIntent(CoreasonBaseState):
     def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "domain_filter", sorted(self.domain_filter))
         return self
+
+
+class NavigationalDiscoveryIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A zero-entropy discovery intent rooted in Known-Item Search theory. Used when the orchestrator possesses the exact URN or CID and requires absolute topological precision.
+
+    CAUSAL AFFORDANCE: Bypasses the Semantic Router and executes an O(1) hash table lookup against the registry matrix.
+
+    EPISTEMIC BOUNDS: Bounded strictly by a single target_urn. Must return exactly 1 or 0 results.
+
+    MCP ROUTING TRIGGERS: Known-Item Search, Navigational Intent, Exact Match Routing, O(1) Resolution.
+    """
+
+    topology_class: Literal["navigational_discovery_intent"] = Field(
+        default="navigational_discovery_intent",
+        description="Discriminator for the NavigationalDiscoveryIntent topology.",
+    )
+    target_urn: Annotated[str, StringConstraints(max_length=2000, pattern=r"^urn:coreason:.*$")] = Field(
+        description="The exact topological coordinate required to fulfill the Navigational Intent."
+    )
+
+
+class ExploratoryDiscoveryIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A high-entropy discovery intent rooted in Exploratory Search and Epistemic Foraging theory. Used to navigate the latent vector space when the exact topological coordinate is unknown.
+
+    CAUSAL AFFORDANCE: Triggers the Semantic Router to compute cosine similarity against the compiled_matrix.arrow embeddings, returning a Pareto-optimal frontier of related capabilities.
+
+    EPISTEMIC BOUNDS: The search perimeter is volumetrically clamped by max_results (le=50) and minimum_congruence_score (ge=0.0, le=1.0).
+
+    MCP ROUTING TRIGGERS: Exploratory Search, Semantic Routing, Epistemic Foraging, Dense Vector Retrieval.
+    """
+
+    topology_class: Literal["exploratory_discovery_intent"] = Field(
+        default="exploratory_discovery_intent",
+        description="Discriminator for the ExploratoryDiscoveryIntent topology.",
+    )
+    semantic_query: Annotated[str, StringConstraints(min_length=1, max_length=2000)] = Field(
+        description="The continuous natural language query to be projected into the latent vector space."
+    )
+    minimum_congruence_score: float = Field(
+        default=0.7,
+        ge=0.0,
+        le=1.0,
+        description="The strict mathematical floor for cosine similarity congruence.",
+    )
+    max_results: int = Field(
+        default=5,
+        ge=1,
+        le=50,
+        description="Volumetric constraint on the number of returned topological candidates.",
+    )
+
+
+class ExhaustiveDiscoveryIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A recall-oriented discovery intent rooted in Systematic Review theory. Used when the swarm requires a complete, unfiltered topological map of a specific network partition.
+
+    CAUSAL AFFORDANCE: Executes a full matrix sweep to enumerate all available capabilities within a specified boundary, ensuring 100% recall.
+
+    EPISTEMIC BOUNDS: Bounded by the namespace_prefix to prevent global namespace exhaustion. Does not evaluate semantic congruence.
+
+    MCP ROUTING TRIGGERS: Recall-Oriented Search, Systematic Review, Topological Mapping, Exhaustive Enumeration.
+    """
+
+    topology_class: Literal["exhaustive_discovery_intent"] = Field(
+        default="exhaustive_discovery_intent",
+        description="Discriminator for the ExhaustiveDiscoveryIntent topology.",
+    )
+    namespace_prefix: Annotated[str, StringConstraints(min_length=1, max_length=1000)] = Field(
+        description="The topological boundary condition (e.g., 'urn:coreason:actionspace:solver:') to exhaustively enumerate."
+    )
+    include_quarantined: bool = Field(
+        default=False,
+        description="Boolean override to include capabilities with QUARANTINED or RETRACTED epistemic statuses in the recall matrix.",
+    )
 
 
 class EvidentiaryCitationState(CoreasonBaseState):
