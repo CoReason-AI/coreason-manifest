@@ -203,7 +203,10 @@ def _sync_versions(project_root: Path) -> str:
                     check=True,
                 )
                 version = result.stdout.strip()
-            except (subprocess.CalledProcessError, FileNotFoundError):
+            except (
+                subprocess.CalledProcessError,
+                FileNotFoundError,
+            ):
                 print("  'hatch' not found or failed. Falling back to 'git describe'...")
                 try:
                     result = subprocess.run(
@@ -214,7 +217,10 @@ def _sync_versions(project_root: Path) -> str:
                         check=True,
                     )
                     version = result.stdout.strip()
-                except (subprocess.CalledProcessError, FileNotFoundError):
+                except (
+                    subprocess.CalledProcessError,
+                    FileNotFoundError,
+                ):
                     print("  'git' failed. Defaulting to '0.0.0-dev' (quarantine mode).")
                     version = "0.0.0-dev"
         else:
