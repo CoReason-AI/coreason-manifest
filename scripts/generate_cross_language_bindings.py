@@ -178,11 +178,52 @@ def _generate_rust(schema_path: str, rust_out: str) -> None:
 
 
 def _sync_versions(project_root: Path) -> str:
-    """Read the version from pyproject.toml and synchronize bindings."""
+    """Read the version from pyproject.toml and synchronize bindings.
+
+    Handles both static versions and dynamic versions (vcs-based).
+    """
     pyproject_path = project_root / "pyproject.toml"
     with open(pyproject_path, "rb") as f:
         data = tomllib.load(f)
-    version = data["project"]["version"]
+
+    version = data.get("project", {}).get("version")
+
+    if not version:
+        # If version is missing, check if it's dynamic
+        dynamic = data.get("project", {}).get("dynamic", [])
+        if "version" in dynamic:
+            print("Detected dynamic versioning. Attempting to retrieve version via 'hatch version'...")
+            try:
+                # Try hatch first
+                result = subprocess.run(
+                    ["hatch", "version"],
+                    cwd=project_root,
+                    capture_output=True,
+                    text=True,
+                    check=True,
+                )
+                version = result.stdout.strip()
+            except (subprocess.CalledProcessError, FileNotFoundError):
+                print("  'hatch' not found or failed. Falling back to 'git describe'...")
+                try:
+                    result = subprocess.run(
+                        ["git", "describe", "--tags", "--always"],
+                        cwd=project_root,
+                        capture_output=True,
+                        text=True,
+                        check=True,
+                    )
+                    version = result.stdout.strip()
+                except (subprocess.CalledProcessError, FileNotFoundError):
+                    print("  'git' failed. Defaulting to '0.0.0-dev' (quarantine mode).")
+                    version = "0.0.0-dev"
+        else:
+            raise KeyError("Project version not found and not marked as dynamic.")
+
+    # Normalize version for Rust (strip leading 'v', ensure SemVer-ish)
+    if version.startswith("v"):
+        version = version[1:]
+
     print(f"Synchronizing ecosystem to version: {version}")
 
     # TypeScript package.json
