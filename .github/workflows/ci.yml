@@ -82,7 +82,7 @@ jobs:
         run: uv run zensical build
 
       - name: Docs Link Validation
-        uses: lycheeverse/lychee-action@db473fddc028af60658334401dc6fa3ffd8669fd # v2.3.0
+        uses: lycheeverse/lychee-action@f613c4a64e50d792e0b31ec34bbcbba12263c6a6 # v2.3.0
         with:
           args: >-
             --verbose
