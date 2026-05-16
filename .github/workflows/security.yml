@@ -25,9 +25,9 @@ jobs:
         with:
           fetch-depth: 0
       - name: Gitleaks Secret Scan
-        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2.3.7
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Use the Gitleaks Docker image to avoid license requirements of the managed GitHub Action
+          docker run -v ${{ github.workspace }}:/path zricethezav/gitleaks:latest detect --source=/path --verbose --redact
         continue-on-error: true
 
   sca-audit:
