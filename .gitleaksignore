@@ -1,0 +1,9 @@
+# Gitleaks ignore file
+# Fingerprints for known false positives or test data
+
+d9f688cfc50d6fa684ecf94b50ff6e09ae93ec1d:scratch/epic2_refactor.py:generic-api-key:46
+1a0099b9b242d94fa13ea089e5e4fa4f80497050:scratch/epic2_refactor.py:generic-api-key:46
+e4a1b4b6e87ec593b25a0ddfd04f09c9d37593e8:src/coreason_manifest/spec/ontology.py:generic-api-key:1274
+7989bc98239dfa1f3749e88e8193231f7035ec64:src/coreason_manifest/core/identity.py:generic-api-key:24
+3d6e80ff2789d4334b454d48c60bafe9d503b5aa:src/coreason_manifest/spec/ontology.py:generic-api-key:1156
+9d494038c3f4a95340332b1a7fff82acfd8938ee:tests/test_observability_security.py:generic-api-key:90

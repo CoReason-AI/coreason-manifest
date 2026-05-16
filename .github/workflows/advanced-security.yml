@@ -27,10 +27,10 @@ jobs:
         with:
           fetch-depth: 0 # Deep clone for complete history scanning
 
-      - name: TruffleHog OSS
-        uses: trufflesecurity/trufflehog@0c381f12b3f9a934f33fc61bf003599f5323ff55 # main
-        with:
-          path: ./
+      - name: Gitleaks Scan
+        run: |
+          # Use the Gitleaks Docker image to avoid license requirements of the managed GitHub Action
+          docker run -v ${{ github.workspace }}:/path zricethezav/gitleaks:latest detect --source=/path --verbose --redact
 
   malware-scan:
     name: Repository-Wide Malware Scan (ClamAV)
