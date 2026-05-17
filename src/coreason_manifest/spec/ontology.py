@@ -14380,11 +14380,11 @@ class CommercialOverrideReceipt(CoreasonBaseState):
         "'prosperity-3.0' = forged assets are licensed to CoReason Inc. "
         "'commercial' = the tenant retains full ownership of forged assets.",
     )
-    signer_did: Annotated[
-        str, StringConstraints(min_length=10, max_length=256, pattern=r"^did:key:z[a-zA-Z0-9]+$")
-    ] = Field(
-        description="The W3C Decentralized Identifier (DID) of the authority that cryptographically signed this receipt. "
-        "Must be a did:key: multicodec identifier encoding an Ed25519 public key.",
+    signer_did: Annotated[str, StringConstraints(min_length=10, max_length=256, pattern=r"^did:key:z[a-zA-Z0-9]+$")] = (
+        Field(
+            description="The W3C Decentralized Identifier (DID) of the authority that cryptographically signed this receipt. "
+            "Must be a did:key: multicodec identifier encoding an Ed25519 public key.",
+        )
     )
     distr_license_cid: Annotated[str, StringConstraints(min_length=1, max_length=256)] = Field(
         description="The unique identifier of the upstream Distr license record that was validated to produce this receipt. "
@@ -14427,6 +14427,7 @@ class CommercialOverrideReceipt(CoreasonBaseState):
     def _enforce_canonical_sort(self) -> Self:
         object.__setattr__(self, "entitlements", sorted(self.entitlements))
         return self
+
 
 CognitiveDualVerificationReceipt.model_rebuild()
 EpistemicGroundedTaskManifest.model_rebuild()
