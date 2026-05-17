@@ -11,11 +11,14 @@
 
 import argparse
 import ast
+import ipaddress
 import json
 import re
+import socket
 import subprocess
 import sys
 import types
+import urllib.parse
 import urllib.request
 from pathlib import Path
 from typing import Annotated, Any, ForwardRef, TypeAliasType, Union, cast, get_args, get_origin, get_type_hints
@@ -590,6 +593,22 @@ def scan_epistemic_quarantine(source: str) -> None:
 
     try:
         if source.startswith(("http://", "https://")):
+            parsed_url = urllib.parse.urlparse(source)
+            if not parsed_url.hostname:
+                raise ValueError(f"Invalid URL: {source}")
+            try:
+                addr_info = socket.getaddrinfo(parsed_url.hostname, None)
+            except socket.gaierror as e:
+                raise ValueError(f"Could not resolve hostname: {parsed_url.hostname}") from e
+
+            for info in addr_info:
+                ip = info[4][0]
+                ip_obj = ipaddress.ip_address(ip)
+                if ip_obj.is_private or ip_obj.is_loopback or ip_obj.is_link_local:
+                    raise ValueError(
+                        f"SSRF Protection: Resolution of {parsed_url.hostname} points to a restricted IP: {ip}"
+                    )
+
             with urllib.request.urlopen(source, timeout=10) as response:  # noqa: S310 # nosec B310
                 schema_dict = json.loads(response.read().decode("utf-8"))
         else:
