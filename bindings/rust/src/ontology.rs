@@ -9733,6 +9733,9 @@ impl<'de> ::serde::Deserialize<'de> for ClassifiedIntent {
 #[doc = "    \"CommercialLicenseState\": {"]
 #[doc = "      \"$ref\": \"#/$defs/CommercialLicenseState\""]
 #[doc = "    },"]
+#[doc = "    \"CommercialOverrideReceipt\": {"]
+#[doc = "      \"$ref\": \"#/$defs/CommercialOverrideReceipt\""]
+#[doc = "    },"]
 #[doc = "    \"CompositeNodeProfile\": {"]
 #[doc = "      \"$ref\": \"#/$defs/CompositeNodeProfile\""]
 #[doc = "    },"]
@@ -11130,6 +11133,12 @@ pub struct CoReasonSharedKernelOntology {
         skip_serializing_if = "::std::option::Option::is_none"
     )]
     pub commercial_license_state: ::std::option::Option<CommercialLicenseState>,
+    #[serde(
+        rename = "CommercialOverrideReceipt",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub commercial_override_receipt: ::std::option::Option<CommercialOverrideReceipt>,
     #[serde(
         rename = "CompositeNodeProfile",
         default,
@@ -13149,6 +13158,7 @@ impl ::std::default::Default for CoReasonSharedKernelOntology {
             collective_intelligence_profile: Default::default(),
             commercial_license_intent: Default::default(),
             commercial_license_state: Default::default(),
+            commercial_override_receipt: Default::default(),
             composite_node_profile: Default::default(),
             compute_engine_profile: Default::default(),
             compute_provisioning_intent: Default::default(),
@@ -16092,6 +16102,127 @@ pub struct CommercialLicenseState {
 }
 impl CommercialLicenseState {
     pub fn builder() -> builder::CommercialLicenseState {
+        Default::default()
+    }
+}
+#[doc = "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen receipt bridging external license lifecycle management (Distr) into the CoReason URN Authority zero-trust verification chain. As an append-only coordinate on the Merkle-DAG, the LLM must never hallucinate a mutation to this receipt. The receipt is issued by the coreason-ecosystem gateway upon successful Distr license validation and is consumed by downstream WASM sandboxes and tensor routers to gate premium feature access.\n\nCAUSAL AFFORDANCE: Unlocks IP sovereignty for tenants operating under commercial license agreements by providing a cryptographically verifiable, self-contained proof of entitlement. The receipt severs the runtime dependency on the external Distr API — once issued, the receipt is locally verifiable via DID-based signature validation without network callbacks. Enables the coreason-runtime to branch execution based on `license_tier` (Prosperity vs. Commercial) and gate Forge output headers accordingly.\n\nEPISTEMIC BOUNDS: The `license_tier` is strictly bounded to the Literal set `[\"prosperity-3.0\", \"commercial\"]`. The `signer_did` must conform to the W3C DID `did:key:z` multicodec pattern (Ed25519). The `issued_at_epoch` and `expires_at_epoch` are strict POSIX integer timestamps with `issued_at < expires_at` enforced by model validator. The `entitlements` list is canonically sorted for RFC 8785 determinism. The `distr_license_cid` is bounded to 256 chars and references the external Distr license record.\n\nMCP ROUTING TRIGGERS: Commercial License Override, Distr Integration, IP Sovereignty Receipt, Zero-Trust License Verification, WASM Feature Gating, Prosperity Public License, DID-based Signing"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"CommercialOverrideReceipt\","]
+#[doc = "  \"description\": \"CoReason Shared Kernel Ontology\\n\\nAGENT INSTRUCTION: A cryptographically frozen receipt bridging external license lifecycle management (Distr) into the CoReason URN Authority zero-trust verification chain. As an append-only coordinate on the Merkle-DAG, the LLM must never hallucinate a mutation to this receipt. The receipt is issued by the coreason-ecosystem gateway upon successful Distr license validation and is consumed by downstream WASM sandboxes and tensor routers to gate premium feature access.\\n\\nCAUSAL AFFORDANCE: Unlocks IP sovereignty for tenants operating under commercial license agreements by providing a cryptographically verifiable, self-contained proof of entitlement. The receipt severs the runtime dependency on the external Distr API — once issued, the receipt is locally verifiable via DID-based signature validation without network callbacks. Enables the coreason-runtime to branch execution based on `license_tier` (Prosperity vs. Commercial) and gate Forge output headers accordingly.\\n\\nEPISTEMIC BOUNDS: The `license_tier` is strictly bounded to the Literal set `[\\\"prosperity-3.0\\\", \\\"commercial\\\"]`. The `signer_did` must conform to the W3C DID `did:key:z` multicodec pattern (Ed25519). The `issued_at_epoch` and `expires_at_epoch` are strict POSIX integer timestamps with `issued_at < expires_at` enforced by model validator. The `entitlements` list is canonically sorted for RFC 8785 determinism. The `distr_license_cid` is bounded to 256 chars and references the external Distr license record.\\n\\nMCP ROUTING TRIGGERS: Commercial License Override, Distr Integration, IP Sovereignty Receipt, Zero-Trust License Verification, WASM Feature Gating, Prosperity Public License, DID-based Signing\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"distr_license_cid\","]
+#[doc = "    \"expires_at_epoch\","]
+#[doc = "    \"issued_at_epoch\","]
+#[doc = "    \"license_tier\","]
+#[doc = "    \"network_mode\","]
+#[doc = "    \"signer_did\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"distr_license_cid\": {"]
+#[doc = "      \"title\": \"Distr License Cid\","]
+#[doc = "      \"description\": \"The unique identifier of the upstream Distr license record that was validated to produce this receipt. Establishes bidirectional traceability between the CoReason trust chain and the external license lifecycle manager.\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"maxLength\": 256,"]
+#[doc = "      \"minLength\": 1"]
+#[doc = "    },"]
+#[doc = "    \"entitlements\": {"]
+#[doc = "      \"title\": \"Entitlements\","]
+#[doc = "      \"description\": \"The specific feature flags and access rights granted by the commercial license. Examples: 'IP_SOVEREIGNTY_EXCEPTION', 'COMMERCIAL_USE', 'PRIVATE_NETWORK_FEDERATION', 'UNLIMITED_FORGE_OUTPUT'.\","]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"type\": \"string\","]
+#[doc = "        \"maxLength\": 128,"]
+#[doc = "        \"minLength\": 1"]
+#[doc = "      }"]
+#[doc = "    },"]
+#[doc = "    \"expires_at_epoch\": {"]
+#[doc = "      \"title\": \"Expires At Epoch\","]
+#[doc = "      \"description\": \"The POSIX timestamp (seconds since epoch) when this receipt mechanically terminates. After expiration, the WASM sandbox must refuse to unlock premium features until a fresh receipt is issued.\","]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"minimum\": 0.0"]
+#[doc = "    },"]
+#[doc = "    \"federation_enabled\": {"]
+#[doc = "      \"title\": \"Federation Enabled\","]
+#[doc = "      \"description\": \"When true, authorizes the bridge from the client's private network to the CoReason public network for capability sharing, URN resolution against the public ledger, and cross-network publishing.\","]
+#[doc = "      \"type\": \"boolean\""]
+#[doc = "    },"]
+#[doc = "    \"issued_at_epoch\": {"]
+#[doc = "      \"title\": \"Issued At Epoch\","]
+#[doc = "      \"description\": \"The POSIX timestamp (seconds since epoch) when this receipt was cryptographically issued by the gateway.\","]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"minimum\": 0.0"]
+#[doc = "    },"]
+#[doc = "    \"license_tier\": {"]
+#[doc = "      \"title\": \"License Tier\","]
+#[doc = "      \"description\": \"The license classification governing IP ownership of assets forged by coreason-meta-engineering. 'prosperity-3.0' = forged assets are licensed to CoReason Inc. 'commercial' = the tenant retains full ownership of forged assets.\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"prosperity-3.0\","]
+#[doc = "        \"commercial\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"network_mode\": {"]
+#[doc = "      \"title\": \"Network Mode\","]
+#[doc = "      \"description\": \"The network topology this receipt authorizes. 'public' = CoReason-managed network. 'private' = client-operated isolated network.\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"public\","]
+#[doc = "        \"private\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"signer_did\": {"]
+#[doc = "      \"title\": \"Signer Did\","]
+#[doc = "      \"description\": \"The W3C Decentralized Identifier (DID) of the authority that cryptographically signed this receipt. Must be a did:key: multicodec identifier encoding an Ed25519 public key.\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"maxLength\": 256,"]
+#[doc = "      \"minLength\": 10,"]
+#[doc = "      \"pattern\": \"^did:key:z[a-zA-Z0-9]+$\""]
+#[doc = "    },"]
+#[doc = "    \"tenant_cid\": {"]
+#[doc = "      \"title\": \"Tenant Cid\","]
+#[doc = "      \"description\": \"The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\\\"date_of_incorporation\\\":\\\"2025-10-16\\\",\\\"file_number\\\":\\\"10369312\\\",\\\"jurisdiction\\\":\\\"US-DE\\\",\\\"legal_name\\\":\\\"CoReason, Inc.\\\"}\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"maxLength\": 128,"]
+#[doc = "      \"minLength\": 4,"]
+#[doc = "      \"pattern\": \"^[a-zA-Z0-9_.:-]+$\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct CommercialOverrideReceipt {
+    #[doc = "The unique identifier of the upstream Distr license record that was validated to produce this receipt. Establishes bidirectional traceability between the CoReason trust chain and the external license lifecycle manager."]
+    pub distr_license_cid: DistrLicenseCid,
+    #[doc = "The specific feature flags and access rights granted by the commercial license. Examples: 'IP_SOVEREIGNTY_EXCEPTION', 'COMMERCIAL_USE', 'PRIVATE_NETWORK_FEDERATION', 'UNLIMITED_FORGE_OUTPUT'."]
+    #[serde(default, skip_serializing_if = "::std::vec::Vec::is_empty")]
+    pub entitlements: ::std::vec::Vec<EntitlementsItem>,
+    #[doc = "The POSIX timestamp (seconds since epoch) when this receipt mechanically terminates. After expiration, the WASM sandbox must refuse to unlock premium features until a fresh receipt is issued."]
+    pub expires_at_epoch: u64,
+    #[doc = "When true, authorizes the bridge from the client's private network to the CoReason public network for capability sharing, URN resolution against the public ledger, and cross-network publishing."]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub federation_enabled: ::std::option::Option<bool>,
+    #[doc = "The POSIX timestamp (seconds since epoch) when this receipt was cryptographically issued by the gateway."]
+    pub issued_at_epoch: u64,
+    #[doc = "The license classification governing IP ownership of assets forged by coreason-meta-engineering. 'prosperity-3.0' = forged assets are licensed to CoReason Inc. 'commercial' = the tenant retains full ownership of forged assets."]
+    pub license_tier: LicenseTier,
+    #[doc = "The network topology this receipt authorizes. 'public' = CoReason-managed network. 'private' = client-operated isolated network."]
+    pub network_mode: NetworkMode,
+    #[doc = "The W3C Decentralized Identifier (DID) of the authority that cryptographically signed this receipt. Must be a did:key: multicodec identifier encoding an Ed25519 public key."]
+    pub signer_did: SignerDid,
+    #[doc = "The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\"date_of_incorporation\":\"2025-10-16\",\"file_number\":\"10369312\",\"jurisdiction\":\"US-DE\",\"legal_name\":\"CoReason, Inc.\"}"]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub tenant_cid: ::std::option::Option<TenantCid>,
+}
+impl CommercialOverrideReceipt {
+    pub fn builder() -> builder::CommercialOverrideReceipt {
         Default::default()
     }
 }
@@ -23161,6 +23292,80 @@ impl ::std::convert::TryFrom<::std::string::String> for DiscoveryAlgorithm {
         value.parse()
     }
 }
+#[doc = "The unique identifier of the upstream Distr license record that was validated to produce this receipt. Establishes bidirectional traceability between the CoReason trust chain and the external license lifecycle manager."]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"Distr License Cid\","]
+#[doc = "  \"description\": \"The unique identifier of the upstream Distr license record that was validated to produce this receipt. Establishes bidirectional traceability between the CoReason trust chain and the external license lifecycle manager.\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 256,"]
+#[doc = "  \"minLength\": 1"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct DistrLicenseCid(::std::string::String);
+impl ::std::ops::Deref for DistrLicenseCid {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<DistrLicenseCid> for ::std::string::String {
+    fn from(value: DistrLicenseCid) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for DistrLicenseCid {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 256usize {
+            return Err("longer than 256 characters".into());
+        }
+        if value.chars().count() < 1usize {
+            return Err("shorter than 1 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for DistrLicenseCid {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for DistrLicenseCid {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for DistrLicenseCid {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for DistrLicenseCid {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
 #[doc = "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Bayesian Inference and Parametric Probability Density\nFunctions (PDFs) to mathematically define the stochastic shape of latent variables.\nAs a ...Profile suffix, this is a declarative, frozen snapshot of an evaluation geometry.\n\nCAUSAL AFFORDANCE: Projects a continuous statistical geometry (Gaussian, Uniform,\nor Beta) onto a stochastic process, dictating the generative bounds of entropy or\nreward distributions during reinforcement learning.\n\nEPISTEMIC BOUNDS: The Euclidean limits are physically clamped by mean and variance\n(le=18446744073709551615.0). The @model_validator validate_confidence_interval mathematically\nenforces the invariant that the 95% confidence lower bound must be strictly less than\nthe upper bound.\n\nMCP ROUTING TRIGGERS: Probability Density Function, Bayesian Inference, Stochastic Geometry, Parametric Distribution, Variance Bounding"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -25430,6 +25635,78 @@ pub struct EnsembleTopologyProfile {
 impl EnsembleTopologyProfile {
     pub fn builder() -> builder::EnsembleTopologyProfile {
         Default::default()
+    }
+}
+#[doc = "`EntitlementsItem`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 128,"]
+#[doc = "  \"minLength\": 1"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct EntitlementsItem(::std::string::String);
+impl ::std::ops::Deref for EntitlementsItem {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<EntitlementsItem> for ::std::string::String {
+    fn from(value: EntitlementsItem) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for EntitlementsItem {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 128usize {
+            return Err("longer than 128 characters".into());
+        }
+        if value.chars().count() < 1usize {
+            return Err("shorter than 1 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for EntitlementsItem {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for EntitlementsItem {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for EntitlementsItem {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for EntitlementsItem {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
     }
 }
 #[doc = "Defines the initial state (S_0) of the MDP."]
@@ -40903,6 +41180,80 @@ impl ::std::convert::TryFrom<::std::string::String> for Level {
         value.parse()
     }
 }
+#[doc = "The license classification governing IP ownership of assets forged by coreason-meta-engineering. 'prosperity-3.0' = forged assets are licensed to CoReason Inc. 'commercial' = the tenant retains full ownership of forged assets."]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"License Tier\","]
+#[doc = "  \"description\": \"The license classification governing IP ownership of assets forged by coreason-meta-engineering. 'prosperity-3.0' = forged assets are licensed to CoReason Inc. 'commercial' = the tenant retains full ownership of forged assets.\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"prosperity-3.0\","]
+#[doc = "    \"commercial\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum LicenseTier {
+    #[serde(rename = "prosperity-3.0")]
+    Prosperity30,
+    #[serde(rename = "commercial")]
+    Commercial,
+}
+impl ::std::fmt::Display for LicenseTier {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Prosperity30 => f.write_str("prosperity-3.0"),
+            Self::Commercial => f.write_str("commercial"),
+        }
+    }
+}
+impl ::std::str::FromStr for LicenseTier {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "prosperity-3.0" => Ok(Self::Prosperity30),
+            "commercial" => Ok(Self::Commercial),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for LicenseTier {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for LicenseTier {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for LicenseTier {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = "The execution phase of the graph. 'draft' allows incomplete structural state."]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -45020,6 +45371,80 @@ impl ::std::convert::TryFrom<&::std::string::String> for NetworkBoundary {
     }
 }
 impl ::std::convert::TryFrom<::std::string::String> for NetworkBoundary {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "The network topology this receipt authorizes. 'public' = CoReason-managed network. 'private' = client-operated isolated network."]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"Network Mode\","]
+#[doc = "  \"description\": \"The network topology this receipt authorizes. 'public' = CoReason-managed network. 'private' = client-operated isolated network.\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"public\","]
+#[doc = "    \"private\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum NetworkMode {
+    #[serde(rename = "public")]
+    Public,
+    #[serde(rename = "private")]
+    Private,
+}
+impl ::std::fmt::Display for NetworkMode {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Public => f.write_str("public"),
+            Self::Private => f.write_str("private"),
+        }
+    }
+}
+impl ::std::str::FromStr for NetworkMode {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "public" => Ok(Self::Public),
+            "private" => Ok(Self::Private),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for NetworkMode {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for NetworkMode {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for NetworkMode {
     type Error = self::error::ConversionError;
     fn try_from(
         value: ::std::string::String,
@@ -57384,6 +57809,88 @@ pub struct SideEffectProfile {
 impl SideEffectProfile {
     pub fn builder() -> builder::SideEffectProfile {
         Default::default()
+    }
+}
+#[doc = "The W3C Decentralized Identifier (DID) of the authority that cryptographically signed this receipt. Must be a did:key: multicodec identifier encoding an Ed25519 public key."]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"Signer Did\","]
+#[doc = "  \"description\": \"The W3C Decentralized Identifier (DID) of the authority that cryptographically signed this receipt. Must be a did:key: multicodec identifier encoding an Ed25519 public key.\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 256,"]
+#[doc = "  \"minLength\": 10,"]
+#[doc = "  \"pattern\": \"^did:key:z[a-zA-Z0-9]+$\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct SignerDid(::std::string::String);
+impl ::std::ops::Deref for SignerDid {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<SignerDid> for ::std::string::String {
+    fn from(value: SignerDid) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for SignerDid {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 256usize {
+            return Err("longer than 256 characters".into());
+        }
+        if value.chars().count() < 10usize {
+            return Err("shorter than 10 characters".into());
+        }
+        static PATTERN: ::std::sync::LazyLock<::regress::Regex> =
+            ::std::sync::LazyLock::new(|| {
+                ::regress::Regex::new("^did:key:z[a-zA-Z0-9]+$").unwrap()
+            });
+        if PATTERN.find(value).is_none() {
+            return Err("doesn't match pattern \"^did:key:z[a-zA-Z0-9]+$\"".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for SignerDid {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for SignerDid {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for SignerDid {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for SignerDid {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
     }
 }
 #[doc = "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Optimal Stopping Theory for Monte Carlo Tree Search (MCTS)\nand sandbox simulations. As an ...SLA suffix, this defines rigid mathematical boundaries\nthat the orchestrator must enforce globally.\n\nCAUSAL AFFORDANCE: Triggers early probability wave collapse when the statistical variance\nof the simulation rollouts falls below the tolerance, conserving GPU VRAM and halting\nunnecessary compute expansion.\n\nEPISTEMIC BOUNDS: Physically constrained by max_monte_carlo_rollouts (gt=0,\nle=18446744073709551615) to prevent infinite branching. Statistical confidence is mathematically\nclamped by variance_tolerance to a probability distribution between [ge=0.0, le=1.0].\n\nMCP ROUTING TRIGGERS: Optimal Stopping Theory, Monte Carlo Tree Search, Variance\nReduction, Probability Wave Collapse, Simulation Convergence"]
@@ -78823,6 +79330,10 @@ pub mod builder {
             ::std::option::Option<super::CommercialLicenseState>,
             ::std::string::String,
         >,
+        commercial_override_receipt: ::std::result::Result<
+            ::std::option::Option<super::CommercialOverrideReceipt>,
+            ::std::string::String,
+        >,
         composite_node_profile: ::std::result::Result<
             ::std::option::Option<super::CompositeNodeProfile>,
             ::std::string::String,
@@ -80172,6 +80683,7 @@ pub mod builder {
                 collective_intelligence_profile: Ok(Default::default()),
                 commercial_license_intent: Ok(Default::default()),
                 commercial_license_state: Ok(Default::default()),
+                commercial_override_receipt: Ok(Default::default()),
                 composite_node_profile: Ok(Default::default()),
                 compute_engine_profile: Ok(Default::default()),
                 compute_provisioning_intent: Ok(Default::default()),
@@ -81231,6 +81743,16 @@ pub mod builder {
         {
             self.commercial_license_state = value.try_into().map_err(|e| {
                 format!("error converting supplied value for commercial_license_state: {e}")
+            });
+            self
+        }
+        pub fn commercial_override_receipt<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<super::CommercialOverrideReceipt>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.commercial_override_receipt = value.try_into().map_err(|e| {
+                format!("error converting supplied value for commercial_override_receipt: {e}")
             });
             self
         }
@@ -84597,6 +85119,7 @@ pub mod builder {
                 collective_intelligence_profile: value.collective_intelligence_profile?,
                 commercial_license_intent: value.commercial_license_intent?,
                 commercial_license_state: value.commercial_license_state?,
+                commercial_override_receipt: value.commercial_override_receipt?,
                 composite_node_profile: value.composite_node_profile?,
                 compute_engine_profile: value.compute_engine_profile?,
                 compute_provisioning_intent: value.compute_provisioning_intent?,
@@ -85009,6 +85532,7 @@ pub mod builder {
                 collective_intelligence_profile: Ok(value.collective_intelligence_profile),
                 commercial_license_intent: Ok(value.commercial_license_intent),
                 commercial_license_state: Ok(value.commercial_license_state),
+                commercial_override_receipt: Ok(value.commercial_override_receipt),
                 composite_node_profile: Ok(value.composite_node_profile),
                 compute_engine_profile: Ok(value.compute_engine_profile),
                 compute_provisioning_intent: Ok(value.compute_provisioning_intent),
@@ -88254,6 +88778,161 @@ pub mod builder {
                 issued_by: Ok(value.issued_by),
                 jti: Ok(value.jti),
                 supersedes: Ok(value.supersedes),
+                tenant_cid: Ok(value.tenant_cid),
+            }
+        }
+    }
+    #[derive(Clone, Debug)]
+    pub struct CommercialOverrideReceipt {
+        distr_license_cid: ::std::result::Result<super::DistrLicenseCid, ::std::string::String>,
+        entitlements:
+            ::std::result::Result<::std::vec::Vec<super::EntitlementsItem>, ::std::string::String>,
+        expires_at_epoch: ::std::result::Result<u64, ::std::string::String>,
+        federation_enabled:
+            ::std::result::Result<::std::option::Option<bool>, ::std::string::String>,
+        issued_at_epoch: ::std::result::Result<u64, ::std::string::String>,
+        license_tier: ::std::result::Result<super::LicenseTier, ::std::string::String>,
+        network_mode: ::std::result::Result<super::NetworkMode, ::std::string::String>,
+        signer_did: ::std::result::Result<super::SignerDid, ::std::string::String>,
+        tenant_cid:
+            ::std::result::Result<::std::option::Option<super::TenantCid>, ::std::string::String>,
+    }
+    impl ::std::default::Default for CommercialOverrideReceipt {
+        fn default() -> Self {
+            Self {
+                distr_license_cid: Err("no value supplied for distr_license_cid".to_string()),
+                entitlements: Ok(Default::default()),
+                expires_at_epoch: Err("no value supplied for expires_at_epoch".to_string()),
+                federation_enabled: Ok(Default::default()),
+                issued_at_epoch: Err("no value supplied for issued_at_epoch".to_string()),
+                license_tier: Err("no value supplied for license_tier".to_string()),
+                network_mode: Err("no value supplied for network_mode".to_string()),
+                signer_did: Err("no value supplied for signer_did".to_string()),
+                tenant_cid: Ok(Default::default()),
+            }
+        }
+    }
+    impl CommercialOverrideReceipt {
+        pub fn distr_license_cid<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<super::DistrLicenseCid>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.distr_license_cid = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for distr_license_cid: {e}"));
+            self
+        }
+        pub fn entitlements<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::vec::Vec<super::EntitlementsItem>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.entitlements = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for entitlements: {e}"));
+            self
+        }
+        pub fn expires_at_epoch<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<u64>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.expires_at_epoch = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for expires_at_epoch: {e}"));
+            self
+        }
+        pub fn federation_enabled<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<bool>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.federation_enabled = value.try_into().map_err(|e| {
+                format!("error converting supplied value for federation_enabled: {e}")
+            });
+            self
+        }
+        pub fn issued_at_epoch<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<u64>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.issued_at_epoch = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for issued_at_epoch: {e}"));
+            self
+        }
+        pub fn license_tier<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<super::LicenseTier>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.license_tier = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for license_tier: {e}"));
+            self
+        }
+        pub fn network_mode<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<super::NetworkMode>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.network_mode = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for network_mode: {e}"));
+            self
+        }
+        pub fn signer_did<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<super::SignerDid>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.signer_did = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for signer_did: {e}"));
+            self
+        }
+        pub fn tenant_cid<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<super::TenantCid>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.tenant_cid = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for tenant_cid: {e}"));
+            self
+        }
+    }
+    impl ::std::convert::TryFrom<CommercialOverrideReceipt> for super::CommercialOverrideReceipt {
+        type Error = super::error::ConversionError;
+        fn try_from(
+            value: CommercialOverrideReceipt,
+        ) -> ::std::result::Result<Self, super::error::ConversionError> {
+            Ok(Self {
+                distr_license_cid: value.distr_license_cid?,
+                entitlements: value.entitlements?,
+                expires_at_epoch: value.expires_at_epoch?,
+                federation_enabled: value.federation_enabled?,
+                issued_at_epoch: value.issued_at_epoch?,
+                license_tier: value.license_tier?,
+                network_mode: value.network_mode?,
+                signer_did: value.signer_did?,
+                tenant_cid: value.tenant_cid?,
+            })
+        }
+    }
+    impl ::std::convert::From<super::CommercialOverrideReceipt> for CommercialOverrideReceipt {
+        fn from(value: super::CommercialOverrideReceipt) -> Self {
+            Self {
+                distr_license_cid: Ok(value.distr_license_cid),
+                entitlements: Ok(value.entitlements),
+                expires_at_epoch: Ok(value.expires_at_epoch),
+                federation_enabled: Ok(value.federation_enabled),
+                issued_at_epoch: Ok(value.issued_at_epoch),
+                license_tier: Ok(value.license_tier),
+                network_mode: Ok(value.network_mode),
+                signer_did: Ok(value.signer_did),
                 tenant_cid: Ok(value.tenant_cid),
             }
         }
