@@ -492,6 +492,7 @@ def evaluate_topological_reachability() -> None:
         "ExhaustiveDiscoveryIntent",
         "CommercialLicenseIntent",
         "CommercialLicenseState",
+        "CommercialOverrideReceipt",
     ]
     reachable_indices = set()
     for root in root_nodes:

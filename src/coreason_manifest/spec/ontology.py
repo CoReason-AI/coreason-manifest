@@ -14362,6 +14362,72 @@ class CommercialLicenseState(CoreasonBaseState):
         return self
 
 
+class CommercialOverrideReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A cryptographically frozen receipt bridging external license lifecycle management (Distr) into the CoReason URN Authority zero-trust verification chain. As an append-only coordinate on the Merkle-DAG, the LLM must never hallucinate a mutation to this receipt. The receipt is issued by the coreason-ecosystem gateway upon successful Distr license validation and is consumed by downstream WASM sandboxes and tensor routers to gate premium feature access.
+
+    CAUSAL AFFORDANCE: Unlocks IP sovereignty for tenants operating under commercial license agreements by providing a cryptographically verifiable, self-contained proof of entitlement. The receipt severs the runtime dependency on the external Distr API — once issued, the receipt is locally verifiable via DID-based signature validation without network callbacks. Enables the coreason-runtime to branch execution based on `license_tier` (Prosperity vs. Commercial) and gate Forge output headers accordingly.
+
+    EPISTEMIC BOUNDS: The `license_tier` is strictly bounded to the Literal set `["prosperity-3.0", "commercial"]`. The `signer_did` must conform to the W3C DID `did:key:z` multicodec pattern (Ed25519). The `issued_at_epoch` and `expires_at_epoch` are strict POSIX integer timestamps with `issued_at < expires_at` enforced by model validator. The `entitlements` list is canonically sorted for RFC 8785 determinism. The `distr_license_cid` is bounded to 256 chars and references the external Distr license record.
+
+    MCP ROUTING TRIGGERS: Commercial License Override, Distr Integration, IP Sovereignty Receipt, Zero-Trust License Verification, WASM Feature Gating, Prosperity Public License, DID-based Signing
+    """
+
+    __action_space_urn__: str = "urn:coreason:state:governance:commercial_override_receipt:v1"
+
+    license_tier: Literal["prosperity-3.0", "commercial"] = Field(
+        description="The license classification governing IP ownership of assets forged by coreason-meta-engineering. "
+        "'prosperity-3.0' = forged assets are licensed to CoReason Inc. "
+        "'commercial' = the tenant retains full ownership of forged assets.",
+    )
+    signer_did: Annotated[
+        str, StringConstraints(min_length=10, max_length=256, pattern=r"^did:key:z[a-zA-Z0-9]+$")
+    ] = Field(
+        description="The W3C Decentralized Identifier (DID) of the authority that cryptographically signed this receipt. "
+        "Must be a did:key: multicodec identifier encoding an Ed25519 public key.",
+    )
+    distr_license_cid: Annotated[str, StringConstraints(min_length=1, max_length=256)] = Field(
+        description="The unique identifier of the upstream Distr license record that was validated to produce this receipt. "
+        "Establishes bidirectional traceability between the CoReason trust chain and the external license lifecycle manager.",
+    )
+    issued_at_epoch: int = Field(
+        ge=0,
+        description="The POSIX timestamp (seconds since epoch) when this receipt was cryptographically issued by the gateway.",
+    )
+    expires_at_epoch: int = Field(
+        ge=0,
+        description="The POSIX timestamp (seconds since epoch) when this receipt mechanically terminates. "
+        "After expiration, the WASM sandbox must refuse to unlock premium features until a fresh receipt is issued.",
+    )
+    entitlements: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
+        default_factory=list,
+        description="The specific feature flags and access rights granted by the commercial license. "
+        "Examples: 'IP_SOVEREIGNTY_EXCEPTION', 'COMMERCIAL_USE', 'PRIVATE_NETWORK_FEDERATION', 'UNLIMITED_FORGE_OUTPUT'.",
+    )
+    network_mode: Literal["public", "private"] = Field(
+        description="The network topology this receipt authorizes. "
+        "'public' = CoReason-managed network. 'private' = client-operated isolated network.",
+    )
+    federation_enabled: bool = Field(
+        default=False,
+        description="When true, authorizes the bridge from the client's private network to the CoReason public network "
+        "for capability sharing, URN resolution against the public ledger, and cross-network publishing.",
+    )
+
+    @model_validator(mode="after")
+    def _enforce_temporal_ordering(self) -> Self:
+        if self.issued_at_epoch >= self.expires_at_epoch:
+            raise ValueError(
+                f"Temporal Ordering Violation: issued_at_epoch ({self.issued_at_epoch}) "
+                f"must be strictly less than expires_at_epoch ({self.expires_at_epoch})."
+            )
+        return self
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> Self:
+        object.__setattr__(self, "entitlements", sorted(self.entitlements))
+        return self
+
 CognitiveDualVerificationReceipt.model_rebuild()
 EpistemicGroundedTaskManifest.model_rebuild()
 EpistemicCurriculumManifest.model_rebuild()
@@ -14501,3 +14567,4 @@ CognitiveDeliberativeEnvelopeState.model_rebuild()
 StrategicThoughtNodeIntent.model_rebuild()
 CommercialLicenseIntent.model_rebuild()
 CommercialLicenseState.model_rebuild()
+CommercialOverrideReceipt.model_rebuild()
