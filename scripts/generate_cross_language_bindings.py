@@ -21,6 +21,7 @@ The CI drift guillotine (`git diff --exit-code bindings/`) enforces that committ
 bindings always match the current schema.
 """
 
+import argparse
 import json
 import os
 import re
@@ -177,16 +178,20 @@ def _generate_rust(schema_path: str, rust_out: str) -> None:
     print(f"  -> {rust_out}: {line_count:,} lines")
 
 
-def _sync_versions(project_root: Path) -> str:
+def _sync_versions(project_root: Path, override_version: str | None = None) -> str:
     """Read the version from pyproject.toml and synchronize bindings.
 
-    Handles both static versions and dynamic versions (vcs-based).
+    Handles both static versions and dynamic versions (vcs-based), or uses
+    the provided override_version if specified.
     """
-    pyproject_path = project_root / "pyproject.toml"
-    with open(pyproject_path, "rb") as f:
-        data = tomllib.load(f)
+    if override_version:
+        version = override_version
+    else:
+        pyproject_path = project_root / "pyproject.toml"
+        with open(pyproject_path, "rb") as f:
+            data = tomllib.load(f)
 
-    version = data.get("project", {}).get("version")
+        version = data.get("project", {}).get("version")
 
     if not version:
         # If version is missing, check if it's dynamic
@@ -287,7 +292,14 @@ def main() -> None:
     project_root = Path(__file__).resolve().parent.parent
     os.chdir(project_root)
 
-    _sync_versions(project_root)
+    parser = argparse.ArgumentParser(description="Cross-language binding generator.")
+    parser.add_argument(
+        "--version",
+        help="Override the package version to synchronize across Cargo.toml and package.json.",
+    )
+    args = parser.parse_args()
+
+    _sync_versions(project_root, override_version=args.version)
     _update_lockfiles(project_root)
 
     schema_file = "coreason_ontology.schema.json"

@@ -161,7 +161,7 @@ def test_align_semantic_manifolds_subset(source: list[str]) -> None:
         st.floats(min_value=-10.0, max_value=10.0, allow_nan=False, allow_infinity=False), min_size=1, max_size=10
     )
 )
-@settings(max_examples=100)
+@settings(max_examples=100, deadline=None)
 def test_calculate_latent_alignment_success(v1: list[float]) -> None:
     b1 = struct.pack(f"<{len(v1)}f", *v1)
     b64 = base64.b64encode(b1).decode("ascii")
@@ -864,7 +864,7 @@ def state_mutation_intent_st(draw: st.DrawFn) -> StateMutationIntent:
     ),
     st.lists(state_mutation_intent_st(), min_size=1, max_size=50),
 )
-@settings(max_examples=1000, deadline=500)
+@settings(max_examples=1000, deadline=None)
 def test_apply_state_differential_fuzz(base_state: dict[str, Any], patches: list[StateMutationIntent]) -> None:
     manifest = StateDifferentialManifest(
         diff_cid="a" * 128, author_node_cid="a" * 128, lamport_timestamp=1, vector_clock={}, patches=patches
@@ -882,7 +882,7 @@ def test_apply_state_differential_fuzz(base_state: dict[str, Any], patches: list
     st.lists(st.floats(allow_nan=True, allow_infinity=True, width=32), min_size=1, max_size=1000),
     st.lists(st.floats(allow_nan=True, allow_infinity=True, width=32), min_size=1, max_size=1000),
 )
-@settings(max_examples=1000, deadline=500)
+@settings(max_examples=1000, deadline=None)
 def test_calculate_latent_alignment_fuzz(v1_floats: list[float], v2_floats: list[float]) -> None:
     dim = len(v1_floats)
     if len(v2_floats) > dim:

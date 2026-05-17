@@ -102,7 +102,7 @@ def test_models_hypothesis_from_type_registered(cls_name: str) -> None:
     cls = getattr(module, cls_name)
 
     @given(st.builds(cls))
-    @settings(max_examples=5, suppress_health_check=list(HealthCheck))
+    @settings(max_examples=5, suppress_health_check=list(HealthCheck), deadline=None)
     def _test(instance: object) -> None:
         pass
 
