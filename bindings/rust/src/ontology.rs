@@ -7,7 +7,6 @@
 
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
-
 #![allow(clippy::redundant_closure_call)]
 #![allow(clippy::needless_lifetimes)]
 #![allow(clippy::match_single_binding)]
