@@ -6819,6 +6819,70 @@ export type SemanticVersionState = string;
  */
 export type TenantCid344 = string;
 /**
+ * The raw text captured during the session.
+ */
+export type CapturedText = string | null;
+/**
+ * The URN of the securely uploaded audio blob.
+ */
+export type CapturedAudioUrn = string | null;
+/**
+ * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
+ */
+export type TenantCid345 = string;
+/**
+ * Whether to activate the microphone for audio ingestion.
+ */
+export type EnableAudioCapture = boolean;
+/**
+ * Whether to activate the text input overlay for typed ingestion.
+ */
+export type EnableTextCapture = boolean;
+/**
+ * Maximum allowed duration for the capture session.
+ */
+export type MaxDurationSeconds = number;
+/**
+ * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
+ */
+export type TenantCid346 = string;
+/**
+ * The URN of the avatar actively projected.
+ */
+export type ProjectedAvatarUrn = string | null;
+/**
+ * The URN of the audio stream actively playing.
+ */
+export type ProjectedAudioUrn = string | null;
+/**
+ * The text actively displayed on the visual canvas.
+ */
+export type ProjectedOverlayText = string | null;
+/**
+ * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
+ */
+export type TenantCid347 = string;
+/**
+ * Optional URN for the visual avatar or face projection.
+ */
+export type AvatarUrn = string | null;
+/**
+ * The exact text string to be synthesized via TTS.
+ */
+export type AudioTtsString = string | null;
+/**
+ * Optional URN for an existing audio stream artifact.
+ */
+export type AudioStreamUrn = string | null;
+/**
+ * Text to be rendered visually over the spatial canvas.
+ */
+export type OverlayText = string | null;
+/**
+ * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
+ */
+export type TenantCid348 = string;
+/**
  * The fully qualified URN available for hot-swapping.
  */
 export type AvailableUpgradeUrn = string;
@@ -6829,7 +6893,7 @@ export type ImprovementDelta = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid345 = string;
+export type TenantCid349 = string;
 /**
  * The currently loaded URN in the active session.
  */
@@ -6845,7 +6909,7 @@ export type UpgradeRationaleScore = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid346 = string;
+export type TenantCid350 = string;
 /**
  * The unique cryptographic identifier for this local spatial volume.
  */
@@ -6861,7 +6925,7 @@ export type PhysicalRoomHash = string | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid347 = string;
+export type TenantCid351 = string;
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this state differential.
  */
@@ -6881,7 +6945,7 @@ export type Patches = StateMutationIntent[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid348 = string;
+export type TenantCid352 = string;
 /**
  * A string ID representing the session or specific spatial trace binding.
  */
@@ -6897,7 +6961,7 @@ export type MaxRetainedTokens1 = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid349 = string;
+export type TenantCid353 = string;
 /**
  * Unique identifier for this simulation profile.
  */
@@ -6943,7 +7007,7 @@ export type UpperOntologyClassProfile1 = "continuant" | "occurrent";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid350 = string;
+export type TenantCid354 = string;
 /**
  * The statistical variance threshold below which deterministic fallback is enforced.
  */
@@ -6951,7 +7015,7 @@ export type SuperpositionVarianceThreshold = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid351 = string;
+export type TenantCid355 = string;
 /**
  * The linear algebraic projection operator applied to collapse the topology.
  */
@@ -6971,7 +7035,7 @@ export type ClippingPlaneFar = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid352 = string;
+export type TenantCid356 = string;
 /**
  * The ephemeral session boundary for this execution.
  */
@@ -7297,6 +7361,10 @@ export interface CoReasonSharedKernelOntology {
   SemanticRelationalVectorState?: SemanticRelationalVectorState;
   SemanticSlicingPolicy?: SemanticSlicingPolicy;
   SemanticVersionState?: SemanticVersionState;
+  SensoryMultimodalCaptureEvent?: SensoryMultimodalCaptureEvent;
+  SensoryMultimodalCaptureIntent?: SensoryMultimodalCaptureIntent;
+  SensoryMultimodalProjectionEvent?: SensoryMultimodalProjectionEvent;
+  SensoryMultimodalProjectionIntent?: SensoryMultimodalProjectionIntent;
   SensoryUIUpgradeAvailableEvent?: SensoryUIUpgradeAvailableEvent;
   SensoryUIUpgradeIntent?: SensoryUIUpgradeIntent;
   ShapleyAttributionReceipt?: ShapleyAttributionReceipt;
@@ -16451,6 +16519,74 @@ export interface TemporalBoundsProfile3 {
 /**
  * CoReason Shared Kernel Ontology
  *
+ * AGENT INSTRUCTION: A cryptographically frozen historical fact representing successfully captured multimodal input from the Sensory Manifold.
+ *
+ * CAUSAL AFFORDANCE: Delivers raw captured text and audio URNs to the execution engine for processing and Epistemic Consolidation.
+ *
+ * EPISTEMIC BOUNDS: Contains the raw high-entropy user input; MUST be processed via an active inference quarantine before updating global state.
+ *
+ * MCP ROUTING TRIGGERS: Sensory Ingestion Complete, Multimodal Payload, ASR Processing
+ */
+export interface SensoryMultimodalCaptureEvent {
+  tenant_cid?: TenantCid344;
+  captured_text?: CapturedText;
+  captured_audio_urn?: CapturedAudioUrn;
+}
+/**
+ * CoReason Shared Kernel Ontology
+ *
+ * AGENT INSTRUCTION: A hypothesis proposing the activation of bidirectional multimodal capture (microphone, text input, ambient sound).
+ *
+ * CAUSAL AFFORDANCE: Instructs the Sensory Manifold to initialize the browser's MediaRecorder and Web Speech APIs to capture high-entropy input.
+ *
+ * EPISTEMIC BOUNDS: The capture session is strictly bounded by active tenant_cid RBAC permissions; input must be quarantined via EpistemicFirewallField upon receipt.
+ *
+ * MCP ROUTING TRIGGERS: Audio Capture, Multimodal Ingestion, ASR Transcription, Real-time Sensing
+ */
+export interface SensoryMultimodalCaptureIntent {
+  tenant_cid?: TenantCid345;
+  enable_audio_capture: EnableAudioCapture;
+  enable_text_capture: EnableTextCapture;
+  max_duration_seconds: MaxDurationSeconds;
+}
+/**
+ * CoReason Shared Kernel Ontology
+ *
+ * AGENT INSTRUCTION: A cryptographically frozen historical fact representing a successfully broadcasted multimodal state to the Sensory Manifold.
+ *
+ * CAUSAL AFFORDANCE: Emits an SSE stream to the Sensory Manifold to natively synchronize and play visual avatars, text, and audio.
+ *
+ * EPISTEMIC BOUNDS: Follows strict Tripartite decoupling; the payload is completely devoid of execution logic and purely descriptive.
+ *
+ * MCP ROUTING TRIGGERS: SSE Telemetry Event, Multimodal Broadcast, Active UI Synchronization
+ */
+export interface SensoryMultimodalProjectionEvent {
+  tenant_cid?: TenantCid346;
+  projected_avatar_urn?: ProjectedAvatarUrn;
+  projected_audio_urn?: ProjectedAudioUrn;
+  projected_overlay_text?: ProjectedOverlayText;
+}
+/**
+ * CoReason Shared Kernel Ontology
+ *
+ * AGENT INSTRUCTION: A hypothesis proposing the projection of a synchronized multimodal interface (avatar, audio, overlay text).
+ *
+ * CAUSAL AFFORDANCE: Triggers the execution engine to assemble a unified visual and auditory payload for the Hollow Data Plane.
+ *
+ * EPISTEMIC BOUNDS: The avatar_urn and audio_urn must correspond to valid, verified OCI artifacts or active streams.
+ *
+ * MCP ROUTING TRIGGERS: Multimodal Projection, Avatar Rendering, TTS Output, Spatial Overlay
+ */
+export interface SensoryMultimodalProjectionIntent {
+  tenant_cid?: TenantCid347;
+  avatar_urn?: AvatarUrn;
+  audio_tts_string?: AudioTtsString;
+  audio_stream_urn?: AudioStreamUrn;
+  overlay_text?: OverlayText;
+}
+/**
+ * CoReason Shared Kernel Ontology
+ *
  * AGENT INSTRUCTION: A cryptographically frozen historical fact representing a successfully optimized and forged Sensory UI upgrade ready for injection.
  *
  * CAUSAL AFFORDANCE: Emits an SSE stream to the Sensory Manifold to prompt a JIT un-mounting and re-mounting of the visual Topos.
@@ -16460,7 +16596,7 @@ export interface TemporalBoundsProfile3 {
  * MCP ROUTING TRIGGERS: SSE Telemetry Event, UI Optimization Notification, Zero-Trust Projection Update
  */
 export interface SensoryUIUpgradeAvailableEvent {
-  tenant_cid?: TenantCid344;
+  tenant_cid?: TenantCid348;
   available_upgrade_urn: AvailableUpgradeUrn;
   improvement_delta: ImprovementDelta;
 }
@@ -16476,7 +16612,7 @@ export interface SensoryUIUpgradeAvailableEvent {
  * MCP ROUTING TRIGGERS: TDA Optimization, Sensory Hot-Swap, AOT UI Upgrade, Epistemic Modality Shift
  */
 export interface SensoryUIUpgradeIntent {
-  tenant_cid?: TenantCid345;
+  tenant_cid?: TenantCid349;
   current_active_urn: CurrentActiveUrn;
   target_upgrade_urn: TargetUpgradeUrn;
   upgrade_rationale_score: UpgradeRationaleScore;
@@ -16580,7 +16716,7 @@ export interface SpatialGenerativeTaxonomyManifest1 {
  * MCP ROUTING TRIGGERS: Federated Pose Graph, Spatial Reference Frame, SLAM Anchor, Relative Coordinate Geometry, Origin Point
  */
 export interface SpatialReferenceFrameManifest {
-  tenant_cid?: TenantCid346;
+  tenant_cid?: TenantCid350;
   frame_cid: FrameCid;
   anchor_protocol: AnchorProtocol;
   physical_room_hash?: PhysicalRoomHash;
@@ -16606,7 +16742,7 @@ export interface SpatialReferenceFrameManifest {
  * Vector Clock, Eventual Consistency, Last-Writer-Wins
  */
 export interface StateDifferentialManifest {
-  tenant_cid?: TenantCid347;
+  tenant_cid?: TenantCid351;
   diff_cid: DiffCid1;
   author_node_cid: AuthorNodeCid1;
   lamport_timestamp: LamportTimestamp1;
@@ -16642,7 +16778,7 @@ export interface VectorClock1 {
  * Partitioning, VRAM Bounding, Serialization Geometry
  */
 export interface StateHydrationManifest {
-  tenant_cid?: TenantCid348;
+  tenant_cid?: TenantCid352;
   epistemic_coordinate: EpistemicCoordinate;
   crystallized_ledger_cids: CrystallizedLedgerCids;
   working_context_variables: WorkingContextVariables;
@@ -16710,7 +16846,7 @@ export interface StructuralCausalGraphProfile2 {
  * Structural Entropy, Fuzzing Blueprint, Synthetic Permutation
  */
 export interface SyntheticGenerationProfile {
-  tenant_cid?: TenantCid349;
+  tenant_cid?: TenantCid353;
   profile_cid: ProfileCid;
   manifold_sla: GenerativeManifoldSLA1;
   target_schema_ref: TargetSchemaRef;
@@ -16820,7 +16956,7 @@ export interface TraceContextState1 {
  * MCP ROUTING TRIGGERS: Multi-Attribute Utility Theory, Pareto Efficiency, Variance Reduction, Fallback Superposition, Utility Routing
  */
 export interface UtilityJustificationGraphReceipt {
-  tenant_cid?: TenantCid350;
+  tenant_cid?: TenantCid354;
   optimizing_vectors?: OptimizingVectors;
   degrading_vectors?: DegradingVectors;
   superposition_variance_threshold: SuperpositionVarianceThreshold;
@@ -16853,7 +16989,7 @@ export interface DegradingVectors {
  * MCP ROUTING TRIGGERS: Viewport Projection Matrix, View Frustum, Field of View, Clipping Planes, Linear Algebraic Projection
  */
 export interface ViewportProjectionContract {
-  tenant_cid?: TenantCid351;
+  tenant_cid?: TenantCid355;
   projection_class: ProjectionClass;
   field_of_view_degrees?: FieldOfViewDegrees;
   clipping_plane_near: ClippingPlaneNear;
@@ -16889,7 +17025,7 @@ export interface VolumetricBoundingProfile1 {
  * MCP ROUTING TRIGGERS: Topos Theory, Cybernetics, Execution Envelope, Macroscopic Topology, Viable System Model
  */
 export interface WorkflowManifest {
-  tenant_cid?: TenantCid352;
+  tenant_cid?: TenantCid356;
   genesis_provenance: EpistemicProvenanceReceipt2;
   /**
    * An Immutable structural checkpoint.

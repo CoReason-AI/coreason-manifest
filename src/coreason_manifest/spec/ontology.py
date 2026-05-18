@@ -14645,6 +14645,96 @@ class SensoryUIUpgradeAvailableEvent(CoreasonBaseState):
     improvement_delta: Annotated[float, Field(description="The calculated Free Energy improvement delta.", ge=0.0)]
 
 
+class SensoryMultimodalProjectionIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A hypothesis proposing the projection of a synchronized multimodal interface (avatar, audio, overlay text).
+
+    CAUSAL AFFORDANCE: Triggers the execution engine to assemble a unified visual and auditory payload for the Hollow Data Plane.
+
+    EPISTEMIC BOUNDS: The avatar_urn and audio_urn must correspond to valid, verified OCI artifacts or active streams.
+
+    MCP ROUTING TRIGGERS: Multimodal Projection, Avatar Rendering, TTS Output, Spatial Overlay
+    """
+
+    avatar_urn: Annotated[
+        str | None, Field(description="Optional URN for the visual avatar or face projection.", max_length=256)
+    ] = None
+    audio_tts_string: Annotated[
+        str | None, Field(description="The exact text string to be synthesized via TTS.", max_length=4096)
+    ] = None
+    audio_stream_urn: Annotated[
+        str | None, Field(description="Optional URN for an existing audio stream artifact.", max_length=256)
+    ] = None
+    overlay_text: Annotated[
+        str | None, Field(description="Text to be rendered visually over the spatial canvas.", max_length=4096)
+    ] = None
+
+
+class SensoryMultimodalProjectionEvent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A cryptographically frozen historical fact representing a successfully broadcasted multimodal state to the Sensory Manifold.
+
+    CAUSAL AFFORDANCE: Emits an SSE stream to the Sensory Manifold to natively synchronize and play visual avatars, text, and audio.
+
+    EPISTEMIC BOUNDS: Follows strict Tripartite decoupling; the payload is completely devoid of execution logic and purely descriptive.
+
+    MCP ROUTING TRIGGERS: SSE Telemetry Event, Multimodal Broadcast, Active UI Synchronization
+    """
+
+    projected_avatar_urn: Annotated[
+        str | None, Field(description="The URN of the avatar actively projected.", max_length=256)
+    ] = None
+    projected_audio_urn: Annotated[
+        str | None, Field(description="The URN of the audio stream actively playing.", max_length=256)
+    ] = None
+    projected_overlay_text: Annotated[
+        str | None, Field(description="The text actively displayed on the visual canvas.", max_length=4096)
+    ] = None
+
+
+class SensoryMultimodalCaptureIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A hypothesis proposing the activation of bidirectional multimodal capture (microphone, text input, ambient sound).
+
+    CAUSAL AFFORDANCE: Instructs the Sensory Manifold to initialize the browser's MediaRecorder and Web Speech APIs to capture high-entropy input.
+
+    EPISTEMIC BOUNDS: The capture session is strictly bounded by active tenant_cid RBAC permissions; input must be quarantined via EpistemicFirewallField upon receipt.
+
+    MCP ROUTING TRIGGERS: Audio Capture, Multimodal Ingestion, ASR Transcription, Real-time Sensing
+    """
+
+    enable_audio_capture: Annotated[bool, Field(description="Whether to activate the microphone for audio ingestion.")]
+    enable_text_capture: Annotated[
+        bool, Field(description="Whether to activate the text input overlay for typed ingestion.")
+    ]
+    max_duration_seconds: Annotated[
+        int, Field(description="Maximum allowed duration for the capture session.", ge=1, le=3600)
+    ]
+
+
+class SensoryMultimodalCaptureEvent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A cryptographically frozen historical fact representing successfully captured multimodal input from the Sensory Manifold.
+
+    CAUSAL AFFORDANCE: Delivers raw captured text and audio URNs to the execution engine for processing and Epistemic Consolidation.
+
+    EPISTEMIC BOUNDS: Contains the raw high-entropy user input; MUST be processed via an active inference quarantine before updating global state.
+
+    MCP ROUTING TRIGGERS: Sensory Ingestion Complete, Multimodal Payload, ASR Processing
+    """
+
+    captured_text: Annotated[
+        str | None, Field(description="The raw text captured during the session.", max_length=16384)
+    ] = None
+    captured_audio_urn: Annotated[
+        str | None, Field(description="The URN of the securely uploaded audio blob.", max_length=256)
+    ] = None
+
+
 GeometricSchemaIntent.model_rebuild()
 SensoryUIUpgradeIntent.model_rebuild()
 SensoryUIUpgradeAvailableEvent.model_rebuild()
+SensoryMultimodalProjectionIntent.model_rebuild()
+SensoryMultimodalProjectionEvent.model_rebuild()
+SensoryMultimodalCaptureIntent.model_rebuild()
+SensoryMultimodalCaptureEvent.model_rebuild()

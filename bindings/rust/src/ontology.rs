@@ -10532,6 +10532,18 @@ impl<'de> ::serde::Deserialize<'de> for ClassifiedIntent {
 #[doc = "    \"SemanticVersionState\": {"]
 #[doc = "      \"$ref\": \"#/$defs/SemanticVersionState\""]
 #[doc = "    },"]
+#[doc = "    \"SensoryMultimodalCaptureEvent\": {"]
+#[doc = "      \"$ref\": \"#/$defs/SensoryMultimodalCaptureEvent\""]
+#[doc = "    },"]
+#[doc = "    \"SensoryMultimodalCaptureIntent\": {"]
+#[doc = "      \"$ref\": \"#/$defs/SensoryMultimodalCaptureIntent\""]
+#[doc = "    },"]
+#[doc = "    \"SensoryMultimodalProjectionEvent\": {"]
+#[doc = "      \"$ref\": \"#/$defs/SensoryMultimodalProjectionEvent\""]
+#[doc = "    },"]
+#[doc = "    \"SensoryMultimodalProjectionIntent\": {"]
+#[doc = "      \"$ref\": \"#/$defs/SensoryMultimodalProjectionIntent\""]
+#[doc = "    },"]
 #[doc = "    \"SensoryUIUpgradeAvailableEvent\": {"]
 #[doc = "      \"$ref\": \"#/$defs/SensoryUIUpgradeAvailableEvent\""]
 #[doc = "    },"]
@@ -12659,6 +12671,32 @@ pub struct CoReasonSharedKernelOntology {
     )]
     pub semantic_version_state: ::std::option::Option<SemanticVersionState>,
     #[serde(
+        rename = "SensoryMultimodalCaptureEvent",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub sensory_multimodal_capture_event: ::std::option::Option<SensoryMultimodalCaptureEvent>,
+    #[serde(
+        rename = "SensoryMultimodalCaptureIntent",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub sensory_multimodal_capture_intent: ::std::option::Option<SensoryMultimodalCaptureIntent>,
+    #[serde(
+        rename = "SensoryMultimodalProjectionEvent",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub sensory_multimodal_projection_event:
+        ::std::option::Option<SensoryMultimodalProjectionEvent>,
+    #[serde(
+        rename = "SensoryMultimodalProjectionIntent",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub sensory_multimodal_projection_intent:
+        ::std::option::Option<SensoryMultimodalProjectionIntent>,
+    #[serde(
         rename = "SensoryUIUpgradeAvailableEvent",
         default,
         skip_serializing_if = "::std::option::Option::is_none"
@@ -13493,6 +13531,10 @@ impl ::std::default::Default for CoReasonSharedKernelOntology {
             semantic_relational_vector_state: Default::default(),
             semantic_slicing_policy: Default::default(),
             semantic_version_state: Default::default(),
+            sensory_multimodal_capture_event: Default::default(),
+            sensory_multimodal_capture_intent: Default::default(),
+            sensory_multimodal_projection_event: Default::default(),
+            sensory_multimodal_projection_intent: Default::default(),
             sensory_ui_upgrade_available_event: Default::default(),
             sensory_ui_upgrade_intent: Default::default(),
             shacl_validation_sla: Default::default(),
@@ -57507,6 +57549,339 @@ impl ::std::convert::TryFrom<::std::string::String> for SensoryModality {
         value.parse()
     }
 }
+#[doc = "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing successfully captured multimodal input from the Sensory Manifold.\n\nCAUSAL AFFORDANCE: Delivers raw captured text and audio URNs to the execution engine for processing and Epistemic Consolidation.\n\nEPISTEMIC BOUNDS: Contains the raw high-entropy user input; MUST be processed via an active inference quarantine before updating global state.\n\nMCP ROUTING TRIGGERS: Sensory Ingestion Complete, Multimodal Payload, ASR Processing"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"SensoryMultimodalCaptureEvent\","]
+#[doc = "  \"description\": \"CoReason Shared Kernel Ontology\\n\\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing successfully captured multimodal input from the Sensory Manifold.\\n\\nCAUSAL AFFORDANCE: Delivers raw captured text and audio URNs to the execution engine for processing and Epistemic Consolidation.\\n\\nEPISTEMIC BOUNDS: Contains the raw high-entropy user input; MUST be processed via an active inference quarantine before updating global state.\\n\\nMCP ROUTING TRIGGERS: Sensory Ingestion Complete, Multimodal Payload, ASR Processing\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"captured_audio_urn\": {"]
+#[doc = "      \"title\": \"Captured Audio Urn\","]
+#[doc = "      \"description\": \"The URN of the securely uploaded audio blob.\","]
+#[doc = "      \"anyOf\": ["]
+#[doc = "        {"]
+#[doc = "          \"type\": \"string\""]
+#[doc = "        },"]
+#[doc = "        {"]
+#[doc = "          \"type\": \"null\""]
+#[doc = "        }"]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"captured_text\": {"]
+#[doc = "      \"title\": \"Captured Text\","]
+#[doc = "      \"description\": \"The raw text captured during the session.\","]
+#[doc = "      \"anyOf\": ["]
+#[doc = "        {"]
+#[doc = "          \"type\": \"string\""]
+#[doc = "        },"]
+#[doc = "        {"]
+#[doc = "          \"type\": \"null\""]
+#[doc = "        }"]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"tenant_cid\": {"]
+#[doc = "      \"title\": \"Tenant Cid\","]
+#[doc = "      \"description\": \"The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\\\"date_of_incorporation\\\":\\\"2025-10-16\\\",\\\"file_number\\\":\\\"10369312\\\",\\\"jurisdiction\\\":\\\"US-DE\\\",\\\"legal_name\\\":\\\"CoReason, Inc.\\\"}\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"maxLength\": 128,"]
+#[doc = "      \"minLength\": 4,"]
+#[doc = "      \"pattern\": \"^[a-zA-Z0-9_.:-]+$\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct SensoryMultimodalCaptureEvent {
+    #[doc = "The URN of the securely uploaded audio blob."]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub captured_audio_urn: ::std::option::Option<::std::string::String>,
+    #[doc = "The raw text captured during the session."]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub captured_text: ::std::option::Option<::std::string::String>,
+    #[doc = "The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\"date_of_incorporation\":\"2025-10-16\",\"file_number\":\"10369312\",\"jurisdiction\":\"US-DE\",\"legal_name\":\"CoReason, Inc.\"}"]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub tenant_cid: ::std::option::Option<TenantCid>,
+}
+impl ::std::default::Default for SensoryMultimodalCaptureEvent {
+    fn default() -> Self {
+        Self {
+            captured_audio_urn: Default::default(),
+            captured_text: Default::default(),
+            tenant_cid: Default::default(),
+        }
+    }
+}
+impl SensoryMultimodalCaptureEvent {
+    pub fn builder() -> builder::SensoryMultimodalCaptureEvent {
+        Default::default()
+    }
+}
+#[doc = "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A hypothesis proposing the activation of bidirectional multimodal capture (microphone, text input, ambient sound).\n\nCAUSAL AFFORDANCE: Instructs the Sensory Manifold to initialize the browser's MediaRecorder and Web Speech APIs to capture high-entropy input.\n\nEPISTEMIC BOUNDS: The capture session is strictly bounded by active tenant_cid RBAC permissions; input must be quarantined via EpistemicFirewallField upon receipt.\n\nMCP ROUTING TRIGGERS: Audio Capture, Multimodal Ingestion, ASR Transcription, Real-time Sensing"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"SensoryMultimodalCaptureIntent\","]
+#[doc = "  \"description\": \"CoReason Shared Kernel Ontology\\n\\nAGENT INSTRUCTION: A hypothesis proposing the activation of bidirectional multimodal capture (microphone, text input, ambient sound).\\n\\nCAUSAL AFFORDANCE: Instructs the Sensory Manifold to initialize the browser's MediaRecorder and Web Speech APIs to capture high-entropy input.\\n\\nEPISTEMIC BOUNDS: The capture session is strictly bounded by active tenant_cid RBAC permissions; input must be quarantined via EpistemicFirewallField upon receipt.\\n\\nMCP ROUTING TRIGGERS: Audio Capture, Multimodal Ingestion, ASR Transcription, Real-time Sensing\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"enable_audio_capture\","]
+#[doc = "    \"enable_text_capture\","]
+#[doc = "    \"max_duration_seconds\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"enable_audio_capture\": {"]
+#[doc = "      \"title\": \"Enable Audio Capture\","]
+#[doc = "      \"description\": \"Whether to activate the microphone for audio ingestion.\","]
+#[doc = "      \"type\": \"boolean\""]
+#[doc = "    },"]
+#[doc = "    \"enable_text_capture\": {"]
+#[doc = "      \"title\": \"Enable Text Capture\","]
+#[doc = "      \"description\": \"Whether to activate the text input overlay for typed ingestion.\","]
+#[doc = "      \"type\": \"boolean\""]
+#[doc = "    },"]
+#[doc = "    \"max_duration_seconds\": {"]
+#[doc = "      \"title\": \"Max Duration Seconds\","]
+#[doc = "      \"description\": \"Maximum allowed duration for the capture session.\","]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 3600.0,"]
+#[doc = "      \"minimum\": 1.0"]
+#[doc = "    },"]
+#[doc = "    \"tenant_cid\": {"]
+#[doc = "      \"title\": \"Tenant Cid\","]
+#[doc = "      \"description\": \"The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\\\"date_of_incorporation\\\":\\\"2025-10-16\\\",\\\"file_number\\\":\\\"10369312\\\",\\\"jurisdiction\\\":\\\"US-DE\\\",\\\"legal_name\\\":\\\"CoReason, Inc.\\\"}\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"maxLength\": 128,"]
+#[doc = "      \"minLength\": 4,"]
+#[doc = "      \"pattern\": \"^[a-zA-Z0-9_.:-]+$\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct SensoryMultimodalCaptureIntent {
+    #[doc = "Whether to activate the microphone for audio ingestion."]
+    pub enable_audio_capture: bool,
+    #[doc = "Whether to activate the text input overlay for typed ingestion."]
+    pub enable_text_capture: bool,
+    #[doc = "Maximum allowed duration for the capture session."]
+    pub max_duration_seconds: ::std::num::NonZeroU64,
+    #[doc = "The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\"date_of_incorporation\":\"2025-10-16\",\"file_number\":\"10369312\",\"jurisdiction\":\"US-DE\",\"legal_name\":\"CoReason, Inc.\"}"]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub tenant_cid: ::std::option::Option<TenantCid>,
+}
+impl SensoryMultimodalCaptureIntent {
+    pub fn builder() -> builder::SensoryMultimodalCaptureIntent {
+        Default::default()
+    }
+}
+#[doc = "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing a successfully broadcasted multimodal state to the Sensory Manifold.\n\nCAUSAL AFFORDANCE: Emits an SSE stream to the Sensory Manifold to natively synchronize and play visual avatars, text, and audio.\n\nEPISTEMIC BOUNDS: Follows strict Tripartite decoupling; the payload is completely devoid of execution logic and purely descriptive.\n\nMCP ROUTING TRIGGERS: SSE Telemetry Event, Multimodal Broadcast, Active UI Synchronization"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"SensoryMultimodalProjectionEvent\","]
+#[doc = "  \"description\": \"CoReason Shared Kernel Ontology\\n\\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing a successfully broadcasted multimodal state to the Sensory Manifold.\\n\\nCAUSAL AFFORDANCE: Emits an SSE stream to the Sensory Manifold to natively synchronize and play visual avatars, text, and audio.\\n\\nEPISTEMIC BOUNDS: Follows strict Tripartite decoupling; the payload is completely devoid of execution logic and purely descriptive.\\n\\nMCP ROUTING TRIGGERS: SSE Telemetry Event, Multimodal Broadcast, Active UI Synchronization\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"projected_audio_urn\": {"]
+#[doc = "      \"title\": \"Projected Audio Urn\","]
+#[doc = "      \"description\": \"The URN of the audio stream actively playing.\","]
+#[doc = "      \"anyOf\": ["]
+#[doc = "        {"]
+#[doc = "          \"type\": \"string\""]
+#[doc = "        },"]
+#[doc = "        {"]
+#[doc = "          \"type\": \"null\""]
+#[doc = "        }"]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"projected_avatar_urn\": {"]
+#[doc = "      \"title\": \"Projected Avatar Urn\","]
+#[doc = "      \"description\": \"The URN of the avatar actively projected.\","]
+#[doc = "      \"anyOf\": ["]
+#[doc = "        {"]
+#[doc = "          \"type\": \"string\""]
+#[doc = "        },"]
+#[doc = "        {"]
+#[doc = "          \"type\": \"null\""]
+#[doc = "        }"]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"projected_overlay_text\": {"]
+#[doc = "      \"title\": \"Projected Overlay Text\","]
+#[doc = "      \"description\": \"The text actively displayed on the visual canvas.\","]
+#[doc = "      \"anyOf\": ["]
+#[doc = "        {"]
+#[doc = "          \"type\": \"string\""]
+#[doc = "        },"]
+#[doc = "        {"]
+#[doc = "          \"type\": \"null\""]
+#[doc = "        }"]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"tenant_cid\": {"]
+#[doc = "      \"title\": \"Tenant Cid\","]
+#[doc = "      \"description\": \"The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\\\"date_of_incorporation\\\":\\\"2025-10-16\\\",\\\"file_number\\\":\\\"10369312\\\",\\\"jurisdiction\\\":\\\"US-DE\\\",\\\"legal_name\\\":\\\"CoReason, Inc.\\\"}\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"maxLength\": 128,"]
+#[doc = "      \"minLength\": 4,"]
+#[doc = "      \"pattern\": \"^[a-zA-Z0-9_.:-]+$\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct SensoryMultimodalProjectionEvent {
+    #[doc = "The URN of the audio stream actively playing."]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub projected_audio_urn: ::std::option::Option<::std::string::String>,
+    #[doc = "The URN of the avatar actively projected."]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub projected_avatar_urn: ::std::option::Option<::std::string::String>,
+    #[doc = "The text actively displayed on the visual canvas."]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub projected_overlay_text: ::std::option::Option<::std::string::String>,
+    #[doc = "The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\"date_of_incorporation\":\"2025-10-16\",\"file_number\":\"10369312\",\"jurisdiction\":\"US-DE\",\"legal_name\":\"CoReason, Inc.\"}"]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub tenant_cid: ::std::option::Option<TenantCid>,
+}
+impl ::std::default::Default for SensoryMultimodalProjectionEvent {
+    fn default() -> Self {
+        Self {
+            projected_audio_urn: Default::default(),
+            projected_avatar_urn: Default::default(),
+            projected_overlay_text: Default::default(),
+            tenant_cid: Default::default(),
+        }
+    }
+}
+impl SensoryMultimodalProjectionEvent {
+    pub fn builder() -> builder::SensoryMultimodalProjectionEvent {
+        Default::default()
+    }
+}
+#[doc = "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A hypothesis proposing the projection of a synchronized multimodal interface (avatar, audio, overlay text).\n\nCAUSAL AFFORDANCE: Triggers the execution engine to assemble a unified visual and auditory payload for the Hollow Data Plane.\n\nEPISTEMIC BOUNDS: The avatar_urn and audio_urn must correspond to valid, verified OCI artifacts or active streams.\n\nMCP ROUTING TRIGGERS: Multimodal Projection, Avatar Rendering, TTS Output, Spatial Overlay"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"SensoryMultimodalProjectionIntent\","]
+#[doc = "  \"description\": \"CoReason Shared Kernel Ontology\\n\\nAGENT INSTRUCTION: A hypothesis proposing the projection of a synchronized multimodal interface (avatar, audio, overlay text).\\n\\nCAUSAL AFFORDANCE: Triggers the execution engine to assemble a unified visual and auditory payload for the Hollow Data Plane.\\n\\nEPISTEMIC BOUNDS: The avatar_urn and audio_urn must correspond to valid, verified OCI artifacts or active streams.\\n\\nMCP ROUTING TRIGGERS: Multimodal Projection, Avatar Rendering, TTS Output, Spatial Overlay\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"audio_stream_urn\": {"]
+#[doc = "      \"title\": \"Audio Stream Urn\","]
+#[doc = "      \"description\": \"Optional URN for an existing audio stream artifact.\","]
+#[doc = "      \"anyOf\": ["]
+#[doc = "        {"]
+#[doc = "          \"type\": \"string\""]
+#[doc = "        },"]
+#[doc = "        {"]
+#[doc = "          \"type\": \"null\""]
+#[doc = "        }"]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"audio_tts_string\": {"]
+#[doc = "      \"title\": \"Audio Tts String\","]
+#[doc = "      \"description\": \"The exact text string to be synthesized via TTS.\","]
+#[doc = "      \"anyOf\": ["]
+#[doc = "        {"]
+#[doc = "          \"type\": \"string\""]
+#[doc = "        },"]
+#[doc = "        {"]
+#[doc = "          \"type\": \"null\""]
+#[doc = "        }"]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"avatar_urn\": {"]
+#[doc = "      \"title\": \"Avatar Urn\","]
+#[doc = "      \"description\": \"Optional URN for the visual avatar or face projection.\","]
+#[doc = "      \"anyOf\": ["]
+#[doc = "        {"]
+#[doc = "          \"type\": \"string\""]
+#[doc = "        },"]
+#[doc = "        {"]
+#[doc = "          \"type\": \"null\""]
+#[doc = "        }"]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"overlay_text\": {"]
+#[doc = "      \"title\": \"Overlay Text\","]
+#[doc = "      \"description\": \"Text to be rendered visually over the spatial canvas.\","]
+#[doc = "      \"anyOf\": ["]
+#[doc = "        {"]
+#[doc = "          \"type\": \"string\""]
+#[doc = "        },"]
+#[doc = "        {"]
+#[doc = "          \"type\": \"null\""]
+#[doc = "        }"]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"tenant_cid\": {"]
+#[doc = "      \"title\": \"Tenant Cid\","]
+#[doc = "      \"description\": \"The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\\\"date_of_incorporation\\\":\\\"2025-10-16\\\",\\\"file_number\\\":\\\"10369312\\\",\\\"jurisdiction\\\":\\\"US-DE\\\",\\\"legal_name\\\":\\\"CoReason, Inc.\\\"}\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"maxLength\": 128,"]
+#[doc = "      \"minLength\": 4,"]
+#[doc = "      \"pattern\": \"^[a-zA-Z0-9_.:-]+$\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct SensoryMultimodalProjectionIntent {
+    #[doc = "Optional URN for an existing audio stream artifact."]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub audio_stream_urn: ::std::option::Option<::std::string::String>,
+    #[doc = "The exact text string to be synthesized via TTS."]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub audio_tts_string: ::std::option::Option<::std::string::String>,
+    #[doc = "Optional URN for the visual avatar or face projection."]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub avatar_urn: ::std::option::Option<::std::string::String>,
+    #[doc = "Text to be rendered visually over the spatial canvas."]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub overlay_text: ::std::option::Option<::std::string::String>,
+    #[doc = "The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\"date_of_incorporation\":\"2025-10-16\",\"file_number\":\"10369312\",\"jurisdiction\":\"US-DE\",\"legal_name\":\"CoReason, Inc.\"}"]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub tenant_cid: ::std::option::Option<TenantCid>,
+}
+impl ::std::default::Default for SensoryMultimodalProjectionIntent {
+    fn default() -> Self {
+        Self {
+            audio_stream_urn: Default::default(),
+            audio_tts_string: Default::default(),
+            avatar_urn: Default::default(),
+            overlay_text: Default::default(),
+            tenant_cid: Default::default(),
+        }
+    }
+}
+impl SensoryMultimodalProjectionIntent {
+    pub fn builder() -> builder::SensoryMultimodalProjectionIntent {
+        Default::default()
+    }
+}
 #[doc = "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing a successfully optimized and forged Sensory UI upgrade ready for injection.\n\nCAUSAL AFFORDANCE: Emits an SSE stream to the Sensory Manifold to prompt a JIT un-mounting and re-mounting of the visual Topos.\n\nEPISTEMIC BOUNDS: The target URN must be formally registered and accessible within the ecosystem ledger prior to emission.\n\nMCP ROUTING TRIGGERS: SSE Telemetry Event, UI Optimization Notification, Zero-Trust Projection Update"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -80896,6 +81271,22 @@ pub mod builder {
             ::std::option::Option<super::SemanticVersionState>,
             ::std::string::String,
         >,
+        sensory_multimodal_capture_event: ::std::result::Result<
+            ::std::option::Option<super::SensoryMultimodalCaptureEvent>,
+            ::std::string::String,
+        >,
+        sensory_multimodal_capture_intent: ::std::result::Result<
+            ::std::option::Option<super::SensoryMultimodalCaptureIntent>,
+            ::std::string::String,
+        >,
+        sensory_multimodal_projection_event: ::std::result::Result<
+            ::std::option::Option<super::SensoryMultimodalProjectionEvent>,
+            ::std::string::String,
+        >,
+        sensory_multimodal_projection_intent: ::std::result::Result<
+            ::std::option::Option<super::SensoryMultimodalProjectionIntent>,
+            ::std::string::String,
+        >,
         sensory_ui_upgrade_available_event: ::std::result::Result<
             ::std::option::Option<super::SensoryUiUpgradeAvailableEvent>,
             ::std::string::String,
@@ -81553,6 +81944,10 @@ pub mod builder {
                 semantic_relational_vector_state: Ok(Default::default()),
                 semantic_slicing_policy: Ok(Default::default()),
                 semantic_version_state: Ok(Default::default()),
+                sensory_multimodal_capture_event: Ok(Default::default()),
+                sensory_multimodal_capture_intent: Ok(Default::default()),
+                sensory_multimodal_projection_event: Ok(Default::default()),
+                sensory_multimodal_projection_intent: Ok(Default::default()),
                 sensory_ui_upgrade_available_event: Ok(Default::default()),
                 sensory_ui_upgrade_intent: Ok(Default::default()),
                 shacl_validation_sla: Ok(Default::default()),
@@ -84823,6 +85218,58 @@ pub mod builder {
             });
             self
         }
+        pub fn sensory_multimodal_capture_event<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<super::SensoryMultimodalCaptureEvent>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.sensory_multimodal_capture_event = value.try_into().map_err(|e| {
+                format!("error converting supplied value for sensory_multimodal_capture_event: {e}")
+            });
+            self
+        }
+        pub fn sensory_multimodal_capture_intent<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<
+                ::std::option::Option<super::SensoryMultimodalCaptureIntent>,
+            >,
+            T::Error: ::std::fmt::Display,
+        {
+            self.sensory_multimodal_capture_intent = value.try_into().map_err(|e| {
+                format!(
+                    "error converting supplied value for sensory_multimodal_capture_intent: {e}"
+                )
+            });
+            self
+        }
+        pub fn sensory_multimodal_projection_event<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<
+                ::std::option::Option<super::SensoryMultimodalProjectionEvent>,
+            >,
+            T::Error: ::std::fmt::Display,
+        {
+            self.sensory_multimodal_projection_event = value.try_into().map_err(|e| {
+                format!(
+                    "error converting supplied value for sensory_multimodal_projection_event: {e}"
+                )
+            });
+            self
+        }
+        pub fn sensory_multimodal_projection_intent<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<
+                ::std::option::Option<super::SensoryMultimodalProjectionIntent>,
+            >,
+            T::Error: ::std::fmt::Display,
+        {
+            self.sensory_multimodal_projection_intent = value.try_into().map_err(|e| {
+                format!(
+                    "error converting supplied value for sensory_multimodal_projection_intent: {e}"
+                )
+            });
+            self
+        }
         pub fn sensory_ui_upgrade_available_event<T>(mut self, value: T) -> Self
         where
             T: ::std::convert::TryInto<
@@ -86037,6 +86484,10 @@ pub mod builder {
                 semantic_relational_vector_state: value.semantic_relational_vector_state?,
                 semantic_slicing_policy: value.semantic_slicing_policy?,
                 semantic_version_state: value.semantic_version_state?,
+                sensory_multimodal_capture_event: value.sensory_multimodal_capture_event?,
+                sensory_multimodal_capture_intent: value.sensory_multimodal_capture_intent?,
+                sensory_multimodal_projection_event: value.sensory_multimodal_projection_event?,
+                sensory_multimodal_projection_intent: value.sensory_multimodal_projection_intent?,
                 sensory_ui_upgrade_available_event: value.sensory_ui_upgrade_available_event?,
                 sensory_ui_upgrade_intent: value.sensory_ui_upgrade_intent?,
                 shacl_validation_sla: value.shacl_validation_sla?,
@@ -86464,6 +86915,10 @@ pub mod builder {
                 semantic_relational_vector_state: Ok(value.semantic_relational_vector_state),
                 semantic_slicing_policy: Ok(value.semantic_slicing_policy),
                 semantic_version_state: Ok(value.semantic_version_state),
+                sensory_multimodal_capture_event: Ok(value.sensory_multimodal_capture_event),
+                sensory_multimodal_capture_intent: Ok(value.sensory_multimodal_capture_intent),
+                sensory_multimodal_projection_event: Ok(value.sensory_multimodal_projection_event),
+                sensory_multimodal_projection_intent: Ok(value.sensory_multimodal_projection_intent),
                 sensory_ui_upgrade_available_event: Ok(value.sensory_ui_upgrade_available_event),
                 sensory_ui_upgrade_intent: Ok(value.sensory_ui_upgrade_intent),
                 shacl_validation_sla: Ok(value.shacl_validation_sla),
@@ -116029,6 +116484,379 @@ pub mod builder {
                 context_window_token_ceiling: Ok(value.context_window_token_ceiling),
                 permitted_classification_tiers: Ok(value.permitted_classification_tiers),
                 required_semantic_labels: Ok(value.required_semantic_labels),
+                tenant_cid: Ok(value.tenant_cid),
+            }
+        }
+    }
+    #[derive(Clone, Debug)]
+    pub struct SensoryMultimodalCaptureEvent {
+        captured_audio_urn: ::std::result::Result<
+            ::std::option::Option<::std::string::String>,
+            ::std::string::String,
+        >,
+        captured_text: ::std::result::Result<
+            ::std::option::Option<::std::string::String>,
+            ::std::string::String,
+        >,
+        tenant_cid:
+            ::std::result::Result<::std::option::Option<super::TenantCid>, ::std::string::String>,
+    }
+    impl ::std::default::Default for SensoryMultimodalCaptureEvent {
+        fn default() -> Self {
+            Self {
+                captured_audio_urn: Ok(Default::default()),
+                captured_text: Ok(Default::default()),
+                tenant_cid: Ok(Default::default()),
+            }
+        }
+    }
+    impl SensoryMultimodalCaptureEvent {
+        pub fn captured_audio_urn<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<::std::string::String>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.captured_audio_urn = value.try_into().map_err(|e| {
+                format!("error converting supplied value for captured_audio_urn: {e}")
+            });
+            self
+        }
+        pub fn captured_text<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<::std::string::String>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.captured_text = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for captured_text: {e}"));
+            self
+        }
+        pub fn tenant_cid<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<super::TenantCid>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.tenant_cid = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for tenant_cid: {e}"));
+            self
+        }
+    }
+    impl ::std::convert::TryFrom<SensoryMultimodalCaptureEvent>
+        for super::SensoryMultimodalCaptureEvent
+    {
+        type Error = super::error::ConversionError;
+        fn try_from(
+            value: SensoryMultimodalCaptureEvent,
+        ) -> ::std::result::Result<Self, super::error::ConversionError> {
+            Ok(Self {
+                captured_audio_urn: value.captured_audio_urn?,
+                captured_text: value.captured_text?,
+                tenant_cid: value.tenant_cid?,
+            })
+        }
+    }
+    impl ::std::convert::From<super::SensoryMultimodalCaptureEvent> for SensoryMultimodalCaptureEvent {
+        fn from(value: super::SensoryMultimodalCaptureEvent) -> Self {
+            Self {
+                captured_audio_urn: Ok(value.captured_audio_urn),
+                captured_text: Ok(value.captured_text),
+                tenant_cid: Ok(value.tenant_cid),
+            }
+        }
+    }
+    #[derive(Clone, Debug)]
+    pub struct SensoryMultimodalCaptureIntent {
+        enable_audio_capture: ::std::result::Result<bool, ::std::string::String>,
+        enable_text_capture: ::std::result::Result<bool, ::std::string::String>,
+        max_duration_seconds: ::std::result::Result<::std::num::NonZeroU64, ::std::string::String>,
+        tenant_cid:
+            ::std::result::Result<::std::option::Option<super::TenantCid>, ::std::string::String>,
+    }
+    impl ::std::default::Default for SensoryMultimodalCaptureIntent {
+        fn default() -> Self {
+            Self {
+                enable_audio_capture: Err("no value supplied for enable_audio_capture".to_string()),
+                enable_text_capture: Err("no value supplied for enable_text_capture".to_string()),
+                max_duration_seconds: Err("no value supplied for max_duration_seconds".to_string()),
+                tenant_cid: Ok(Default::default()),
+            }
+        }
+    }
+    impl SensoryMultimodalCaptureIntent {
+        pub fn enable_audio_capture<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<bool>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.enable_audio_capture = value.try_into().map_err(|e| {
+                format!("error converting supplied value for enable_audio_capture: {e}")
+            });
+            self
+        }
+        pub fn enable_text_capture<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<bool>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.enable_text_capture = value.try_into().map_err(|e| {
+                format!("error converting supplied value for enable_text_capture: {e}")
+            });
+            self
+        }
+        pub fn max_duration_seconds<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::num::NonZeroU64>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.max_duration_seconds = value.try_into().map_err(|e| {
+                format!("error converting supplied value for max_duration_seconds: {e}")
+            });
+            self
+        }
+        pub fn tenant_cid<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<super::TenantCid>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.tenant_cid = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for tenant_cid: {e}"));
+            self
+        }
+    }
+    impl ::std::convert::TryFrom<SensoryMultimodalCaptureIntent>
+        for super::SensoryMultimodalCaptureIntent
+    {
+        type Error = super::error::ConversionError;
+        fn try_from(
+            value: SensoryMultimodalCaptureIntent,
+        ) -> ::std::result::Result<Self, super::error::ConversionError> {
+            Ok(Self {
+                enable_audio_capture: value.enable_audio_capture?,
+                enable_text_capture: value.enable_text_capture?,
+                max_duration_seconds: value.max_duration_seconds?,
+                tenant_cid: value.tenant_cid?,
+            })
+        }
+    }
+    impl ::std::convert::From<super::SensoryMultimodalCaptureIntent>
+        for SensoryMultimodalCaptureIntent
+    {
+        fn from(value: super::SensoryMultimodalCaptureIntent) -> Self {
+            Self {
+                enable_audio_capture: Ok(value.enable_audio_capture),
+                enable_text_capture: Ok(value.enable_text_capture),
+                max_duration_seconds: Ok(value.max_duration_seconds),
+                tenant_cid: Ok(value.tenant_cid),
+            }
+        }
+    }
+    #[derive(Clone, Debug)]
+    pub struct SensoryMultimodalProjectionEvent {
+        projected_audio_urn: ::std::result::Result<
+            ::std::option::Option<::std::string::String>,
+            ::std::string::String,
+        >,
+        projected_avatar_urn: ::std::result::Result<
+            ::std::option::Option<::std::string::String>,
+            ::std::string::String,
+        >,
+        projected_overlay_text: ::std::result::Result<
+            ::std::option::Option<::std::string::String>,
+            ::std::string::String,
+        >,
+        tenant_cid:
+            ::std::result::Result<::std::option::Option<super::TenantCid>, ::std::string::String>,
+    }
+    impl ::std::default::Default for SensoryMultimodalProjectionEvent {
+        fn default() -> Self {
+            Self {
+                projected_audio_urn: Ok(Default::default()),
+                projected_avatar_urn: Ok(Default::default()),
+                projected_overlay_text: Ok(Default::default()),
+                tenant_cid: Ok(Default::default()),
+            }
+        }
+    }
+    impl SensoryMultimodalProjectionEvent {
+        pub fn projected_audio_urn<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<::std::string::String>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.projected_audio_urn = value.try_into().map_err(|e| {
+                format!("error converting supplied value for projected_audio_urn: {e}")
+            });
+            self
+        }
+        pub fn projected_avatar_urn<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<::std::string::String>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.projected_avatar_urn = value.try_into().map_err(|e| {
+                format!("error converting supplied value for projected_avatar_urn: {e}")
+            });
+            self
+        }
+        pub fn projected_overlay_text<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<::std::string::String>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.projected_overlay_text = value.try_into().map_err(|e| {
+                format!("error converting supplied value for projected_overlay_text: {e}")
+            });
+            self
+        }
+        pub fn tenant_cid<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<super::TenantCid>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.tenant_cid = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for tenant_cid: {e}"));
+            self
+        }
+    }
+    impl ::std::convert::TryFrom<SensoryMultimodalProjectionEvent>
+        for super::SensoryMultimodalProjectionEvent
+    {
+        type Error = super::error::ConversionError;
+        fn try_from(
+            value: SensoryMultimodalProjectionEvent,
+        ) -> ::std::result::Result<Self, super::error::ConversionError> {
+            Ok(Self {
+                projected_audio_urn: value.projected_audio_urn?,
+                projected_avatar_urn: value.projected_avatar_urn?,
+                projected_overlay_text: value.projected_overlay_text?,
+                tenant_cid: value.tenant_cid?,
+            })
+        }
+    }
+    impl ::std::convert::From<super::SensoryMultimodalProjectionEvent>
+        for SensoryMultimodalProjectionEvent
+    {
+        fn from(value: super::SensoryMultimodalProjectionEvent) -> Self {
+            Self {
+                projected_audio_urn: Ok(value.projected_audio_urn),
+                projected_avatar_urn: Ok(value.projected_avatar_urn),
+                projected_overlay_text: Ok(value.projected_overlay_text),
+                tenant_cid: Ok(value.tenant_cid),
+            }
+        }
+    }
+    #[derive(Clone, Debug)]
+    pub struct SensoryMultimodalProjectionIntent {
+        audio_stream_urn: ::std::result::Result<
+            ::std::option::Option<::std::string::String>,
+            ::std::string::String,
+        >,
+        audio_tts_string: ::std::result::Result<
+            ::std::option::Option<::std::string::String>,
+            ::std::string::String,
+        >,
+        avatar_urn: ::std::result::Result<
+            ::std::option::Option<::std::string::String>,
+            ::std::string::String,
+        >,
+        overlay_text: ::std::result::Result<
+            ::std::option::Option<::std::string::String>,
+            ::std::string::String,
+        >,
+        tenant_cid:
+            ::std::result::Result<::std::option::Option<super::TenantCid>, ::std::string::String>,
+    }
+    impl ::std::default::Default for SensoryMultimodalProjectionIntent {
+        fn default() -> Self {
+            Self {
+                audio_stream_urn: Ok(Default::default()),
+                audio_tts_string: Ok(Default::default()),
+                avatar_urn: Ok(Default::default()),
+                overlay_text: Ok(Default::default()),
+                tenant_cid: Ok(Default::default()),
+            }
+        }
+    }
+    impl SensoryMultimodalProjectionIntent {
+        pub fn audio_stream_urn<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<::std::string::String>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.audio_stream_urn = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for audio_stream_urn: {e}"));
+            self
+        }
+        pub fn audio_tts_string<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<::std::string::String>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.audio_tts_string = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for audio_tts_string: {e}"));
+            self
+        }
+        pub fn avatar_urn<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<::std::string::String>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.avatar_urn = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for avatar_urn: {e}"));
+            self
+        }
+        pub fn overlay_text<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<::std::string::String>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.overlay_text = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for overlay_text: {e}"));
+            self
+        }
+        pub fn tenant_cid<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<super::TenantCid>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.tenant_cid = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for tenant_cid: {e}"));
+            self
+        }
+    }
+    impl ::std::convert::TryFrom<SensoryMultimodalProjectionIntent>
+        for super::SensoryMultimodalProjectionIntent
+    {
+        type Error = super::error::ConversionError;
+        fn try_from(
+            value: SensoryMultimodalProjectionIntent,
+        ) -> ::std::result::Result<Self, super::error::ConversionError> {
+            Ok(Self {
+                audio_stream_urn: value.audio_stream_urn?,
+                audio_tts_string: value.audio_tts_string?,
+                avatar_urn: value.avatar_urn?,
+                overlay_text: value.overlay_text?,
+                tenant_cid: value.tenant_cid?,
+            })
+        }
+    }
+    impl ::std::convert::From<super::SensoryMultimodalProjectionIntent>
+        for SensoryMultimodalProjectionIntent
+    {
+        fn from(value: super::SensoryMultimodalProjectionIntent) -> Self {
+            Self {
+                audio_stream_urn: Ok(value.audio_stream_urn),
+                audio_tts_string: Ok(value.audio_tts_string),
+                avatar_urn: Ok(value.avatar_urn),
+                overlay_text: Ok(value.overlay_text),
                 tenant_cid: Ok(value.tenant_cid),
             }
         }

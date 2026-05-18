@@ -19448,6 +19448,222 @@
       "pattern": "^\\d+\\.\\d+\\.\\d+$",
       "type": "string"
     },
+    "SensoryMultimodalCaptureEvent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing successfully captured multimodal input from the Sensory Manifold.\n\nCAUSAL AFFORDANCE: Delivers raw captured text and audio URNs to the execution engine for processing and Epistemic Consolidation.\n\nEPISTEMIC BOUNDS: Contains the raw high-entropy user input; MUST be processed via an active inference quarantine before updating global state.\n\nMCP ROUTING TRIGGERS: Sensory Ingestion Complete, Multimodal Payload, ASR Processing",
+      "properties": {
+        "tenant_cid": {
+          "default": "889955217295c2bfef2d6812071b633b0819477e67f57853febf116f69f30531",
+          "description": "The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\"date_of_incorporation\":\"2025-10-16\",\"file_number\":\"10369312\",\"jurisdiction\":\"US-DE\",\"legal_name\":\"CoReason, Inc.\"}",
+          "maxLength": 128,
+          "minLength": 4,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Tenant Cid",
+          "type": "string"
+        },
+        "captured_text": {
+          "anyOf": [
+            {
+              "maxLength": 16384,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The raw text captured during the session.",
+          "title": "Captured Text"
+        },
+        "captured_audio_urn": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The URN of the securely uploaded audio blob.",
+          "title": "Captured Audio Urn"
+        }
+      },
+      "title": "SensoryMultimodalCaptureEvent",
+      "type": "object"
+    },
+    "SensoryMultimodalCaptureIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A hypothesis proposing the activation of bidirectional multimodal capture (microphone, text input, ambient sound).\n\nCAUSAL AFFORDANCE: Instructs the Sensory Manifold to initialize the browser's MediaRecorder and Web Speech APIs to capture high-entropy input.\n\nEPISTEMIC BOUNDS: The capture session is strictly bounded by active tenant_cid RBAC permissions; input must be quarantined via EpistemicFirewallField upon receipt.\n\nMCP ROUTING TRIGGERS: Audio Capture, Multimodal Ingestion, ASR Transcription, Real-time Sensing",
+      "properties": {
+        "tenant_cid": {
+          "default": "889955217295c2bfef2d6812071b633b0819477e67f57853febf116f69f30531",
+          "description": "The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\"date_of_incorporation\":\"2025-10-16\",\"file_number\":\"10369312\",\"jurisdiction\":\"US-DE\",\"legal_name\":\"CoReason, Inc.\"}",
+          "maxLength": 128,
+          "minLength": 4,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Tenant Cid",
+          "type": "string"
+        },
+        "enable_audio_capture": {
+          "description": "Whether to activate the microphone for audio ingestion.",
+          "title": "Enable Audio Capture",
+          "type": "boolean"
+        },
+        "enable_text_capture": {
+          "description": "Whether to activate the text input overlay for typed ingestion.",
+          "title": "Enable Text Capture",
+          "type": "boolean"
+        },
+        "max_duration_seconds": {
+          "description": "Maximum allowed duration for the capture session.",
+          "maximum": 3600,
+          "minimum": 1,
+          "title": "Max Duration Seconds",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "enable_audio_capture",
+        "enable_text_capture",
+        "max_duration_seconds"
+      ],
+      "title": "SensoryMultimodalCaptureIntent",
+      "type": "object"
+    },
+    "SensoryMultimodalProjectionEvent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing a successfully broadcasted multimodal state to the Sensory Manifold.\n\nCAUSAL AFFORDANCE: Emits an SSE stream to the Sensory Manifold to natively synchronize and play visual avatars, text, and audio.\n\nEPISTEMIC BOUNDS: Follows strict Tripartite decoupling; the payload is completely devoid of execution logic and purely descriptive.\n\nMCP ROUTING TRIGGERS: SSE Telemetry Event, Multimodal Broadcast, Active UI Synchronization",
+      "properties": {
+        "tenant_cid": {
+          "default": "889955217295c2bfef2d6812071b633b0819477e67f57853febf116f69f30531",
+          "description": "The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\"date_of_incorporation\":\"2025-10-16\",\"file_number\":\"10369312\",\"jurisdiction\":\"US-DE\",\"legal_name\":\"CoReason, Inc.\"}",
+          "maxLength": 128,
+          "minLength": 4,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Tenant Cid",
+          "type": "string"
+        },
+        "projected_avatar_urn": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The URN of the avatar actively projected.",
+          "title": "Projected Avatar Urn"
+        },
+        "projected_audio_urn": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The URN of the audio stream actively playing.",
+          "title": "Projected Audio Urn"
+        },
+        "projected_overlay_text": {
+          "anyOf": [
+            {
+              "maxLength": 4096,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The text actively displayed on the visual canvas.",
+          "title": "Projected Overlay Text"
+        }
+      },
+      "title": "SensoryMultimodalProjectionEvent",
+      "type": "object"
+    },
+    "SensoryMultimodalProjectionIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A hypothesis proposing the projection of a synchronized multimodal interface (avatar, audio, overlay text).\n\nCAUSAL AFFORDANCE: Triggers the execution engine to assemble a unified visual and auditory payload for the Hollow Data Plane.\n\nEPISTEMIC BOUNDS: The avatar_urn and audio_urn must correspond to valid, verified OCI artifacts or active streams.\n\nMCP ROUTING TRIGGERS: Multimodal Projection, Avatar Rendering, TTS Output, Spatial Overlay",
+      "properties": {
+        "tenant_cid": {
+          "default": "889955217295c2bfef2d6812071b633b0819477e67f57853febf116f69f30531",
+          "description": "The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\"date_of_incorporation\":\"2025-10-16\",\"file_number\":\"10369312\",\"jurisdiction\":\"US-DE\",\"legal_name\":\"CoReason, Inc.\"}",
+          "maxLength": 128,
+          "minLength": 4,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Tenant Cid",
+          "type": "string"
+        },
+        "avatar_urn": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional URN for the visual avatar or face projection.",
+          "title": "Avatar Urn"
+        },
+        "audio_tts_string": {
+          "anyOf": [
+            {
+              "maxLength": 4096,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The exact text string to be synthesized via TTS.",
+          "title": "Audio Tts String"
+        },
+        "audio_stream_urn": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional URN for an existing audio stream artifact.",
+          "title": "Audio Stream Urn"
+        },
+        "overlay_text": {
+          "anyOf": [
+            {
+              "maxLength": 4096,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Text to be rendered visually over the spatial canvas.",
+          "title": "Overlay Text"
+        }
+      },
+      "title": "SensoryMultimodalProjectionIntent",
+      "type": "object"
+    },
     "SensoryUIUpgradeAvailableEvent": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen historical fact representing a successfully optimized and forged Sensory UI upgrade ready for injection.\n\nCAUSAL AFFORDANCE: Emits an SSE stream to the Sensory Manifold to prompt a JIT un-mounting and re-mounting of the visual Topos.\n\nEPISTEMIC BOUNDS: The target URN must be formally registered and accessible within the ecosystem ledger prior to emission.\n\nMCP ROUTING TRIGGERS: SSE Telemetry Event, UI Optimization Notification, Zero-Trust Projection Update",
