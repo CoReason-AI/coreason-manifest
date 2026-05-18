@@ -14364,7 +14364,8 @@ class CommercialLicenseState(CoreasonBaseState):
 
 # A mock public key used strictly for local development and CI/CD until the production Key Generation Ceremony is performed.
 # See `coreason-ecosystem/src/coreason_ecosystem/auth/distr_provisioning.py` for its counterpart.
-TESTING_DISTR_PUBLIC_KEY: str = "did:key:z6MkhaXgBZDvotDkL5257faiztiuC2ZXsdY4SSgMnh3YEFWbYB"
+TESTING_DISTR_PUBLIC_KEY: str = "did:key:z6MkhaXgBZDvotDkL5257faiztiuC2ZXsdY4SSgMnh3YEFWbYB"  # gitleaks:allow
+
 
 
 class CommercialOverrideReceipt(CoreasonBaseState):
