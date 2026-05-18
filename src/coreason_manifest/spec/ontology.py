@@ -14441,7 +14441,6 @@ class CommercialOverrideReceipt(CoreasonBaseState):
         return self
 
 
-
 CognitiveDualVerificationReceipt.model_rebuild()
 EpistemicGroundedTaskManifest.model_rebuild()
 EpistemicCurriculumManifest.model_rebuild()
