@@ -14367,7 +14367,6 @@ class CommercialLicenseState(CoreasonBaseState):
 TESTING_DISTR_PUBLIC_KEY: str = "did:key:z6MkhaXgBZDvotDkL5257faiztiuC2ZXsdY4SSgMnh3YEFWbYB"  # gitleaks:allow
 
 
-
 class CommercialOverrideReceipt(CoreasonBaseState):
     """
     AGENT INSTRUCTION: A cryptographically frozen receipt bridging external license lifecycle management (Distr) into the CoReason URN Authority zero-trust verification chain. Formatted as a W3C VCDM v2.0 credential using Selective Disclosure JWTs (SD-JWT). As an append-only coordinate on the Merkle-DAG, the LLM must never hallucinate a mutation to this receipt.
