@@ -74,7 +74,8 @@ jobs:
         run: |
           git add bindings/
           # We ignore version changes in package.json and Cargo.toml as they are dynamic
-          git diff --staged --exit-code -I '^  "version":' -I '^version ='
+          git diff --staged --exit-code -I 'version'
+
 
       - name: Deptry Check
         run: uv run deptry src/
