@@ -10,7 +10,7 @@ checksum = "683d7910e743518b0e34f1186f92494becacb047c7b6bf616c96772180fef923"
 
 [[package]]
 name = "coreason-manifest"
-version = "0.81.0-1-g41e10bfc"
+version = "0.81.0-3-g8f36d0de"
 dependencies = [
  "regress",
  "serde",
