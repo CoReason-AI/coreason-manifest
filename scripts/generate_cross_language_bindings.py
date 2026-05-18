@@ -197,37 +197,8 @@ def _sync_versions(project_root: Path, override_version: str | None = None) -> s
         # If version is missing, check if it's dynamic
         dynamic = data.get("project", {}).get("dynamic", [])
         if "version" in dynamic:
-            print("Detected dynamic versioning. Attempting to retrieve version via 'hatch version'...")
-            try:
-                # Try hatch first
-                result = subprocess.run(
-                    ["hatch", "version"],  # nosec B603 B607 # noqa: S607
-                    cwd=project_root,
-                    capture_output=True,
-                    text=True,
-                    check=True,
-                )
-                version = result.stdout.strip()
-            except (
-                subprocess.CalledProcessError,
-                FileNotFoundError,
-            ):
-                print("  'hatch' not found or failed. Falling back to 'git describe'...")
-                try:
-                    result = subprocess.run(
-                        ["git", "describe", "--tags", "--always"],  # nosec B603 B607 # noqa: S607
-                        cwd=project_root,
-                        capture_output=True,
-                        text=True,
-                        check=True,
-                    )
-                    version = result.stdout.strip()
-                except (
-                    subprocess.CalledProcessError,
-                    FileNotFoundError,
-                ):
-                    print("  'git' failed. Defaulting to '0.0.0-dev' (quarantine mode).")
-                    version = "0.0.0-dev"
+            print("Detected dynamic versioning. Defaulting to '0.0.0-git' placeholder for repository clean state.")
+            version = "0.0.0-git"
         else:
             raise KeyError("Project version not found and not marked as dynamic.")
 
@@ -246,6 +217,20 @@ def _sync_versions(project_root: Path, override_version: str | None = None) -> s
             json.dump(ts_pkg, f, indent=2)
             f.write("\n")
         print(f"  -> {ts_pkg_path.relative_to(project_root)} updated.")
+
+    # TypeScript package-lock.json
+    ts_lock_path = project_root / "bindings/typescript/package-lock.json"
+    if ts_lock_path.exists():
+        with open(ts_lock_path, encoding="utf-8") as f:
+            ts_lock = json.load(f)
+        if "version" in ts_lock:
+            ts_lock["version"] = version
+        if "packages" in ts_lock and "" in ts_lock["packages"]:
+            ts_lock["packages"][""]["version"] = version
+        with open(ts_lock_path, "w", encoding="utf-8") as f:
+            json.dump(ts_lock, f, indent=2)
+            f.write("\n")
+        print(f"  -> {ts_lock_path.relative_to(project_root)} updated.")
 
     # Rust Cargo.toml
     rust_cargo_path = project_root / "bindings/rust/Cargo.toml"
