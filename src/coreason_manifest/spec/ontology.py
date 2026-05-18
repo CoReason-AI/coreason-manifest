@@ -14586,3 +14586,65 @@ StrategicThoughtNodeIntent.model_rebuild()
 CommercialLicenseIntent.model_rebuild()
 CommercialLicenseState.model_rebuild()
 CommercialOverrideReceipt.model_rebuild()
+
+
+class GeometricSchemaIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Mathematically defines the nested, topological URN boundaries for UI rendering without runtime execution limits.
+
+    CAUSAL AFFORDANCE: Instructs the coreason-meta-engineering Forge to physically etch a new SDUI geometry into the URN ledger.
+
+    EPISTEMIC BOUNDS: Bounded to active urn:coreason:actionspace:sensory:* structures and prevents recursive loops beyond depth max_depth.
+
+    MCP ROUTING TRIGGERS: Structural Topology, Server-Driven UI, Geometric Schema, Ast Transformer, Sensory Mapping
+    """
+
+    target_urn: Annotated[str, Field(description="The primary target URN for this geometric schema.", max_length=256)]
+    nested_urns: Annotated[
+        list[str], Field(description="The sorted array of nested child URNs in the geometric topology.", max_items=100)
+    ]
+    max_depth: Annotated[
+        int, Field(description="The maximum allowed recursion depth for topological unfolding.", ge=1, le=10)
+    ]
+
+
+class SensoryUIUpgradeIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A hypothesis proposing that a new, ahead-of-time forged URN geometry will yield higher epistemic clarity than the active session.
+
+    CAUSAL AFFORDANCE: Triggers the orchestrator to perform vector boundary matching against the EpistemicDeficit to validate upgrade eligibility.
+
+    EPISTEMIC BOUNDS: Requires an active tenant_cid and operates solely over the continuous telemetry stream without mutating historical persistence.
+
+    MCP ROUTING TRIGGERS: TDA Optimization, Sensory Hot-Swap, AOT UI Upgrade, Epistemic Modality Shift
+    """
+
+    current_active_urn: Annotated[
+        str, Field(description="The currently loaded URN in the active session.", max_length=256)
+    ]
+    target_upgrade_urn: Annotated[str, Field(description="The proposed upgraded URN.", max_length=256)]
+    upgrade_rationale_score: Annotated[
+        float, Field(description="The mathematical scalar scoring the proposed optimization.", ge=0.0, le=1.0)
+    ]
+
+
+class SensoryUIUpgradeAvailableEvent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A cryptographically frozen historical fact representing a successfully optimized and forged Sensory UI upgrade ready for injection.
+
+    CAUSAL AFFORDANCE: Emits an SSE stream to the Sensory Manifold to prompt a JIT un-mounting and re-mounting of the visual Topos.
+
+    EPISTEMIC BOUNDS: The target URN must be formally registered and accessible within the ecosystem ledger prior to emission.
+
+    MCP ROUTING TRIGGERS: SSE Telemetry Event, UI Optimization Notification, Zero-Trust Projection Update
+    """
+
+    available_upgrade_urn: Annotated[
+        str, Field(description="The fully qualified URN available for hot-swapping.", max_length=256)
+    ]
+    improvement_delta: Annotated[float, Field(description="The calculated Free Energy improvement delta.", ge=0.0)]
+
+
+GeometricSchemaIntent.model_rebuild()
+SensoryUIUpgradeIntent.model_rebuild()
+SensoryUIUpgradeAvailableEvent.model_rebuild()
