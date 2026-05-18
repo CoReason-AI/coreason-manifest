@@ -14610,7 +14610,7 @@ class GeometricSchemaIntent(CoreasonBaseState):
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> "GeometricSchemaIntent":
         if self.nested_urns is not None:
-            self.nested_urns = sorted(self.nested_urns)
+            object.__setattr__(self, "nested_urns", sorted(self.nested_urns))
         return self
 
 
