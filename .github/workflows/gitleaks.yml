@@ -2,25 +2,35 @@ name: Gitleaks Secret Scan
 
 on:
   push:
-    branches: [ "main", "coreason-develop" ]
+    branches: [ main, coreason-develop ]
   pull_request:
-    branches: [ "main", "coreason-develop" ]
+    branches: [ main, coreason-develop ]
+  workflow_dispatch:
 
 permissions: read-all
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   gitleaks:
     name: Gitleaks Secret Scanner
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
+      - name: Harden Runner (Endpoint Network Security)
+        uses: step-security/harden-runner@c95a14d0e5bab51a9f56296a4eb0e416910cd350 # v2.19.1
+        with:
+          egress-policy: audit
+
       - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.2.2
         with:
           fetch-depth: 0
 
       - name: Gitleaks Scan
-        run: |
-          # Use the Gitleaks Docker image to avoid license requirements of the managed GitHub Action
-          docker run -v ${{ github.workspace }}:/path zricethezav/gitleaks:latest detect --source=/path --verbose --redact
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}

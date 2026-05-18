@@ -2,9 +2,10 @@ name: Advanced Security (Malware & Secrets)
 
 on:
   push:
-    branches: [main]
+    branches: [ main, coreason-develop ]
   pull_request:
-
+    branches: [ main, coreason-develop ]
+  workflow_dispatch:
 
 permissions: read-all
 
@@ -19,18 +20,19 @@ jobs:
       contents: read
     steps:
       - name: Harden Runner (Endpoint Network Security)
-        uses: step-security/harden-runner@c95a14d0e5bab51a9f56296a4eb0e416910cd350 # v2.10.3
+        uses: step-security/harden-runner@c95a14d0e5bab51a9f56296a4eb0e416910cd350 # v2.19.1
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.2.2
         with:
-          fetch-depth: 0 # Deep clone for complete history scanning
+          fetch-depth: 0
 
       - name: Gitleaks Scan
-        run: |
-          # Use the Gitleaks Docker image to avoid license requirements of the managed GitHub Action
-          docker run -v ${{ github.workspace }}:/path zricethezav/gitleaks:latest detect --source=/path --verbose --redact
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
 
   malware-scan:
     name: Repository-Wide Malware Scan (ClamAV)
@@ -39,14 +41,14 @@ jobs:
       contents: read
     steps:
       - name: Harden Runner (Endpoint Network Security)
-        uses: step-security/harden-runner@c95a14d0e5bab51a9f56296a4eb0e416910cd350 # v2.10.3
+        uses: step-security/harden-runner@c95a14d0e5bab51a9f56296a4eb0e416910cd350 # v2.19.1
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.2.2
 
       - name: Cache ClamAV Database
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: /var/lib/clamav
           key: ${{ runner.os }}-clamav-db-${{ github.sha }}
@@ -61,10 +63,8 @@ jobs:
           sudo chown -R clamav:clamav /var/lib/clamav || true
           for i in {1..3}; do sudo freshclam && break || sleep 5; done
 
-
       - name: Run ClamAV Scan
         run: clamscan -r -i ./
-        # Fails if an infection is found.
 
   license-firewall:
     name: Dependency License Firewall (Copyleft Block)
@@ -72,19 +72,19 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      pull-requests: write
     steps:
       - name: Harden Runner (Endpoint Network Security)
-        uses: step-security/harden-runner@c95a14d0e5bab51a9f56296a4eb0e416910cd350 # v2.10.3
+        uses: step-security/harden-runner@c95a14d0e5bab51a9f56296a4eb0e416910cd350 # v2.19.1
         with:
           egress-policy: audit
 
       - name: Checkout Repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.2.2
 
       - name: Dependency Review & Legal Firewall
         uses: actions/dependency-review-action@3b139cfc5fae8b618d3eae3675e383bb1769c019 # v4.5.0
         with:
-          fail-on-severity: 'high'
-          deny-licenses: 'GPL-2.0, GPL-3.0, AGPL-3.0, OSL-3.0, CPAL-1.0'
-
-
+          comment-summary-in-pr: always
+          fail-on-severity: high
+          deny-licenses: AGPL-1.0, AGPL-3.0, GPL-1.0, GPL-2.0, GPL-3.0, LGPL-2.0, LGPL-2.1, LGPL-3.0
