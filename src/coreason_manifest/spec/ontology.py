@@ -14607,6 +14607,12 @@ class GeometricSchemaIntent(CoreasonBaseState):
         int, Field(description="The maximum allowed recursion depth for topological unfolding.", ge=1, le=10)
     ]
 
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> "GeometricSchemaIntent":
+        if self.nested_urns is not None:
+            self.nested_urns = sorted(self.nested_urns)
+        return self
+
 
 class SensoryUIUpgradeIntent(CoreasonBaseState):
     """
