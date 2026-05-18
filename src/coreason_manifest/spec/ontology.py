@@ -6054,6 +6054,14 @@ class HTTPTransportProfile(CoreasonBaseState):
 
     topology_class: Literal["http"] = Field(default="http", description="Type of transport.")
     uri: HttpUrl = Field(..., description="The HTTP URL endpoint for the stateless connection.")
+
+    @field_validator("uri", mode="after")
+    @classmethod
+    def _enforce_ssrf(cls, v: Any) -> Any:
+        from coreason_manifest.utils.algebra import _validate_ssrf_safety
+
+        return _validate_ssrf_safety(v)
+
     headers: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=2000)]
     ] = Field(default_factory=dict, description="HTTP headers, strictly bounded for zero-trust credentials.")
@@ -6753,6 +6761,14 @@ class SPARQLQueryIntent(CoreasonBaseState):
 
     query_string: str
     target_endpoint: HttpUrl
+
+    @field_validator("target_endpoint", mode="after")
+    @classmethod
+    def _enforce_ssrf(cls, v: Any) -> Any:
+        from coreason_manifest.utils.algebra import _validate_ssrf_safety
+
+        return _validate_ssrf_safety(v)
+
     topology_class: Literal["sparql_query"] = "sparql_query"
 
 
@@ -9167,6 +9183,14 @@ class SSETransportProfile(CoreasonBaseState):
 
     topology_class: Literal["sse"] = Field(default="sse", description="Type of transport.")
     uri: HttpUrl = Field(..., description="The HTTP URL endpoint for the SSE connection.")
+
+    @field_validator("uri", mode="after")
+    @classmethod
+    def _enforce_ssrf(cls, v: Any) -> Any:
+        from coreason_manifest.utils.algebra import _validate_ssrf_safety
+
+        return _validate_ssrf_safety(v)
+
     headers: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=2000)]
     ] = Field(default_factory=dict, description="HTTP headers, e.g., for authentication.")
@@ -13878,6 +13902,14 @@ class EvidentiaryCitationState(CoreasonBaseState):
         description="Cryptographic anchor for the specific piece of evidence."
     )
     source_url: HttpUrl = Field(description="The canonical origin of the evidence.")
+
+    @field_validator("source_url", mode="after")
+    @classmethod
+    def _enforce_ssrf(cls, v: Any) -> Any:
+        from coreason_manifest.utils.algebra import _validate_ssrf_safety
+
+        return _validate_ssrf_safety(v)
+
     extracted_snippet: Annotated[str, StringConstraints(max_length=10000)] = Field(
         description="The exact text evaluated by the NLI model."
     )
@@ -14586,3 +14618,161 @@ StrategicThoughtNodeIntent.model_rebuild()
 CommercialLicenseIntent.model_rebuild()
 CommercialLicenseState.model_rebuild()
 CommercialOverrideReceipt.model_rebuild()
+
+
+class GeometricSchemaIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Mathematically defines the nested, topological URN boundaries for UI rendering without runtime execution limits.
+
+    CAUSAL AFFORDANCE: Instructs the coreason-meta-engineering Forge to physically etch a new SDUI geometry into the URN ledger.
+
+    EPISTEMIC BOUNDS: Bounded to active urn:coreason:actionspace:sensory:* structures and prevents recursive loops beyond depth max_depth.
+
+    MCP ROUTING TRIGGERS: Structural Topology, Server-Driven UI, Geometric Schema, Ast Transformer, Sensory Mapping
+    """
+
+    target_urn: Annotated[str, Field(description="The primary target URN for this geometric schema.", max_length=256)]
+    nested_urns: Annotated[
+        list[str], Field(description="The sorted array of nested child URNs in the geometric topology.", max_items=100)
+    ]
+    max_depth: Annotated[
+        int, Field(description="The maximum allowed recursion depth for topological unfolding.", ge=1, le=10)
+    ]
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> "GeometricSchemaIntent":
+        if self.nested_urns is not None:
+            object.__setattr__(self, "nested_urns", sorted(self.nested_urns))
+        return self
+
+
+class SensoryUIUpgradeIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A hypothesis proposing that a new, ahead-of-time forged URN geometry will yield higher epistemic clarity than the active session.
+
+    CAUSAL AFFORDANCE: Triggers the orchestrator to perform vector boundary matching against the EpistemicDeficit to validate upgrade eligibility.
+
+    EPISTEMIC BOUNDS: Requires an active tenant_cid and operates solely over the continuous telemetry stream without mutating historical persistence.
+
+    MCP ROUTING TRIGGERS: TDA Optimization, Sensory Hot-Swap, AOT UI Upgrade, Epistemic Modality Shift
+    """
+
+    current_active_urn: Annotated[
+        str, Field(description="The currently loaded URN in the active session.", max_length=256)
+    ]
+    target_upgrade_urn: Annotated[str, Field(description="The proposed upgraded URN.", max_length=256)]
+    upgrade_rationale_score: Annotated[
+        float, Field(description="The mathematical scalar scoring the proposed optimization.", ge=0.0, le=1.0)
+    ]
+
+
+class SensoryUIUpgradeAvailableEvent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A cryptographically frozen historical fact representing a successfully optimized and forged Sensory UI upgrade ready for injection.
+
+    CAUSAL AFFORDANCE: Emits an SSE stream to the Sensory Manifold to prompt a JIT un-mounting and re-mounting of the visual Topos.
+
+    EPISTEMIC BOUNDS: The target URN must be formally registered and accessible within the ecosystem ledger prior to emission.
+
+    MCP ROUTING TRIGGERS: SSE Telemetry Event, UI Optimization Notification, Zero-Trust Projection Update
+    """
+
+    available_upgrade_urn: Annotated[
+        str, Field(description="The fully qualified URN available for hot-swapping.", max_length=256)
+    ]
+    improvement_delta: Annotated[float, Field(description="The calculated Free Energy improvement delta.", ge=0.0)]
+
+
+class SensoryMultimodalProjectionIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A hypothesis proposing the projection of a synchronized multimodal interface (avatar, audio, overlay text).
+
+    CAUSAL AFFORDANCE: Triggers the execution engine to assemble a unified visual and auditory payload for the Hollow Data Plane.
+
+    EPISTEMIC BOUNDS: The avatar_urn and audio_urn must correspond to valid, verified OCI artifacts or active streams.
+
+    MCP ROUTING TRIGGERS: Multimodal Projection, Avatar Rendering, TTS Output, Spatial Overlay
+    """
+
+    avatar_urn: Annotated[
+        str | None, Field(description="Optional URN for the visual avatar or face projection.", max_length=256)
+    ] = None
+    audio_tts_string: Annotated[
+        str | None, Field(description="The exact text string to be synthesized via TTS.", max_length=4096)
+    ] = None
+    audio_stream_urn: Annotated[
+        str | None, Field(description="Optional URN for an existing audio stream artifact.", max_length=256)
+    ] = None
+    overlay_text: Annotated[
+        str | None, Field(description="Text to be rendered visually over the spatial canvas.", max_length=4096)
+    ] = None
+
+
+class SensoryMultimodalProjectionEvent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A cryptographically frozen historical fact representing a successfully broadcasted multimodal state to the Sensory Manifold.
+
+    CAUSAL AFFORDANCE: Emits an SSE stream to the Sensory Manifold to natively synchronize and play visual avatars, text, and audio.
+
+    EPISTEMIC BOUNDS: Follows strict Tripartite decoupling; the payload is completely devoid of execution logic and purely descriptive.
+
+    MCP ROUTING TRIGGERS: SSE Telemetry Event, Multimodal Broadcast, Active UI Synchronization
+    """
+
+    projected_avatar_urn: Annotated[
+        str | None, Field(description="The URN of the avatar actively projected.", max_length=256)
+    ] = None
+    projected_audio_urn: Annotated[
+        str | None, Field(description="The URN of the audio stream actively playing.", max_length=256)
+    ] = None
+    projected_overlay_text: Annotated[
+        str | None, Field(description="The text actively displayed on the visual canvas.", max_length=4096)
+    ] = None
+
+
+class SensoryMultimodalCaptureIntent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A hypothesis proposing the activation of bidirectional multimodal capture (microphone, text input, ambient sound).
+
+    CAUSAL AFFORDANCE: Instructs the Sensory Manifold to initialize the browser's MediaRecorder and Web Speech APIs to capture high-entropy input.
+
+    EPISTEMIC BOUNDS: The capture session is strictly bounded by active tenant_cid RBAC permissions; input must be quarantined via EpistemicFirewallField upon receipt.
+
+    MCP ROUTING TRIGGERS: Audio Capture, Multimodal Ingestion, ASR Transcription, Real-time Sensing
+    """
+
+    enable_audio_capture: Annotated[bool, Field(description="Whether to activate the microphone for audio ingestion.")]
+    enable_text_capture: Annotated[
+        bool, Field(description="Whether to activate the text input overlay for typed ingestion.")
+    ]
+    max_duration_seconds: Annotated[
+        int, Field(description="Maximum allowed duration for the capture session.", ge=1, le=3600)
+    ]
+
+
+class SensoryMultimodalCaptureEvent(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: A cryptographically frozen historical fact representing successfully captured multimodal input from the Sensory Manifold.
+
+    CAUSAL AFFORDANCE: Delivers raw captured text and audio URNs to the execution engine for processing and Epistemic Consolidation.
+
+    EPISTEMIC BOUNDS: Contains the raw high-entropy user input; MUST be processed via an active inference quarantine before updating global state.
+
+    MCP ROUTING TRIGGERS: Sensory Ingestion Complete, Multimodal Payload, ASR Processing
+    """
+
+    captured_text: Annotated[
+        str | None, Field(description="The raw text captured during the session.", max_length=16384)
+    ] = None
+    captured_audio_urn: Annotated[
+        str | None, Field(description="The URN of the securely uploaded audio blob.", max_length=256)
+    ] = None
+
+
+GeometricSchemaIntent.model_rebuild()
+SensoryUIUpgradeIntent.model_rebuild()
+SensoryUIUpgradeAvailableEvent.model_rebuild()
+SensoryMultimodalProjectionIntent.model_rebuild()
+SensoryMultimodalProjectionEvent.model_rebuild()
+SensoryMultimodalCaptureIntent.model_rebuild()
+SensoryMultimodalCaptureEvent.model_rebuild()

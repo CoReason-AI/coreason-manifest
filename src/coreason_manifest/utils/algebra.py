@@ -8,6 +8,7 @@
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
+
 """AGENT INSTRUCTION: This module contains pure data transformations of the Hollow Data Plane."""
 
 # Copyright (c) 2026 CoReason, Inc
@@ -24,8 +25,10 @@ import ast
 import base64
 import copy
 import hashlib
+import ipaddress
 import math
 import typing
+import urllib.parse
 from collections.abc import Sequence
 from typing import Any, Literal, cast
 
@@ -429,3 +432,54 @@ def transmute_to_pycrdt_doc(manifest: ontology.TemporalGraphCRDTManifest) -> Any
     map_node["terminate_set"] = pycrdt.Array([term.target_edge_cid for term in manifest.terminate_set])
 
     return doc
+
+
+def _validate_ssrf_safety(url: Any) -> Any:
+    """
+    Mechanistically evaluates an HttpUrl or AnyUrl to prevent Server-Side Request Forgery (SSRF).
+    Mathematically blocks local, loopback, private, and bogon IP space without invoking dynamic DNS resolution.
+    """
+    try:
+        url_str = str(url)
+        parsed = urllib.parse.urlparse(url_str)
+        hostname = parsed.hostname
+
+        if not hostname:
+            return url
+
+        # Hardcode block for localhost and local domains
+        if hostname.lower() in ["localhost", "localhost.localdomain"] or hostname.lower().endswith(".localhost"):
+            raise ValueError(
+                f"SSRF Security Violation: The target hostname '{hostname}' resolves to the local loopback network."
+            )
+
+        # Remove IPv6 brackets if present
+        if hostname.startswith("[") and hostname.endswith("]"):
+            hostname = hostname[1:-1]
+
+        try:
+            ip = ipaddress.ip_address(hostname)
+        except ValueError:
+            # Not an IP address, so no IP-based check is possible without DNS resolution,
+            # which is forbidden by the Air-Gap Mandate.
+            return url
+
+        if (
+            not ip.is_global
+            or ip.is_private
+            or ip.is_loopback
+            or ip.is_link_local
+            or ip.is_multicast
+            or ip.is_unspecified
+            or ip.is_reserved
+        ):
+            raise ValueError(
+                f"SSRF Security Violation: The target IP address '{hostname}' is not a valid global routing address."
+            )
+
+    except Exception as e:
+        if isinstance(e, ValueError) and "SSRF" in str(e):
+            raise
+        raise ValueError(f"Invalid URL for SSRF validation: {e}") from e
+
+    return url

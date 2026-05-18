@@ -496,6 +496,13 @@ def evaluate_topological_reachability() -> None:
         "CommercialLicenseIntent",
         "CommercialLicenseState",
         "CommercialOverrideReceipt",
+        "GeometricSchemaIntent",
+        "SensoryUIUpgradeIntent",
+        "SensoryUIUpgradeAvailableEvent",
+        "SensoryMultimodalProjectionIntent",
+        "SensoryMultimodalProjectionEvent",
+        "SensoryMultimodalCaptureIntent",
+        "SensoryMultimodalCaptureEvent",
     ]
     reachable_indices = set()
     for root in root_nodes:

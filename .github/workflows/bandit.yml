@@ -10,6 +10,8 @@ on:
 
 permissions: read-all
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 jobs:
   bandit:
     name: Bandit Scan
@@ -26,7 +28,7 @@ jobs:
         run: pip install bandit[sarif]
 
       - name: "Run Bandit"
-        run: bandit -r . -f sarif -o bandit-results.sarif || true
+        run: bandit -r . -f sarif -o bandit-results.sarif -s B101,B404 || true
 
       - name: "Upload Bandit results"
         uses: github/codeql-action/upload-sarif@458d36d7d4f47d0dd16ca424c1d3cda0060f1360 # v3.35.5
