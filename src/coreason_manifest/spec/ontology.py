@@ -6054,6 +6054,13 @@ class HTTPTransportProfile(CoreasonBaseState):
 
     topology_class: Literal["http"] = Field(default="http", description="Type of transport.")
     uri: HttpUrl = Field(..., description="The HTTP URL endpoint for the stateless connection.")
+
+    @field_validator("uri", mode="after")
+    @classmethod
+    def _enforce_ssrf(cls, v: Any) -> Any:
+        from coreason_manifest.utils.algebra import _validate_ssrf_safety
+        return _validate_ssrf_safety(v)
+
     headers: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=2000)]
     ] = Field(default_factory=dict, description="HTTP headers, strictly bounded for zero-trust credentials.")
@@ -6753,6 +6760,13 @@ class SPARQLQueryIntent(CoreasonBaseState):
 
     query_string: str
     target_endpoint: HttpUrl
+
+    @field_validator("target_endpoint", mode="after")
+    @classmethod
+    def _enforce_ssrf(cls, v: Any) -> Any:
+        from coreason_manifest.utils.algebra import _validate_ssrf_safety
+        return _validate_ssrf_safety(v)
+
     topology_class: Literal["sparql_query"] = "sparql_query"
 
 
@@ -9167,6 +9181,13 @@ class SSETransportProfile(CoreasonBaseState):
 
     topology_class: Literal["sse"] = Field(default="sse", description="Type of transport.")
     uri: HttpUrl = Field(..., description="The HTTP URL endpoint for the SSE connection.")
+
+    @field_validator("uri", mode="after")
+    @classmethod
+    def _enforce_ssrf(cls, v: Any) -> Any:
+        from coreason_manifest.utils.algebra import _validate_ssrf_safety
+        return _validate_ssrf_safety(v)
+
     headers: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=2000)]
     ] = Field(default_factory=dict, description="HTTP headers, e.g., for authentication.")
@@ -13878,6 +13899,13 @@ class EvidentiaryCitationState(CoreasonBaseState):
         description="Cryptographic anchor for the specific piece of evidence."
     )
     source_url: HttpUrl = Field(description="The canonical origin of the evidence.")
+
+    @field_validator("source_url", mode="after")
+    @classmethod
+    def _enforce_ssrf(cls, v: Any) -> Any:
+        from coreason_manifest.utils.algebra import _validate_ssrf_safety
+        return _validate_ssrf_safety(v)
+
     extracted_snippet: Annotated[str, StringConstraints(max_length=10000)] = Field(
         description="The exact text evaluated by the NLI model."
     )
