@@ -9,7 +9,7 @@ homepage = "https://github.com/CoReason-AI/coreason-manifest"
 documentation = "https://github.com/CoReason-AI/coreason-manifest"
 authors = ["CoReason, Inc <license@coreason.ai>"]
 categories = ["data-structures", "encoding"]
-keywords = ["coreason", "ontology", "manifest", "schema"]
+keywords = ["coreason", "ontology", "pydantic", "schema", "zero-trust"]
 readme = "../../README.md"
 include = ["src/**/*", "Cargo.toml", "LICENSE", "NOTICE"]
 

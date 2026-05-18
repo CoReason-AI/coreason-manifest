@@ -11,11 +11,14 @@
   },
   "homepage": "https://github.com/CoReason-AI/coreason-manifest",
   "keywords": [
+    "agents",
+    "artificial-intelligence",
     "coreason",
+    "mcp",
     "ontology",
-    "manifest",
+    "pydantic",
     "schema",
-    "types"
+    "zero-trust"
   ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -12,6 +12,17 @@ license = { file = "LICENSE" }
 authors = [
     { name = "Gowtham A Rao", email = "gowtham.rao@coreason.ai" },
 ]
+keywords = [
+    "agents",
+    "artificial-intelligence",
+    "coreason",
+    "knoweldge-graph",
+    "mcp",
+    "ontology",
+    "pydantic",
+    "schema",
+    "zero-trust",
+]
 classifiers = [
     "License :: Other/Proprietary License",
     "Operating System :: OS Independent",
