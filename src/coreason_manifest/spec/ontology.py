@@ -6059,6 +6059,7 @@ class HTTPTransportProfile(CoreasonBaseState):
     @classmethod
     def _enforce_ssrf(cls, v: Any) -> Any:
         from coreason_manifest.utils.algebra import _validate_ssrf_safety
+
         return _validate_ssrf_safety(v)
 
     headers: dict[
@@ -6765,6 +6766,7 @@ class SPARQLQueryIntent(CoreasonBaseState):
     @classmethod
     def _enforce_ssrf(cls, v: Any) -> Any:
         from coreason_manifest.utils.algebra import _validate_ssrf_safety
+
         return _validate_ssrf_safety(v)
 
     topology_class: Literal["sparql_query"] = "sparql_query"
@@ -9186,6 +9188,7 @@ class SSETransportProfile(CoreasonBaseState):
     @classmethod
     def _enforce_ssrf(cls, v: Any) -> Any:
         from coreason_manifest.utils.algebra import _validate_ssrf_safety
+
         return _validate_ssrf_safety(v)
 
     headers: dict[
@@ -13904,6 +13907,7 @@ class EvidentiaryCitationState(CoreasonBaseState):
     @classmethod
     def _enforce_ssrf(cls, v: Any) -> Any:
         from coreason_manifest.utils.algebra import _validate_ssrf_safety
+
         return _validate_ssrf_safety(v)
 
     extracted_snippet: Annotated[str, StringConstraints(max_length=10000)] = Field(

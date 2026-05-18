@@ -449,7 +449,9 @@ def _validate_ssrf_safety(url: Any) -> Any:
 
         # Hardcode block for localhost and local domains
         if hostname.lower() in ["localhost", "localhost.localdomain"] or hostname.lower().endswith(".localhost"):
-            raise ValueError(f"SSRF Security Violation: The target hostname '{hostname}' resolves to the local loopback network.")
+            raise ValueError(
+                f"SSRF Security Violation: The target hostname '{hostname}' resolves to the local loopback network."
+            )
 
         # Remove IPv6 brackets if present
         if hostname.startswith("[") and hostname.endswith("]"):
