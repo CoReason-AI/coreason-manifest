@@ -279,12 +279,14 @@ def _update_lockfiles(project_root: Path) -> None:
                 text=True,
                 check=True,
             )
+            print("  -> Cargo.lock updated.")
+        except FileNotFoundError:
+            print("Warning: cargo not found in PATH. Skipping Cargo.lock update.")
         except subprocess.CalledProcessError as e:
             print(f"Error: 'cargo update' failed with exit status {e.returncode}")
             print(f"Stdout: {e.stdout}")
             print(f"Stderr: {e.stderr}")
             raise
-        print("  -> Cargo.lock updated.")
 
 
 def main() -> None:

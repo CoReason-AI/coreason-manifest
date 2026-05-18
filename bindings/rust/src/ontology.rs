@@ -16105,14 +16105,14 @@ impl CommercialLicenseState {
         Default::default()
     }
 }
-#[doc = "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen receipt bridging external license lifecycle management (Distr) into the CoReason URN Authority zero-trust verification chain. As an append-only coordinate on the Merkle-DAG, the LLM must never hallucinate a mutation to this receipt. The receipt is issued by the coreason-ecosystem gateway upon successful Distr license validation and is consumed by downstream WASM sandboxes and tensor routers to gate premium feature access.\n\nCAUSAL AFFORDANCE: Unlocks IP sovereignty for tenants operating under commercial license agreements by providing a cryptographically verifiable, self-contained proof of entitlement. The receipt severs the runtime dependency on the external Distr API — once issued, the receipt is locally verifiable via DID-based signature validation without network callbacks. Enables the coreason-runtime to branch execution based on `license_tier` (Prosperity vs. Commercial) and gate Forge output headers accordingly.\n\nEPISTEMIC BOUNDS: The `license_tier` is strictly bounded to the Literal set `[\"prosperity-3.0\", \"commercial\"]`. The `signer_did` must conform to the W3C DID `did:key:z` multicodec pattern (Ed25519). The `issued_at_epoch` and `expires_at_epoch` are strict POSIX integer timestamps with `issued_at < expires_at` enforced by model validator. The `entitlements` list is canonically sorted for RFC 8785 determinism. The `distr_license_cid` is bounded to 256 chars and references the external Distr license record.\n\nMCP ROUTING TRIGGERS: Commercial License Override, Distr Integration, IP Sovereignty Receipt, Zero-Trust License Verification, WASM Feature Gating, Prosperity Public License, DID-based Signing"]
+#[doc = "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A cryptographically frozen receipt bridging external license lifecycle management (Distr) into the CoReason URN Authority zero-trust verification chain. Formatted as a W3C VCDM v2.0 credential using Selective Disclosure JWTs (SD-JWT). As an append-only coordinate on the Merkle-DAG, the LLM must never hallucinate a mutation to this receipt.\n\nCAUSAL AFFORDANCE: Unlocks IP sovereignty for tenants operating under commercial license agreements by providing a cryptographically verifiable, self-contained proof of entitlement. It supports zk-SNARK hardware fingerprint proofs for privacy-preserving air-gapped activation. Enables the coreason-runtime to branch execution based on `license_tier` (Prosperity vs. Commercial) and gate Forge output headers accordingly.\n\nEPISTEMIC BOUNDS: The `license_tier` is strictly bounded to the Literal set `[\"prosperity-3.0\", \"commercial\"]`. The `signer_did` must conform to the W3C DID `did:key:z` multicodec pattern (supporting Post-Quantum ML-DSA keys). The `hardware_zk_proof` must be a valid zero-knowledge succinct non-interactive argument of knowledge.\n\nMCP ROUTING TRIGGERS: Commercial License Override, VCDM v2.0, SD-JWT, zk-SNARK, ML-DSA, FIPS 204, Distr Integration, IP Sovereignty Receipt, Zero-Trust License Verification, WASM Feature Gating"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
 #[doc = r""]
 #[doc = r" ```json"]
 #[doc = "{"]
 #[doc = "  \"title\": \"CommercialOverrideReceipt\","]
-#[doc = "  \"description\": \"CoReason Shared Kernel Ontology\\n\\nAGENT INSTRUCTION: A cryptographically frozen receipt bridging external license lifecycle management (Distr) into the CoReason URN Authority zero-trust verification chain. As an append-only coordinate on the Merkle-DAG, the LLM must never hallucinate a mutation to this receipt. The receipt is issued by the coreason-ecosystem gateway upon successful Distr license validation and is consumed by downstream WASM sandboxes and tensor routers to gate premium feature access.\\n\\nCAUSAL AFFORDANCE: Unlocks IP sovereignty for tenants operating under commercial license agreements by providing a cryptographically verifiable, self-contained proof of entitlement. The receipt severs the runtime dependency on the external Distr API — once issued, the receipt is locally verifiable via DID-based signature validation without network callbacks. Enables the coreason-runtime to branch execution based on `license_tier` (Prosperity vs. Commercial) and gate Forge output headers accordingly.\\n\\nEPISTEMIC BOUNDS: The `license_tier` is strictly bounded to the Literal set `[\\\"prosperity-3.0\\\", \\\"commercial\\\"]`. The `signer_did` must conform to the W3C DID `did:key:z` multicodec pattern (Ed25519). The `issued_at_epoch` and `expires_at_epoch` are strict POSIX integer timestamps with `issued_at < expires_at` enforced by model validator. The `entitlements` list is canonically sorted for RFC 8785 determinism. The `distr_license_cid` is bounded to 256 chars and references the external Distr license record.\\n\\nMCP ROUTING TRIGGERS: Commercial License Override, Distr Integration, IP Sovereignty Receipt, Zero-Trust License Verification, WASM Feature Gating, Prosperity Public License, DID-based Signing\","]
+#[doc = "  \"description\": \"CoReason Shared Kernel Ontology\\n\\nAGENT INSTRUCTION: A cryptographically frozen receipt bridging external license lifecycle management (Distr) into the CoReason URN Authority zero-trust verification chain. Formatted as a W3C VCDM v2.0 credential using Selective Disclosure JWTs (SD-JWT). As an append-only coordinate on the Merkle-DAG, the LLM must never hallucinate a mutation to this receipt.\\n\\nCAUSAL AFFORDANCE: Unlocks IP sovereignty for tenants operating under commercial license agreements by providing a cryptographically verifiable, self-contained proof of entitlement. It supports zk-SNARK hardware fingerprint proofs for privacy-preserving air-gapped activation. Enables the coreason-runtime to branch execution based on `license_tier` (Prosperity vs. Commercial) and gate Forge output headers accordingly.\\n\\nEPISTEMIC BOUNDS: The `license_tier` is strictly bounded to the Literal set `[\\\"prosperity-3.0\\\", \\\"commercial\\\"]`. The `signer_did` must conform to the W3C DID `did:key:z` multicodec pattern (supporting Post-Quantum ML-DSA keys). The `hardware_zk_proof` must be a valid zero-knowledge succinct non-interactive argument of knowledge.\\n\\nMCP ROUTING TRIGGERS: Commercial License Override, VCDM v2.0, SD-JWT, zk-SNARK, ML-DSA, FIPS 204, Distr Integration, IP Sovereignty Receipt, Zero-Trust License Verification, WASM Feature Gating\","]
 #[doc = "  \"type\": \"object\","]
 #[doc = "  \"required\": ["]
 #[doc = "    \"distr_license_cid\","]
@@ -16123,6 +16123,15 @@ impl CommercialLicenseState {
 #[doc = "    \"signer_did\""]
 #[doc = "  ],"]
 #[doc = "  \"properties\": {"]
+#[doc = "    \"credential_format\": {"]
+#[doc = "      \"title\": \"Credential Format\","]
+#[doc = "      \"description\": \"The W3C VCDM v2.0 serialization format. 'sd-jwt' enables Selective Disclosure of entitlements.\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"sd-jwt\","]
+#[doc = "        \"vc-json\""]
+#[doc = "      ]"]
+#[doc = "    },"]
 #[doc = "    \"distr_license_cid\": {"]
 #[doc = "      \"title\": \"Distr License Cid\","]
 #[doc = "      \"description\": \"The unique identifier of the upstream Distr license record that was validated to produce this receipt. Establishes bidirectional traceability between the CoReason trust chain and the external license lifecycle manager.\","]
@@ -16142,7 +16151,7 @@ impl CommercialLicenseState {
 #[doc = "    },"]
 #[doc = "    \"expires_at_epoch\": {"]
 #[doc = "      \"title\": \"Expires At Epoch\","]
-#[doc = "      \"description\": \"The POSIX timestamp (seconds since epoch) when this receipt mechanically terminates. After expiration, the WASM sandbox must refuse to unlock premium features until a fresh receipt is issued.\","]
+#[doc = "      \"description\": \"The POSIX timestamp (seconds since epoch) when this receipt mechanically terminates. After expiration, the WASM sandbox must gracefully fallback to Prosperity 3.0 mode.\","]
 #[doc = "      \"type\": \"integer\","]
 #[doc = "      \"minimum\": 0.0"]
 #[doc = "    },"]
@@ -16150,6 +16159,18 @@ impl CommercialLicenseState {
 #[doc = "      \"title\": \"Federation Enabled\","]
 #[doc = "      \"description\": \"When true, authorizes the bridge from the client's private network to the CoReason public network for capability sharing, URN resolution against the public ledger, and cross-network publishing.\","]
 #[doc = "      \"type\": \"boolean\""]
+#[doc = "    },"]
+#[doc = "    \"hardware_zk_proof\": {"]
+#[doc = "      \"title\": \"Hardware Zk Proof\","]
+#[doc = "      \"description\": \"The zk-SNARK proof confirming possession of the authorized cluster hardware fingerprint without revealing the raw physical identifiers over the wire.\","]
+#[doc = "      \"anyOf\": ["]
+#[doc = "        {"]
+#[doc = "          \"type\": \"string\""]
+#[doc = "        },"]
+#[doc = "        {"]
+#[doc = "          \"type\": \"null\""]
+#[doc = "        }"]
+#[doc = "      ]"]
 #[doc = "    },"]
 #[doc = "    \"issued_at_epoch\": {"]
 #[doc = "      \"title\": \"Issued At Epoch\","]
@@ -16175,9 +16196,20 @@ impl CommercialLicenseState {
 #[doc = "        \"private\""]
 #[doc = "      ]"]
 #[doc = "    },"]
+#[doc = "    \"signature_algorithm\": {"]
+#[doc = "      \"title\": \"Signature Algorithm\","]
+#[doc = "      \"description\": \"The cryptographic algorithm used for the signature. Defaults to NIST FIPS 204 post-quantum ML-DSA-65.\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"Ed25519\","]
+#[doc = "        \"ML-DSA-44\","]
+#[doc = "        \"ML-DSA-65\","]
+#[doc = "        \"ML-DSA-87\""]
+#[doc = "      ]"]
+#[doc = "    },"]
 #[doc = "    \"signer_did\": {"]
 #[doc = "      \"title\": \"Signer Did\","]
-#[doc = "      \"description\": \"The W3C Decentralized Identifier (DID) of the authority that cryptographically signed this receipt. Must be a did:key: multicodec identifier encoding an Ed25519 public key.\","]
+#[doc = "      \"description\": \"The W3C Decentralized Identifier (DID) of the authority that cryptographically signed this receipt. Must be a did:key: multicodec identifier encoding an ML-DSA (FIPS 204) or Ed25519 public key.\","]
 #[doc = "      \"type\": \"string\","]
 #[doc = "      \"maxLength\": 256,"]
 #[doc = "      \"minLength\": 10,"]
@@ -16199,23 +16231,32 @@ impl CommercialLicenseState {
 #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
 #[serde(deny_unknown_fields)]
 pub struct CommercialOverrideReceipt {
+    #[doc = "The W3C VCDM v2.0 serialization format. 'sd-jwt' enables Selective Disclosure of entitlements."]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub credential_format: ::std::option::Option<CredentialFormat>,
     #[doc = "The unique identifier of the upstream Distr license record that was validated to produce this receipt. Establishes bidirectional traceability between the CoReason trust chain and the external license lifecycle manager."]
     pub distr_license_cid: DistrLicenseCid,
     #[doc = "The specific feature flags and access rights granted by the commercial license. Examples: 'IP_SOVEREIGNTY_EXCEPTION', 'COMMERCIAL_USE', 'PRIVATE_NETWORK_FEDERATION', 'UNLIMITED_FORGE_OUTPUT'."]
     #[serde(default, skip_serializing_if = "::std::vec::Vec::is_empty")]
     pub entitlements: ::std::vec::Vec<EntitlementsItem>,
-    #[doc = "The POSIX timestamp (seconds since epoch) when this receipt mechanically terminates. After expiration, the WASM sandbox must refuse to unlock premium features until a fresh receipt is issued."]
+    #[doc = "The POSIX timestamp (seconds since epoch) when this receipt mechanically terminates. After expiration, the WASM sandbox must gracefully fallback to Prosperity 3.0 mode."]
     pub expires_at_epoch: u64,
     #[doc = "When true, authorizes the bridge from the client's private network to the CoReason public network for capability sharing, URN resolution against the public ledger, and cross-network publishing."]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub federation_enabled: ::std::option::Option<bool>,
+    #[doc = "The zk-SNARK proof confirming possession of the authorized cluster hardware fingerprint without revealing the raw physical identifiers over the wire."]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub hardware_zk_proof: ::std::option::Option<::std::string::String>,
     #[doc = "The POSIX timestamp (seconds since epoch) when this receipt was cryptographically issued by the gateway."]
     pub issued_at_epoch: u64,
     #[doc = "The license classification governing IP ownership of assets forged by coreason-meta-engineering. 'prosperity-3.0' = forged assets are licensed to CoReason Inc. 'commercial' = the tenant retains full ownership of forged assets."]
     pub license_tier: LicenseTier,
     #[doc = "The network topology this receipt authorizes. 'public' = CoReason-managed network. 'private' = client-operated isolated network."]
     pub network_mode: NetworkMode,
-    #[doc = "The W3C Decentralized Identifier (DID) of the authority that cryptographically signed this receipt. Must be a did:key: multicodec identifier encoding an Ed25519 public key."]
+    #[doc = "The cryptographic algorithm used for the signature. Defaults to NIST FIPS 204 post-quantum ML-DSA-65."]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub signature_algorithm: ::std::option::Option<SignatureAlgorithm>,
+    #[doc = "The W3C Decentralized Identifier (DID) of the authority that cryptographically signed this receipt. Must be a did:key: multicodec identifier encoding an ML-DSA (FIPS 204) or Ed25519 public key."]
     pub signer_did: SignerDid,
     #[doc = "The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\"date_of_incorporation\":\"2025-10-16\",\"file_number\":\"10369312\",\"jurisdiction\":\"US-DE\",\"legal_name\":\"CoReason, Inc.\"}"]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
@@ -19288,6 +19329,80 @@ pub struct CounterfactualRegretEvent {
 impl CounterfactualRegretEvent {
     pub fn builder() -> builder::CounterfactualRegretEvent {
         Default::default()
+    }
+}
+#[doc = "The W3C VCDM v2.0 serialization format. 'sd-jwt' enables Selective Disclosure of entitlements."]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"Credential Format\","]
+#[doc = "  \"description\": \"The W3C VCDM v2.0 serialization format. 'sd-jwt' enables Selective Disclosure of entitlements.\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"sd-jwt\","]
+#[doc = "    \"vc-json\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum CredentialFormat {
+    #[serde(rename = "sd-jwt")]
+    SdJwt,
+    #[serde(rename = "vc-json")]
+    VcJson,
+}
+impl ::std::fmt::Display for CredentialFormat {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::SdJwt => f.write_str("sd-jwt"),
+            Self::VcJson => f.write_str("vc-json"),
+        }
+    }
+}
+impl ::std::str::FromStr for CredentialFormat {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "sd-jwt" => Ok(Self::SdJwt),
+            "vc-json" => Ok(Self::VcJson),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for CredentialFormat {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for CredentialFormat {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for CredentialFormat {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
     }
 }
 #[doc = "Unique identifier for the grading criterion."]
@@ -57811,14 +57926,97 @@ impl SideEffectProfile {
         Default::default()
     }
 }
-#[doc = "The W3C Decentralized Identifier (DID) of the authority that cryptographically signed this receipt. Must be a did:key: multicodec identifier encoding an Ed25519 public key."]
+#[doc = "The cryptographic algorithm used for the signature. Defaults to NIST FIPS 204 post-quantum ML-DSA-65."]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"Signature Algorithm\","]
+#[doc = "  \"description\": \"The cryptographic algorithm used for the signature. Defaults to NIST FIPS 204 post-quantum ML-DSA-65.\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"Ed25519\","]
+#[doc = "    \"ML-DSA-44\","]
+#[doc = "    \"ML-DSA-65\","]
+#[doc = "    \"ML-DSA-87\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum SignatureAlgorithm {
+    Ed25519,
+    #[serde(rename = "ML-DSA-44")]
+    MlDsa44,
+    #[serde(rename = "ML-DSA-65")]
+    MlDsa65,
+    #[serde(rename = "ML-DSA-87")]
+    MlDsa87,
+}
+impl ::std::fmt::Display for SignatureAlgorithm {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Ed25519 => f.write_str("Ed25519"),
+            Self::MlDsa44 => f.write_str("ML-DSA-44"),
+            Self::MlDsa65 => f.write_str("ML-DSA-65"),
+            Self::MlDsa87 => f.write_str("ML-DSA-87"),
+        }
+    }
+}
+impl ::std::str::FromStr for SignatureAlgorithm {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "Ed25519" => Ok(Self::Ed25519),
+            "ML-DSA-44" => Ok(Self::MlDsa44),
+            "ML-DSA-65" => Ok(Self::MlDsa65),
+            "ML-DSA-87" => Ok(Self::MlDsa87),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for SignatureAlgorithm {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for SignatureAlgorithm {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for SignatureAlgorithm {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "The W3C Decentralized Identifier (DID) of the authority that cryptographically signed this receipt. Must be a did:key: multicodec identifier encoding an ML-DSA (FIPS 204) or Ed25519 public key."]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
 #[doc = r""]
 #[doc = r" ```json"]
 #[doc = "{"]
 #[doc = "  \"title\": \"Signer Did\","]
-#[doc = "  \"description\": \"The W3C Decentralized Identifier (DID) of the authority that cryptographically signed this receipt. Must be a did:key: multicodec identifier encoding an Ed25519 public key.\","]
+#[doc = "  \"description\": \"The W3C Decentralized Identifier (DID) of the authority that cryptographically signed this receipt. Must be a did:key: multicodec identifier encoding an ML-DSA (FIPS 204) or Ed25519 public key.\","]
 #[doc = "  \"type\": \"string\","]
 #[doc = "  \"maxLength\": 256,"]
 #[doc = "  \"minLength\": 10,"]
@@ -88784,15 +88982,27 @@ pub mod builder {
     }
     #[derive(Clone, Debug)]
     pub struct CommercialOverrideReceipt {
+        credential_format: ::std::result::Result<
+            ::std::option::Option<super::CredentialFormat>,
+            ::std::string::String,
+        >,
         distr_license_cid: ::std::result::Result<super::DistrLicenseCid, ::std::string::String>,
         entitlements:
             ::std::result::Result<::std::vec::Vec<super::EntitlementsItem>, ::std::string::String>,
         expires_at_epoch: ::std::result::Result<u64, ::std::string::String>,
         federation_enabled:
             ::std::result::Result<::std::option::Option<bool>, ::std::string::String>,
+        hardware_zk_proof: ::std::result::Result<
+            ::std::option::Option<::std::string::String>,
+            ::std::string::String,
+        >,
         issued_at_epoch: ::std::result::Result<u64, ::std::string::String>,
         license_tier: ::std::result::Result<super::LicenseTier, ::std::string::String>,
         network_mode: ::std::result::Result<super::NetworkMode, ::std::string::String>,
+        signature_algorithm: ::std::result::Result<
+            ::std::option::Option<super::SignatureAlgorithm>,
+            ::std::string::String,
+        >,
         signer_did: ::std::result::Result<super::SignerDid, ::std::string::String>,
         tenant_cid:
             ::std::result::Result<::std::option::Option<super::TenantCid>, ::std::string::String>,
@@ -88800,19 +89010,32 @@ pub mod builder {
     impl ::std::default::Default for CommercialOverrideReceipt {
         fn default() -> Self {
             Self {
+                credential_format: Ok(Default::default()),
                 distr_license_cid: Err("no value supplied for distr_license_cid".to_string()),
                 entitlements: Ok(Default::default()),
                 expires_at_epoch: Err("no value supplied for expires_at_epoch".to_string()),
                 federation_enabled: Ok(Default::default()),
+                hardware_zk_proof: Ok(Default::default()),
                 issued_at_epoch: Err("no value supplied for issued_at_epoch".to_string()),
                 license_tier: Err("no value supplied for license_tier".to_string()),
                 network_mode: Err("no value supplied for network_mode".to_string()),
+                signature_algorithm: Ok(Default::default()),
                 signer_did: Err("no value supplied for signer_did".to_string()),
                 tenant_cid: Ok(Default::default()),
             }
         }
     }
     impl CommercialOverrideReceipt {
+        pub fn credential_format<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<super::CredentialFormat>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.credential_format = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for credential_format: {e}"));
+            self
+        }
         pub fn distr_license_cid<T>(mut self, value: T) -> Self
         where
             T: ::std::convert::TryInto<super::DistrLicenseCid>,
@@ -88853,6 +89076,16 @@ pub mod builder {
             });
             self
         }
+        pub fn hardware_zk_proof<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<::std::string::String>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.hardware_zk_proof = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for hardware_zk_proof: {e}"));
+            self
+        }
         pub fn issued_at_epoch<T>(mut self, value: T) -> Self
         where
             T: ::std::convert::TryInto<u64>,
@@ -88883,6 +89116,16 @@ pub mod builder {
                 .map_err(|e| format!("error converting supplied value for network_mode: {e}"));
             self
         }
+        pub fn signature_algorithm<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<super::SignatureAlgorithm>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.signature_algorithm = value.try_into().map_err(|e| {
+                format!("error converting supplied value for signature_algorithm: {e}")
+            });
+            self
+        }
         pub fn signer_did<T>(mut self, value: T) -> Self
         where
             T: ::std::convert::TryInto<super::SignerDid>,
@@ -88910,13 +89153,16 @@ pub mod builder {
             value: CommercialOverrideReceipt,
         ) -> ::std::result::Result<Self, super::error::ConversionError> {
             Ok(Self {
+                credential_format: value.credential_format?,
                 distr_license_cid: value.distr_license_cid?,
                 entitlements: value.entitlements?,
                 expires_at_epoch: value.expires_at_epoch?,
                 federation_enabled: value.federation_enabled?,
+                hardware_zk_proof: value.hardware_zk_proof?,
                 issued_at_epoch: value.issued_at_epoch?,
                 license_tier: value.license_tier?,
                 network_mode: value.network_mode?,
+                signature_algorithm: value.signature_algorithm?,
                 signer_did: value.signer_did?,
                 tenant_cid: value.tenant_cid?,
             })
@@ -88925,13 +89171,16 @@ pub mod builder {
     impl ::std::convert::From<super::CommercialOverrideReceipt> for CommercialOverrideReceipt {
         fn from(value: super::CommercialOverrideReceipt) -> Self {
             Self {
+                credential_format: Ok(value.credential_format),
                 distr_license_cid: Ok(value.distr_license_cid),
                 entitlements: Ok(value.entitlements),
                 expires_at_epoch: Ok(value.expires_at_epoch),
                 federation_enabled: Ok(value.federation_enabled),
+                hardware_zk_proof: Ok(value.hardware_zk_proof),
                 issued_at_epoch: Ok(value.issued_at_epoch),
                 license_tier: Ok(value.license_tier),
                 network_mode: Ok(value.network_mode),
+                signature_algorithm: Ok(value.signature_algorithm),
                 signer_did: Ok(value.signer_did),
                 tenant_cid: Ok(value.tenant_cid),
             }
