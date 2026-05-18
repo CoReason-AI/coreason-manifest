@@ -5740,19 +5740,31 @@ export type TenantCid280 = string;
  */
 export type LicenseTier = "prosperity-3.0" | "commercial";
 /**
- * The W3C Decentralized Identifier (DID) of the authority that cryptographically signed this receipt. Must be a did:key: multicodec identifier encoding an Ed25519 public key.
+ * The W3C Decentralized Identifier (DID) of the authority that cryptographically signed this receipt. Must be a did:key: multicodec identifier encoding an ML-DSA (FIPS 204) or Ed25519 public key.
  */
 export type SignerDid = string;
+/**
+ * The cryptographic algorithm used for the signature. Defaults to NIST FIPS 204 post-quantum ML-DSA-65.
+ */
+export type SignatureAlgorithm = "Ed25519" | "ML-DSA-44" | "ML-DSA-65" | "ML-DSA-87";
+/**
+ * The W3C VCDM v2.0 serialization format. 'sd-jwt' enables Selective Disclosure of entitlements.
+ */
+export type CredentialFormat = "sd-jwt" | "vc-json";
 /**
  * The unique identifier of the upstream Distr license record that was validated to produce this receipt. Establishes bidirectional traceability between the CoReason trust chain and the external license lifecycle manager.
  */
 export type DistrLicenseCid = string;
 /**
+ * The zk-SNARK proof confirming possession of the authorized cluster hardware fingerprint without revealing the raw physical identifiers over the wire.
+ */
+export type HardwareZkProof = string | null;
+/**
  * The POSIX timestamp (seconds since epoch) when this receipt was cryptographically issued by the gateway.
  */
 export type IssuedAtEpoch = number;
 /**
- * The POSIX timestamp (seconds since epoch) when this receipt mechanically terminates. After expiration, the WASM sandbox must refuse to unlock premium features until a fresh receipt is issued.
+ * The POSIX timestamp (seconds since epoch) when this receipt mechanically terminates. After expiration, the WASM sandbox must gracefully fallback to Prosperity 3.0 mode.
  */
 export type ExpiresAtEpoch = number;
 /**
@@ -14553,19 +14565,22 @@ export interface CommercialLicenseState {
 /**
  * CoReason Shared Kernel Ontology
  *
- * AGENT INSTRUCTION: A cryptographically frozen receipt bridging external license lifecycle management (Distr) into the CoReason URN Authority zero-trust verification chain. As an append-only coordinate on the Merkle-DAG, the LLM must never hallucinate a mutation to this receipt. The receipt is issued by the coreason-ecosystem gateway upon successful Distr license validation and is consumed by downstream WASM sandboxes and tensor routers to gate premium feature access.
+ * AGENT INSTRUCTION: A cryptographically frozen receipt bridging external license lifecycle management (Distr) into the CoReason URN Authority zero-trust verification chain. Formatted as a W3C VCDM v2.0 credential using Selective Disclosure JWTs (SD-JWT). As an append-only coordinate on the Merkle-DAG, the LLM must never hallucinate a mutation to this receipt.
  *
- * CAUSAL AFFORDANCE: Unlocks IP sovereignty for tenants operating under commercial license agreements by providing a cryptographically verifiable, self-contained proof of entitlement. The receipt severs the runtime dependency on the external Distr API — once issued, the receipt is locally verifiable via DID-based signature validation without network callbacks. Enables the coreason-runtime to branch execution based on `license_tier` (Prosperity vs. Commercial) and gate Forge output headers accordingly.
+ * CAUSAL AFFORDANCE: Unlocks IP sovereignty for tenants operating under commercial license agreements by providing a cryptographically verifiable, self-contained proof of entitlement. It supports zk-SNARK hardware fingerprint proofs for privacy-preserving air-gapped activation. Enables the coreason-runtime to branch execution based on `license_tier` (Prosperity vs. Commercial) and gate Forge output headers accordingly.
  *
- * EPISTEMIC BOUNDS: The `license_tier` is strictly bounded to the Literal set `["prosperity-3.0", "commercial"]`. The `signer_did` must conform to the W3C DID `did:key:z` multicodec pattern (Ed25519). The `issued_at_epoch` and `expires_at_epoch` are strict POSIX integer timestamps with `issued_at < expires_at` enforced by model validator. The `entitlements` list is canonically sorted for RFC 8785 determinism. The `distr_license_cid` is bounded to 256 chars and references the external Distr license record.
+ * EPISTEMIC BOUNDS: The `license_tier` is strictly bounded to the Literal set `["prosperity-3.0", "commercial"]`. The `signer_did` must conform to the W3C DID `did:key:z` multicodec pattern (supporting Post-Quantum ML-DSA keys). The `hardware_zk_proof` must be a valid zero-knowledge succinct non-interactive argument of knowledge.
  *
- * MCP ROUTING TRIGGERS: Commercial License Override, Distr Integration, IP Sovereignty Receipt, Zero-Trust License Verification, WASM Feature Gating, Prosperity Public License, DID-based Signing
+ * MCP ROUTING TRIGGERS: Commercial License Override, VCDM v2.0, SD-JWT, zk-SNARK, ML-DSA, FIPS 204, Distr Integration, IP Sovereignty Receipt, Zero-Trust License Verification, WASM Feature Gating
  */
 export interface CommercialOverrideReceipt {
   tenant_cid?: TenantCid280;
   license_tier: LicenseTier;
   signer_did: SignerDid;
+  signature_algorithm?: SignatureAlgorithm;
+  credential_format?: CredentialFormat;
   distr_license_cid: DistrLicenseCid;
+  hardware_zk_proof?: HardwareZkProof;
   issued_at_epoch: IssuedAtEpoch;
   expires_at_epoch: ExpiresAtEpoch;
   entitlements?: Entitlements1;
