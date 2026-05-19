@@ -14155,6 +14155,12 @@ class SpeculativeExecutionPolicy(CoreasonBaseState):
         le=1.0,
         description="The assigned mathematical likelihood that the speculative branch will merge successfully.",
     )
+    threshold_target: float = Field(
+        default=0.8,
+        ge=0.0,
+        le=1.0,
+        description="The target probability threshold above which a speculative branch is successfully merged.",
+    )
     rollback_pointers: list[
         Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
     ] = Field(

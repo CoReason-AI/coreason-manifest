@@ -20685,6 +20685,14 @@
           "title": "Commit Probability",
           "type": "number"
         },
+        "threshold_target": {
+          "default": 0.8,
+          "description": "The target probability threshold above which a speculative branch is successfully merged.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Threshold Target",
+          "type": "number"
+        },
         "rollback_pointers": {
           "description": "CIDs referencing the deterministic states the orchestrator must rewind to upon branch falsification.",
           "items": {

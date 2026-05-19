@@ -3156,6 +3156,10 @@ export type IsSpeculative = boolean;
  */
 export type CommitProbability = number;
 /**
+ * The target probability threshold above which a speculative branch is successfully merged.
+ */
+export type ThresholdTarget = number;
+/**
  * CIDs referencing the deterministic states the orchestrator must rewind to upon branch falsification.
  *
  * @maxItems 10000
@@ -11172,6 +11176,7 @@ export interface SpeculativeExecutionPolicy {
   boundary_cid: BoundaryCid;
   is_speculative?: IsSpeculative;
   commit_probability: CommitProbability;
+  threshold_target?: ThresholdTarget;
   rollback_pointers?: RollbackPointers;
   competing_hypotheses?: CompetingHypotheses;
 }

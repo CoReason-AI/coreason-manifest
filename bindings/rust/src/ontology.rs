@@ -62384,6 +62384,13 @@ impl SpatialToolManifest {
 #[doc = "      \"maxLength\": 128,"]
 #[doc = "      \"minLength\": 4,"]
 #[doc = "      \"pattern\": \"^[a-zA-Z0-9_.:-]+$\""]
+#[doc = "    },"]
+#[doc = "    \"threshold_target\": {"]
+#[doc = "      \"title\": \"Threshold Target\","]
+#[doc = "      \"description\": \"The target probability threshold above which a speculative branch is successfully merged.\","]
+#[doc = "      \"type\": \"number\","]
+#[doc = "      \"maximum\": 1.0,"]
+#[doc = "      \"minimum\": 0.0"]
 #[doc = "    }"]
 #[doc = "  },"]
 #[doc = "  \"additionalProperties\": false"]
@@ -62409,6 +62416,9 @@ pub struct SpeculativeExecutionPolicy {
     #[doc = "The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\"date_of_incorporation\":\"2025-10-16\",\"file_number\":\"10369312\",\"jurisdiction\":\"US-DE\",\"legal_name\":\"CoReason, Inc.\"}"]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub tenant_cid: ::std::option::Option<TenantCid>,
+    #[doc = "The target probability threshold above which a speculative branch is successfully merged."]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub threshold_target: ::std::option::Option<f64>,
 }
 impl SpeculativeExecutionPolicy {
     pub fn builder() -> builder::SpeculativeExecutionPolicy {
@@ -119309,6 +119319,7 @@ pub mod builder {
         >,
         tenant_cid:
             ::std::result::Result<::std::option::Option<super::TenantCid>, ::std::string::String>,
+        threshold_target: ::std::result::Result<::std::option::Option<f64>, ::std::string::String>,
     }
     impl ::std::default::Default for SpeculativeExecutionPolicy {
         fn default() -> Self {
@@ -119319,6 +119330,7 @@ pub mod builder {
                 is_speculative: Ok(Default::default()),
                 rollback_pointers: Ok(Default::default()),
                 tenant_cid: Ok(Default::default()),
+                threshold_target: Ok(Default::default()),
             }
         }
     }
@@ -119383,6 +119395,16 @@ pub mod builder {
                 .map_err(|e| format!("error converting supplied value for tenant_cid: {e}"));
             self
         }
+        pub fn threshold_target<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<f64>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.threshold_target = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for threshold_target: {e}"));
+            self
+        }
     }
     impl ::std::convert::TryFrom<SpeculativeExecutionPolicy> for super::SpeculativeExecutionPolicy {
         type Error = super::error::ConversionError;
@@ -119396,6 +119418,7 @@ pub mod builder {
                 is_speculative: value.is_speculative?,
                 rollback_pointers: value.rollback_pointers?,
                 tenant_cid: value.tenant_cid?,
+                threshold_target: value.threshold_target?,
             })
         }
     }
@@ -119408,6 +119431,7 @@ pub mod builder {
                 is_speculative: Ok(value.is_speculative),
                 rollback_pointers: Ok(value.rollback_pointers),
                 tenant_cid: Ok(value.tenant_cid),
+                threshold_target: Ok(value.threshold_target),
             }
         }
     }
