@@ -280,27 +280,29 @@ def calculate_latent_alignment(
     if v1.foundation_matrix_name != v2.foundation_matrix_name or v1.dimensionality != v2.dimensionality:
         raise ValueError("Topological Contradiction: Vector geometries are incommensurable.")
 
-    try:
-        b1 = base64.b64decode(v1.vector_base64)
-    except Exception as e:
-        raise ValueError("Topological Contradiction: Invalid base64 encoding.") from e
-    arr1 = np.frombuffer(b1, dtype=np.float32)
+    def _get_cached_vector(v: VectorEmbeddingState) -> tuple[np.ndarray, float]:
+        try:
+            return object.__getattribute__(v, "_cached_numpy_array"), object.__getattribute__(v, "_cached_norm")
+        except AttributeError:
+            try:
+                b = base64.b64decode(v.vector_base64)
+            except Exception as e:
+                raise ValueError("Topological Contradiction: Invalid base64 encoding.") from e
+            arr = np.frombuffer(b, dtype=np.float32)
+            if len(arr) != v.dimensionality:
+                raise ValueError("Byte length does not match declared dimensionality.")
+            norm = float(np.linalg.norm(arr))
+            object.__setattr__(v, "_cached_numpy_array", arr)
+            object.__setattr__(v, "_cached_norm", norm)
+            return arr, norm
 
-    try:
-        b2 = base64.b64decode(v2.vector_base64)
-    except Exception as e:
-        raise ValueError("Topological Contradiction: Invalid base64 encoding.") from e
-    arr2 = np.frombuffer(b2, dtype=np.float32)
-
-    if len(arr1) != v1.dimensionality or len(arr2) != v2.dimensionality:
-        raise ValueError("Byte length does not match declared dimensionality.")
+    arr1, norm1 = _get_cached_vector(v1)
+    arr2, norm2 = _get_cached_vector(v2)
 
     # ⚡ Bolt Reversion: Direct np.dot causes float32 underflow for small vectors (ZeroDivisionError)
     # and overflow for large vectors (yielding 0.0 similarity instead of 1.0).
     # We MUST use np.linalg.norm to ensure BLAS-level scaling (snrm2) for mathematical correctness.
     with np.errstate(all="ignore"):
-        norm1 = float(np.linalg.norm(arr1))
-        norm2 = float(np.linalg.norm(arr2))
         similarity = 0.0 if norm1 == 0.0 or norm2 == 0.0 else float(np.dot(arr1, arr2) / (norm1 * norm2))
 
     if math.isnan(similarity):
