@@ -290,7 +290,7 @@ def calculate_latent_alignment(
                 raise ValueError("Topological Contradiction: Invalid base64 encoding.") from e
             arr = np.frombuffer(b, dtype=np.float32)
             if len(arr) != v.dimensionality:
-                raise ValueError("Byte length does not match declared dimensionality.")
+                raise ValueError("Byte length does not match declared dimensionality.") from None
             norm = float(np.linalg.norm(arr))
             object.__setattr__(v, "_cached_numpy_array", arr)
             object.__setattr__(v, "_cached_norm", norm)
