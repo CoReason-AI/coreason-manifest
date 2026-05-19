@@ -48,7 +48,7 @@ jobs:
         run: uv run python -c "import json; from coreason_manifest.utils.algebra import get_ontology_schema; schema = get_ontology_schema(); open('coreason_ontology.schema.json', 'w', encoding='utf-8').write(json.dumps(schema, indent=2, ensure_ascii=False) + '\n')"
 
       - name: Generate SLSA Provenance
-        uses: actions/attest-build-provenance@96b4a1ef7235a096b17240c259729fdd70c83d45 # v2.2.0
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.2.0
         with:
           subject-path: |
             dist/*.whl
