@@ -92,6 +92,7 @@ jobs:
             --accept 200,204,301,429
             --exclude-loopback
             --exclude 'npmjs\.com'
+            --exclude 'scorecard\.dev'
             '*.md'
             'docs/**/*.md'
           fail: true
