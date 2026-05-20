@@ -13,6 +13,7 @@ import contextlib
 import copy
 import math
 import struct
+import numpy as np
 import unittest.mock
 from typing import Any, cast
 from unittest.mock import Mock, patch
@@ -647,6 +648,47 @@ def test_calculate_latent_alignment_invalid_base64() -> None:
 
     with pytest.raises(ValueError, match=r"Topological Contradiction: Invalid base64 encoding\."):
         calculate_latent_alignment(v_invalid, v_valid, pol)
+
+
+def test_calculate_latent_alignment_caching() -> None:
+    pol = EpistemicOntologicalAlignmentPolicy(min_cosine_similarity=-1.0, require_isometry_proof=False)
+    v1 = VectorEmbeddingState(
+        vector_base64=base64.b64encode(struct.pack("<3f", 1.0, 0.0, 0.0)).decode(),
+        dimensionality=3,
+        foundation_matrix_name="model1",
+    )
+    v2 = VectorEmbeddingState(
+        vector_base64=base64.b64encode(struct.pack("<3f", 0.0, 1.0, 0.0)).decode(),
+        dimensionality=3,
+        foundation_matrix_name="model1",
+    )
+
+    # Initially, caching attributes should not exist
+    with pytest.raises(AttributeError):
+        object.__getattribute__(v1, "_cached_numpy_array")
+    with pytest.raises(AttributeError):
+        object.__getattribute__(v2, "_cached_numpy_array")
+
+    # Run alignment
+    sim = calculate_latent_alignment(v1, v2, pol)
+    assert sim == 0.0
+
+    # Caching attributes must now exist
+    arr1 = object.__getattribute__(v1, "_cached_numpy_array")
+    norm1 = object.__getattribute__(v1, "_cached_norm")
+    arr2 = object.__getattribute__(v2, "_cached_numpy_array")
+    norm2 = object.__getattribute__(v2, "_cached_norm")
+
+    assert isinstance(arr1, np.ndarray)
+    assert norm1 == 1.0
+    assert isinstance(arr2, np.ndarray)
+    assert norm2 == 1.0
+
+    # If we mock base64.b64decode to raise an exception, the next call should still succeed because it is cached
+    with patch("base64.b64decode", side_effect=Exception("Should not be called!")):
+        sim2 = calculate_latent_alignment(v1, v2, pol)
+        assert sim2 == 0.0
+
 
 
 def test_epistemic_transmutation_schema_presence() -> None:
