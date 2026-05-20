@@ -21,6 +21,8 @@ Unbounded, recursively nested data structures represent a critical vulnerability
 
 Instead of relying on legacy one-dimensional array length clamps, this constraint evaluates the aggregate topology of a payload. The orchestrator mathematically terminates evaluation the millisecond a payload exceeds a ceiling of `10000` total nodes or breaches a `max_recursion` depth of `10`. Furthermore, primitive string geometry and dictionary keys are strictly clamped to a length of `10000` characters. For safety researchers, this guarantees that any arbitrary state mutation is thermodynamically incapable of exhausting the host GPU's VRAM.
 
+In addition to payload-level evaluation, the manifest enforces strict, type-level invariants directly on all collection fields (including lists, dicts, sets, and specialized arrays/mappings) across all ontology models. By bounding these fields at the schema layer (using Pydantic's `max_length` constraints), the Hollow Data Plane guarantees that no individual model can consume unbounded memory during parsing or validation. This includes capping cryptographic/JWT entitlement arrays to `1000` entries, limiting concurrent execution branches to `100`, bounding causal edges within graph topologies to `10000`, and ensuring all CRDT mutation logs are strictly bound, effectively eliminating any potential vector for memory exhaustion attacks at the boundary.
+
 ### 6.2 Spatial Kinematics and the Holographic UI
 
 When projecting multimodal tokens or interface layouts into physical space, the system utilizes continuous Newtonian mechanics defined by the `SE3TransformProfile`. This profile represents a rigid-body transformation within the Special Euclidean group SE(3), dictating the exact kinematic positioning of a node.
