@@ -220,6 +220,7 @@ export type TopologyClass2 = "macro_adversarial";
  * Nodes assigned to the Blue Team.
  *
  * @minItems 1
+ * @maxItems 1000
  */
 export type BlueTeamCids = [NodeCIDState, ...NodeCIDState[]];
 /**
@@ -230,6 +231,7 @@ export type NodeCIDState = string;
  * Nodes assigned to the Red Team.
  *
  * @minItems 1
+ * @maxItems 1000
  */
 export type RedTeamCids = [NodeCIDState, ...NodeCIDState[]];
 /**
@@ -278,6 +280,8 @@ export type PresentationFormat = "jwt_vc" | "ldp_vc" | "sd_jwt" | "zkp_vc";
 export type CryptographicProofBlob = string;
 /**
  * The wallet of selective disclosure credentials proving the agent's identity, clearance, and budget authorization.
+ *
+ * @maxItems 100
  */
 export type CredentialPresentations = VerifiableCredentialPresentationReceipt[];
 /**
@@ -416,12 +420,14 @@ export type CapabilityCid = string;
  * The strictly bounded array of foundational AlgebraicRefinementContracts representing the P state geometry.
  *
  * @minItems 1
+ * @maxItems 100
  */
 export type Preconditions = [AlgebraicRefinementContract, ...AlgebraicRefinementContract[]];
 /**
  * The strictly bounded array of subsequent AlgebraicRefinementContracts representing the Q state geometry.
  *
  * @minItems 1
+ * @maxItems 100
  */
 export type Postconditions = [AlgebraicRefinementContract, ...AlgebraicRefinementContract[]];
 /**
@@ -604,6 +610,8 @@ export type PrismTargetPointer = string;
 export type StrictIsomorphism = boolean;
 /**
  * Profunctor mappings for side-effect-free state synchronization.
+ *
+ * @maxItems 100
  */
 export type StateSynchronizationOptics = OpticalMappingContract[];
 /**
@@ -742,6 +750,9 @@ export type AgentRole = "generator" | "critic" | "synthesizer";
  */
 export type StochasticTensor = string;
 export type EpistemicEntropy = number;
+/**
+ * @maxItems 1000
+ */
 export type StochasticGraph = StochasticNodeState[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
@@ -1083,6 +1094,8 @@ export type DerivationModeProfile = "direct_translation" | "abductive_upsampling
 export type JustificationHash = string | null;
 /**
  * The mathematical chain of custody binding this virtual coordinate back to physical vectors.
+ *
+ * @maxItems 100
  */
 export type LeafProvenance = EpistemicProvenanceReceipt[];
 /**
@@ -1293,6 +1306,7 @@ export type FormalLogicClauses = string;
  * Explicit pointers to the AtomicPropositionState or EpistemicOntologicalReificationReceipt nodes that causally justify this new mapping rule.
  *
  * @minItems 1
+ * @maxItems 100
  */
 export type JustificationEvidenceCids = [NodeCIDState, ...NodeCIDState[]];
 /**
@@ -3097,6 +3111,8 @@ export type TemporalIntervalProof = string | null;
 export type TemporalCircuitHash = string | null;
 /**
  * The array of Area of Interest perimeters dictating spatial telemetry isolation.
+ *
+ * @maxItems 100
  */
 export type ActiveSpatialSubscriptions = VolumetricPartitionState[];
 /**
@@ -3109,6 +3125,8 @@ export type FoveatedPrivacyEpsilon = number | null;
 export type TopologyClass68 = "dag";
 /**
  * The strict, topologically bounded matrix of directed causal edges.
+ *
+ * @maxItems 10000
  */
 export type Edges = [unknown, unknown][];
 /**
@@ -3357,10 +3375,14 @@ export type StakedMagnitude = number;
 export type ImpliedProbability = number;
 /**
  * The immutable ledger of all stakes placed by the swarm.
+ *
+ * @maxItems 10000
  */
 export type OrderBook = HypothesisStakeReceipt[];
 /**
  * The live algorithmic betting markets resolving swarm consensus.
+ *
+ * @maxItems 1000
  */
 export type ActivePredictionMarkets = PredictionMarketState[];
 /**
@@ -3383,6 +3405,8 @@ export type WinningHypothesisCid = string;
 export type FalsifiedHypothesisCids = string[];
 /**
  * The immutable records of finalized markets and reputation capital distributions.
+ *
+ * @maxItems 1000
  */
 export type ResolvedMarkets = MarketResolutionState[];
 /**
@@ -3579,6 +3603,7 @@ export type TopologyClass75 = "macro_federation";
  * The nodes forming the PBFT ring.
  *
  * @minItems 3
+ * @maxItems 1000
  */
 export type ParticipantCids = [NodeCIDState, NodeCIDState, NodeCIDState, ...NodeCIDState[]];
 /**
@@ -3727,6 +3752,8 @@ export type TenantCid186 = string;
 export type DiscourseType = "preamble" | "methodology" | "argumentation" | "findings" | "conclusion" | "addendum";
 /**
  * Explicit pointers linking this discourse block to the specific AtomicPropositionState nodes extracted from its text.
+ *
+ * @maxItems 1000
  */
 export type ContainedPropositions = NodeCIDState[];
 /**
@@ -3824,6 +3851,8 @@ export type TopologyClass82 = "manifold_mapping";
 export type IsometryPreservationScore = number;
 /**
  * Optional geometric projections binding this discrete node to a continuous spatial rendering environment.
+ *
+ * @maxItems 100
  */
 export type SpatialManifoldMappings = ContinuousManifoldMappingContract[];
 /**
@@ -3898,6 +3927,8 @@ export type ColumnSpan = number;
 export type TextPayload = string;
 /**
  * The complete, sorted array of constituent cell geometries.
+ *
+ * @maxItems 10000
  */
 export type Cells = TabularCellState[];
 /**
@@ -3918,6 +3949,8 @@ export type ParentKey = string;
 export type ChildKey = string;
 /**
  * Explicit state projection inputs.
+ *
+ * @maxItems 100
  */
 export type InputMappings = InputMappingContract[];
 /**
@@ -3934,6 +3967,8 @@ export type ChildKey1 = string;
 export type ParentKey1 = string;
 /**
  * Explicit state projection outputs.
+ *
+ * @maxItems 100
  */
 export type OutputMappings = OutputMappingContract[];
 /**
@@ -4050,10 +4085,14 @@ export type AuthorNodeCid = string;
 export type LamportTimestamp = number;
 /**
  * The Grow-Only Set (G-Set) of newly transmutated semantic vertices.
+ *
+ * @maxItems 10000
  */
 export type AddSet = NodeCIDState[];
 /**
  * The set of non-monotonic timeline caps.
+ *
+ * @maxItems 10000
  */
 export type TerminateSet = TemporalEdgeInvalidationIntent[];
 /**
@@ -4320,6 +4359,8 @@ export type SourceEventCid1 = string;
 export type InfluenceWeight = number;
 /**
  * Immutable audit trail of prior states that forced this specific cognitive synthesis.
+ *
+ * @maxItems 1000
  */
 export type CausalAttributions = CausalAttributionState[];
 /**
@@ -4397,6 +4438,8 @@ export type IllocutionaryForceProfile = "assertive" | "directive_normative" | "c
 export type TextChunk1 = string;
 /**
  * Explicit array of entity DIDs/CIDs resolving implicit references (e.g., pronouns) within the text chunk back to explicit nodes.
+ *
+ * @maxItems 100
  */
 export type AnaphoricResolutionCids = NodeCIDState[];
 /**
@@ -4430,6 +4473,8 @@ export type LowerBound = number | null;
 export type UpperBound = number | null;
 /**
  * Explicit mathematical boundaries extracted from the text that empirically limit the certainty or scope of the proposition.
+ *
+ * @maxItems 100
  */
 export type StatisticalQualifiers = EmpiricalStatisticalProfile[];
 /**
@@ -5257,6 +5302,8 @@ export type TopologyClass123 = "epistemic_starvation";
 export type StarvedEdgeCid = string;
 /**
  * The array of citations evaluated that fell below the required NLI threshold.
+ *
+ * @maxItems 1000
  */
 export type FailedCitations = EvidentiaryCitationState[];
 /**
@@ -5555,6 +5602,8 @@ export type AuctionMechanismProfile = "sealed_bid" | "dutch" | "vickrey";
 export type TenantCid267 = string;
 /**
  * The array of received bids.
+ *
+ * @maxItems 1000
  */
 export type Bids = AgentBidIntent[];
 /**
@@ -5738,6 +5787,8 @@ export type TenantCid279 = string;
 export type Jti = string;
 /**
  * An array of older JWT IDs that this token explicitly invalidates.
+ *
+ * @maxItems 100
  */
 export type Supersedes = string[];
 /**
@@ -5746,6 +5797,8 @@ export type Supersedes = string[];
 export type Exp = number;
 /**
  * The granted access rights (e.g., 'COMMERCIAL_USE', 'IP_SOVEREIGNTY_EXCEPTION').
+ *
+ * @maxItems 1000
  */
 export type Entitlements = string[];
 /**
@@ -5791,13 +5844,15 @@ export type ExpiresAtEpoch = number;
 /**
  * The standard JWT Expiration Time claim representing the POSIX timestamp when the receipt mechanically terminates.
  */
-export type Exp1 = number | null;
+export type Exp1 = number;
 /**
  * The standard JWT Issued At claim representing the POSIX timestamp when the receipt was issued.
  */
-export type Iat = number | null;
+export type Iat = number;
 /**
  * The specific feature flags and access rights granted by the commercial license. Examples: 'IP_SOVEREIGNTY_EXCEPTION', 'COMMERCIAL_USE', 'PRIVATE_NETWORK_FEDERATION', 'UNLIMITED_FORGE_OUTPUT'.
+ *
+ * @maxItems 1000
  */
 export type Entitlements1 = string[];
 /**
@@ -5928,6 +5983,8 @@ export type TenantCid287 = string;
 export type CapabilityCid2 = string;
 /**
  * The strictly bounded set of ToolIdentifiers this delegation permits.
+ *
+ * @maxItems 1000
  */
 export type AllowedToolCids = CapabilityPointerState[];
 /**
@@ -6046,6 +6103,7 @@ export type TenantCid295 = string;
  * The strict array of strict W3C DIDs (NodeIdentifierStates) representing concurrent topology branches.
  *
  * @minItems 2
+ * @maxItems 100
  */
 export type ConcurrentBranchCids = [NodeCIDState, NodeCIDState, ...NodeCIDState[]];
 /**
@@ -6086,6 +6144,8 @@ export type SourceSemanticNodeCid = string | null;
 export type Justification19 = string;
 /**
  * The foundational premises supporting this claim.
+ *
+ * @maxItems 100
  */
 export type Warrants = EvidentiaryWarrantState[];
 /**
@@ -6152,6 +6212,7 @@ export type ProofCid = string;
  * The strictly ordered sequence of axioms forming the reasoning path.
  *
  * @minItems 1
+ * @maxItems 1000
  */
 export type AxiomaticChain = [EpistemicAxiomState, ...EpistemicAxiomState[]];
 /**
@@ -6165,6 +6226,7 @@ export type TenantCid304 = string;
 export type GraphCid1 = string;
 /**
  * @minItems 1
+ * @maxItems 1000
  */
 export type VerifiedAxioms = [EpistemicAxiomState, ...EpistemicAxiomState[]];
 /**
@@ -6347,6 +6409,8 @@ export type ActionSpaces = CognitiveActionSpaceManifest[];
 export type ProfileCIDState = string;
 /**
  * The strict array of foundational model personas available.
+ *
+ * @maxItems 100
  */
 export type SupportedPersonas = ProfileCIDState[];
 /**
@@ -6551,6 +6615,8 @@ export type InvariantCid = string;
 export type CategoricalCohorts = string[];
 /**
  * The valid chronological windows encompassing the artifact.
+ *
+ * @maxItems 1000
  */
 export type TemporalObservationHorizons = TemporalBoundsProfile2[];
 /**
@@ -6977,6 +7043,8 @@ export type AuthorNodeCid1 = string;
 export type LamportTimestamp1 = number;
 /**
  * The exact, ordered sequence of deterministic state vector mutations.
+ *
+ * @maxItems 1000
  */
 export type Patches = StateMutationIntent[];
 /**
@@ -6989,6 +7057,8 @@ export type TenantCid352 = string;
 export type EpistemicCoordinate = string;
 /**
  * The explicit array of cryptographic pointers to past immutable EpistemicLedgerState blocks.
+ *
+ * @maxItems 10000
  */
 export type CrystallizedLedgerCids = string[];
 /**
@@ -14738,8 +14808,8 @@ export interface CommercialOverrideReceipt {
   hardware_zk_proof?: HardwareZkProof;
   issued_at_epoch: IssuedAtEpoch;
   expires_at_epoch: ExpiresAtEpoch;
-  exp?: Exp1;
-  iat?: Iat;
+  exp: Exp1;
+  iat: Iat;
   entitlements?: Entitlements1;
   network_mode: NetworkMode;
   federation_enabled?: FederationEnabled;
