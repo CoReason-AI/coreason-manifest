@@ -750,6 +750,7 @@ class IdentityContextProxy(CoreasonBaseState):
 
     jwt_payload: dict[str, JsonPrimitiveState] = Field(
         ...,
+        max_length=1000,
         description="The cryptographically validated JSON Web Token (JWT) claims extracted from the external Identity Provider.",
     )
     execution_taint: Annotated[
@@ -905,7 +906,7 @@ class StochasticTopologyManifest(CoreasonBaseState):
     topology_cid: Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_.:-]+$")]
     topology_class: Literal["stochastic_ensemble"] = Field(default="stochastic_ensemble")
     phase: IdeationPhaseProfile = Field()
-    stochastic_graph: list[StochasticNodeState] = Field()
+    stochastic_graph: list[StochasticNodeState] = Field(max_length=1000)
     superposition: HypothesisSuperpositionState | None = Field(default=None)
     epistemic_status: Literal["stochastically_unbounded"] = Field(default="stochastically_unbounded")
 
@@ -2959,6 +2960,7 @@ class StateDifferentialManifest(CoreasonBaseState):
         description="Causal history mapping of all known Lineage Watermarks to their latest logical mutation count at the time of authoring."
     )
     patches: list[StateMutationIntent] = Field(
+        max_length=1000,
         json_schema_extra={"coreason_topological_exemption": True},
         default_factory=list,
         description="The exact, ordered sequence of deterministic state vector mutations.",
@@ -2990,10 +2992,12 @@ class TemporalGraphCRDTManifest(CoreasonBaseState):
         description="Causal history mapping of all known Lineage Watermarks."
     )
     add_set: list[NodeCIDState] = Field(
-        default_factory=list, description="The Grow-Only Set (G-Set) of newly transmutated semantic vertices."
+        max_length=10000,
+        default_factory=list,
+        description="The Grow-Only Set (G-Set) of newly transmutated semantic vertices.",
     )
     terminate_set: list["TemporalEdgeInvalidationIntent"] = Field(
-        default_factory=list, description="The set of non-monotonic timeline caps."
+        max_length=10000, default_factory=list, description="The set of non-monotonic timeline caps."
     )
 
     @model_validator(mode="after")
@@ -3052,7 +3056,8 @@ class StateHydrationManifest(CoreasonBaseState):
         description="A string ID representing the session or specific spatial trace binding."
     )
     crystallized_ledger_cids: list[Annotated[str, StringConstraints(pattern="^[a-f0-9]{64}$")]] = Field(
-        description="The explicit array of cryptographic pointers to past immutable EpistemicLedgerState blocks."
+        max_length=10000,
+        description="The explicit array of cryptographic pointers to past immutable EpistemicLedgerState blocks.",
     )
     working_context_variables: dict[Annotated[str, StringConstraints(max_length=255)], JsonPrimitiveState] = Field(
         description="A strictly typed dictionary for ephemeral context variables injected at runtime. AGENT INSTRUCTION: This matrix is deterministically sorted by CoreasonBaseState natively. AGENT INSTRUCTION: Payload volume is strictly limited to an absolute $O(N)$ limit of 10,000 nodes and a maximum recursion depth of 10 to prevent VRAM exhaustion."
@@ -3816,6 +3821,7 @@ class SemanticMappingHeuristicIntent(CoreasonBaseState):
     )
     justification_evidence_cids: list[NodeCIDState] = Field(
         min_length=1,
+        max_length=100,
         description="Explicit pointers to the AtomicPropositionState or EpistemicOntologicalReificationReceipt nodes that causally justify this new mapping rule.",
     )
 
@@ -4429,7 +4435,9 @@ class TabularMatrixProfile(CoreasonBaseState):
     matrix_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
     total_rows: int = Field(ge=1)
     total_columns: int = Field(ge=1)
-    cells: list[TabularCellState] = Field(description="The complete, sorted array of constituent cell geometries.")
+    cells: list[TabularCellState] = Field(
+        max_length=10000, description="The complete, sorted array of constituent cell geometries."
+    )
 
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
@@ -4857,6 +4865,7 @@ class EnsembleTopologyProfile(CoreasonBaseState):
     concurrent_branch_cids: list[NodeCIDState] = Field(
         ...,
         min_length=2,
+        max_length=100,
         description="The strict array of strict W3C DIDs (NodeIdentifierStates) representing concurrent topology branches.",
     )
     fusion_function: Literal["weighted_consensus", "highest_confidence", "brier_score_collapse"] = Field(
@@ -5404,7 +5413,7 @@ class EpistemicArgumentClaimState(CoreasonBaseState):
         description="The natural language representation of the proposition."
     )
     warrants: list[EvidentiaryWarrantState] = Field(
-        default_factory=list, description="The foundational premises supporting this claim."
+        max_length=100, default_factory=list, description="The foundational premises supporting this claim."
     )
 
     @model_validator(mode="after")
@@ -5651,7 +5660,7 @@ class DelegatedCapabilityManifest(CoreasonBaseState):
         description="The DID representing the autonomous actor receiving authority."
     )
     allowed_tool_cids: list[CapabilityPointerState] = Field(
-        description="The strictly bounded set of ToolIdentifiers this delegation permits."
+        max_length=1000, description="The strictly bounded set of ToolIdentifiers this delegation permits."
     )
     expiration_timestamp: float = Field(
         ge=0.0, le=253402300799.0, description="A float bounding the temporal lifecycle."
@@ -6200,6 +6209,7 @@ class SpatialTaxonomicNodeState(CoreasonBaseState):
         default_factory=list, description="Explicit array of child node CIDs to enforce the Directed Acyclic Graph."
     )
     leaf_provenance: list["EpistemicProvenanceReceipt"] = Field(
+        max_length=100,
         default_factory=list,
         description="The mathematical chain of custody binding this virtual coordinate back to physical vectors.",
     )
@@ -7689,6 +7699,7 @@ class MCPServerManifest(CoreasonBaseState):
         description="Cryptographic proof of identity and authorization for the external server."
     )
     state_synchronization_optics: list[OpticalMappingContract] = Field(
+        max_length=100,
         default_factory=list,
         description="Profunctor mappings for side-effect-free state synchronization.",
     )
@@ -8100,7 +8111,7 @@ class SpatialOntologicalSurfaceProjectionManifest(CoreasonBaseState):
         default_factory=list, description="The full, machine-readable declaration of accessible tools and MCP servers."
     )
     supported_personas: list[ProfileCIDState] = Field(
-        default_factory=list, description="The strict array of foundational model personas available."
+        max_length=100, default_factory=list, description="The strict array of foundational model personas available."
     )
     available_procedural_manifolds: list[ProceduralMetadataManifest] = Field(
         default_factory=list, description="The lightweight progressive disclosure tier for procedural skills."
@@ -8580,7 +8591,8 @@ class NeuralAuditAttestationReceipt(CoreasonBaseState):
         description="A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.",
     )
     hook_activations: dict[str, list[SaeFeatureActivationState]] = Field(
-        description="A mapping of specific TransformerLens hook points to their top-k activated SAE features."
+        max_length=1000,
+        description="A mapping of specific TransformerLens hook points to their top-k activated SAE features.",
     )
     causal_scrubbing_applied: bool = Field(
         default=False,
@@ -8717,10 +8729,10 @@ class CompositeNodeProfile(CoreasonBaseState):
     topology_class: Literal["composite"] = Field(default="composite", description="Discriminator for a Composite node.")
     topology: "AnyTopologyManifest" = Field(description="The encapsulated subgraph to execute.")
     input_mappings: list[InputMappingContract] = Field(
-        default_factory=list, description="Explicit state projection inputs."
+        max_length=100, default_factory=list, description="Explicit state projection inputs."
     )
     output_mappings: list[OutputMappingContract] = Field(
-        default_factory=list, description="Explicit state projection outputs."
+        max_length=100, default_factory=list, description="Explicit state projection outputs."
     )
 
     @model_validator(mode="after")
@@ -8860,7 +8872,7 @@ class PredictionMarketState(CoreasonBaseState):
         description="The stringified decimal representing the liquidity parameter defining the market depth and max loss for the AMM."
     )
     order_book: list[HypothesisStakeReceipt] = Field(
-        description="The immutable ledger of all stakes placed by the swarm."
+        max_length=10000, description="The immutable ledger of all stakes placed by the swarm."
     )
     current_market_probabilities: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=255)]
@@ -9822,7 +9834,11 @@ class AuctionState(CoreasonBaseState):
     """
 
     announcement: TaskAnnouncementIntent = Field(description="The original call for proposals.")
-    bids: list[AgentBidIntent] = Field(default_factory=list, description="The array of received bids.")
+    bids: list[AgentBidIntent] = Field(
+        max_length=1000,
+        default_factory=list,
+        description="The array of received bids.",
+    )
     award: TaskAwardReceipt | None = Field(
         default=None, description="The final cryptographic receipt of the auction, if resolved."
     )
@@ -9948,7 +9964,7 @@ class GlobalSemanticInvariantProfile(CoreasonBaseState):
         description="An untyped but volumetrically bounded dictionary defining study arms, jurisdictions, or specific environmental conditions.",
     )
     temporal_observation_horizons: list[TemporalBoundsProfile] = Field(
-        default_factory=list, description="The valid chronological windows encompassing the artifact."
+        max_length=1000, default_factory=list, description="The valid chronological windows encompassing the artifact."
     )
 
     @field_validator("operational_perimeters", mode="before")
@@ -9989,6 +10005,7 @@ class DiscourseNodeState(CoreasonBaseState):
         default=None, description="A pointer to the subsuming structural block. None indicates this is a root node."
     )
     contained_propositions: list[NodeCIDState] = Field(
+        max_length=1000,
         default_factory=list,
         description="Explicit pointers linking this discourse block to the specific AtomicPropositionState nodes extracted from its text.",
     )
@@ -10303,10 +10320,12 @@ class HoareLogicProofReceipt(CoreasonBaseState):
         description="The 128-char DID boundary physically binding this proof to the target executable matrix."
     )
     preconditions: Annotated[list[AlgebraicRefinementContract], Field(min_length=1)] = Field(
-        description="The strictly bounded array of foundational AlgebraicRefinementContracts representing the P state geometry."
+        max_length=100,
+        description="The strictly bounded array of foundational AlgebraicRefinementContracts representing the P state geometry.",
     )
     postconditions: Annotated[list[AlgebraicRefinementContract], Field(min_length=1)] = Field(
-        description="The strictly bounded array of subsequent AlgebraicRefinementContracts representing the Q state geometry."
+        max_length=100,
+        description="The strictly bounded array of subsequent AlgebraicRefinementContracts representing the Q state geometry.",
     )
     proof_system: Literal["lean4", "z3"] = Field(
         description="The strict mathematical automaton engine responsible for evaluating the structural boundary."
@@ -10669,6 +10688,7 @@ class SemanticNodeState(CoreasonBaseState):
         description="The cryptographic envelope enabling privacy-preserving computation directly on this node's encrypted state.",
     )
     spatial_manifold_mappings: list["ContinuousManifoldMappingContract"] = Field(
+        max_length=100,
         default_factory=list,
         description="Optional geometric projections binding this discrete node to a continuous spatial rendering environment.",
     )
@@ -10743,6 +10763,7 @@ class AgentAttestationReceipt(CoreasonBaseState):
         pattern="^[a-f0-9]{64}$", description="The SHA-256 Merkle root of the agent's verified semantic capabilities."
     )
     credential_presentations: list[VerifiableCredentialPresentationReceipt] = Field(
+        max_length=100,
         default_factory=list,
         description="The wallet of selective disclosure credentials proving the agent's identity, clearance, and budget authorization.",
     )
@@ -11117,6 +11138,7 @@ class ObservabilityLODPolicy(CoreasonBaseState):
         description="The network flow constraints mathematically bound to the observer's kinematics."
     )
     active_spatial_subscriptions: list[VolumetricPartitionState] = Field(
+        max_length=100,
         default_factory=list,
         description="The array of Area of Interest perimeters dictating spatial telemetry isolation.",
     )
@@ -11175,7 +11197,9 @@ class CouncilTopologyManifest(CoreasonBaseState):
     justification: Annotated[str, StringConstraints(max_length=2000)] | None = Field(
         default=None, description="Cryptographic/audit justification for this topology's configuration."
     )
-    nodes: dict[NodeCIDState, AnyNodeProfile] = Field(description="Flat registry of all nodes in this topology.")
+    nodes: dict[NodeCIDState, AnyNodeProfile] = Field(
+        max_length=10000, description="Flat registry of all nodes in this topology."
+    )
     shared_state_contract: StateContract | None = Field(
         default=None, description="The schema-on-write contract governing the internal state of this topology."
     )
@@ -11249,7 +11273,9 @@ class DAGTopologyManifest(CoreasonBaseState):
     justification: Annotated[str, StringConstraints(max_length=2000)] | None = Field(
         default=None, description="Cryptographic/audit justification for this topology's configuration."
     )
-    nodes: dict[NodeCIDState, AnyNodeProfile] = Field(description="Flat registry of all nodes in this topology.")
+    nodes: dict[NodeCIDState, AnyNodeProfile] = Field(
+        max_length=10000, description="Flat registry of all nodes in this topology."
+    )
     shared_state_contract: StateContract | None = Field(
         default=None, description="The schema-on-write contract governing the internal state of this topology."
     )
@@ -11266,7 +11292,9 @@ class DAGTopologyManifest(CoreasonBaseState):
 
     topology_class: Literal["dag"] = Field(default="dag", description="Discriminator for a DAG topology.")
     edges: list[tuple[NodeCIDState, NodeCIDState]] = Field(
-        default_factory=list, description="The strict, topologically bounded matrix of directed causal edges."
+        max_length=10000,
+        default_factory=list,
+        description="The strict, topologically bounded matrix of directed causal edges.",
     )
     allow_cycles: bool = Field(
         default=False, description="Configuration indicating if cycles are allowed during validation."
@@ -11355,7 +11383,9 @@ class DigitalTwinTopologyManifest(CoreasonBaseState):
     justification: Annotated[str, StringConstraints(max_length=2000)] | None = Field(
         default=None, description="Cryptographic/audit justification for this topology's configuration."
     )
-    nodes: dict[NodeCIDState, AnyNodeProfile] = Field(description="Flat registry of all nodes in this topology.")
+    nodes: dict[NodeCIDState, AnyNodeProfile] = Field(
+        max_length=10000, description="Flat registry of all nodes in this topology."
+    )
     shared_state_contract: StateContract | None = Field(
         default=None, description="The schema-on-write contract governing the internal state of this topology."
     )
@@ -11409,7 +11439,9 @@ class EvaluatorOptimizerTopologyManifest(CoreasonBaseState):
     justification: Annotated[str, StringConstraints(max_length=2000)] | None = Field(
         default=None, description="Cryptographic/audit justification for this topology's configuration."
     )
-    nodes: dict[NodeCIDState, AnyNodeProfile] = Field(description="Flat registry of all nodes in this topology.")
+    nodes: dict[NodeCIDState, AnyNodeProfile] = Field(
+        max_length=10000, description="Flat registry of all nodes in this topology."
+    )
     shared_state_contract: StateContract | None = Field(
         default=None, description="The schema-on-write contract governing the internal state of this topology."
     )
@@ -11477,7 +11509,9 @@ class EvolutionaryTopologyManifest(CoreasonBaseState):
     justification: Annotated[str, StringConstraints(max_length=2000)] | None = Field(
         default=None, description="Cryptographic/audit justification for this topology's configuration."
     )
-    nodes: dict[NodeCIDState, AnyNodeProfile] = Field(description="Flat registry of all nodes in this topology.")
+    nodes: dict[NodeCIDState, AnyNodeProfile] = Field(
+        max_length=10000, description="Flat registry of all nodes in this topology."
+    )
     shared_state_contract: StateContract | None = Field(
         default=None, description="The schema-on-write contract governing the internal state of this topology."
     )
@@ -11535,7 +11569,9 @@ class SMPCTopologyManifest(CoreasonBaseState):
     justification: Annotated[str, StringConstraints(max_length=2000)] | None = Field(
         default=None, description="Cryptographic/audit justification for this topology's configuration."
     )
-    nodes: dict[NodeCIDState, AnyNodeProfile] = Field(description="Flat registry of all nodes in this topology.")
+    nodes: dict[NodeCIDState, AnyNodeProfile] = Field(
+        max_length=10000, description="Flat registry of all nodes in this topology."
+    )
     shared_state_contract: StateContract | None = Field(
         default=None, description="The schema-on-write contract governing the internal state of this topology."
     )
@@ -11595,7 +11631,9 @@ class SwarmTopologyManifest(CoreasonBaseState):
     justification: Annotated[str, StringConstraints(max_length=2000)] | None = Field(
         default=None, description="Cryptographic/audit justification for this topology's configuration."
     )
-    nodes: dict[NodeCIDState, AnyNodeProfile] = Field(description="Flat registry of all nodes in this topology.")
+    nodes: dict[NodeCIDState, AnyNodeProfile] = Field(
+        max_length=10000, description="Flat registry of all nodes in this topology."
+    )
     shared_state_contract: StateContract | None = Field(
         default=None, description="The schema-on-write contract governing the internal state of this topology."
     )
@@ -11619,9 +11657,12 @@ class SwarmTopologyManifest(CoreasonBaseState):
         default=None, description="The mathematical policy governing task decentralization via Spot Markets."
     )
     active_prediction_markets: list[PredictionMarketState] = Field(
-        default_factory=list, description="The live algorithmic betting markets resolving swarm consensus."
+        max_length=1000,
+        default_factory=list,
+        description="The live algorithmic betting markets resolving swarm consensus.",
     )
     resolved_markets: list[MarketResolutionState] = Field(
+        max_length=1000,
         default_factory=list,
         description="The immutable records of finalized markets and reputation capital distributions.",
     )
@@ -11709,8 +11750,12 @@ class AdversarialMarketTopologyManifest(CoreasonBaseState):
     topology_class: Literal["macro_adversarial"] = Field(
         default="macro_adversarial", description="Discriminator for adversarial macro."
     )
-    blue_team_cids: list[NodeCIDState] = Field(min_length=1, description="Nodes assigned to the Blue Team.")
-    red_team_cids: list[NodeCIDState] = Field(min_length=1, description="Nodes assigned to the Red Team.")
+    blue_team_cids: list[NodeCIDState] = Field(
+        min_length=1, max_length=1000, description="Nodes assigned to the Blue Team."
+    )
+    red_team_cids: list[NodeCIDState] = Field(
+        min_length=1, max_length=1000, description="Nodes assigned to the Red Team."
+    )
     adjudicator_cid: NodeCIDState = Field(
         description="The neutral node responsible for synthesizing the market resolution."
     )
@@ -11759,7 +11804,9 @@ class ConsensusFederationTopologyManifest(CoreasonBaseState):
     topology_class: Literal["macro_federation"] = Field(
         default="macro_federation", description="Discriminator for federation macro."
     )
-    participant_cids: list[NodeCIDState] = Field(min_length=3, description="The nodes forming the PBFT ring.")
+    participant_cids: list[NodeCIDState] = Field(
+        min_length=3, max_length=1000, description="The nodes forming the PBFT ring."
+    )
     adjudicator_cid: NodeCIDState = Field(description="The orchestrating sequencer for the PBFT consensus.")
     quorum_rules: QuorumPolicy = Field(description="The strict BFT tolerance bounds.")
 
@@ -11809,7 +11856,7 @@ class NeurosymbolicIngestionTopologyManifest(CoreasonBaseState):
         default=None, description="Cryptographic/audit justification for this topology's configuration."
     )
     nodes: dict[NodeCIDState, AnyNodeProfile] = Field(
-        default_factory=dict, description="Flat registry of all nodes in this topology."
+        max_length=10000, default_factory=dict, description="Flat registry of all nodes in this topology."
     )
     shared_state_contract: StateContract | None = Field(
         default=None, description="The schema-on-write contract governing the internal state."
@@ -11895,7 +11942,9 @@ class CapabilityForgeTopologyManifest(CoreasonBaseState):
     justification: Annotated[str, StringConstraints(max_length=2000)] | None = Field(
         default=None, description="Cryptographic/audit justification for this topology's configuration."
     )
-    nodes: dict[NodeCIDState, AnyNodeProfile] = Field(description="Flat registry of all nodes in this topology.")
+    nodes: dict[NodeCIDState, AnyNodeProfile] = Field(
+        max_length=10000, description="Flat registry of all nodes in this topology."
+    )
     shared_state_contract: StateContract | None = Field(
         default=None, description="The schema-on-write contract governing the internal state of this topology."
     )
@@ -11970,7 +12019,9 @@ class IntentElicitationTopologyManifest(CoreasonBaseState):
     justification: Annotated[str, StringConstraints(max_length=2000)] | None = Field(
         default=None, description="Cryptographic/audit justification for this topology's configuration."
     )
-    nodes: dict[NodeCIDState, AnyNodeProfile] = Field(description="Flat registry of all nodes in this topology.")
+    nodes: dict[NodeCIDState, AnyNodeProfile] = Field(
+        max_length=10000, description="Flat registry of all nodes in this topology."
+    )
     shared_state_contract: StateContract | None = Field(
         default=None, description="The schema-on-write contract governing the internal state of this topology."
     )
@@ -12053,7 +12104,9 @@ class NeurosymbolicVerificationTopologyManifest(CoreasonBaseState):
     justification: Annotated[str, StringConstraints(max_length=2000)] | None = Field(
         default=None, description="Cryptographic/audit justification for this topology's configuration."
     )
-    nodes: dict[NodeCIDState, AnyNodeProfile] = Field(description="Flat registry of all nodes in this topology.")
+    nodes: dict[NodeCIDState, AnyNodeProfile] = Field(
+        max_length=10000, description="Flat registry of all nodes in this topology."
+    )
     shared_state_contract: StateContract | None = Field(
         default=None, description="The schema-on-write contract governing the internal state of this topology."
     )
@@ -12360,6 +12413,7 @@ class BeliefMutationEvent(CoreasonBaseState):
         default=None, description="The specific topological node that synthesized this belief assertion."
     )
     causal_attributions: list[CausalAttributionState] = Field(
+        max_length=1000,
         default_factory=list,
         description="Immutable audit trail of prior states that forced this specific cognitive synthesis.",
     )
@@ -12801,7 +12855,7 @@ class EpistemicDomainGraphManifest(CoreasonBaseState):
     """
 
     graph_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field()
-    verified_axioms: list[EpistemicAxiomState] = Field(min_length=1)
+    verified_axioms: list[EpistemicAxiomState] = Field(min_length=1, max_length=1000)
 
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
@@ -12833,6 +12887,7 @@ class EpistemicTopologicalProofManifest(CoreasonBaseState):
         description="A Content Identifier (CID) for this specific topological proof.",
     )
     axiomatic_chain: list[EpistemicAxiomState] = Field(
+        max_length=1000,
         json_schema_extra={"coreason_topological_exemption": True},
         min_length=1,
         description="The strictly ordered sequence of axioms forming the reasoning path.",
@@ -13230,10 +13285,12 @@ class AtomicPropositionState(CoreasonBaseState):
         description="The raw, atomic natural language representation of the proposition. Volumetrically clamped to prevent VRAM overflow."
     )
     anaphoric_resolution_cids: list[NodeCIDState] = Field(
+        max_length=100,
         default_factory=list,
         description="Explicit array of entity DIDs/CIDs resolving implicit references (e.g., pronouns) within the text chunk back to explicit nodes.",
     )
     statistical_qualifiers: list[EmpiricalStatisticalProfile] = Field(
+        max_length=100,
         default_factory=list,
         description="Explicit mathematical boundaries extracted from the text that empirically limit the certainty or scope of the proposition.",
     )
@@ -13529,7 +13586,7 @@ class EpistemicMCPToolDefinitionState(CoreasonBaseState):
     name: Annotated[str, StringConstraints(max_length=64, pattern="^[a-zA-Z0-9_-]+$")]
     description: Annotated[str, StringConstraints(max_length=2048)]
     input_schema: dict[str, JsonPrimitiveState] = Field(
-        alias="inputSchema", description="The JSON Schema payload mirroring our Pydantic limits."
+        max_length=1000, alias="inputSchema", description="The JSON Schema payload mirroring our Pydantic limits."
     )
 
 
@@ -14000,7 +14057,7 @@ class EpistemicStarvationEvent(CoreasonBaseState):
         Field(description="The cryptographic pointer to the specific edge that failed empirical grounding.")
     )
     failed_citations: list[EvidentiaryCitationState] = Field(
-        description="The array of citations evaluated that fell below the required NLI threshold."
+        max_length=1000, description="The array of citations evaluated that fell below the required NLI threshold."
     )
     diagnostic_reason: Annotated[str, StringConstraints(max_length=2000)] = Field(
         description="The semantic explanation for the starvation (e.g., 'Maximum search retries exhausted')."
@@ -14110,7 +14167,7 @@ class ContinuousObservationState(CoreasonBaseState):
         description="The array of ingested tokens representing the continuous stream. AGENT INSTRUCTION: Topological Exemption applied. Do NOT sort this array, as its chronological sequence is its mathematical state.",
     )
     temporal_decay_matrix: dict[Annotated[int, Field(ge=0)], Annotated[float, Field(ge=0.0, le=1.0)]] = Field(
-        description="The mathematical decay map applied to historical token indices."
+        max_length=10000, description="The mathematical decay map applied to historical token indices."
     )
     latest_confidence_score: float = Field(
         ge=0.0, le=1.0, description="The certainty score of the latest token prediction."
@@ -14399,12 +14456,15 @@ class CommercialLicenseState(CoreasonBaseState):
         description="The unique cryptographic identifier of this specific JWT token."
     )
     supersedes: list[str] = Field(
-        default_factory=list, description="An array of older JWT IDs that this token explicitly invalidates."
+        max_length=100,
+        default_factory=list,
+        description="An array of older JWT IDs that this token explicitly invalidates.",
     )
     exp: int = Field(
         description="The absolute UNIX epoch timestamp when this commercial exception mechanically terminates."
     )
     entitlements: list[str] = Field(
+        max_length=1000,
         default_factory=list,
         description="The granted access rights (e.g., 'COMMERCIAL_USE', 'IP_SOVEREIGNTY_EXCEPTION').",
     )
@@ -14471,15 +14531,14 @@ class CommercialOverrideReceipt(CoreasonBaseState):
         description="The POSIX timestamp (seconds since epoch) when this receipt mechanically terminates. "
         "After expiration, the WASM sandbox must gracefully fallback to Prosperity 3.0 mode.",
     )
-    exp: int | None = Field(
-        default=None,
+    exp: int = Field(
         description="The standard JWT Expiration Time claim representing the POSIX timestamp when the receipt mechanically terminates.",
     )
-    iat: int | None = Field(
-        default=None,
+    iat: int = Field(
         description="The standard JWT Issued At claim representing the POSIX timestamp when the receipt was issued.",
     )
     entitlements: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
+        max_length=1000,
         default_factory=list,
         description="The specific feature flags and access rights granted by the commercial license. "
         "Examples: 'IP_SOVEREIGNTY_EXCEPTION', 'COMMERCIAL_USE', 'PRIVATE_NETWORK_FEDERATION', 'UNLIMITED_FORGE_OUTPUT'.",
@@ -14494,13 +14553,18 @@ class CommercialOverrideReceipt(CoreasonBaseState):
         "for capability sharing, URN resolution against the public ledger, and cross-network publishing.",
     )
 
+    @model_validator(mode="before")
+    @classmethod
+    def _populate_standard_claims(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            if "exp" not in data and "expires_at_epoch" in data:
+                data["exp"] = data["expires_at_epoch"]
+            if "iat" not in data and "issued_at_epoch" in data:
+                data["iat"] = data["issued_at_epoch"]
+        return data
+
     @model_validator(mode="after")
     def _enforce_temporal_ordering(self) -> Self:
-        if self.exp is None:
-            object.__setattr__(self, "exp", self.expires_at_epoch)
-        if self.iat is None:
-            object.__setattr__(self, "iat", self.issued_at_epoch)
-
         if self.exp != self.expires_at_epoch:
             raise ValueError(
                 f"Consistency Violation: exp ({self.exp}) must match expires_at_epoch ({self.expires_at_epoch})."

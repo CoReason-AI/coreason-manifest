@@ -397,6 +397,7 @@
           "items": {
             "$ref": "#/$defs/NodeCIDState"
           },
+          "maxItems": 1000,
           "minItems": 1,
           "title": "Blue Team Cids",
           "type": "array"
@@ -406,6 +407,7 @@
           "items": {
             "$ref": "#/$defs/NodeCIDState"
           },
+          "maxItems": 1000,
           "minItems": 1,
           "title": "Red Team Cids",
           "type": "array"
@@ -467,6 +469,7 @@
           "items": {
             "$ref": "#/$defs/VerifiableCredentialPresentationReceipt"
           },
+          "maxItems": 100,
           "title": "Credential Presentations",
           "type": "array"
         }
@@ -1562,6 +1565,7 @@
           "items": {
             "$ref": "#/$defs/NodeCIDState"
           },
+          "maxItems": 100,
           "title": "Anaphoric Resolution Cids",
           "type": "array"
         },
@@ -1570,6 +1574,7 @@
           "items": {
             "$ref": "#/$defs/EmpiricalStatisticalProfile"
           },
+          "maxItems": 100,
           "title": "Statistical Qualifiers",
           "type": "array"
         }
@@ -1659,6 +1664,7 @@
           "items": {
             "$ref": "#/$defs/AgentBidIntent"
           },
+          "maxItems": 1000,
           "title": "Bids",
           "type": "array"
         },
@@ -2037,6 +2043,7 @@
           "items": {
             "$ref": "#/$defs/CausalAttributionState"
           },
+          "maxItems": 1000,
           "title": "Causal Attributions",
           "type": "array"
         },
@@ -2426,6 +2433,7 @@
             "$ref": "#/$defs/AnyNodeProfile"
           },
           "description": "Flat registry of all nodes in this topology.",
+          "maxProperties": 10000,
           "propertyNames": {
             "$ref": "#/$defs/NodeCIDState"
           },
@@ -4543,6 +4551,7 @@
           "items": {
             "type": "string"
           },
+          "maxItems": 100,
           "title": "Supersedes",
           "type": "array"
         },
@@ -4556,6 +4565,7 @@
           "items": {
             "type": "string"
           },
+          "maxItems": 1000,
           "title": "Entitlements",
           "type": "array"
         },
@@ -4658,30 +4668,14 @@
           "type": "integer"
         },
         "exp": {
-          "anyOf": [
-            {
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
           "description": "The standard JWT Expiration Time claim representing the POSIX timestamp when the receipt mechanically terminates.",
-          "title": "Exp"
+          "title": "Exp",
+          "type": "integer"
         },
         "iat": {
-          "anyOf": [
-            {
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
           "description": "The standard JWT Issued At claim representing the POSIX timestamp when the receipt was issued.",
-          "title": "Iat"
+          "title": "Iat",
+          "type": "integer"
         },
         "entitlements": {
           "description": "The specific feature flags and access rights granted by the commercial license. Examples: 'IP_SOVEREIGNTY_EXCEPTION', 'COMMERCIAL_USE', 'PRIVATE_NETWORK_FEDERATION', 'UNLIMITED_FORGE_OUTPUT'.",
@@ -4690,6 +4684,7 @@
             "minLength": 1,
             "type": "string"
           },
+          "maxItems": 1000,
           "title": "Entitlements",
           "type": "array"
         },
@@ -4715,6 +4710,8 @@
         "distr_license_cid",
         "issued_at_epoch",
         "expires_at_epoch",
+        "exp",
+        "iat",
         "network_mode"
       ],
       "title": "CommercialOverrideReceipt",
@@ -4847,6 +4844,7 @@
           "items": {
             "$ref": "#/$defs/InputMappingContract"
           },
+          "maxItems": 100,
           "title": "Input Mappings",
           "type": "array"
         },
@@ -4855,6 +4853,7 @@
           "items": {
             "$ref": "#/$defs/OutputMappingContract"
           },
+          "maxItems": 100,
           "title": "Output Mappings",
           "type": "array"
         }
@@ -5082,6 +5081,7 @@
           "items": {
             "$ref": "#/$defs/NodeCIDState"
           },
+          "maxItems": 1000,
           "minItems": 3,
           "title": "Participant Cids",
           "type": "array"
@@ -5599,6 +5599,7 @@
             "type": "number"
           },
           "description": "The mathematical decay map applied to historical token indices.",
+          "maxProperties": 10000,
           "title": "Temporal Decay Matrix",
           "type": "object"
         },
@@ -5731,6 +5732,7 @@
             "$ref": "#/$defs/AnyNodeProfile"
           },
           "description": "Flat registry of all nodes in this topology.",
+          "maxProperties": 10000,
           "propertyNames": {
             "$ref": "#/$defs/NodeCIDState"
           },
@@ -6402,6 +6404,7 @@
             "$ref": "#/$defs/AnyNodeProfile"
           },
           "description": "Flat registry of all nodes in this topology.",
+          "maxProperties": 10000,
           "propertyNames": {
             "$ref": "#/$defs/NodeCIDState"
           },
@@ -6466,6 +6469,7 @@
             ],
             "type": "array"
           },
+          "maxItems": 10000,
           "title": "Edges",
           "type": "array"
         },
@@ -6718,6 +6722,7 @@
           "items": {
             "$ref": "#/$defs/CapabilityPointerState"
           },
+          "maxItems": 1000,
           "title": "Allowed Tool Cids",
           "type": "array"
         },
@@ -6865,6 +6870,7 @@
             "$ref": "#/$defs/AnyNodeProfile"
           },
           "description": "Flat registry of all nodes in this topology.",
+          "maxProperties": 10000,
           "propertyNames": {
             "$ref": "#/$defs/NodeCIDState"
           },
@@ -6988,6 +6994,7 @@
           "items": {
             "$ref": "#/$defs/NodeCIDState"
           },
+          "maxItems": 1000,
           "title": "Contained Propositions",
           "type": "array"
         }
@@ -7992,6 +7999,7 @@
           "items": {
             "$ref": "#/$defs/NodeCIDState"
           },
+          "maxItems": 100,
           "minItems": 2,
           "title": "Concurrent Branch Cids",
           "type": "array"
@@ -8140,6 +8148,7 @@
           "items": {
             "$ref": "#/$defs/EvidentiaryWarrantState"
           },
+          "maxItems": 100,
           "title": "Warrants",
           "type": "array"
         }
@@ -8685,6 +8694,7 @@
           "items": {
             "$ref": "#/$defs/EpistemicAxiomState"
           },
+          "maxItems": 1000,
           "minItems": 1,
           "title": "Verified Axioms",
           "type": "array"
@@ -9184,6 +9194,7 @@
             "$ref": "#/$defs/JsonPrimitiveState"
           },
           "description": "The JSON Schema payload mirroring our Pydantic limits.",
+          "maxProperties": 1000,
           "title": "Inputschema",
           "type": "object"
         }
@@ -10421,6 +10432,7 @@
           "items": {
             "$ref": "#/$defs/EvidentiaryCitationState"
           },
+          "maxItems": 1000,
           "title": "Failed Citations",
           "type": "array"
         },
@@ -10559,6 +10571,7 @@
           "items": {
             "$ref": "#/$defs/EpistemicAxiomState"
           },
+          "maxItems": 1000,
           "minItems": 1,
           "title": "Axiomatic Chain",
           "type": "array"
@@ -11103,6 +11116,7 @@
             "$ref": "#/$defs/AnyNodeProfile"
           },
           "description": "Flat registry of all nodes in this topology.",
+          "maxProperties": 10000,
           "propertyNames": {
             "$ref": "#/$defs/NodeCIDState"
           },
@@ -11487,6 +11501,7 @@
             "$ref": "#/$defs/AnyNodeProfile"
           },
           "description": "Flat registry of all nodes in this topology.",
+          "maxProperties": 10000,
           "propertyNames": {
             "$ref": "#/$defs/NodeCIDState"
           },
@@ -12647,6 +12662,7 @@
           "items": {
             "$ref": "#/$defs/TemporalBoundsProfile"
           },
+          "maxItems": 1000,
           "title": "Temporal Observation Horizons",
           "type": "array"
         }
@@ -13189,6 +13205,7 @@
           "items": {
             "$ref": "#/$defs/AlgebraicRefinementContract"
           },
+          "maxItems": 100,
           "minItems": 1,
           "title": "Preconditions",
           "type": "array"
@@ -13198,6 +13215,7 @@
           "items": {
             "$ref": "#/$defs/AlgebraicRefinementContract"
           },
+          "maxItems": 100,
           "minItems": 1,
           "title": "Postconditions",
           "type": "array"
@@ -13514,6 +13532,7 @@
             "$ref": "#/$defs/JsonPrimitiveState"
           },
           "description": "The cryptographically validated JSON Web Token (JWT) claims extracted from the external Identity Provider.",
+          "maxProperties": 1000,
           "title": "Jwt Payload",
           "type": "object"
         },
@@ -13787,6 +13806,7 @@
             "$ref": "#/$defs/AnyNodeProfile"
           },
           "description": "Flat registry of all nodes in this topology.",
+          "maxProperties": 10000,
           "propertyNames": {
             "$ref": "#/$defs/NodeCIDState"
           },
@@ -15248,6 +15268,7 @@
           "items": {
             "$ref": "#/$defs/OpticalMappingContract"
           },
+          "maxItems": 100,
           "title": "State Synchronization Optics",
           "type": "array"
         }
@@ -16079,6 +16100,7 @@
             "type": "array"
           },
           "description": "A mapping of specific TransformerLens hook points to their top-k activated SAE features.",
+          "maxProperties": 1000,
           "title": "Hook Activations",
           "type": "object"
         },
@@ -16291,6 +16313,7 @@
             "$ref": "#/$defs/AnyNodeProfile"
           },
           "description": "Flat registry of all nodes in this topology.",
+          "maxProperties": 10000,
           "propertyNames": {
             "$ref": "#/$defs/NodeCIDState"
           },
@@ -16451,6 +16474,7 @@
             "$ref": "#/$defs/AnyNodeProfile"
           },
           "description": "Flat registry of all nodes in this topology.",
+          "maxProperties": 10000,
           "propertyNames": {
             "$ref": "#/$defs/NodeCIDState"
           },
@@ -16584,6 +16608,7 @@
           "items": {
             "$ref": "#/$defs/VolumetricPartitionState"
           },
+          "maxItems": 100,
           "title": "Active Spatial Subscriptions",
           "type": "array"
         },
@@ -17447,6 +17472,7 @@
           "items": {
             "$ref": "#/$defs/HypothesisStakeReceipt"
           },
+          "maxItems": 10000,
           "title": "Order Book",
           "type": "array"
         },
@@ -18317,6 +18343,7 @@
             "$ref": "#/$defs/AnyNodeProfile"
           },
           "description": "Flat registry of all nodes in this topology.",
+          "maxProperties": 10000,
           "propertyNames": {
             "$ref": "#/$defs/NodeCIDState"
           },
@@ -19185,6 +19212,7 @@
           "items": {
             "$ref": "#/$defs/NodeCIDState"
           },
+          "maxItems": 100,
           "minItems": 1,
           "title": "Justification Evidence Cids",
           "type": "array"
@@ -19316,6 +19344,7 @@
           "items": {
             "$ref": "#/$defs/ContinuousManifoldMappingContract"
           },
+          "maxItems": 100,
           "title": "Spatial Manifold Mappings",
           "type": "array"
         }
@@ -20298,6 +20327,7 @@
           "items": {
             "$ref": "#/$defs/ProfileCIDState"
           },
+          "maxItems": 100,
           "title": "Supported Personas",
           "type": "array"
         },
@@ -20500,6 +20530,7 @@
           "items": {
             "$ref": "#/$defs/EpistemicProvenanceReceipt"
           },
+          "maxItems": 100,
           "title": "Leaf Provenance",
           "type": "array"
         },
@@ -20905,6 +20936,7 @@
           "items": {
             "$ref": "#/$defs/StateMutationIntent"
           },
+          "maxItems": 1000,
           "title": "Patches",
           "type": "array"
         }
@@ -20949,6 +20981,7 @@
             "pattern": "^[a-f0-9]{64}$",
             "type": "string"
           },
+          "maxItems": 10000,
           "title": "Crystallized Ledger Cids",
           "type": "array"
         },
@@ -21270,6 +21303,7 @@
           "items": {
             "$ref": "#/$defs/StochasticNodeState"
           },
+          "maxItems": 1000,
           "title": "Stochastic Graph",
           "type": "array"
         },
@@ -21564,6 +21598,7 @@
             "$ref": "#/$defs/AnyNodeProfile"
           },
           "description": "Flat registry of all nodes in this topology.",
+          "maxProperties": 10000,
           "propertyNames": {
             "$ref": "#/$defs/NodeCIDState"
           },
@@ -21645,6 +21680,7 @@
           "items": {
             "$ref": "#/$defs/PredictionMarketState"
           },
+          "maxItems": 1000,
           "title": "Active Prediction Markets",
           "type": "array"
         },
@@ -21653,6 +21689,7 @@
           "items": {
             "$ref": "#/$defs/MarketResolutionState"
           },
+          "maxItems": 1000,
           "title": "Resolved Markets",
           "type": "array"
         }
@@ -21954,6 +21991,7 @@
           "items": {
             "$ref": "#/$defs/TabularCellState"
           },
+          "maxItems": 10000,
           "title": "Cells",
           "type": "array"
         }
@@ -22527,6 +22565,7 @@
           "items": {
             "$ref": "#/$defs/NodeCIDState"
           },
+          "maxItems": 10000,
           "title": "Add Set",
           "type": "array"
         },
@@ -22535,6 +22574,7 @@
           "items": {
             "$ref": "#/$defs/TemporalEdgeInvalidationIntent"
           },
+          "maxItems": 10000,
           "title": "Terminate Set",
           "type": "array"
         }
