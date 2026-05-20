@@ -13,11 +13,11 @@ import contextlib
 import copy
 import math
 import struct
-import numpy as np
 import unittest.mock
 from typing import Any, cast
 from unittest.mock import Mock, patch
 
+import numpy as np
 import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
@@ -688,7 +688,6 @@ def test_calculate_latent_alignment_caching() -> None:
     with patch("base64.b64decode", side_effect=Exception("Should not be called!")):
         sim2 = calculate_latent_alignment(v1, v2, pol)
         assert sim2 == 0.0
-
 
 
 def test_epistemic_transmutation_schema_presence() -> None:

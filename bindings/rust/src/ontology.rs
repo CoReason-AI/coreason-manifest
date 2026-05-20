@@ -13734,7 +13734,8 @@ impl CoReasonSharedKernelOntology {
 #[doc = "      \"type\": \"array\","]
 #[doc = "      \"items\": {"]
 #[doc = "        \"$ref\": \"#/$defs/NodeCIDState\""]
-#[doc = "      }"]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 1000"]
 #[doc = "    }"]
 #[doc = "  },"]
 #[doc = "  \"additionalProperties\": false"]
@@ -13940,7 +13941,8 @@ impl CognitiveActionSpaceManifest {
 #[doc = "      \"type\": \"array\","]
 #[doc = "      \"items\": {"]
 #[doc = "        \"$ref\": \"#/$defs/AnyIntent\""]
-#[doc = "      }"]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 1000"]
 #[doc = "    },"]
 #[doc = "    \"epistemic_policy\": {"]
 #[doc = "      \"description\": \"The policy governing epistemic scanning.\","]
@@ -13996,7 +13998,8 @@ impl CognitiveActionSpaceManifest {
 #[doc = "      \"type\": \"array\","]
 #[doc = "      \"items\": {"]
 #[doc = "        \"$ref\": \"#/$defs/InterventionPolicy\""]
-#[doc = "      }"]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 1000"]
 #[doc = "    },"]
 #[doc = "    \"interventional_policy\": {"]
 #[doc = "      \"description\": \"The formal contract authorizing the agent to mutate variables to prove PyWhy/DoWhy causation.\","]
@@ -14049,7 +14052,8 @@ impl CognitiveActionSpaceManifest {
 #[doc = "      \"type\": \"array\","]
 #[doc = "      \"items\": {"]
 #[doc = "        \"$ref\": \"#/$defs/PeftAdapterContract\""]
-#[doc = "      }"]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 1000"]
 #[doc = "    },"]
 #[doc = "    \"reflex_policy\": {"]
 #[doc = "      \"description\": \"The policy governing System 1 reflex actions.\","]
@@ -14632,7 +14636,8 @@ impl CognitiveDualVerificationReceipt {
 #[doc = "      \"type\": \"array\","]
 #[doc = "      \"items\": {"]
 #[doc = "        \"$ref\": \"#/$defs/InterventionPolicy\""]
-#[doc = "      }"]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 1000"]
 #[doc = "    },"]
 #[doc = "    \"justification\": {"]
 #[doc = "      \"title\": \"Justification\","]
@@ -14781,6 +14786,7 @@ impl CognitiveHumanNodeProfile {
 #[doc = "        \"type\": \"string\","]
 #[doc = "        \"maxLength\": 255"]
 #[doc = "      },"]
+#[doc = "      \"maxItems\": 1000,"]
 #[doc = "      \"minItems\": 1"]
 #[doc = "    },"]
 #[doc = "    \"source_chain_cid\": {"]
@@ -15391,7 +15397,8 @@ impl CognitiveSwarmDeploymentManifest {
 #[doc = "      \"type\": \"array\","]
 #[doc = "      \"items\": {"]
 #[doc = "        \"$ref\": \"#/$defs/InterventionPolicy\""]
-#[doc = "      }"]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 1000"]
 #[doc = "    },"]
 #[doc = "    \"justification\": {"]
 #[doc = "      \"title\": \"Justification\","]
@@ -16291,6 +16298,18 @@ impl CommercialLicenseState {
 #[doc = "        \"minLength\": 1"]
 #[doc = "      }"]
 #[doc = "    },"]
+#[doc = "    \"exp\": {"]
+#[doc = "      \"title\": \"Exp\","]
+#[doc = "      \"description\": \"The standard JWT Expiration Time claim representing the POSIX timestamp when the receipt mechanically terminates.\","]
+#[doc = "      \"anyOf\": ["]
+#[doc = "        {"]
+#[doc = "          \"type\": \"integer\""]
+#[doc = "        },"]
+#[doc = "        {"]
+#[doc = "          \"type\": \"null\""]
+#[doc = "        }"]
+#[doc = "      ]"]
+#[doc = "    },"]
 #[doc = "    \"expires_at_epoch\": {"]
 #[doc = "      \"title\": \"Expires At Epoch\","]
 #[doc = "      \"description\": \"The POSIX timestamp (seconds since epoch) when this receipt mechanically terminates. After expiration, the WASM sandbox must gracefully fallback to Prosperity 3.0 mode.\","]
@@ -16308,6 +16327,18 @@ impl CommercialLicenseState {
 #[doc = "      \"anyOf\": ["]
 #[doc = "        {"]
 #[doc = "          \"type\": \"string\""]
+#[doc = "        },"]
+#[doc = "        {"]
+#[doc = "          \"type\": \"null\""]
+#[doc = "        }"]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"iat\": {"]
+#[doc = "      \"title\": \"Iat\","]
+#[doc = "      \"description\": \"The standard JWT Issued At claim representing the POSIX timestamp when the receipt was issued.\","]
+#[doc = "      \"anyOf\": ["]
+#[doc = "        {"]
+#[doc = "          \"type\": \"integer\""]
 #[doc = "        },"]
 #[doc = "        {"]
 #[doc = "          \"type\": \"null\""]
@@ -16381,6 +16412,9 @@ pub struct CommercialOverrideReceipt {
     #[doc = "The specific feature flags and access rights granted by the commercial license. Examples: 'IP_SOVEREIGNTY_EXCEPTION', 'COMMERCIAL_USE', 'PRIVATE_NETWORK_FEDERATION', 'UNLIMITED_FORGE_OUTPUT'."]
     #[serde(default, skip_serializing_if = "::std::vec::Vec::is_empty")]
     pub entitlements: ::std::vec::Vec<EntitlementsItem>,
+    #[doc = "The standard JWT Expiration Time claim representing the POSIX timestamp when the receipt mechanically terminates."]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub exp: ::std::option::Option<i64>,
     #[doc = "The POSIX timestamp (seconds since epoch) when this receipt mechanically terminates. After expiration, the WASM sandbox must gracefully fallback to Prosperity 3.0 mode."]
     pub expires_at_epoch: u64,
     #[doc = "When true, authorizes the bridge from the client's private network to the CoReason public network for capability sharing, URN resolution against the public ledger, and cross-network publishing."]
@@ -16389,6 +16423,9 @@ pub struct CommercialOverrideReceipt {
     #[doc = "The zk-SNARK proof confirming possession of the authorized cluster hardware fingerprint without revealing the raw physical identifiers over the wire."]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub hardware_zk_proof: ::std::option::Option<::std::string::String>,
+    #[doc = "The standard JWT Issued At claim representing the POSIX timestamp when the receipt was issued."]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub iat: ::std::option::Option<i64>,
     #[doc = "The POSIX timestamp (seconds since epoch) when this receipt was cryptographically issued by the gateway."]
     pub issued_at_epoch: u64,
     #[doc = "The license classification governing IP ownership of assets forged by coreason-meta-engineering. 'prosperity-3.0' = forged assets are licensed to CoReason Inc. 'commercial' = the tenant retains full ownership of forged assets."]
@@ -16924,7 +16961,8 @@ impl<'de> ::serde::Deserialize<'de> for CompilerBackend {
 #[doc = "      \"type\": \"array\","]
 #[doc = "      \"items\": {"]
 #[doc = "        \"$ref\": \"#/$defs/InterventionPolicy\""]
-#[doc = "      }"]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 1000"]
 #[doc = "    },"]
 #[doc = "    \"justification\": {"]
 #[doc = "      \"title\": \"Justification\","]
@@ -27822,7 +27860,8 @@ impl EpistemicHydrationPolicy {
 #[doc = "      \"type\": \"array\","]
 #[doc = "      \"items\": {"]
 #[doc = "        \"$ref\": \"#/$defs/DefeasibleCascadeEvent\""]
-#[doc = "      }"]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 1000"]
 #[doc = "    },"]
 #[doc = "    \"active_rollbacks\": {"]
 #[doc = "      \"title\": \"Active Rollbacks\","]
@@ -27830,7 +27869,8 @@ impl EpistemicHydrationPolicy {
 #[doc = "      \"type\": \"array\","]
 #[doc = "      \"items\": {"]
 #[doc = "        \"$ref\": \"#/$defs/RollbackIntent\""]
-#[doc = "      }"]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 1000"]
 #[doc = "    },"]
 #[doc = "    \"checkpoints\": {"]
 #[doc = "      \"title\": \"Checkpoints\","]
@@ -27856,6 +27896,7 @@ impl EpistemicHydrationPolicy {
 #[doc = "      \"title\": \"Defeasible Claims\","]
 #[doc = "      \"description\": \"The set of non-monotonic claims residing in the epistemic ledger that are structurally liable to falsification.\","]
 #[doc = "      \"type\": \"object\","]
+#[doc = "      \"maxProperties\": 10000,"]
 #[doc = "      \"patternProperties\": {"]
 #[doc = "        \"^[a-zA-Z0-9_.:-]+$\": {"]
 #[doc = "          \"$ref\": \"#/$defs/SemanticNodeState\""]
@@ -27891,7 +27932,8 @@ impl EpistemicHydrationPolicy {
 #[doc = "        \"maxLength\": 128,"]
 #[doc = "        \"minLength\": 1,"]
 #[doc = "        \"pattern\": \"^[a-zA-Z0-9_.:-]+$\""]
-#[doc = "      }"]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 10000"]
 #[doc = "    },"]
 #[doc = "    \"tenant_cid\": {"]
 #[doc = "      \"title\": \"Tenant Cid\","]
@@ -29074,11 +29116,11 @@ impl EpistemicProxyStateAny {
 #[doc = "      \"title\": \"Active Context\","]
 #[doc = "      \"description\": \"The ephemeral latent variables and environmental bindings currently active in Epistemic Quarantine.\","]
 #[doc = "      \"type\": \"object\","]
+#[doc = "      \"maxProperties\": 10000,"]
 #[doc = "      \"additionalProperties\": {"]
 #[doc = "        \"type\": \"string\","]
 #[doc = "        \"maxLength\": 100000"]
-#[doc = "      },"]
-#[doc = "      \"le\": 18446744073709551615"]
+#[doc = "      }"]
 #[doc = "    },"]
 #[doc = "    \"affordance_projection\": {"]
 #[doc = "      \"description\": \"The mathematically bounded subgraph of capabilities currently available to the agent.\","]
@@ -29122,7 +29164,8 @@ impl EpistemicProxyStateAny {
 #[doc = "      \"type\": \"array\","]
 #[doc = "      \"items\": {"]
 #[doc = "        \"$ref\": \"#/$defs/TheoryOfMindSnapshot\""]
-#[doc = "      }"]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 1000"]
 #[doc = "    }"]
 #[doc = "  },"]
 #[doc = "  \"additionalProperties\": false"]
@@ -44111,7 +44154,8 @@ impl MechanisticAuditContract {
 #[doc = "      \"type\": \"array\","]
 #[doc = "      \"items\": {"]
 #[doc = "        \"$ref\": \"#/$defs/InterventionPolicy\""]
-#[doc = "      }"]
+#[doc = "      },"]
+#[doc = "      \"maxItems\": 1000"]
 #[doc = "    },"]
 #[doc = "    \"justification\": {"]
 #[doc = "      \"title\": \"Justification\","]
@@ -89931,6 +89975,7 @@ pub mod builder {
         distr_license_cid: ::std::result::Result<super::DistrLicenseCid, ::std::string::String>,
         entitlements:
             ::std::result::Result<::std::vec::Vec<super::EntitlementsItem>, ::std::string::String>,
+        exp: ::std::result::Result<::std::option::Option<i64>, ::std::string::String>,
         expires_at_epoch: ::std::result::Result<u64, ::std::string::String>,
         federation_enabled:
             ::std::result::Result<::std::option::Option<bool>, ::std::string::String>,
@@ -89938,6 +89983,7 @@ pub mod builder {
             ::std::option::Option<::std::string::String>,
             ::std::string::String,
         >,
+        iat: ::std::result::Result<::std::option::Option<i64>, ::std::string::String>,
         issued_at_epoch: ::std::result::Result<u64, ::std::string::String>,
         license_tier: ::std::result::Result<super::LicenseTier, ::std::string::String>,
         network_mode: ::std::result::Result<super::NetworkMode, ::std::string::String>,
@@ -89955,9 +90001,11 @@ pub mod builder {
                 credential_format: Ok(Default::default()),
                 distr_license_cid: Err("no value supplied for distr_license_cid".to_string()),
                 entitlements: Ok(Default::default()),
+                exp: Ok(Default::default()),
                 expires_at_epoch: Err("no value supplied for expires_at_epoch".to_string()),
                 federation_enabled: Ok(Default::default()),
                 hardware_zk_proof: Ok(Default::default()),
+                iat: Ok(Default::default()),
                 issued_at_epoch: Err("no value supplied for issued_at_epoch".to_string()),
                 license_tier: Err("no value supplied for license_tier".to_string()),
                 network_mode: Err("no value supplied for network_mode".to_string()),
@@ -89998,6 +90046,16 @@ pub mod builder {
                 .map_err(|e| format!("error converting supplied value for entitlements: {e}"));
             self
         }
+        pub fn exp<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<i64>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.exp = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for exp: {e}"));
+            self
+        }
         pub fn expires_at_epoch<T>(mut self, value: T) -> Self
         where
             T: ::std::convert::TryInto<u64>,
@@ -90026,6 +90084,16 @@ pub mod builder {
             self.hardware_zk_proof = value
                 .try_into()
                 .map_err(|e| format!("error converting supplied value for hardware_zk_proof: {e}"));
+            self
+        }
+        pub fn iat<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<i64>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.iat = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for iat: {e}"));
             self
         }
         pub fn issued_at_epoch<T>(mut self, value: T) -> Self
@@ -90098,9 +90166,11 @@ pub mod builder {
                 credential_format: value.credential_format?,
                 distr_license_cid: value.distr_license_cid?,
                 entitlements: value.entitlements?,
+                exp: value.exp?,
                 expires_at_epoch: value.expires_at_epoch?,
                 federation_enabled: value.federation_enabled?,
                 hardware_zk_proof: value.hardware_zk_proof?,
+                iat: value.iat?,
                 issued_at_epoch: value.issued_at_epoch?,
                 license_tier: value.license_tier?,
                 network_mode: value.network_mode?,
@@ -90116,9 +90186,11 @@ pub mod builder {
                 credential_format: Ok(value.credential_format),
                 distr_license_cid: Ok(value.distr_license_cid),
                 entitlements: Ok(value.entitlements),
+                exp: Ok(value.exp),
                 expires_at_epoch: Ok(value.expires_at_epoch),
                 federation_enabled: Ok(value.federation_enabled),
                 hardware_zk_proof: Ok(value.hardware_zk_proof),
+                iat: Ok(value.iat),
                 issued_at_epoch: Ok(value.issued_at_epoch),
                 license_tier: Ok(value.license_tier),
                 network_mode: Ok(value.network_mode),

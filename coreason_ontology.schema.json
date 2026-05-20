@@ -3028,6 +3028,7 @@
           "items": {
             "$ref": "#/$defs/NodeCIDState"
           },
+          "maxItems": 1000,
           "title": "Trusted Validators",
           "type": "array"
         },
@@ -3093,6 +3094,7 @@
           "items": {
             "$ref": "#/$defs/InterventionPolicy"
           },
+          "maxItems": 1000,
           "title": "Intervention Policies",
           "type": "array"
         },
@@ -3225,6 +3227,7 @@
           "items": {
             "$ref": "#/$defs/PeftAdapterContract"
           },
+          "maxItems": 1000,
           "title": "Peft Adapters",
           "type": "array"
         },
@@ -3417,6 +3420,7 @@
           "items": {
             "$ref": "#/$defs/AnyIntent"
           },
+          "maxItems": 1000,
           "title": "Emitted Intents",
           "type": "array"
         }
@@ -3692,6 +3696,7 @@
           "items": {
             "$ref": "#/$defs/InterventionPolicy"
           },
+          "maxItems": 1000,
           "title": "Intervention Policies",
           "type": "array"
         },
@@ -3834,6 +3839,7 @@
             "maxLength": 255,
             "type": "string"
           },
+          "maxItems": 1000,
           "minItems": 1,
           "title": "Predicted Top K Tokens",
           "type": "array"
@@ -4213,6 +4219,7 @@
           "items": {
             "$ref": "#/$defs/InterventionPolicy"
           },
+          "maxItems": 1000,
           "title": "Intervention Policies",
           "type": "array"
         },
@@ -4650,6 +4657,32 @@
           "title": "Expires At Epoch",
           "type": "integer"
         },
+        "exp": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The standard JWT Expiration Time claim representing the POSIX timestamp when the receipt mechanically terminates.",
+          "title": "Exp"
+        },
+        "iat": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The standard JWT Issued At claim representing the POSIX timestamp when the receipt was issued.",
+          "title": "Iat"
+        },
         "entitlements": {
           "description": "The specific feature flags and access rights granted by the commercial license. Examples: 'IP_SOVEREIGNTY_EXCEPTION', 'COMMERCIAL_USE', 'PRIVATE_NETWORK_FEDERATION', 'UNLIMITED_FORGE_OUTPUT'.",
           "items": {
@@ -4739,6 +4772,7 @@
           "items": {
             "$ref": "#/$defs/InterventionPolicy"
           },
+          "maxItems": 1000,
           "title": "Intervention Policies",
           "type": "array"
         },
@@ -8939,6 +8973,7 @@
         },
         "defeasible_claims": {
           "description": "The set of non-monotonic claims residing in the epistemic ledger that are structurally liable to falsification.",
+          "maxProperties": 10000,
           "patternProperties": {
             "^[a-zA-Z0-9_.:-]+$": {
               "$ref": "#/$defs/SemanticNodeState"
@@ -8958,6 +8993,7 @@
             "pattern": "^[a-zA-Z0-9_.:-]+$",
             "type": "string"
           },
+          "maxItems": 10000,
           "title": "Retracted Nodes",
           "type": "array"
         },
@@ -8975,6 +9011,7 @@
           "items": {
             "$ref": "#/$defs/RollbackIntent"
           },
+          "maxItems": 1000,
           "title": "Active Rollbacks",
           "type": "array"
         },
@@ -9008,6 +9045,7 @@
           "items": {
             "$ref": "#/$defs/DefeasibleCascadeEvent"
           },
+          "maxItems": 1000,
           "title": "Active Cascades",
           "type": "array"
         },
@@ -9783,7 +9821,7 @@
             "type": "string"
           },
           "description": "The ephemeral latent variables and environmental bindings currently active in Epistemic Quarantine.",
-          "le": 18446744073709551615,
+          "maxProperties": 10000,
           "propertyNames": {
             "maxLength": 255
           },
@@ -9807,6 +9845,7 @@
           "items": {
             "$ref": "#/$defs/TheoryOfMindSnapshot"
           },
+          "maxItems": 1000,
           "title": "Theory Of Mind Matrices",
           "type": "array"
         },
@@ -15581,6 +15620,7 @@
           "items": {
             "$ref": "#/$defs/InterventionPolicy"
           },
+          "maxItems": 1000,
           "title": "Intervention Policies",
           "type": "array"
         },

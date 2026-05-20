@@ -2339,6 +2339,8 @@ export type AsyncObservationPort = string | null;
 export type EmitTelemetryOnRevision = boolean;
 /**
  * The declarative array of proactive oversight hooks bound to this node's lifecycle.
+ *
+ * @maxItems 1000
  */
 export type InterventionPolicies = InterventionPolicy[];
 /**
@@ -2533,6 +2535,8 @@ export type TargetModules = [string, ...string[]];
 export type EvictionTtlSeconds = number | null;
 /**
  * The declarative array of ephemeral PEFT/LoRA weights required to be hot-swapped during this agent's execution.
+ *
+ * @maxItems 1000
  */
 export type PeftAdapters = PeftAdapterContract[];
 /**
@@ -2745,6 +2749,8 @@ export type FlowEstimationMatrix = string;
 export type LocalExplorationK = number;
 /**
  * The array of cognitive intents and structural proposals emitted by this agent.
+ *
+ * @maxItems 1000
  */
 export type EmittedIntents = AnyIntent[];
 /**
@@ -2765,6 +2771,8 @@ export type ArchitecturalIntent1 = string | null;
 export type Justification3 = string | null;
 /**
  * The declarative array of proactive oversight hooks bound to this node's lifecycle.
+ *
+ * @maxItems 1000
  */
 export type InterventionPolicies1 = InterventionPolicy[];
 /**
@@ -2799,6 +2807,8 @@ export type ArchitecturalIntent2 = string | null;
 export type Justification4 = string | null;
 /**
  * The declarative array of proactive oversight hooks bound to this node's lifecycle.
+ *
+ * @maxItems 1000
  */
 export type InterventionPolicies2 = InterventionPolicy[];
 /**
@@ -2829,6 +2839,8 @@ export type ArchitecturalIntent3 = string | null;
 export type Justification5 = string | null;
 /**
  * The declarative array of proactive oversight hooks bound to this node's lifecycle.
+ *
+ * @maxItems 1000
  */
 export type InterventionPolicies3 = InterventionPolicy[];
 /**
@@ -3942,6 +3954,8 @@ export type ArchitecturalIntent15 = string | null;
 export type Justification17 = string | null;
 /**
  * The declarative array of proactive oversight hooks bound to this node's lifecycle.
+ *
+ * @maxItems 1000
  */
 export type InterventionPolicies4 = InterventionPolicy[];
 /**
@@ -4756,6 +4770,7 @@ export type SourceChainCid = string;
 export type TargetSourceConcept = string;
 /**
  * @minItems 1
+ * @maxItems 1000
  */
 export type PredictedTopKTokens = [string, ...string[]];
 /**
@@ -5616,6 +5631,8 @@ export type MutuallyExclusiveClusters = string[][];
 export type EnforcementAction = "halt_and_quarantine" | "sever_causal_chain";
 /**
  * A deterministic array of DIDs authorized to validate this manifest.
+ *
+ * @maxItems 1000
  */
 export type TrustedValidators = NodeCIDState[];
 /**
@@ -5771,6 +5788,14 @@ export type IssuedAtEpoch = number;
  * The POSIX timestamp (seconds since epoch) when this receipt mechanically terminates. After expiration, the WASM sandbox must gracefully fallback to Prosperity 3.0 mode.
  */
 export type ExpiresAtEpoch = number;
+/**
+ * The standard JWT Expiration Time claim representing the POSIX timestamp when the receipt mechanically terminates.
+ */
+export type Exp1 = number | null;
+/**
+ * The standard JWT Issued At claim representing the POSIX timestamp when the receipt was issued.
+ */
+export type Iat = number | null;
 /**
  * The specific feature flags and access rights granted by the commercial license. Examples: 'IP_SOVEREIGNTY_EXCEPTION', 'COMMERCIAL_USE', 'PRIVATE_NETWORK_FEDERATION', 'UNLIMITED_FORGE_OUTPUT'.
  */
@@ -6202,6 +6227,8 @@ export type TenantCid308 = string;
 export type History = AnyStateEvent[];
 /**
  * A strict sequence of CIDs representing historical nodes that have been severed from the causal graph via defeasible logic.
+ *
+ * @maxItems 10000
  */
 export type RetractedNodes = string[];
 /**
@@ -6228,6 +6255,8 @@ export type StateHash = string;
 export type Checkpoints = TemporalCheckpointState[];
 /**
  * Causal invalidations actively enforced on the execution tree.
+ *
+ * @maxItems 1000
  */
 export type ActiveRollbacks = RollbackIntent[];
 /**
@@ -6248,6 +6277,8 @@ export type MaxRetainedTokens = number;
 export type ProtectedEventCids = string[];
 /**
  * The active state-differential payload muting specific causal subgraphs due to falsification.
+ *
+ * @maxItems 1000
  */
 export type ActiveCascades = DefeasibleCascadeEvent[];
 /**
@@ -6294,6 +6325,8 @@ export type IdentifiedKnowledgeGaps = string[];
 export type EmpathyConfidenceScore = number;
 /**
  * Empathetic models of other agents to compress and target outgoing communications.
+ *
+ * @maxItems 1000
  */
 export type TheoryOfMindMatrices = TheoryOfMindSnapshot[];
 /**
@@ -14705,6 +14738,8 @@ export interface CommercialOverrideReceipt {
   hardware_zk_proof?: HardwareZkProof;
   issued_at_epoch: IssuedAtEpoch;
   expires_at_epoch: ExpiresAtEpoch;
+  exp?: Exp1;
+  iat?: Iat;
   entitlements?: Entitlements1;
   network_mode: NetworkMode;
   federation_enabled?: FederationEnabled;

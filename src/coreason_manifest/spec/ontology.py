@@ -7388,6 +7388,7 @@ class CognitiveHumanNodeProfile(CoreasonBaseState):
         default=None, description="Cryptographic/audit justification for this node's existence in the graph."
     )
     intervention_policies: list[InterventionPolicy] = Field(
+        max_length=1000,
         default_factory=list,
         description="The declarative array of proactive oversight hooks bound to this node's lifecycle.",
     )
@@ -7455,6 +7456,7 @@ class MemoizedNodeProfile(CoreasonBaseState):
         default=None, description="Cryptographic/audit justification for this node's existence in the graph."
     )
     intervention_policies: list[InterventionPolicy] = Field(
+        max_length=1000,
         default_factory=list,
         description="The declarative array of proactive oversight hooks bound to this node's lifecycle.",
     )
@@ -7521,6 +7523,7 @@ class CognitiveSystemNodeProfile(CoreasonBaseState):
         default=None, description="Cryptographic/audit justification for this node's existence in the graph."
     )
     intervention_policies: list[InterventionPolicy] = Field(
+        max_length=1000,
         default_factory=list,
         description="The declarative array of proactive oversight hooks bound to this node's lifecycle.",
     )
@@ -7972,7 +7975,9 @@ class CognitiveActionSpaceManifest(CoreasonBaseState):
         default=None, description="The content-addressed SHA-256 hash of the FAIR metadata."
     )
     trusted_validators: list[NodeCIDState] = Field(
-        default_factory=list, description="A deterministic array of DIDs authorized to validate this manifest."
+        max_length=1000,
+        default_factory=list,
+        description="A deterministic array of DIDs authorized to validate this manifest.",
     )
     execution_fee_lmsr: float = Field(
         default=0.0, description="The logarithmic market scoring rule threshold for thermodynamic execution."
@@ -8680,6 +8685,7 @@ class CompositeNodeProfile(CoreasonBaseState):
         default=None, description="Cryptographic/audit justification for this node's existence in the graph."
     )
     intervention_policies: list[InterventionPolicy] = Field(
+        max_length=1000,
         default_factory=list,
         description="The declarative array of proactive oversight hooks bound to this node's lifecycle.",
     )
@@ -10770,6 +10776,7 @@ class CognitiveAgentNodeProfile(CoreasonBaseState):
         default=None, description="Cryptographic/audit justification for this node's existence in the graph."
     )
     intervention_policies: list[InterventionPolicy] = Field(
+        max_length=1000,
         default_factory=list,
         description="The declarative array of proactive oversight hooks bound to this node's lifecycle.",
     )
@@ -10826,6 +10833,7 @@ class CognitiveAgentNodeProfile(CoreasonBaseState):
         description="The mathematical bounds defining acceptable probabilistic drift, hardware requirements, and remote decoding protocols for this agent's execution routing.",
     )
     peft_adapters: list[PeftAdapterContract] = Field(
+        max_length=1000,
         default_factory=list,
         description="The declarative array of ephemeral PEFT/LoRA weights required to be hot-swapped during this agent's execution.",
     )
@@ -10885,6 +10893,7 @@ class CognitiveAgentNodeProfile(CoreasonBaseState):
         default=None, description="Authorizes trajectory balance optimization during non-monotonic reasoning."
     )
     emitted_intents: list[AnyIntent] = Field(
+        max_length=1000,
         default_factory=list,
         description="The array of cognitive intents and structural proposals emitted by this agent.",
     )
@@ -12245,7 +12254,7 @@ class EpistemicQuarantineSnapshot(CoreasonBaseState):
     active_context: dict[
         Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=100000)]
     ] = Field(
-        le=18446744073709551615,
+        max_length=10000,
         description="The ephemeral latent variables and environmental bindings currently active in Epistemic Quarantine.",
     )
     argumentation: EpistemicArgumentGraphState | None = Field(
@@ -12253,6 +12262,7 @@ class EpistemicQuarantineSnapshot(CoreasonBaseState):
         description="The formal graph of non-monotonic claims and defeasible attacks currently active in the swarm's working state.",
     )
     theory_of_mind_matrices: list[TheoryOfMindSnapshot] = Field(
+        max_length=1000,
         default_factory=list,
         description="Empathetic models of other agents to compress and target outgoing communications.",
     )
@@ -12675,7 +12685,9 @@ class CognitivePredictionReceipt(CoreasonBaseState):
         Field()
     )
     target_source_concept: Annotated[str, StringConstraints(max_length=2000)] = Field()
-    predicted_top_k_tokens: list[Annotated[str, StringConstraints(max_length=255)]] = Field(min_length=1)
+    predicted_top_k_tokens: list[Annotated[str, StringConstraints(max_length=255)]] = Field(
+        max_length=1000, min_length=1
+    )
 
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
@@ -14202,12 +14214,14 @@ class EpistemicLedgerState(CoreasonBaseState):
     defeasible_claims: dict[
         Annotated[str, StringConstraints(max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")], SemanticNodeState
     ] = Field(
+        max_length=10000,
         default_factory=dict,
         description="The set of non-monotonic claims residing in the epistemic ledger that are structurally liable to falsification.",
     )
     retracted_nodes: list[
         Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
     ] = Field(
+        max_length=10000,
         default_factory=list,
         description="A strict sequence of CIDs representing historical nodes that have been severed from the causal graph via defeasible logic.",
     )
@@ -14215,7 +14229,9 @@ class EpistemicLedgerState(CoreasonBaseState):
         max_length=1000, default_factory=list, description="Hard temporal anchors allowing state restoration."
     )
     active_rollbacks: list[RollbackIntent] = Field(
-        default_factory=list, description="Causal invalidations actively enforced on the execution tree."
+        max_length=1000,
+        default_factory=list,
+        description="Causal invalidations actively enforced on the execution tree.",
     )
     eviction_policy: EvictionPolicy | None = Field(
         default=None, description="The strict mathematical boundary governing context window compression."
@@ -14226,6 +14242,7 @@ class EpistemicLedgerState(CoreasonBaseState):
         description="The mathematical contract governing automated causal graph ablations and probabilistic decay.",
     )
     active_cascades: list[DefeasibleCascadeEvent] = Field(
+        max_length=1000,
         default_factory=list,
         description="The active state-differential payload muting specific causal subgraphs due to falsification.",
     )
@@ -14454,6 +14471,14 @@ class CommercialOverrideReceipt(CoreasonBaseState):
         description="The POSIX timestamp (seconds since epoch) when this receipt mechanically terminates. "
         "After expiration, the WASM sandbox must gracefully fallback to Prosperity 3.0 mode.",
     )
+    exp: int | None = Field(
+        default=None,
+        description="The standard JWT Expiration Time claim representing the POSIX timestamp when the receipt mechanically terminates.",
+    )
+    iat: int | None = Field(
+        default=None,
+        description="The standard JWT Issued At claim representing the POSIX timestamp when the receipt was issued.",
+    )
     entitlements: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
         default_factory=list,
         description="The specific feature flags and access rights granted by the commercial license. "
@@ -14471,6 +14496,20 @@ class CommercialOverrideReceipt(CoreasonBaseState):
 
     @model_validator(mode="after")
     def _enforce_temporal_ordering(self) -> Self:
+        if self.exp is None:
+            object.__setattr__(self, "exp", self.expires_at_epoch)
+        if self.iat is None:
+            object.__setattr__(self, "iat", self.issued_at_epoch)
+
+        if self.exp != self.expires_at_epoch:
+            raise ValueError(
+                f"Consistency Violation: exp ({self.exp}) must match expires_at_epoch ({self.expires_at_epoch})."
+            )
+        if self.iat != self.issued_at_epoch:
+            raise ValueError(
+                f"Consistency Violation: iat ({self.iat}) must match issued_at_epoch ({self.issued_at_epoch})."
+            )
+
         if self.issued_at_epoch >= self.expires_at_epoch:
             raise ValueError(
                 f"Temporal Ordering Violation: issued_at_epoch ({self.issued_at_epoch}) "
