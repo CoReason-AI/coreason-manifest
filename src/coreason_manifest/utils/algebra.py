@@ -541,3 +541,115 @@ def _validate_ssrf_safety(url: Any) -> Any:
         raise ValueError(f"Invalid URL for SSRF validation: {e}") from e
 
     return url
+
+
+def _canonicalize_json_and_hash(schema: dict[str, Any]) -> tuple[bytes, str]:
+    """AGENT INSTRUCTION: Canonicalize a JSON-serializable dict and compute its SHA-256 hash.
+
+    CAUSAL AFFORDANCE: Prepares schema for sealing or verification.
+
+    EPISTEMIC BOUNDS: Bounded by Rust acceleration or Python fallback.
+
+    MCP ROUTING TRIGGERS: Canonicalization, SHA-256, Hashing, Schema Seal
+    """
+    if _RUST_ALGEBRA is not None:
+        try:
+            import json
+
+            json_str = json.dumps(schema)
+            # Python gets back a tuple (canonical_bytes, digest)
+            res = _RUST_ALGEBRA.canonicalize_json_and_hash(json_str)
+            if isinstance(res, tuple) and len(res) == 2:
+                return res[0], res[1]
+        except Exception:  # noqa: S110 # nosec
+            pass
+
+    # Fallback to Python-only implementation
+    def canonicalize(v: Any) -> Any:
+        if isinstance(v, dict):
+            new_dict = {}
+            for k in sorted(v.keys()):
+                cv = canonicalize(v[k])
+                if cv is not None:
+                    new_dict[k] = cv
+            return new_dict
+        if isinstance(v, list):
+            return [canonicalize(item) for item in v]
+        return v
+
+    import json
+
+    canonical = canonicalize(schema)
+    canonical_bytes = json.dumps(canonical, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    digest = hashlib.sha256(canonical_bytes).hexdigest()
+    return canonical_bytes, digest
+
+
+def compute_schema_seal(schema: dict[str, Any]) -> str | dict[str, str]:
+    """AGENT INSTRUCTION: Mathematically computes the schema seal using Vault Transit.
+
+    CAUSAL AFFORDANCE: Generates a cryptographic seal mapping the schema to the key.
+
+    EPISTEMIC BOUNDS: Relies on Vault transit configurations and RFC 8785 canonicalization.
+
+    MCP ROUTING TRIGGERS: Vault, Transit Engine, Cryptographic Seal, RFC 8785
+    """
+    import base64
+    import os
+
+    import hvac
+
+    canonical, digest = _canonicalize_json_and_hash(schema)
+
+    vault_addr = os.environ.get("VAULT_ADDR")
+    vault_token = os.environ.get("VAULT_TOKEN")
+    vault_configured = bool(vault_addr and vault_token)
+
+    if vault_configured:
+        client = hvac.Client(url=vault_addr, token=vault_token)
+        sign_result = client.secrets.transit.sign_data(
+            name="coreason-merkle-key",
+            hash_input=base64.b64encode(canonical).decode("utf-8"),
+        )
+        return {"hash": digest, "signature": sign_result["data"]["signature"]}
+    return digest
+
+
+def verify_schema_seal(schema: dict[str, Any], seal: str | dict[str, str]) -> bool:
+    """AGENT INSTRUCTION: Cryptographically verifies the schema seal using Vault Transit.
+
+    CAUSAL AFFORDANCE: Confirms that the schema seal matches the schema context.
+
+    EPISTEMIC BOUNDS: Raises ValueError on signature or hash mismatches.
+
+    MCP ROUTING TRIGGERS: Vault, Transit Engine, Cryptographic Verification, Schema Seal
+    """
+    import base64
+    import os
+
+    import hvac
+
+    canonical, digest = _canonicalize_json_and_hash(schema)
+
+    if isinstance(seal, str):
+        if digest != seal:
+            raise ValueError("Schema seal mismatch")
+        return True
+
+    if digest != seal.get("hash", ""):
+        raise ValueError("Schema seal hash mismatch")
+
+    vault_addr = os.environ.get("VAULT_ADDR")
+    vault_token = os.environ.get("VAULT_TOKEN")
+    if not vault_addr or not vault_token:
+        raise ValueError("Vault is not configured for signature verification.")
+
+    client = hvac.Client(url=vault_addr, token=vault_token)
+    verify_result = client.secrets.transit.verify_signed_data(
+        name="coreason-merkle-key",
+        hash_input=base64.b64encode(canonical).decode("utf-8"),
+        signature=seal["signature"],
+    )
+    if not verify_result["data"]["valid"]:
+        raise ValueError("Vault Transit rejected the signature.")
+    return True

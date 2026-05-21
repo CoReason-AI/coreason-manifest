@@ -331,3 +331,25 @@ pub fn py_compute_topology_hash(topology_json: &str) -> PyResult<String> {
     })?;
     compute_topology_hash(&val).map_err(|e| pyo3::exceptions::PyValueError::new_err(e))
 }
+
+/// Canonicalizes JSON and returns both the canonical JSON bytes and the SHA-256 hex digest.
+pub fn canonicalize_json_and_hash(val: &serde_json::Value) -> Result<(Vec<u8>, String), String> {
+    let canonical = canonicalize_value(val.clone());
+    let bytes = serde_json::to_vec(&canonical)
+        .map_err(|e| format!("Failed to serialize canonical JSON: {}", e))?;
+    let mut hasher = Sha256::new();
+    hasher.update(&bytes);
+    let hash = hex::encode(hasher.finalize());
+    Ok((bytes, hash))
+}
+
+#[cfg(feature = "pyo3")]
+#[pyfunction]
+#[pyo3(name = "canonicalize_json_and_hash")]
+pub fn py_canonicalize_json_and_hash(json_str: &str) -> PyResult<(Vec<u8>, String)> {
+    let val: serde_json::Value = serde_json::from_str(json_str).map_err(|e| {
+        pyo3::exceptions::PyValueError::new_err(format!("Invalid JSON: {}", e))
+    })?;
+    canonicalize_json_and_hash(&val).map_err(|e| pyo3::exceptions::PyValueError::new_err(e))
+}
+

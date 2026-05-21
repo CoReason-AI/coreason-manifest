@@ -19,3 +19,9 @@ Part of the CoReason Tripartite Cybernetic Manifold.
 """
 
 from coreason_manifest.spec.ontology import *  # noqa: F403
+from coreason_manifest.utils.algebra import (
+    compute_schema_seal as compute_schema_seal,
+)
+from coreason_manifest.utils.algebra import (
+    verify_schema_seal as verify_schema_seal,
+)
