@@ -1,6 +1,6 @@
 [package]
 name = "coreason-manifest"
-version = "0.0.0-git"
+version = "0.0.0"
 edition = "2021"
 description = "Rust bindings for the CoReason Hollow Data Plane."
 license-file = "LICENSE"
@@ -14,7 +14,13 @@ readme = "../../README.md"
 include = ["src/**/*", "Cargo.toml", "LICENSE", "NOTICE"]
 
 [lib]
+name = "coreason_manifest_rust"
+crate-type = ["cdylib", "rlib"]
 doctest = false
+
+[features]
+default = []
+pyo3 = ["dep:pyo3"]
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
@@ -24,3 +30,4 @@ sha2 = "0.10.8"
 base64 = "0.22.1"
 hex = "0.4.3"
 url = "2.5.4"
+pyo3 = { version = "0.22.6", features = ["extension-module"], optional = true }

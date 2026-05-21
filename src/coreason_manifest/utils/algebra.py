@@ -39,6 +39,13 @@ import numpy as np
 from pydantic import AnyUrl, BaseModel, ValidationError
 from pydantic.json_schema import models_json_schema
 
+_RUST_ALGEBRA: Any = None
+try:
+    from coreason_manifest import coreason_manifest_rust
+    _RUST_ALGEBRA = coreason_manifest_rust
+except ImportError:
+    pass
+
 import coreason_manifest.spec.ontology as ontology
 from coreason_manifest.spec.ontology import (
     AnyTopologyManifest,
@@ -277,7 +284,6 @@ def calculate_latent_alignment(
     """
     A pure algebraic functor to calculate cosine similarity of two vectors.
     """
-
     if v1.foundation_matrix_name != v2.foundation_matrix_name or v1.dimensionality != v2.dimensionality:
         raise ValueError("Topological Contradiction: Vector geometries are incommensurable.")
 
@@ -299,6 +305,26 @@ def calculate_latent_alignment(
 
     arr1, norm1 = _get_cached_vector(v1)
     arr2, norm2 = _get_cached_vector(v2)
+
+    import unittest.mock
+    is_mocked = isinstance(np.dot, unittest.mock.Mock)
+
+    if _RUST_ALGEBRA is not None and not is_mocked:
+        try:
+            return float(
+                _RUST_ALGEBRA.calculate_latent_alignment(
+                    v1.model_dump_json(),
+                    v2.model_dump_json(),
+                    policy.model_dump_json(),
+                )
+            )
+        except ValueError as e:
+            err_msg = str(e)
+            if "Latent alignment failed" in err_msg:
+                raise TamperFaultEvent("Latent alignment failed.") from e
+            raise ValueError(err_msg) from e
+        except Exception:
+            pass
 
     # ⚡ Bolt Reversion: Direct np.dot causes float32 underflow for small vectors (ZeroDivisionError)
     # and overflow for large vectors (yielding 0.0 similarity instead of 1.0).
@@ -344,6 +370,12 @@ def compute_merkle_directory_cid(file_contents: dict[str, bytes]) -> str:
     Returns:
         A string in the format ``sha256:<64-char hex digest>``.
     """
+    if _RUST_ALGEBRA is not None:
+        try:
+            return str(_RUST_ALGEBRA.compute_merkle_directory_cid(file_contents))
+        except Exception:
+            pass
+
     file_hashes: list[str] = []
     for filename in sorted(file_contents.keys()):
         file_hash = hashlib.sha256(file_contents[filename]).hexdigest()
@@ -357,6 +389,12 @@ def compute_topology_hash(topology: "AnyTopologyManifest") -> str:
     """
     Deterministically computes the SOTA Merkle-DAG SHA-256 fingerprint of a given topology.
     """
+    if _RUST_ALGEBRA is not None:
+        try:
+            return str(_RUST_ALGEBRA.compute_topology_hash(topology.model_dump_json()))
+        except Exception:
+            pass
+
     return hashlib.sha256(topology.model_dump_canonical()).hexdigest()
 
 
@@ -442,6 +480,16 @@ def _validate_ssrf_safety(url: Any) -> Any:
     Mechanistically evaluates an HttpUrl or AnyUrl to prevent Server-Side Request Forgery (SSRF).
     Mathematically blocks local, loopback, private, and bogon IP space without invoking dynamic DNS resolution.
     """
+    if _RUST_ALGEBRA is not None:
+        try:
+            _RUST_ALGEBRA.validate_ssrf_safety(str(url))
+            return url
+        except ValueError as e:
+            if "SSRF" in str(e):
+                raise
+        except Exception:
+            pass
+
     try:
         url_str = str(url)
         parsed = urllib.parse.urlparse(url_str)

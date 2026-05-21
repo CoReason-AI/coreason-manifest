@@ -283,3 +283,49 @@ pub fn compute_topology_hash<T: serde::Serialize>(topology: &T) -> Result<String
     hasher.update(&bytes);
     Ok(hex::encode(hasher.finalize()))
 }
+
+#[cfg(feature = "pyo3")]
+use pyo3::prelude::*;
+
+#[cfg(feature = "pyo3")]
+#[pyfunction]
+#[pyo3(name = "validate_ssrf_safety")]
+pub fn py_validate_ssrf_safety(url_str: &str) -> PyResult<()> {
+    validate_ssrf_safety(url_str).map_err(|e| pyo3::exceptions::PyValueError::new_err(e))
+}
+
+#[cfg(feature = "pyo3")]
+#[pyfunction]
+#[pyo3(name = "compute_merkle_directory_cid")]
+pub fn py_compute_merkle_directory_cid(file_contents: HashMap<String, Vec<u8>>) -> String {
+    compute_merkle_directory_cid(&file_contents)
+}
+
+#[cfg(feature = "pyo3")]
+#[pyfunction]
+#[pyo3(name = "calculate_latent_alignment")]
+pub fn py_calculate_latent_alignment(
+    v1_json: &str,
+    v2_json: &str,
+    policy_json: &str,
+) -> PyResult<f64> {
+    let r_v1: VectorEmbeddingState = serde_json::from_str(v1_json)
+        .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("Invalid v1 JSON: {}", e)))?;
+    let r_v2: VectorEmbeddingState = serde_json::from_str(v2_json)
+        .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("Invalid v2 JSON: {}", e)))?;
+    let r_policy: EpistemicOntologicalAlignmentPolicy = serde_json::from_str(policy_json)
+        .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("Invalid policy JSON: {}", e)))?;
+
+    calculate_latent_alignment(&r_v1, &r_v2, &r_policy)
+        .map_err(|e| pyo3::exceptions::PyValueError::new_err(e))
+}
+
+#[cfg(feature = "pyo3")]
+#[pyfunction]
+#[pyo3(name = "compute_topology_hash")]
+pub fn py_compute_topology_hash(topology_json: &str) -> PyResult<String> {
+    let val: serde_json::Value = serde_json::from_str(topology_json)
+        .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("Invalid topology JSON: {}", e)))?;
+    compute_topology_hash(&val)
+        .map_err(|e| pyo3::exceptions::PyValueError::new_err(e))
+}

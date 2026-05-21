@@ -2,11 +2,11 @@
 // Licensed under the Prosperity Public License 3.0
 // https://github.com/CoReason-AI/coreason-manifest
 
-use coreason_manifest::algebra::{
+use coreason_manifest_rust::algebra::{
     calculate_latent_alignment, compute_merkle_directory_cid, compute_topology_hash,
     validate_ssrf_safety,
 };
-use coreason_manifest::ontology::{
+use coreason_manifest_rust::ontology::{
     EpistemicOntologicalAlignmentPolicy, FoundationMatrixName, VectorBase64, VectorEmbeddingState,
 };
 use std::collections::HashMap;
