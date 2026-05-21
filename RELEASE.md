@@ -36,13 +36,13 @@ graph TD
 ## 2. Versioning & Hook Validations
 
 ### Version Schemes:
-*   **VCS-Dynamic (Hatch):** All Python packages (`coreason-manifest`, `coreason-urn-authority`, `coreason-runtime`, `coreason-ecosystem`, `coreason-meta-engineering`, `coreason-documentation`, `coreason-infrastructure`, `coreason-isv-admin`) resolve their versions dynamically from Git tags using `hatch-vcs`. They retrieve version at runtime using `importlib.metadata` with fallback `"0.0.0-dev"`.
-*   **Static/Git Tag Synchronized (Node/NPM):** NPM packages (`coreason-sensory-app`, `coreason-sensory-core`, and `coreason-sensory-embed`) define static versions in `package.json`. These **must match** the Git tag exactly.
+*   **VCS-Dynamic (Hatch/Python):** All Python packages (`coreason-manifest`, `coreason-urn-authority`, `coreason-runtime`, `coreason-ecosystem`, `coreason-meta-engineering`, `coreason-documentation`, `coreason-infrastructure`, `coreason-isv-admin`) resolve their versions dynamically from Git tags using `hatch-vcs`. They retrieve version at runtime using `importlib.metadata` with fallback `"0.0.0-dev"`.
+*   **VCS-Dynamic (NPM/Node):** NPM packages (`coreason-sensory-app`, `coreason-sensory-core`, and `coreason-sensory-embed`) specify version `"0.0.0-dev"` in `package.json` in Git. The release/publishing workflows dynamically inject the tag version (e.g. `vX.Y.Z`) at build/publish time.
 
 ### Git Verification Hooks:
 To prevent CI publish failures, standard git hooks run automatically on:
-1. **Pre-commit:** Ensures static code versions are in valid SemVer format.
-2. **Pre-push:** Rejects tag pushes if the tag `vX.Y.Z` does not match the static version defined in code files (for NPM packages only; Python dynamic packages only check that the tag is valid SemVer).
+1. **Pre-commit:** Ensures static files conform to expected version declarations.
+2. **Pre-push:** Rejects tag pushes if the tag `vX.Y.Z` does not match the SemVer format. For any static package files (if any are left static), it ensures tag version matches package version.
 
 ---
 
