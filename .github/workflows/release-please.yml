@@ -21,4 +21,5 @@ jobs:
       - uses: googleapis/release-please-action@v4
         id: release
         with:
+          token: ${{ secrets.GITOPS_PROMOTION_TOKEN || secrets.GHCR_PAT || secrets.GITHUB_TOKEN }}
           release-type: python
