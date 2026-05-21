@@ -97,6 +97,11 @@ To support automated, secure deployments across cloud substrates and developer s
 - **Repository Dispatch:** Once new images are published to GHCR, the workflow sends a dispatch payload to `coreason-infrastructure`.
 - **ArgoCD Reconciliation:** ArgoCD automatically updates the targeting manifests to sync the new release tags and roll out updates using sync wave orchestration.
 
+### E. Swarm-in-a-Box / Enclave Packaging
+- **Local Dev/Test E2E Swarm:** The full Tripartite Swarm (Gateway, Runtime/WASM Sandbox, URN Authority, Asset Forge) is orchestrated locally via `docker-compose.e2e.yaml` under `coreason-ecosystem/tests/e2e_swarm/` in accordance with the anti-mocking, real-test mandate.
+- **Enterprise Single-Enclave ("Swarm-in-a-Box"):** Standalone, single-host virtual machine image or container set that boots all Tripartite planes in isolation.
+- **Deprecation of Federated Swarm-in-a-Box:** The decentralized/federated multi-host data models (previously detailed in Challenge X23) are officially deprecated under the **Absolute Type Isomorphism** invariant. All downstream enclaves must remain purely anemic and tightly isomorphic to the Python data plane (`coreason_manifest.spec.ontology`) to preserve zero-trust verification boundaries. Only single-enclave Swarm-in-a-Box configurations are supported.
+
 ---
 
 ## 5. Release Orchestration Commands
