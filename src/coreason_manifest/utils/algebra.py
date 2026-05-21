@@ -60,6 +60,7 @@ from coreason_manifest.spec.ontology import (
 _RUST_ALGEBRA: Any = None
 try:
     from coreason_manifest import coreason_manifest_rust
+
     _RUST_ALGEBRA = coreason_manifest_rust
 except ImportError:
     pass
@@ -307,6 +308,7 @@ def calculate_latent_alignment(
     arr2, norm2 = _get_cached_vector(v2)
 
     import unittest.mock
+
     is_mocked = isinstance(np.dot, unittest.mock.Mock)
 
     if _RUST_ALGEBRA is not None and not is_mocked:
