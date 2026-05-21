@@ -36,13 +36,13 @@ graph TD
 ## 2. Versioning & Hook Validations
 
 ### Version Schemes:
-*   **VCS-Dynamic (Hatch):** Packages like `coreason-manifest` and `coreason-urn-authority` get their version dynamically from Git tags using `hatch-vcs`. They do not store hardcoded version strings in source code.
-*   **Static/Git Tag Synchronized:** Packages like `coreason-runtime`, `coreason-ecosystem`, `coreason-meta-engineering`, `coreason-sensory-app`, and `coreason-sensory-core` define static versions in code (`__version__` in `__init__.py` or `"version"` in `package.json`). These **must match** the Git tag exactly.
+*   **VCS-Dynamic (Hatch):** All Python packages (`coreason-manifest`, `coreason-urn-authority`, `coreason-runtime`, `coreason-ecosystem`, `coreason-meta-engineering`, `coreason-documentation`, `coreason-infrastructure`, `coreason-isv-admin`) resolve their versions dynamically from Git tags using `hatch-vcs`. They retrieve version at runtime using `importlib.metadata` with fallback `"0.0.0-dev"`.
+*   **Static/Git Tag Synchronized (Node/NPM):** NPM packages (`coreason-sensory-app`, `coreason-sensory-core`, and `coreason-sensory-embed`) define static versions in `package.json`. These **must match** the Git tag exactly.
 
 ### Git Verification Hooks:
 To prevent CI publish failures, standard git hooks run automatically on:
 1. **Pre-commit:** Ensures static code versions are in valid SemVer format.
-2. **Pre-push:** Rejects tag pushes if the tag `vX.Y.Z` does not match the static version defined in the code files.
+2. **Pre-push:** Rejects tag pushes if the tag `vX.Y.Z` does not match the static version defined in code files (for NPM packages only; Python dynamic packages only check that the tag is valid SemVer).
 
 ---
 
