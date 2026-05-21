@@ -19,6 +19,7 @@ from enum import StrEnum
 from typing import Annotated, Any, Literal, Self
 
 import canonicaljson
+import msgspec
 from pydantic import (
     AnyUrl,
     BaseModel,
@@ -704,6 +705,17 @@ class CoreasonBaseState(BaseModel):
             canonical_dump: bytes = canonicaljson.encode_canonical_json(canonical_payload)
             object.__setattr__(self, "_cached_canonical_dump", canonical_dump)
             return canonical_dump
+
+    def to_msgpack(self) -> bytes:
+        """Serialize the state to MessagePack format using msgspec for high performance."""
+        raw_dict = self.model_dump(mode="json", exclude_none=True, by_alias=True)
+        return msgspec.msgpack.encode(raw_dict)
+
+    @classmethod
+    def from_msgpack(cls, data: bytes) -> Self:
+        """Deserialize MessagePack data into an instance of this state using msgspec."""
+        decoded = msgspec.msgpack.decode(data)
+        return cls.model_validate(decoded)
 
 
 class EpistemicProxyState[T](CoreasonBaseState):
@@ -9594,7 +9606,28 @@ class StdioTransportProfile(CoreasonBaseState):
     ] = Field(default_factory=dict, description="Environment variables required by the transport.")
 
 
-type MCPTransportProfile = StdioTransportProfile | SSETransportProfile | HTTPTransportProfile
+class ExtismInProcessProfile(CoreasonBaseState):
+    r"""
+    AGENT INSTRUCTION: Formalizes local, in-process WebAssembly execution using the Extism SDK to bypass OS process boundaries safely.
+
+    CAUSAL AFFORDANCE: Loads pre-compiled WASM binary files directly into the host process memory space, running sandboxed functions using the underlying Wasmtime runtime engine.
+
+    EPISTEMIC BOUNDS: The `wasm_path` must be a valid path string (`max_length=2000`). Environment variables are restricted to standard bounds.
+
+    MCP ROUTING TRIGGERS: In-Process WASM, WebAssembly Sandbox, Extism SDK, Local Memory Sandbox, Fast Micro-Execution
+
+    """
+
+    topology_class: Literal["extism_in_process"] = Field(default="extism_in_process", description="Type of transport.")
+    wasm_path: Annotated[str, StringConstraints(max_length=2000)] = Field(
+        ..., description="The path to the local WASM file."
+    )
+    env_vars: dict[
+        Annotated[str, StringConstraints(max_length=255)], Annotated[str, StringConstraints(max_length=2000)]
+    ] = Field(default_factory=dict, description="Environment variables required by the transport.")
+
+
+type MCPTransportProfile = StdioTransportProfile | SSETransportProfile | HTTPTransportProfile | ExtismInProcessProfile
 
 
 class EpistemicCausalGraphDefinitionState(CoreasonBaseState):

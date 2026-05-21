@@ -165,6 +165,22 @@ class TestCoreasonBaseStateHashing:
         assert hash(obj1) == hash(obj2)
 
 
+class TestBaseStateMsgpackSerialization:
+    """Verify high-performance msgspec MessagePack serialization and deserialization."""
+
+    def test_msgpack_roundtrip(self) -> None:
+        obj = GradingCriterionProfile(criterion_cid="test-msgpack", description="desc", weight=4.2)
+        serialized = obj.to_msgpack()
+        assert isinstance(serialized, bytes)
+        assert len(serialized) > 0
+
+        deserialized = GradingCriterionProfile.from_msgpack(serialized)
+        assert deserialized.criterion_cid == obj.criterion_cid
+        assert deserialized.description == obj.description
+        assert deserialized.weight == obj.weight
+        assert deserialized == obj
+
+
 # ---------------------------------------------------------------------------
 # EpistemicProxyState
 # ---------------------------------------------------------------------------
