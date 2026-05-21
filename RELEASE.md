@@ -71,7 +71,35 @@ The release process integrates local verification with cloud-based continuous de
 
 ---
 
-## 4. Release Orchestration Commands
+## 4. OCI Artifacts, Cloud Marketplaces, and GitOps
+
+To support automated, secure deployments across cloud substrates and developer sandboxes, the release pipeline publishes and verifies the following target artifacts:
+
+### A. OCI Container Images
+- **GitHub Container Registry (GHCR):** All components are packaged as Docker-compatible OCI images under `ghcr.io/coreason-ai/`.
+- **Cosign Cryptographic Signing:** Every container image is signed via keyless **Sigstore/Cosign** to guarantee supply chain integrity.
+- **SLSA Level 3 Provenance:** GitHub Actions generates SLSA build provenance and publishes it via GitHub Attestations.
+- **Dynamic Tagging:** Images are published with both the explicit tag (`vX.Y.Z`) and the `:latest` tag to support automatic updates in tracking environments.
+
+### B. OCI Helm Charts
+- **Infrastructure Packaging:** Helm charts (e.g., `coreason-enterprise` and `coreason-mesh`) are packaged and pushed as OCI artifacts to `ghcr.io/coreason-ai/charts/`.
+- **Signature Verification:** Production Kubernetes clusters must verify Helm chart signatures before deployment:
+  ```bash
+  cosign verify ghcr.io/coreason-ai/charts/coreason-enterprise:vX.Y.Z
+  ```
+
+### C. Cloud Marketplace AMIs & Terraform
+- **Topology-in-a-Box:** All dependencies are bundled into an orchestrated, self-bootstrapping enclave for push-button deployment on AWS ECS/Fargate or Azure Container Instances.
+- **Packer Pipelines:** Pre-baked AMIs containing the systemd `coreason.service` are built via Packer (`infrastructure/packer/aws/topology-in-a-box.pkr.hcl`) to pull the latest signed containers on boot.
+- **Terraform IaC:** Infrastructure templates are stored in `coreason-ecosystem/infrastructure/terraform/aws/` to automate provisioning VPCs, IAM task roles, and clusters.
+
+### D. GitOps Promotion (ArgoCD)
+- **Repository Dispatch:** Once new images are published to GHCR, the workflow sends a dispatch payload to `coreason-infrastructure`.
+- **ArgoCD Reconciliation:** ArgoCD automatically updates the targeting manifests to sync the new release tags and roll out updates using sync wave orchestration.
+
+---
+
+## 5. Release Orchestration Commands
 
 Use the central workspace release manager to run coordinated tasks:
 
@@ -90,7 +118,7 @@ Use the central workspace release manager to run coordinated tasks:
 
 ---
 
-## 5. Agent Boundary Constraints
+## 6. Agent Boundary Constraints
 
 AI agents operating in this workspace must strictly adhere to the following safety rules:
 
