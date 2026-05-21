@@ -39,13 +39,6 @@ import numpy as np
 from pydantic import AnyUrl, BaseModel, ValidationError
 from pydantic.json_schema import models_json_schema
 
-_RUST_ALGEBRA: Any = None
-try:
-    from coreason_manifest import coreason_manifest_rust
-    _RUST_ALGEBRA = coreason_manifest_rust
-except ImportError:
-    pass
-
 import coreason_manifest.spec.ontology as ontology
 from coreason_manifest.spec.ontology import (
     AnyTopologyManifest,
@@ -63,6 +56,13 @@ from coreason_manifest.spec.ontology import (
     VectorEmbeddingState,
     WorkflowManifest,
 )
+
+_RUST_ALGEBRA: Any = None
+try:
+    from coreason_manifest import coreason_manifest_rust
+    _RUST_ALGEBRA = coreason_manifest_rust
+except ImportError:
+    pass
 
 SCHEMA_REGISTRY: dict[str, type[BaseModel]] = {
     "mcp_tool_definition": EpistemicMCPToolDefinitionState,
@@ -323,7 +323,7 @@ def calculate_latent_alignment(
             if "Latent alignment failed" in err_msg:
                 raise TamperFaultEvent("Latent alignment failed.") from e
             raise ValueError(err_msg) from e
-        except Exception:
+        except Exception:  # noqa: S110 # nosec
             pass
 
     # ⚡ Bolt Reversion: Direct np.dot causes float32 underflow for small vectors (ZeroDivisionError)
@@ -373,7 +373,7 @@ def compute_merkle_directory_cid(file_contents: dict[str, bytes]) -> str:
     if _RUST_ALGEBRA is not None:
         try:
             return str(_RUST_ALGEBRA.compute_merkle_directory_cid(file_contents))
-        except Exception:
+        except Exception:  # noqa: S110 # nosec
             pass
 
     file_hashes: list[str] = []
@@ -392,7 +392,7 @@ def compute_topology_hash(topology: "AnyTopologyManifest") -> str:
     if _RUST_ALGEBRA is not None:
         try:
             return str(_RUST_ALGEBRA.compute_topology_hash(topology.model_dump_json()))
-        except Exception:
+        except Exception:  # noqa: S110 # nosec
             pass
 
     return hashlib.sha256(topology.model_dump_canonical()).hexdigest()
@@ -487,7 +487,7 @@ def _validate_ssrf_safety(url: Any) -> Any:
         except ValueError as e:
             if "SSRF" in str(e):
                 raise
-        except Exception:
+        except Exception:  # noqa: S110 # nosec
             pass
 
     try:
