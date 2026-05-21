@@ -706,16 +706,17 @@ class CoreasonBaseState(BaseModel):
             object.__setattr__(self, "_cached_canonical_dump", canonical_dump)
             return canonical_dump
 
-    def to_msgpack(self) -> bytes:
-        """Serialize the state to MessagePack format using msgspec for high performance."""
-        raw_dict = self.model_dump(mode="json", exclude_none=True, by_alias=True)
-        return msgspec.msgpack.encode(raw_dict)
 
-    @classmethod
-    def from_msgpack(cls, data: bytes) -> Self:
-        """Deserialize MessagePack data into an instance of this state using msgspec."""
-        decoded = msgspec.msgpack.decode(data)
-        return cls.model_validate(decoded)
+def serialize_state_to_msgpack(state: CoreasonBaseState) -> bytes:
+    """Serialize the state to MessagePack format using msgspec for high performance."""
+    raw_dict = state.model_dump(mode="json", exclude_none=True, by_alias=True)
+    return msgspec.msgpack.encode(raw_dict)
+
+
+def deserialize_state_from_msgpack[T: CoreasonBaseState](cls: type[T], data: bytes) -> T:
+    """Deserialize MessagePack data into an instance of a CoreasonBaseState subclass using msgspec."""
+    decoded = msgspec.msgpack.decode(data)
+    return cls.model_validate(decoded)
 
 
 class EpistemicProxyState[T](CoreasonBaseState):

@@ -20,6 +20,8 @@ from coreason_manifest.spec.ontology import (
     GradingCriterionProfile,
     _canonicalize_payload,
     _validate_payload_bounds,
+    deserialize_state_from_msgpack,
+    serialize_state_to_msgpack,
 )
 
 # ---------------------------------------------------------------------------
@@ -170,11 +172,11 @@ class TestBaseStateMsgpackSerialization:
 
     def test_msgpack_roundtrip(self) -> None:
         obj = GradingCriterionProfile(criterion_cid="test-msgpack", description="desc", weight=4.2)
-        serialized = obj.to_msgpack()
+        serialized = serialize_state_to_msgpack(obj)
         assert isinstance(serialized, bytes)
         assert len(serialized) > 0
 
-        deserialized = GradingCriterionProfile.from_msgpack(serialized)
+        deserialized = deserialize_state_from_msgpack(GradingCriterionProfile, serialized)
         assert deserialized.criterion_cid == obj.criterion_cid
         assert deserialized.description == obj.description
         assert deserialized.weight == obj.weight

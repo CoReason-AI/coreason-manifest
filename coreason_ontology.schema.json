@@ -11894,6 +11894,51 @@
       "title": "ExploratoryDiscoveryIntent",
       "type": "object"
     },
+    "ExtismInProcessProfile": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes local, in-process WebAssembly execution using the Extism SDK to bypass OS process boundaries safely.\n\nCAUSAL AFFORDANCE: Loads pre-compiled WASM binary files directly into the host process memory space, running sandboxed functions using the underlying Wasmtime runtime engine.\n\nEPISTEMIC BOUNDS: The `wasm_path` must be a valid path string (`max_length=2000`). Environment variables are restricted to standard bounds.\n\nMCP ROUTING TRIGGERS: In-Process WASM, WebAssembly Sandbox, Extism SDK, Local Memory Sandbox, Fast Micro-Execution",
+      "properties": {
+        "tenant_cid": {
+          "default": "889955217295c2bfef2d6812071b633b0819477e67f57853febf116f69f30531",
+          "description": "The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\"date_of_incorporation\":\"2025-10-16\",\"file_number\":\"10369312\",\"jurisdiction\":\"US-DE\",\"legal_name\":\"CoReason, Inc.\"}",
+          "maxLength": 128,
+          "minLength": 4,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Tenant Cid",
+          "type": "string"
+        },
+        "topology_class": {
+          "const": "extism_in_process",
+          "default": "extism_in_process",
+          "description": "Type of transport.",
+          "title": "Topology Class",
+          "type": "string"
+        },
+        "wasm_path": {
+          "description": "The path to the local WASM file.",
+          "maxLength": 2000,
+          "title": "Wasm Path",
+          "type": "string"
+        },
+        "env_vars": {
+          "additionalProperties": {
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "description": "Environment variables required by the transport.",
+          "propertyNames": {
+            "maxLength": 255
+          },
+          "title": "Env Vars",
+          "type": "object"
+        }
+      },
+      "required": [
+        "wasm_path"
+      ],
+      "title": "ExtismInProcessProfile",
+      "type": "object"
+    },
     "FYIIntent": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Asynchronous Epistemic Signaling, indicating\nthat the presented manifold requires no reciprocal causal action from the\nhuman operator.\n\nCAUSAL AFFORDANCE: Triggers a stateless UI projection event, allowing the\nswarm to update the human on peripheral task completions without halting the\nunderlying Directed Acyclic Graph (DAG) execution.\n\nEPISTEMIC BOUNDS: The execution path is rigidly constrained by the\nLiteral[\"fyi\"] type discriminator, physically preventing this object from\nbeing parsed as a blocking Mixed-Initiative state.\n\nMCP ROUTING TRIGGERS: Asynchronous Telemetry, Epistemic Signaling, Stateless\nProjection, Human-in-the-Loop",
@@ -15220,6 +15265,7 @@
           "description": "Polymorphic transport configuration (stdio, sse, or http) including env_vars, args, and headers.",
           "discriminator": {
             "mapping": {
+              "extism_in_process": "#/$defs/ExtismInProcessProfile",
               "http": "#/$defs/HTTPTransportProfile",
               "sse": "#/$defs/SSETransportProfile",
               "stdio": "#/$defs/StdioTransportProfile"
@@ -15235,6 +15281,9 @@
             },
             {
               "$ref": "#/$defs/HTTPTransportProfile"
+            },
+            {
+              "$ref": "#/$defs/ExtismInProcessProfile"
             }
           ],
           "title": "Transport"

@@ -10159,6 +10159,9 @@ impl<'de> ::serde::Deserialize<'de> for ClassifiedIntent {
 #[doc = "    \"ExploratoryDiscoveryIntent\": {"]
 #[doc = "      \"$ref\": \"#/$defs/ExploratoryDiscoveryIntent\""]
 #[doc = "    },"]
+#[doc = "    \"ExtismInProcessProfile\": {"]
+#[doc = "      \"$ref\": \"#/$defs/ExtismInProcessProfile\""]
+#[doc = "    },"]
 #[doc = "    \"FYIIntent\": {"]
 #[doc = "      \"$ref\": \"#/$defs/FYIIntent\""]
 #[doc = "    },"]
@@ -11944,6 +11947,12 @@ pub struct CoReasonSharedKernelOntology {
     )]
     pub exploratory_discovery_intent: ::std::option::Option<ExploratoryDiscoveryIntent>,
     #[serde(
+        rename = "ExtismInProcessProfile",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub extism_in_process_profile: ::std::option::Option<ExtismInProcessProfile>,
+    #[serde(
         rename = "FacetMatrixProfile",
         default,
         skip_serializing_if = "::std::option::Option::is_none"
@@ -13417,6 +13426,7 @@ impl ::std::default::Default for CoReasonSharedKernelOntology {
             exhaustive_discovery_intent: Default::default(),
             exogenous_epistemic_event: Default::default(),
             exploratory_discovery_intent: Default::default(),
+            extism_in_process_profile: Default::default(),
             facet_matrix_profile: Default::default(),
             fallback_intent: Default::default(),
             fallback_sla: Default::default(),
@@ -33161,6 +33171,145 @@ impl<'de> ::serde::Deserialize<'de> for ExportCid {
             })
     }
 }
+#[doc = "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Formalizes local, in-process WebAssembly execution using the Extism SDK to bypass OS process boundaries safely.\n\nCAUSAL AFFORDANCE: Loads pre-compiled WASM binary files directly into the host process memory space, running sandboxed functions using the underlying Wasmtime runtime engine.\n\nEPISTEMIC BOUNDS: The `wasm_path` must be a valid path string (`max_length=2000`). Environment variables are restricted to standard bounds.\n\nMCP ROUTING TRIGGERS: In-Process WASM, WebAssembly Sandbox, Extism SDK, Local Memory Sandbox, Fast Micro-Execution"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"ExtismInProcessProfile\","]
+#[doc = "  \"description\": \"CoReason Shared Kernel Ontology\\n\\nAGENT INSTRUCTION: Formalizes local, in-process WebAssembly execution using the Extism SDK to bypass OS process boundaries safely.\\n\\nCAUSAL AFFORDANCE: Loads pre-compiled WASM binary files directly into the host process memory space, running sandboxed functions using the underlying Wasmtime runtime engine.\\n\\nEPISTEMIC BOUNDS: The `wasm_path` must be a valid path string (`max_length=2000`). Environment variables are restricted to standard bounds.\\n\\nMCP ROUTING TRIGGERS: In-Process WASM, WebAssembly Sandbox, Extism SDK, Local Memory Sandbox, Fast Micro-Execution\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"wasm_path\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"env_vars\": {"]
+#[doc = "      \"title\": \"Env Vars\","]
+#[doc = "      \"description\": \"Environment variables required by the transport.\","]
+#[doc = "      \"type\": \"object\","]
+#[doc = "      \"additionalProperties\": {"]
+#[doc = "        \"type\": \"string\","]
+#[doc = "        \"maxLength\": 2000"]
+#[doc = "      }"]
+#[doc = "    },"]
+#[doc = "    \"tenant_cid\": {"]
+#[doc = "      \"title\": \"Tenant Cid\","]
+#[doc = "      \"description\": \"The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\\\"date_of_incorporation\\\":\\\"2025-10-16\\\",\\\"file_number\\\":\\\"10369312\\\",\\\"jurisdiction\\\":\\\"US-DE\\\",\\\"legal_name\\\":\\\"CoReason, Inc.\\\"}\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"maxLength\": 128,"]
+#[doc = "      \"minLength\": 4,"]
+#[doc = "      \"pattern\": \"^[a-zA-Z0-9_.:-]+$\""]
+#[doc = "    },"]
+#[doc = "    \"topology_class\": {"]
+#[doc = "      \"title\": \"Topology Class\","]
+#[doc = "      \"description\": \"Type of transport.\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"const\": \"extism_in_process\""]
+#[doc = "    },"]
+#[doc = "    \"wasm_path\": {"]
+#[doc = "      \"title\": \"Wasm Path\","]
+#[doc = "      \"description\": \"The path to the local WASM file.\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"maxLength\": 2000"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct ExtismInProcessProfile {
+    #[doc = "Environment variables required by the transport."]
+    #[serde(
+        default,
+        skip_serializing_if = ":: std :: collections :: HashMap::is_empty"
+    )]
+    pub env_vars:
+        ::std::collections::HashMap<::std::string::String, ExtismInProcessProfileEnvVarsValue>,
+    #[doc = "The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\"date_of_incorporation\":\"2025-10-16\",\"file_number\":\"10369312\",\"jurisdiction\":\"US-DE\",\"legal_name\":\"CoReason, Inc.\"}"]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub tenant_cid: ::std::option::Option<TenantCid>,
+    #[doc = "Type of transport."]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub topology_class: ::std::option::Option<::std::string::String>,
+    #[doc = "The path to the local WASM file."]
+    pub wasm_path: WasmPath,
+}
+impl ExtismInProcessProfile {
+    pub fn builder() -> builder::ExtismInProcessProfile {
+        Default::default()
+    }
+}
+#[doc = "`ExtismInProcessProfileEnvVarsValue`"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 2000"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct ExtismInProcessProfileEnvVarsValue(::std::string::String);
+impl ::std::ops::Deref for ExtismInProcessProfileEnvVarsValue {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<ExtismInProcessProfileEnvVarsValue> for ::std::string::String {
+    fn from(value: ExtismInProcessProfileEnvVarsValue) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for ExtismInProcessProfileEnvVarsValue {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 2000usize {
+            return Err("longer than 2000 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for ExtismInProcessProfileEnvVarsValue {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for ExtismInProcessProfileEnvVarsValue {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ExtismInProcessProfileEnvVarsValue {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for ExtismInProcessProfileEnvVarsValue {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
 #[doc = "The exact text evaluated by the NLI model."]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -43907,10 +44056,14 @@ impl McpResourceManifest {
 #[doc = "        },"]
 #[doc = "        {"]
 #[doc = "          \"$ref\": \"#/$defs/HTTPTransportProfile\""]
+#[doc = "        },"]
+#[doc = "        {"]
+#[doc = "          \"$ref\": \"#/$defs/ExtismInProcessProfile\""]
 #[doc = "        }"]
 #[doc = "      ],"]
 #[doc = "      \"discriminator\": {"]
 #[doc = "        \"mapping\": {"]
+#[doc = "          \"extism_in_process\": \"#/$defs/ExtismInProcessProfile\","]
 #[doc = "          \"http\": \"#/$defs/HTTPTransportProfile\","]
 #[doc = "          \"sse\": \"#/$defs/SSETransportProfile\","]
 #[doc = "          \"stdio\": \"#/$defs/StdioTransportProfile\""]
@@ -72816,10 +72969,14 @@ impl<'de> ::serde::Deserialize<'de> for TransmutedPayloadHash {
 #[doc = "    },"]
 #[doc = "    {"]
 #[doc = "      \"$ref\": \"#/$defs/HTTPTransportProfile\""]
+#[doc = "    },"]
+#[doc = "    {"]
+#[doc = "      \"$ref\": \"#/$defs/ExtismInProcessProfile\""]
 #[doc = "    }"]
 #[doc = "  ],"]
 #[doc = "  \"discriminator\": {"]
 #[doc = "    \"mapping\": {"]
+#[doc = "      \"extism_in_process\": \"#/$defs/ExtismInProcessProfile\","]
 #[doc = "      \"http\": \"#/$defs/HTTPTransportProfile\","]
 #[doc = "      \"sse\": \"#/$defs/SSETransportProfile\","]
 #[doc = "      \"stdio\": \"#/$defs/StdioTransportProfile\""]
@@ -72835,6 +72992,7 @@ pub enum Transport {
     StdioTransportProfile(StdioTransportProfile),
     SseTransportProfile(SseTransportProfile),
     HttpTransportProfile(HttpTransportProfile),
+    ExtismInProcessProfile(ExtismInProcessProfile),
 }
 impl ::std::convert::From<StdioTransportProfile> for Transport {
     fn from(value: StdioTransportProfile) -> Self {
@@ -72849,6 +73007,11 @@ impl ::std::convert::From<SseTransportProfile> for Transport {
 impl ::std::convert::From<HttpTransportProfile> for Transport {
     fn from(value: HttpTransportProfile) -> Self {
         Self::HttpTransportProfile(value)
+    }
+}
+impl ::std::convert::From<ExtismInProcessProfile> for Transport {
+    fn from(value: ExtismInProcessProfile) -> Self {
+        Self::ExtismInProcessProfile(value)
     }
 }
 #[doc = "The treatment variable (X) to intervene on."]
@@ -75158,6 +75321,76 @@ impl ::std::convert::TryFrom<::std::string::String> for VrfProof {
     }
 }
 impl<'de> ::serde::Deserialize<'de> for VrfProof {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
+#[doc = "The path to the local WASM file."]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"Wasm Path\","]
+#[doc = "  \"description\": \"The path to the local WASM file.\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 2000"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct WasmPath(::std::string::String);
+impl ::std::ops::Deref for WasmPath {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<WasmPath> for ::std::string::String {
+    fn from(value: WasmPath) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for WasmPath {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 2000usize {
+            return Err("longer than 2000 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for WasmPath {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for WasmPath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for WasmPath {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for WasmPath {
     fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
     where
         D: ::serde::Deserializer<'de>,
@@ -80883,6 +81116,10 @@ pub mod builder {
             ::std::option::Option<super::ExploratoryDiscoveryIntent>,
             ::std::string::String,
         >,
+        extism_in_process_profile: ::std::result::Result<
+            ::std::option::Option<super::ExtismInProcessProfile>,
+            ::std::string::String,
+        >,
         facet_matrix_profile: ::std::result::Result<
             ::std::option::Option<super::FacetMatrixProfile>,
             ::std::string::String,
@@ -81916,6 +82153,7 @@ pub mod builder {
                 exhaustive_discovery_intent: Ok(Default::default()),
                 exogenous_epistemic_event: Ok(Default::default()),
                 exploratory_discovery_intent: Ok(Default::default()),
+                extism_in_process_profile: Ok(Default::default()),
                 facet_matrix_profile: Ok(Default::default()),
                 fallback_intent: Ok(Default::default()),
                 fallback_sla: Ok(Default::default()),
@@ -84073,6 +84311,16 @@ pub mod builder {
         {
             self.exploratory_discovery_intent = value.try_into().map_err(|e| {
                 format!("error converting supplied value for exploratory_discovery_intent: {e}")
+            });
+            self
+        }
+        pub fn extism_in_process_profile<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<super::ExtismInProcessProfile>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.extism_in_process_profile = value.try_into().map_err(|e| {
+                format!("error converting supplied value for extism_in_process_profile: {e}")
             });
             self
         }
@@ -86454,6 +86702,7 @@ pub mod builder {
                 exhaustive_discovery_intent: value.exhaustive_discovery_intent?,
                 exogenous_epistemic_event: value.exogenous_epistemic_event?,
                 exploratory_discovery_intent: value.exploratory_discovery_intent?,
+                extism_in_process_profile: value.extism_in_process_profile?,
                 facet_matrix_profile: value.facet_matrix_profile?,
                 fallback_intent: value.fallback_intent?,
                 fallback_sla: value.fallback_sla?,
@@ -86883,6 +87132,7 @@ pub mod builder {
                 exhaustive_discovery_intent: Ok(value.exhaustive_discovery_intent),
                 exogenous_epistemic_event: Ok(value.exogenous_epistemic_event),
                 exploratory_discovery_intent: Ok(value.exploratory_discovery_intent),
+                extism_in_process_profile: Ok(value.extism_in_process_profile),
                 facet_matrix_profile: Ok(value.facet_matrix_profile),
                 fallback_intent: Ok(value.fallback_intent),
                 fallback_sla: Ok(value.fallback_sla),
@@ -103630,6 +103880,103 @@ pub mod builder {
                 semantic_query: Ok(value.semantic_query),
                 tenant_cid: Ok(value.tenant_cid),
                 topology_class: Ok(value.topology_class),
+            }
+        }
+    }
+    #[derive(Clone, Debug)]
+    pub struct ExtismInProcessProfile {
+        env_vars: ::std::result::Result<
+            ::std::collections::HashMap<
+                ::std::string::String,
+                super::ExtismInProcessProfileEnvVarsValue,
+            >,
+            ::std::string::String,
+        >,
+        tenant_cid:
+            ::std::result::Result<::std::option::Option<super::TenantCid>, ::std::string::String>,
+        topology_class: ::std::result::Result<
+            ::std::option::Option<::std::string::String>,
+            ::std::string::String,
+        >,
+        wasm_path: ::std::result::Result<super::WasmPath, ::std::string::String>,
+    }
+    impl ::std::default::Default for ExtismInProcessProfile {
+        fn default() -> Self {
+            Self {
+                env_vars: Ok(Default::default()),
+                tenant_cid: Ok(Default::default()),
+                topology_class: Ok(Default::default()),
+                wasm_path: Err("no value supplied for wasm_path".to_string()),
+            }
+        }
+    }
+    impl ExtismInProcessProfile {
+        pub fn env_vars<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<
+                ::std::collections::HashMap<
+                    ::std::string::String,
+                    super::ExtismInProcessProfileEnvVarsValue,
+                >,
+            >,
+            T::Error: ::std::fmt::Display,
+        {
+            self.env_vars = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for env_vars: {e}"));
+            self
+        }
+        pub fn tenant_cid<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<super::TenantCid>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.tenant_cid = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for tenant_cid: {e}"));
+            self
+        }
+        pub fn topology_class<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<::std::string::String>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.topology_class = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for topology_class: {e}"));
+            self
+        }
+        pub fn wasm_path<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<super::WasmPath>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.wasm_path = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for wasm_path: {e}"));
+            self
+        }
+    }
+    impl ::std::convert::TryFrom<ExtismInProcessProfile> for super::ExtismInProcessProfile {
+        type Error = super::error::ConversionError;
+        fn try_from(
+            value: ExtismInProcessProfile,
+        ) -> ::std::result::Result<Self, super::error::ConversionError> {
+            Ok(Self {
+                env_vars: value.env_vars?,
+                tenant_cid: value.tenant_cid?,
+                topology_class: value.topology_class?,
+                wasm_path: value.wasm_path?,
+            })
+        }
+    }
+    impl ::std::convert::From<super::ExtismInProcessProfile> for ExtismInProcessProfile {
+        fn from(value: super::ExtismInProcessProfile) -> Self {
+            Self {
+                env_vars: Ok(value.env_vars),
+                tenant_cid: Ok(value.tenant_cid),
+                topology_class: Ok(value.topology_class),
+                wasm_path: Ok(value.wasm_path),
             }
         }
     }

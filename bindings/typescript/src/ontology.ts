@@ -525,7 +525,7 @@ export type ServerCid = string;
 /**
  * Polymorphic transport configuration (stdio, sse, or http) including env_vars, args, and headers.
  */
-export type Transport = StdioTransportProfile | SSETransportProfile | HTTPTransportProfile;
+export type Transport = StdioTransportProfile | SSETransportProfile | HTTPTransportProfile | ExtismInProcessProfile;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
@@ -569,13 +569,25 @@ export type TopologyClass9 = "http";
  */
 export type Uri1 = string;
 /**
+ * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
+ */
+export type TenantCid28 = string;
+/**
+ * Type of transport.
+ */
+export type TopologyClass10 = "extism_in_process";
+/**
+ * The path to the local WASM file.
+ */
+export type WasmPath = string;
+/**
  * Optional SHA-256 hash of the local binary to prevent supply-chain execution attacks over stdio.
  */
 export type BinaryHash = string | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid28 = string;
+export type TenantCid29 = string;
 /**
  * The explicit whitelist of function names the node is allowed to call.
  */
@@ -595,7 +607,7 @@ export type RequiredLicenses = string[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid29 = string;
+export type TenantCid30 = string;
 /**
  * RFC 6902 JSON Pointer extracting exogenous data.
  */
@@ -617,11 +629,11 @@ export type StateSynchronizationOptics = OpticalMappingContract[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid30 = string;
+export type TenantCid31 = string;
 /**
  * Discriminator type for an ephemeral namespace partition.
  */
-export type TopologyClass10 = "ephemeral_partition";
+export type TopologyClass11 = "ephemeral_partition";
 /**
  * Unique identifier for this ephemeral partition.
  */
@@ -655,11 +667,11 @@ export type AllowSubprocessSpawning = boolean;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid31 = string;
+export type TenantCid32 = string;
 /**
  * Discriminator for a zero-trust contract.
  */
-export type TopologyClass11 = "zero_trust_contract";
+export type TopologyClass12 = "zero_trust_contract";
 /**
  * UUIDv7 mapping to the ledger.
  */
@@ -675,7 +687,7 @@ export type SchemaBlueprintName = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid32 = string;
+export type TenantCid33 = string;
 /**
  * Strict AST-parsable string constraint (e.g., 'len(plan.outputs) == len(plan.inputs)').
  */
@@ -700,7 +712,7 @@ export type AnyExplorationBranch = ThoughtBranchState | StochasticTopologyManife
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid33 = string;
+export type TenantCid34 = string;
 /**
  * A deterministic capability pointer bounding this specific topological divergence in the Latent Scratchpad Trace.
  */
@@ -717,13 +729,13 @@ export type LatentContentHash = string;
  * The logical validity score assigned to this branch by the Process Reward Model.
  */
 export type PrmScore = number | null;
-export type TopologyClass12 = "thought_branch";
+export type TopologyClass13 = "thought_branch";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid34 = string;
+export type TenantCid35 = string;
 export type TopologyCid = string;
-export type TopologyClass13 = "stochastic_ensemble";
+export type TopologyClass14 = "stochastic_ensemble";
 /**
  * AGENT INSTRUCTION: Categorizes the thermodynamic phase of the generative ensemble's exploration.
  *
@@ -741,7 +753,7 @@ export type IdeationPhaseProfile =
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid35 = string;
+export type TenantCid36 = string;
 export type NodeCid = string;
 export type ParentNodeCid = string | null;
 export type AgentRole = "generator" | "critic" | "synthesizer";
@@ -757,7 +769,7 @@ export type StochasticGraph = StochasticNodeState[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid36 = string;
+export type TenantCid37 = string;
 export type SuperpositionCid = string;
 export type WaveCollapseFunction = "plurality_vote" | "highest_confidence" | "deterministic_compiler";
 export type ResidualEntropyVectors = string[];
@@ -765,11 +777,11 @@ export type EpistemicStatus = "stochastically_unbounded";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid37 = string;
+export type TenantCid38 = string;
 /**
  * Discriminator for MCTS thought nodes within the strategic planning topology.
  */
-export type TopologyClass14 = "strategic_thought_node";
+export type TopologyClass15 = "strategic_thought_node";
 /**
  * The SHA-256 hash of the parent thought node in the MCTS tree, establishing Merkle-DAG lineage. For root nodes, use the SHA-256 hash of the initial escalation intent.
  */
@@ -839,11 +851,11 @@ export type AnyIntent =
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid38 = string;
+export type TenantCid39 = string;
 /**
  * Discriminator for temporal edge invalidation.
  */
-export type TopologyClass15 = "temporal_invalidation";
+export type TopologyClass16 = "temporal_invalidation";
 /**
  * The precise chronological coordinate terminating the truth value (Graphiti valid_to).
  */
@@ -851,11 +863,11 @@ export type InvalidationTimestamp = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid39 = string;
+export type TenantCid40 = string;
 /**
  * Discriminator type for empirical falsification contract.
  */
-export type TopologyClass16 = "empirical_falsification_contract";
+export type TopologyClass17 = "empirical_falsification_contract";
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this falsification test to the Merkle-DAG.
  */
@@ -875,8 +887,8 @@ export type FalsifyingObservationSignature = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid40 = string;
-export type TopologyClass17 = "falsification_contract";
+export type TenantCid41 = string;
+export type TopologyClass18 = "falsification_contract";
 /**
  * The constraint oracle tasked with finding a counter-model.
  */
@@ -884,8 +896,8 @@ export type FalsificationSolver = "clingo" | "z3";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid41 = string;
-export type TopologyClass18 = "epistemic_ontological_crosswalk";
+export type TenantCid42 = string;
+export type TopologyClass19 = "epistemic_ontological_crosswalk";
 export type TargetGraphCid = string;
 /**
  * The ungrounded natural language concepts extracted by the LLM.
@@ -906,11 +918,11 @@ export type MinimumIsometryThreshold = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid42 = string;
+export type TenantCid43 = string;
 /**
  * The discriminative topological boundary for read-only informational handoffs.
  */
-export type TopologyClass19 = "informational";
+export type TopologyClass20 = "informational";
 /**
  * The context or summary to display to the human operator.
  */
@@ -922,11 +934,11 @@ export type TimeoutAction1 = "rollback" | "proceed_default" | "terminate";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid43 = string;
+export type TenantCid44 = string;
 /**
  * Discriminator for requesting specific missing context from a human.
  */
-export type TopologyClass20 = "drafting";
+export type TopologyClass21 = "drafting";
 /**
  * The prompt explaining what information the swarm is missing.
  */
@@ -938,11 +950,11 @@ export type TimeoutAction2 = "rollback" | "proceed_default" | "terminate";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid44 = string;
+export type TenantCid45 = string;
 /**
  * Discriminator for Forge-to-Claw epistemic deficit escalations.
  */
-export type TopologyClass21 = "escalation";
+export type TopologyClass22 = "escalation";
 /**
  * The fully qualified URN of the heuristic solver capability to which the deficit is being escalated.
  */
@@ -962,11 +974,11 @@ export type ThermodynamicBudget = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid45 = string;
+export type TenantCid46 = string;
 /**
  * Discriminator for geometric boundary of latent tool discovery.
  */
-export type TopologyClass22 = "semantic_discovery";
+export type TopologyClass23 = "semantic_discovery";
 /**
  * The minimum cosine similarity required to authorize a capability mount.
  */
@@ -980,11 +992,11 @@ export type RequiredStructuralTypes = string[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid46 = string;
+export type TenantCid47 = string;
 /**
  * Strict discriminator for dynamic UI regrouping.
  */
-export type TopologyClass23 = "spatial_taxonomic_restructure";
+export type TopologyClass24 = "spatial_taxonomic_restructure";
 /**
  * The SOTA mathematical heuristic used to project the new manifold.
  */
@@ -992,7 +1004,7 @@ export type RestructureHeuristic = "chronological" | "entity_centric" | "semanti
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid47 = string;
+export type TenantCid48 = string;
 /**
  * Unique Content Identifier (CID) for this generated taxonomy.
  */
@@ -1004,7 +1016,7 @@ export type RootNodeCid = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid48 = string;
+export type TenantCid49 = string;
 /**
  * A Content Identifier (CID) bounding this specific taxonomic coordinate.
  */
@@ -1020,7 +1032,7 @@ export type ChildrenNodeCids = string[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid49 = string;
+export type TenantCid50 = string;
 /**
  * Cryptographic pointer back to the TopologicalFidelityReceipt generated at the Input Gate.
  */
@@ -1040,7 +1052,7 @@ export type SourceArtifactCid = string | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid50 = string;
+export type TenantCid51 = string;
 /**
  * The starting index in the discrete VLM context window.
  */
@@ -1072,7 +1084,7 @@ export type BlockClass = ("paragraph" | "table" | "figure" | "footnote" | "heade
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid51 = string;
+export type TenantCid52 = string;
 /**
  * The mathematical methodology used to embed the chain of custody.
  */
@@ -1101,7 +1113,7 @@ export type LeafProvenance = EpistemicProvenanceReceipt[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid52 = string;
+export type TenantCid53 = string;
 /**
  * The abstract material identifier (e.g., 'urn:coreason:material:glass_refractive').
  */
@@ -1113,11 +1125,11 @@ export type CompiledShaderCid = string | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid53 = string;
+export type TenantCid54 = string;
 /**
  * Discriminator for RAG projection intent.
  */
-export type TopologyClass24 = "latent_projection";
+export type TopologyClass25 = "latent_projection";
 /**
  * The maximum number of nodes to extract from the index.
  */
@@ -1129,7 +1141,7 @@ export type MinIsometryScore1 = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid54 = string;
+export type TenantCid55 = string;
 /**
  * The strictly typed search depth bound for the cDAG.
  */
@@ -1150,7 +1162,7 @@ export type EnforceIsometry = boolean;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid55 = string;
+export type TenantCid56 = string;
 /**
  * The mathematical paradigm governing how context is expanded.
  */
@@ -1170,11 +1182,11 @@ export type ParentMergeThreshold = number | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid56 = string;
+export type TenantCid57 = string;
 /**
  * Discriminator for unstructured payload schema deduction.
  */
-export type TopologyClass25 = "latent_schema_inference";
+export type TopologyClass26 = "latent_schema_inference";
 /**
  * The CID pointing to the TerminalBufferState or raw intercepted byte stream.
  */
@@ -1194,11 +1206,11 @@ export type RequireStrictValidation = boolean;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid57 = string;
+export type TenantCid58 = string;
 /**
  * Discriminator type for a human directive.
  */
-export type TopologyClass26 = "human_directive";
+export type TopologyClass27 = "human_directive";
 /**
  * The raw, unstructured human objective.
  */
@@ -1210,11 +1222,11 @@ export type AllocatedBudgetMagnitude = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid58 = string;
+export type TenantCid59 = string;
 /**
  * Discriminator for contextual semantic resolution.
  */
-export type TopologyClass27 = "contextual_semantic_resolution";
+export type TopologyClass28 = "contextual_semantic_resolution";
 /**
  * An explicit cryptographic pointer to the raw SemanticRelationalVectorState pending resolution.
  */
@@ -1241,11 +1253,11 @@ export type MinimumIsometryThreshold1 = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid59 = string;
+export type TenantCid60 = string;
 /**
  * Discriminator for external ontology polling.
  */
-export type TopologyClass28 = "ontology_discovery";
+export type TopologyClass29 = "ontology_discovery";
 /**
  * JSON-RPC version.
  */
@@ -1281,11 +1293,11 @@ export type ExpectedResponseSchema = {
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid60 = string;
+export type TenantCid61 = string;
 /**
  * Discriminator for semantic heuristic proposals.
  */
-export type TopologyClass29 = "semantic_mapping_proposal";
+export type TopologyClass30 = "semantic_mapping_proposal";
 /**
  * The cryptographic Merkle-DAG anchor for the proposal.
  */
@@ -1312,15 +1324,15 @@ export type JustificationEvidenceCids = [NodeCIDState, ...NodeCIDState[]];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid61 = string;
+export type TenantCid62 = string;
 /**
  * The discriminative topological boundary for spatial mutation intents.
  */
-export type TopologyClass30 = "continuous_spatial_mutation";
+export type TopologyClass31 = "continuous_spatial_mutation";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid62 = string;
+export type TenantCid63 = string;
 /**
  * The SpatialReferenceFrameManifest CID this coordinate is relative to, anchoring it to a physical or virtual room.
  */
@@ -1360,7 +1372,7 @@ export type Scale = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid63 = string;
+export type TenantCid64 = string;
 /**
  * The 3D Euclidean velocity vector.
  *
@@ -1400,11 +1412,11 @@ export type LamportClock = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid64 = string;
+export type TenantCid65 = string;
 /**
  * The discriminative topological boundary for compute provisioning intents.
  */
-export type TopologyClass31 = "compute_provisioning";
+export type TopologyClass32 = "compute_provisioning";
 /**
  * The underlying orchestration engine (Mandatory: SkyPilot).
  */
@@ -1416,7 +1428,7 @@ export type MaxBudget = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid65 = string;
+export type TenantCid66 = string;
 /**
  * The discrete architectural boundary of the node.
  */
@@ -1454,11 +1466,11 @@ export type RequiredCapabilities = string[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid66 = string;
+export type TenantCid67 = string;
 /**
  * The discriminative topological boundary for task announcement intents.
  */
-export type TopologyClass32 = "task_announcement";
+export type TopologyClass33 = "task_announcement";
 /**
  * Unique identifier for the required task.
  */
@@ -1474,11 +1486,11 @@ export type MaxBudgetMagnitude = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid67 = string;
+export type TenantCid68 = string;
 /**
  * The type of the resilience payload.
  */
-export type TopologyClass33 = "quarantine_intent";
+export type TopologyClass34 = "quarantine_intent";
 /**
  * The deterministic causal justification for the structural quarantine.
  */
@@ -1486,15 +1498,15 @@ export type Reason = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid68 = string;
+export type TenantCid69 = string;
 /**
  * The type of the intervention payload.
  */
-export type TopologyClass34 = "request";
+export type TopologyClass35 = "request";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid69 = string;
+export type TenantCid70 = string;
 /**
  * The explicit whitelist of top-level JSON pointers mathematically open to mutation.
  *
@@ -1504,7 +1516,7 @@ export type AllowedFields = string[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid70 = string;
+export type TenantCid71 = string;
 /**
  * The maximum allowed delay for a human intervention.
  */
@@ -1524,11 +1536,11 @@ export type AdjudicationDeadline = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid71 = string;
+export type TenantCid72 = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid72 = string;
+export type TenantCid73 = string;
 /**
  * The strictly bounded, un-redacted 1D string projection of the semantic artifact undergoing evaluation.
  */
@@ -1550,7 +1562,7 @@ export type LastRejectedHypothesisHash = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid73 = string;
+export type TenantCid74 = string;
 /**
  * The cryptographic Merkle root of the specific ThoughtBranch being evaluated.
  */
@@ -1566,27 +1578,27 @@ export type LoopsExhausted = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid74 = string;
+export type TenantCid75 = string;
 /**
  * Discriminator for an FYI intent.
  */
-export type TopologyClass35 = "fyi";
-/**
- * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
- */
-export type TenantCid75 = string;
-/**
- * The type of the resilience payload.
- */
-export type TopologyClass36 = "fallback_intent";
+export type TopologyClass36 = "fyi";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
 export type TenantCid76 = string;
 /**
+ * The type of the resilience payload.
+ */
+export type TopologyClass37 = "fallback_intent";
+/**
+ * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
+ */
+export type TenantCid77 = string;
+/**
  * The type of the intervention payload.
  */
-export type TopologyClass37 = "override";
+export type TopologyClass38 = "override";
 /**
  * Cryptographic audit justification for bypassing algorithmic consensus.
  */
@@ -1594,11 +1606,11 @@ export type Justification = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid77 = string;
+export type TenantCid78 = string;
 /**
  * The strict discriminator for this intervention payload.
  */
-export type TopologyClass38 = "constitutional_amendment";
+export type TopologyClass39 = "constitutional_amendment";
 /**
  * The globally unique decentralized identifier (DID) anchoring the GuardrailViolationEvent that justified triggering this proposal.
  */
@@ -1610,11 +1622,11 @@ export type Justification1 = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid78 = string;
+export type TenantCid79 = string;
 /**
  * Discriminator for a spatial kinematic action.
  */
-export type TopologyClass39 = "spatial_kinematic";
+export type TopologyClass40 = "spatial_kinematic";
 /**
  * The specific kinematic interaction paradigm.
  */
@@ -1634,11 +1646,11 @@ export type ExpectedVisualConcept = string | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid79 = string;
+export type TenantCid80 = string;
 /**
  * Discriminator type for System2RemediationIntent.
  */
-export type TopologyClass40 = "system_2_remediation";
+export type TopologyClass41 = "system_2_remediation";
 /**
  * A cryptographic Lineage Watermark (CID) tracking this specific dimensional collapse.
  */
@@ -1652,7 +1664,7 @@ export type ViolationReceipts = [ManifestViolationReceipt, ...ManifestViolationR
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid80 = string;
+export type TenantCid81 = string;
 /**
  * The exact RFC 6902 JSON pointer isolating the topological failure.
  */
@@ -1668,11 +1680,11 @@ export type DiagnosticMessage = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid81 = string;
+export type TenantCid82 = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid82 = string;
+export type TenantCid83 = string;
 /**
  * The discrete open-source engine URN identifier.
  */
@@ -1692,16 +1704,16 @@ export type SupportsLazyHydration = boolean;
 /**
  * Discriminator type for substrate hydration.
  */
-export type TopologyClass41 = "substrate_hydration";
-/**
- * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
- */
-export type TenantCid83 = string;
-export type TopologyClass42 = "neurosymbolic_inference";
+export type TopologyClass42 = "substrate_hydration";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
 export type TenantCid84 = string;
+export type TopologyClass43 = "neurosymbolic_inference";
+/**
+ * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
+ */
+export type TenantCid85 = string;
 /**
  * The continuous normalized float measuring the mathematical density of the contextual semantic envelope.
  */
@@ -1713,7 +1725,7 @@ export type SurroundingTokenDensity = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid85 = string;
+export type TenantCid86 = string;
 /**
  * Measures inherent string ambiguity.
  */
@@ -1733,7 +1745,7 @@ export type RequiresAbductiveEscalation = boolean;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid86 = string;
+export type TenantCid87 = string;
 /**
  * If True, forces the resulting SemanticNodeState to populate its uncertainty_profile.
  */
@@ -1753,9 +1765,9 @@ export type MinimumFidelityThreshold = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid87 = string;
+export type TenantCid88 = string;
 export type ProvenanceTraceCid = string | null;
-export type TopologyClass43 = "topological_projection";
+export type TopologyClass44 = "topological_projection";
 export type ProjectionCid = string;
 export type SourceSuperpositionCid = string;
 export type TargetTopologyProfile =
@@ -1769,8 +1781,8 @@ export type EpistemicStatus1 = "pending_deterministic_collapse";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid88 = string;
-export type TopologyClass44 = "formal_logic_premise";
+export type TenantCid89 = string;
+export type TopologyClass45 = "formal_logic_premise";
 /**
  * The URN identifying the specific formal dialect or solver (e.g., 'urn:coreason:dialect:lean4', 'urn:coreason:dialect:clingo').
  */
@@ -1786,14 +1798,14 @@ export type VerificationScript = string | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid89 = string;
-export type TopologyClass45 = "causal_propagation";
+export type TenantCid90 = string;
+export type TopologyClass46 = "causal_propagation";
 export type TargetGraphCid1 = string;
 export type TaskCid3 = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid90 = string;
+export type TenantCid91 = string;
 export type MinimumNliEntailmentScore = number;
 export type RequireIndependentSources = number;
 export type UngroundedLinkAction = "sever_edge" | "flag_for_human" | "decay_weight";
@@ -1801,7 +1813,7 @@ export type AllowedEvidenceDomains = string[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid91 = string;
+export type TenantCid92 = string;
 /**
  * The independent variable $X$.
  */
@@ -1813,7 +1825,7 @@ export type TargetVariable = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid92 = string;
+export type TenantCid93 = string;
 /**
  * The mathematical spline geometry used to interpolate the space between vertices.
  */
@@ -1842,7 +1854,7 @@ export type PredicateCurie = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid93 = string;
+export type TenantCid94 = string;
 /**
  * Represents exact syntactic schema or sub-string overlap.
  */
@@ -1862,7 +1874,7 @@ export type EpistemicConflictMass = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid94 = string;
+export type TenantCid95 = string;
 /**
  * Cryptographic anchor for the specific piece of evidence.
  */
@@ -1893,8 +1905,8 @@ export type UnverifiedEdges = CausalDirectedEdgeState[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid95 = string;
-export type TopologyClass46 = "rdf_serialization";
+export type TenantCid96 = string;
+export type TopologyClass47 = "rdf_serialization";
 export type ExportCid = string;
 export type TargetGraphCid2 = string;
 export type TargetFormat = "turtle" | "xml" | "json-ld" | "ntriples";
@@ -1902,21 +1914,21 @@ export type BaseUriNamespace = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid96 = string;
+export type TenantCid97 = string;
 export type ShaclShapeGraphUri = string;
 export type ViolationAction = "DROP_GRAPH" | "STRIP_TRIPLES" | "HALT_EXECUTION";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid97 = string;
+export type TenantCid98 = string;
 export type QueryString = string;
 export type TargetEndpoint = string;
-export type TopologyClass47 = "sparql_query";
+export type TopologyClass48 = "sparql_query";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid98 = string;
-export type TopologyClass48 = "bounded_json_rpc_intent";
+export type TenantCid99 = string;
+export type TopologyClass49 = "bounded_json_rpc_intent";
 /**
  * JSON-RPC version.
  */
@@ -1938,8 +1950,8 @@ export type Id1 = string | number | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid99 = string;
-export type TopologyClass49 = "epistemic_transmutation_task";
+export type TenantCid100 = string;
+export type TopologyClass50 = "epistemic_transmutation_task";
 /**
  * Unique identifier for this specific multimodal extraction intervention.
  */
@@ -1960,7 +1972,7 @@ export type TargetModalities = [
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid100 = string;
+export type TenantCid101 = string;
 /**
  * RFC 8785 canonicalized URI to the exact Pydantic template or LinkML definition.
  */
@@ -1974,12 +1986,12 @@ export type ValidationFailureAction = "quarantine_chunk" | "escalate_to_human" |
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid101 = string;
+export type TenantCid102 = string;
 export type LinkmlSchemaUri = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid102 = string;
+export type TenantCid103 = string;
 /**
  * Boolean gate authorizing deep optical evaluation when native PDF byte-extraction fails.
  */
@@ -1999,8 +2011,8 @@ export type ExecutionCostBudgetMagnitude1 = number | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid103 = string;
-export type TopologyClass50 = "epistemic_upsampling_task";
+export type TenantCid104 = string;
+export type TopologyClass51 = "epistemic_upsampling_task";
 /**
  * The explicitly declared target node classification or structural grain.
  */
@@ -2019,8 +2031,8 @@ export type JustificationVectors = [string, ...string[]];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid104 = string;
-export type TopologyClass51 = "dowhy_intervention_intent";
+export type TenantCid105 = string;
+export type TopologyClass52 = "dowhy_intervention_intent";
 /**
  * Unique identifier for this causal intervention.
  */
@@ -2040,8 +2052,8 @@ export type CommonCauses = string[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid105 = string;
-export type TopologyClass52 = "mcp_client_intent";
+export type TenantCid106 = string;
+export type TopologyClass53 = "mcp_client_intent";
 /**
  * JSON-RPC version.
  */
@@ -2063,11 +2075,11 @@ export type Id2 = string | number | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid106 = string;
+export type TenantCid107 = string;
 /**
  * Discriminator for the dynamic manifold projection.
  */
-export type TopologyClass53 = "dynamic_manifold";
+export type TopologyClass54 = "dynamic_manifold";
 /**
  * Unique identifier for this projection.
  */
@@ -2079,7 +2091,7 @@ export type ActiveForgeCid = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid107 = string;
+export type TenantCid108 = string;
 /**
  * The unique identifier for this UI panel.
  */
@@ -2087,7 +2099,7 @@ export type PanelCid = string;
 /**
  * Discriminator for Grammar of Graphics charts.
  */
-export type TopologyClass54 = "grammar";
+export type TopologyClass55 = "grammar";
 /**
  * The declarative semantic anchor summarizing the underlying visual grammar.
  */
@@ -2099,7 +2111,7 @@ export type LedgerSourceCid = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid108 = string;
+export type TenantCid109 = string;
 /**
  * Forces the normal vector of the 2D matrix to continuously align with the observer's camera.
  */
@@ -2123,7 +2135,7 @@ export type Mark = "point" | "line" | "area" | "bar" | "rect" | "arc";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid109 = string;
+export type TenantCid110 = string;
 /**
  * The visual channel the metric is mapped to.
  */
@@ -2135,11 +2147,11 @@ export type Field = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid110 = string;
+export type TenantCid111 = string;
 /**
  * The strictly typed mathematical mapping function distorting metrics into Euclidean pixel space.
  */
-export type TopologyClass55 = "linear" | "log" | "time" | "ordinal" | "nominal";
+export type TopologyClass56 = "linear" | "log" | "time" | "ordinal" | "nominal";
 /**
  * The optional minimum bound of the scale domain.
  */
@@ -2155,7 +2167,7 @@ export type Encodings = VisualEncodingProfile[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid111 = string;
+export type TenantCid112 = string;
 /**
  * The dataset field used to split the chart into rows.
  */
@@ -2167,7 +2179,7 @@ export type ColumnField = string | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid112 = string;
+export type TenantCid113 = string;
 /**
  * The unique identifier for this UI panel.
  */
@@ -2175,7 +2187,7 @@ export type PanelCid1 = string;
 /**
  * Discriminator for markdown insight cards.
  */
-export type TopologyClass56 = "insight_card";
+export type TopologyClass57 = "insight_card";
 /**
  * The declarative semantic anchor summarizing the underlying matrix or markdown projection.
  */
@@ -2187,7 +2199,7 @@ export type MarkdownContent = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid113 = string;
+export type TenantCid114 = string;
 /**
  * The Euclidean distance in meters at which the node collapses into a pure scalar or color-coded coordinate representation.
  */
@@ -2203,8 +2215,8 @@ export type MicroDistanceThreshold = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid114 = string;
-export type TopologyClass57 = "rollback_intent";
+export type TenantCid115 = string;
+export type TopologyClass58 = "rollback_intent";
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the causal rollback operation.
  */
@@ -2220,8 +2232,8 @@ export type InvalidatedNodeCids = string[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid115 = string;
-export type TopologyClass58 = "state_mutation_intent";
+export type TenantCid116 = string;
+export type TopologyClass59 = "state_mutation_intent";
 /**
  * The JSON pointer indicating the exact state vector to mutate deterministically.
  */
@@ -2237,11 +2249,11 @@ export type ZeroTrustReceiptCid = string | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid116 = string;
+export type TenantCid117 = string;
 /**
  * Discriminator for the EpistemicOntologicalNormalizationIntent topology.
  */
-export type TopologyClass59 = "epistemic_ontological_normalization";
+export type TopologyClass60 = "epistemic_ontological_normalization";
 /**
  * The Content Identifier (CID) of the raw ingested data artifact.
  */
@@ -2253,11 +2265,11 @@ export type TargetOntologyUrn = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid117 = string;
+export type TenantCid118 = string;
 /**
  * Discriminator for the FederatedDiscoveryIntent topology.
  */
-export type TopologyClass60 = "federated_discovery_intent";
+export type TopologyClass61 = "federated_discovery_intent";
 /**
  * The strict array of strings defining topological limits on the discovered capabilities.
  */
@@ -2269,11 +2281,11 @@ export type MinimumEpistemicStatus = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid118 = string;
+export type TenantCid119 = string;
 /**
  * Discriminator for the NavigationalDiscoveryIntent topology.
  */
-export type TopologyClass61 = "navigational_discovery_intent";
+export type TopologyClass62 = "navigational_discovery_intent";
 /**
  * The exact topological coordinate required to fulfill the Navigational Intent.
  */
@@ -2281,11 +2293,11 @@ export type TargetUrn = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid119 = string;
+export type TenantCid120 = string;
 /**
  * Discriminator for the ExploratoryDiscoveryIntent topology.
  */
-export type TopologyClass62 = "exploratory_discovery_intent";
+export type TopologyClass63 = "exploratory_discovery_intent";
 /**
  * The continuous natural language query to be projected into the latent vector space.
  */
@@ -2301,11 +2313,11 @@ export type MaxResults = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid120 = string;
+export type TenantCid121 = string;
 /**
  * Discriminator for the ExhaustiveDiscoveryIntent topology.
  */
-export type TopologyClass63 = "exhaustive_discovery_intent";
+export type TopologyClass64 = "exhaustive_discovery_intent";
 /**
  * The topological boundary condition (e.g., 'urn:coreason:actionspace:solver:') to exhaustively enumerate.
  */
@@ -2326,7 +2338,7 @@ export type AnyNodeProfile =
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid121 = string;
+export type TenantCid122 = string;
 /**
  * The AI's declarative rationale for selecting this node.
  */
@@ -2338,7 +2350,7 @@ export type Justification2 = string | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid122 = string;
+export type TenantCid123 = string;
 /**
  * If True, the graph execution halts until a verdict is rendered. If False, it is an async observation.
  */
@@ -2366,7 +2378,7 @@ export type DomainExtensions = {
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid123 = string;
+export type TenantCid124 = string;
 /**
  * The precise Euclidean distance at which an observer's coordinate successfully breaches the agent's internal state partition.
  */
@@ -2386,11 +2398,11 @@ export type Description3 = string;
 /**
  * Discriminator for an Agent node.
  */
-export type TopologyClass64 = "agent";
+export type TopologyClass65 = "agent";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid124 = string;
+export type TenantCid125 = string;
 /**
  * The level of hardware-enforced cryptographic isolation required.
  */
@@ -2418,7 +2430,7 @@ export type EgressObfuscation = boolean;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid125 = string;
+export type TenantCid126 = string;
 /**
  * The DID or public key identifier required by an auditor to reconstruct the PRF and verify the watermark.
  */
@@ -2442,7 +2454,7 @@ export type ContextHistoryWindow = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid126 = string;
+export type TenantCid127 = string;
 /**
  * The strictly normalized 3D directional vector representing the angle of gaze.
  *
@@ -2463,7 +2475,7 @@ export type HardwareGazeSignature = string | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid127 = string;
+export type TenantCid128 = string;
 /**
  * The absolute physical speed limit acceptable for time-to-first-token or total generation.
  */
@@ -2492,7 +2504,7 @@ export type MaxCarbonIntensityGco2EqKwh = number | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid128 = string;
+export type TenantCid129 = string;
 /**
  * The mathematical scalar representing minimum hardware execution rigor (0=CPU, 255=Max GPU). Allows enterprises to inject custom gradient mappings.
  */
@@ -2520,7 +2532,7 @@ export type MaximumLatencyMs = number | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid129 = string;
+export type TenantCid130 = string;
 /**
  * Unique identifier for the requested LoRA adapter.
  */
@@ -2560,7 +2572,7 @@ export type ActionSpaceCid = string | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid130 = string;
+export type TenantCid131 = string;
 /**
  * Unique identifier for the secure session.
  */
@@ -2582,7 +2594,7 @@ export type Description4 = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid131 = string;
+export type TenantCid132 = string;
 /**
  * Drives structural constraints; high urgency forces fast heuristic routing.
  */
@@ -2598,7 +2610,7 @@ export type DivergenceTolerance = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid132 = string;
+export type TenantCid133 = string;
 /**
  * The exact number of functional experts the router must activate per token. High values simulate deep cognitive strain.
  */
@@ -2614,7 +2626,7 @@ export type EnforceFunctionalIsolation = boolean;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid133 = string;
+export type TenantCid134 = string;
 /**
  * The explicit whitelist of sensitivity bounds allowed into context.
  *
@@ -2635,7 +2647,7 @@ export type ContextWindowTokenCeiling = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid134 = string;
+export type TenantCid135 = string;
 /**
  * The confidence threshold required to execute a reflex action.
  */
@@ -2649,7 +2661,7 @@ export type AllowedPassiveTools = string[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid135 = string;
+export type TenantCid136 = string;
 /**
  * Whether the epistemic scanner is active.
  */
@@ -2665,7 +2677,7 @@ export type ActionOnGap = "fail" | "probe" | "clarify";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid136 = string;
+export type TenantCid137 = string;
 /**
  * The maximum number of self-correction loops allowed.
  */
@@ -2677,7 +2689,7 @@ export type RollbackOnFailure = boolean;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid137 = string;
+export type TenantCid138 = string;
 /**
  * The exact Epistemic Uncertainty score that triggers the opening of the Latent Scratchpad.
  */
@@ -2693,7 +2705,7 @@ export type MaxTestTimeComputeMs = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid138 = string;
+export type TenantCid139 = string;
 /**
  * Unique identifier for this symbolic delegation.
  */
@@ -2721,7 +2733,7 @@ export type TimeoutMs = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid139 = string;
+export type TenantCid140 = string;
 /**
  * The specific architectural events that authorize the orchestrator to halt generation and extract internal activations.
  *
@@ -2748,7 +2760,7 @@ export type RequireZkCommitments = boolean;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid140 = string;
+export type TenantCid141 = string;
 /**
  * The mathematical tolerance for the detailed balance constraint.
  */
@@ -2770,7 +2782,7 @@ export type EmittedIntents = AnyIntent[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid141 = string;
+export type TenantCid142 = string;
 /**
  * The semantic boundary defining the objective function or computational perimeter of the execution node.
  */
@@ -2798,7 +2810,7 @@ export type DomainExtensions1 = {
 /**
  * Discriminator for a Human node.
  */
-export type TopologyClass65 = "human";
+export type TopologyClass66 = "human";
 /**
  * The mandatory cryptographic attestation URN required to verify the human operator's identity.
  */
@@ -2806,7 +2818,7 @@ export type RequiredAttestation = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid142 = string;
+export type TenantCid143 = string;
 /**
  * The semantic boundary defining the objective function or computational perimeter of the execution node.
  */
@@ -2834,11 +2846,11 @@ export type DomainExtensions2 = {
 /**
  * Discriminator for a System node.
  */
-export type TopologyClass66 = "system";
+export type TopologyClass67 = "system";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid143 = string;
+export type TenantCid144 = string;
 /**
  * The semantic boundary defining the objective function or computational perimeter of the execution node.
  */
@@ -2866,15 +2878,15 @@ export type DomainExtensions3 = {
 /**
  * Discriminator for a Composite node.
  */
-export type TopologyClass67 = "composite";
-/**
- * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
- */
-export type TenantCid144 = string;
+export type TopologyClass68 = "composite";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
 export type TenantCid145 = string;
+/**
+ * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
+ */
+export type TenantCid146 = string;
 /**
  * Entropy Penalty applied per edge traversal during a defeasible cascade.
  */
@@ -2914,7 +2926,7 @@ export type Justification6 = string | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid146 = string;
+export type TenantCid147 = string;
 /**
  * The formal URN pointing to a verified external standard, supplementing or replacing the raw schema_definition dictionary.
  */
@@ -2926,7 +2938,7 @@ export type StrictValidation = boolean;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid147 = string;
+export type TenantCid148 = string;
 /**
  * The mechanistic strategy for intercepting the LLM forward pass.
  */
@@ -2946,7 +2958,7 @@ export type TerminateOnEosLeak = boolean;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid148 = string;
+export type TenantCid149 = string;
 /**
  * Unique identifier for this macroscopic flow control policy.
  */
@@ -2958,7 +2970,7 @@ export type Active1 = boolean;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid149 = string;
+export type TenantCid150 = string;
 /**
  * The absolute physical ceiling of tokens allowed in a single ingress payload.
  */
@@ -2974,7 +2986,7 @@ export type ActionOnViolation = "drop" | "quarantine" | "redact";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid150 = string;
+export type TenantCid151 = string;
 /**
  * The exact dimensional index of the monosemantic feature in the Sparse Autoencoder dictionary.
  */
@@ -3004,7 +3016,7 @@ export type SaeDictionaryHash = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid151 = string;
+export type TenantCid152 = string;
 /**
  * The trigonometric or algebraic function governing the attenuation curve.
  */
@@ -3024,7 +3036,7 @@ export type LatentFirewalls = SaeLatentPolicy[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid152 = string;
+export type TenantCid153 = string;
 /**
  * The absolute physical ceiling of simultaneous causal nodes authorized to exist in the spatial projection pipeline.
  */
@@ -3036,7 +3048,7 @@ export type SpectralCoarseningActive = boolean;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid153 = string;
+export type TenantCid154 = string;
 /**
  * The high-velocity telemetry budget (Hz) allocated exclusively to topologies intersecting the center of the observer's view frustum.
  */
@@ -3056,11 +3068,11 @@ export type EpsilonDerivativeThreshold = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid154 = string;
+export type TenantCid155 = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid155 = string;
+export type TenantCid156 = string;
 /**
  * The total width of the boundary volume.
  */
@@ -3080,7 +3092,7 @@ export type SubscriptionTtlMs = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid156 = string;
+export type TenantCid157 = string;
 /**
  * The URN of the mathematical dialect of the cryptographic proof (e.g., 'urn:coreason:zk:snark').
  */
@@ -3122,7 +3134,7 @@ export type FoveatedPrivacyEpsilon = number | null;
 /**
  * Discriminator for a DAG topology.
  */
-export type TopologyClass68 = "dag";
+export type TopologyClass69 = "dag";
 /**
  * The strict, topologically bounded matrix of directed causal edges.
  *
@@ -3136,7 +3148,7 @@ export type AllowCycles = boolean;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid157 = string;
+export type TenantCid158 = string;
 /**
  * The maximum number of unprocessed messages/observations allowed between connected nodes before yielding.
  */
@@ -3172,7 +3184,7 @@ export type MaxFanOut = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid158 = string;
+export type TenantCid159 = string;
 /**
  * The unique CID anchoring the start of the speculative execution branch.
  */
@@ -3208,7 +3220,7 @@ export type SpeculativeBoundaries = SpeculativeExecutionPolicy[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid159 = string;
+export type TenantCid160 = string;
 /**
  * The execution phase of the graph. 'draft' allows incomplete structural state.
  */
@@ -3224,11 +3236,11 @@ export type Justification7 = string | null;
 /**
  * Discriminator for a Council topology.
  */
-export type TopologyClass69 = "council";
+export type TopologyClass70 = "council";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid160 = string;
+export type TenantCid161 = string;
 /**
  * The minimum number of adversarial or 'Devil's Advocate' roles required to prevent groupthink.
  */
@@ -3244,7 +3256,7 @@ export type TemperatureVariance = number | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid161 = string;
+export type TenantCid162 = string;
 /**
  * The mathematical rule for reaching agreement.
  */
@@ -3256,7 +3268,7 @@ export type MaxDebateRounds = number | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid162 = string;
+export type TenantCid163 = string;
 /**
  * The maximum number of actively malicious, hallucinating, or degraded nodes (f) the swarm must survive.
  */
@@ -3276,7 +3288,7 @@ export type ByzantineAction = "quarantine" | "slash_escrow" | "ignore";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid163 = string;
+export type TenantCid164 = string;
 /**
  * The absolute minimum latent vector similarity required to allow swarm communication.
  */
@@ -3288,7 +3300,7 @@ export type RequireIsometryProof = boolean;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid164 = string;
+export type TenantCid165 = string;
 /**
  * The strictly typed integer amount cryptographically locked prior to execution.
  */
@@ -3304,7 +3316,7 @@ export type RefundTargetNodeCid = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid165 = string;
+export type TenantCid166 = string;
 /**
  * The execution phase of the graph. 'draft' allows incomplete structural state.
  */
@@ -3320,7 +3332,7 @@ export type Justification8 = string | null;
 /**
  * Discriminator for a Swarm topology.
  */
-export type TopologyClass70 = "swarm";
+export type TopologyClass71 = "swarm";
 /**
  * Threshold limit for dynamic spawning of additional nodes.
  */
@@ -3332,7 +3344,7 @@ export type MaxConcurrentAgents = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid166 = string;
+export type TenantCid167 = string;
 /**
  * The absolute timeout in milliseconds for nodes to submit proposals.
  */
@@ -3340,7 +3352,7 @@ export type MaxBiddingWindowMs = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid167 = string;
+export type TenantCid168 = string;
 /**
  * The deterministic capability pointer representing the prediction market.
  */
@@ -3356,7 +3368,7 @@ export type LmsrBParameter = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid168 = string;
+export type TenantCid169 = string;
 /**
  * The deterministic capability pointer representing the agent placing the stake.
  */
@@ -3388,7 +3400,7 @@ export type ActivePredictionMarkets = PredictionMarketState[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid169 = string;
+export type TenantCid170 = string;
 /**
  * The deterministic capability pointer representing the prediction market.
  */
@@ -3412,7 +3424,7 @@ export type ResolvedMarkets = MarketResolutionState[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid170 = string;
+export type TenantCid171 = string;
 /**
  * The execution phase of the graph. 'draft' allows incomplete structural state.
  */
@@ -3428,7 +3440,7 @@ export type Justification9 = string | null;
 /**
  * Discriminator for an Evolutionary topology.
  */
-export type TopologyClass71 = "evolutionary";
+export type TopologyClass72 = "evolutionary";
 /**
  * The absolute limit on evolutionary breeding cycles.
  */
@@ -3440,7 +3452,7 @@ export type PopulationSize = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid171 = string;
+export type TenantCid172 = string;
 /**
  * The probability that a given agent parameter will randomly mutate between generations.
  */
@@ -3452,7 +3464,7 @@ export type TemperatureShiftVariance = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid172 = string;
+export type TenantCid173 = string;
 /**
  * The zero-knowledge cryptographic proof of fair random generation.
  */
@@ -3468,7 +3480,7 @@ export type SeedHash = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid173 = string;
+export type TenantCid174 = string;
 /**
  * The proportional mix ratio when merging vector properties.
  */
@@ -3476,7 +3488,7 @@ export type BlendingFactor = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid174 = string;
+export type TenantCid175 = string;
 /**
  * The specific telemetry or execution metric to evaluate (e.g., 'latency', 'accuracy').
  */
@@ -3492,7 +3504,7 @@ export type FitnessObjectives = FitnessObjectiveProfile[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid175 = string;
+export type TenantCid176 = string;
 /**
  * The execution phase of the graph. 'draft' allows incomplete structural state.
  */
@@ -3508,7 +3520,7 @@ export type Justification10 = string | null;
 /**
  * Discriminator for SMPC Topology.
  */
-export type TopologyClass72 = "smpc";
+export type TopologyClass73 = "smpc";
 /**
  * The exact cryptographic P2P protocol the nodes must use to evaluate the function.
  */
@@ -3526,7 +3538,7 @@ export type ParticipantNodeCids = [string, string, ...string[]];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid176 = string;
+export type TenantCid177 = string;
 /**
  * The execution phase of the graph. 'draft' allows incomplete structural state.
  */
@@ -3542,7 +3554,7 @@ export type Justification11 = string | null;
 /**
  * Discriminator for an Evaluator-Optimizer loop.
  */
-export type TopologyClass73 = "evaluator_optimizer";
+export type TopologyClass74 = "evaluator_optimizer";
 /**
  * The absolute limit on Actor-Critic cycles to prevent infinite compute burn.
  */
@@ -3554,7 +3566,7 @@ export type RequireMultimodalGrounding = boolean;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid177 = string;
+export type TenantCid178 = string;
 /**
  * The execution phase of the graph. 'draft' allows incomplete structural state.
  */
@@ -3570,7 +3582,7 @@ export type Justification12 = string | null;
 /**
  * Discriminator for a Digital Twin topology.
  */
-export type TopologyClass74 = "digital_twin";
+export type TopologyClass75 = "digital_twin";
 /**
  * The identifier (expected to be a W3C DID) pointing to the real-world topology it is cloning.
  */
@@ -3578,7 +3590,7 @@ export type TargetTopologyCid = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid178 = string;
+export type TenantCid179 = string;
 /**
  * The absolute physical limit on how many alternate futures the system is allowed to render.
  */
@@ -3594,11 +3606,11 @@ export type EnforceNoSideEffects = boolean;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid179 = string;
+export type TenantCid180 = string;
 /**
  * Discriminator for federation macro.
  */
-export type TopologyClass75 = "macro_federation";
+export type TopologyClass76 = "macro_federation";
 /**
  * The nodes forming the PBFT ring.
  *
@@ -3609,7 +3621,7 @@ export type ParticipantCids = [NodeCIDState, NodeCIDState, NodeCIDState, ...Node
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid180 = string;
+export type TenantCid181 = string;
 /**
  * The execution phase of the graph. 'draft' allows incomplete structural state.
  */
@@ -3625,11 +3637,11 @@ export type Justification13 = string | null;
 /**
  * Discriminator for forge macro.
  */
-export type TopologyClass76 = "macro_forge";
+export type TopologyClass77 = "macro_forge";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid181 = string;
+export type TenantCid182 = string;
 /**
  * The structural 128-char DID boundary pointing to the foundational semantic deficit vector.
  */
@@ -3645,7 +3657,7 @@ export type AlignmentThresholdPassed = boolean;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid182 = string;
+export type TenantCid183 = string;
 /**
  * The execution phase of the graph. 'draft' allows incomplete structural state.
  */
@@ -3661,7 +3673,7 @@ export type Justification14 = string | null;
 /**
  * Discriminator for the elicitation macro.
  */
-export type TopologyClass77 = "macro_elicitation";
+export type TopologyClass78 = "macro_elicitation";
 /**
  * The anchor to the initial, unstructured MultimodalArtifactReceipt uploaded by the human.
  */
@@ -3673,7 +3685,7 @@ export type MaxClarificationLoops = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid183 = string;
+export type TenantCid184 = string;
 /**
  * The execution phase of the graph.
  */
@@ -3689,7 +3701,7 @@ export type Justification15 = string | null;
 /**
  * Discriminator for the ingestion macro.
  */
-export type TopologyClass78 = "macro_ingestion";
+export type TopologyClass79 = "macro_ingestion";
 /**
  * Target serialization format.
  */
@@ -3697,7 +3709,7 @@ export type EgressFormat = "turtle" | "xml" | "json-ld" | "ntriples";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid184 = string;
+export type TenantCid185 = string;
 /**
  * The execution phase of the graph. 'draft' allows incomplete structural state.
  */
@@ -3713,7 +3725,7 @@ export type Justification16 = string | null;
 /**
  * Discriminator for a macro neurosymbolic loop.
  */
-export type TopologyClass79 = "macro_neurosymbolic";
+export type TopologyClass80 = "macro_neurosymbolic";
 /**
  * The connectionist agent generating hypotheses.
  */
@@ -3733,11 +3745,11 @@ export type CritiqueSchemaCid = string | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid185 = string;
+export type TenantCid186 = string;
 /**
  * Discriminator for a discourse tree topology.
  */
-export type TopologyClass80 = "discourse_tree";
+export type TopologyClass81 = "discourse_tree";
 /**
  * Cryptographic identifier for this topology.
  */
@@ -3745,7 +3757,7 @@ export type ManifestCid2 = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid186 = string;
+export type TenantCid187 = string;
 /**
  * A strict universal automaton classifying the structural role of the text block.
  */
@@ -3759,14 +3771,14 @@ export type ContainedPropositions = NodeCIDState[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid187 = string;
-export type TopologyClass81 = "document_knowledge_graph";
+export type TenantCid188 = string;
+export type TopologyClass82 = "document_knowledge_graph";
 export type GraphCid = string;
 export type SourceArtifactCid2 = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid188 = string;
+export type TenantCid189 = string;
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this semantic node to the Merkle-DAG.
  */
@@ -3787,7 +3799,7 @@ export type TextChunk = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid189 = string;
+export type TenantCid190 = string;
 /**
  * The UNIX timestamp when this coordinate became true.
  */
@@ -3812,7 +3824,7 @@ export type TemporalCertaintyScore = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid190 = string;
+export type TenantCid191 = string;
 /**
  * The starting importance score of this latent state from 0.0 to 1.0.
  */
@@ -3824,7 +3836,7 @@ export type DecayRate = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid191 = string;
+export type TenantCid192 = string;
 /**
  * The specific homomorphic encryption dialect used to encode the ciphertext.
  */
@@ -3840,11 +3852,11 @@ export type CiphertextBlob = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid192 = string;
+export type TenantCid193 = string;
 /**
  * Discriminator for manifold mapping.
  */
-export type TopologyClass82 = "manifold_mapping";
+export type TopologyClass83 = "manifold_mapping";
 /**
  * Calculated geometric alignment between the semantic embedding and spatial tensor.
  */
@@ -3867,14 +3879,14 @@ export type IsomorphismHash = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid193 = string;
-export type TopologyClass83 = "hierarchical_dom";
+export type TenantCid194 = string;
+export type TopologyClass84 = "hierarchical_dom";
 export type DomCid = string;
 export type RootBlockCid = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid194 = string;
+export type TenantCid195 = string;
 /**
  * Unique structural identifier for this geometric region.
  */
@@ -3896,14 +3908,14 @@ export type BlockClass1 =
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid195 = string;
+export type TenantCid196 = string;
 export type MatrixCid = string;
 export type TotalRows = number;
 export type TotalColumns = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid196 = string;
+export type TenantCid197 = string;
 export type CellCid = string;
 /**
  * The primary Cartesian Y-coordinate of the cell.
@@ -3938,7 +3950,7 @@ export type ContainmentEdges = [unknown, unknown][];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid197 = string;
+export type TenantCid198 = string;
 /**
  * The key in the parent's shared state contract.
  */
@@ -3956,7 +3968,7 @@ export type InputMappings = InputMappingContract[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid198 = string;
+export type TenantCid199 = string;
 /**
  * The key in the nested topology's state contract.
  */
@@ -3974,7 +3986,7 @@ export type OutputMappings = OutputMappingContract[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid199 = string;
+export type TenantCid200 = string;
 /**
  * The semantic boundary defining the objective function or computational perimeter of the execution node.
  */
@@ -4002,7 +4014,7 @@ export type DomainExtensions4 = {
 /**
  * Discriminator for a Memoized node.
  */
-export type TopologyClass84 = "memoized";
+export type TopologyClass85 = "memoized";
 /**
  * A discriminated union of presentation UI panels.
  */
@@ -4066,11 +4078,11 @@ export type AnyStateEvent =
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid200 = string;
+export type TenantCid201 = string;
 /**
  * Discriminator for temporal graph crdt.
  */
-export type TopologyClass85 = "temporal_graph_crdt";
+export type TopologyClass86 = "temporal_graph_crdt";
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark.
  */
@@ -4098,8 +4110,8 @@ export type TerminateSet = TemporalEdgeInvalidationIntent[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid201 = string;
-export type TopologyClass86 = "mcp_tool_definition";
+export type TenantCid202 = string;
+export type TopologyClass87 = "mcp_tool_definition";
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
@@ -4110,16 +4122,16 @@ export type Description9 = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid202 = string;
+export type TenantCid203 = string;
 export type EventCid2 = string;
 export type Timestamp2 = number;
-export type TopologyClass87 = "crosswalk_resolution";
+export type TopologyClass88 = "crosswalk_resolution";
 export type ReceiptCid = string;
 export type TargetGraphCid3 = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid203 = string;
+export type TenantCid204 = string;
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
@@ -4131,7 +4143,7 @@ export type Timestamp3 = number;
 /**
  * Discriminator for a zero-trust receipt.
  */
-export type TopologyClass88 = "zero_trust_receipt";
+export type TopologyClass89 = "zero_trust_receipt";
 /**
  * Pointer to the originating EpistemicZeroTrustContract.
  */
@@ -4155,7 +4167,7 @@ export type TransmutedPayloadHash = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid204 = string;
+export type TenantCid205 = string;
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
@@ -4167,11 +4179,11 @@ export type Timestamp4 = number;
 /**
  * Discriminator type for an observation event.
  */
-export type TopologyClass89 = "observation";
+export type TopologyClass90 = "observation";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid205 = string;
+export type TenantCid206 = string;
 /**
  * The URN representing the physical silicon architecture generating the root-of-trust quote (e.g., 'urn:coreason:enclave:intel_tdx').
  */
@@ -4191,11 +4203,11 @@ export type AnyToolchainState = SpatialBrowserDOMState | TerminalBufferState;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid206 = string;
+export type TenantCid207 = string;
 /**
  * Discriminator for Causal Actuators representing structural shifts.
  */
-export type TopologyClass90 = "browser";
+export type TopologyClass91 = "browser";
 /**
  * Spatial Execution Bounds where the agent interacts.
  */
@@ -4222,11 +4234,11 @@ export type ScreenshotCid = string | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid207 = string;
+export type TenantCid208 = string;
 /**
  * Discriminator for Causal Actuators on structural buffers.
  */
-export type TopologyClass91 = "terminal";
+export type TopologyClass92 = "terminal";
 /**
  * Capability Perimeters defining context bounds.
  */
@@ -4246,7 +4258,7 @@ export type EnvVariablesHash = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid208 = string;
+export type TenantCid209 = string;
 /**
  * Multimodal Sensor Fusion and Spatial-Temporal Bindings representing Proprioceptive State and Exteroceptive Vectors.
  */
@@ -4266,7 +4278,7 @@ export type SalienceThresholdBreached = boolean;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid209 = string;
+export type TenantCid210 = string;
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
@@ -4274,7 +4286,7 @@ export type AuditCid = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid210 = string;
+export type TenantCid211 = string;
 /**
  * The exact dimensional index of the monosemantic feature in the Sparse Autoencoder dictionary.
  */
@@ -4298,7 +4310,7 @@ export type TriggeringInvocationCid = string | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid211 = string;
+export type TenantCid212 = string;
 /**
  * A Content Identifier (CID) for the continuous observation stream.
  */
@@ -4316,7 +4328,7 @@ export type LatestConfidenceScore = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid212 = string;
+export type TenantCid213 = string;
 /**
  * The regular expression pattern identifying a structural disfluency marker in the stream.
  */
@@ -4332,7 +4344,7 @@ export type MaxLookbackWindow = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid213 = string;
+export type TenantCid214 = string;
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
@@ -4344,11 +4356,11 @@ export type Timestamp5 = number;
 /**
  * Discriminator type for a Belief Assertion event.
  */
-export type TopologyClass92 = "belief_mutation";
+export type TopologyClass93 = "belief_mutation";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid214 = string;
+export type TenantCid215 = string;
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the source event in the Merkle-DAG.
  */
@@ -4366,7 +4378,7 @@ export type CausalAttributions = CausalAttributionState[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid215 = string;
+export type TenantCid216 = string;
 /**
  * A Content Identifier (CID) bounding this ephemeral test-time execution tree.
  */
@@ -4394,7 +4406,7 @@ export type QuorumSignatures = string[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid216 = string;
+export type TenantCid217 = string;
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
@@ -4406,12 +4418,12 @@ export type Timestamp6 = number;
 /**
  * Discriminator type for a system fault event.
  */
-export type TopologyClass93 = "system_fault";
+export type TopologyClass94 = "system_fault";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid217 = string;
-export type TopologyClass94 = "atomic_proposition";
+export type TenantCid218 = string;
+export type TopologyClass95 = "atomic_proposition";
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
@@ -4445,7 +4457,7 @@ export type AnaphoricResolutionCids = NodeCIDState[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid218 = string;
+export type TenantCid219 = string;
 /**
  * A universal automaton classifying the type of statistical boundary.
  */
@@ -4480,8 +4492,8 @@ export type StatisticalQualifiers = EmpiricalStatisticalProfile[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid219 = string;
-export type TopologyClass95 = "post_coordinated_concept";
+export type TenantCid220 = string;
+export type TopologyClass96 = "post_coordinated_concept";
 /**
  * Cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
@@ -4505,10 +4517,10 @@ export type IsometryScore = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid220 = string;
+export type TenantCid221 = string;
 export type EventCid9 = string;
 export type Timestamp9 = number;
-export type TopologyClass96 = "artifact_corruption";
+export type TopologyClass97 = "artifact_corruption";
 /**
  * The genesis artifact that caused the ingestion engine to crash.
  */
@@ -4518,7 +4530,7 @@ export type DiagnosticHash = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid221 = string;
+export type TenantCid222 = string;
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
@@ -4530,7 +4542,7 @@ export type Timestamp10 = number;
 /**
  * Discriminator for a hypothesis generation event.
  */
-export type TopologyClass97 = "hypothesis";
+export type TopologyClass98 = "hypothesis";
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this abductive leap to the Merkle-DAG.
  */
@@ -4556,7 +4568,7 @@ export type Status = "active" | "falsified" | "verified";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid222 = string;
+export type TenantCid223 = string;
 /**
  * The format of the provided causal graph.
  */
@@ -4568,7 +4580,7 @@ export type GraphPayload = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid223 = string;
+export type TenantCid224 = string;
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
@@ -4580,7 +4592,7 @@ export type Timestamp11 = number;
 /**
  * Discriminator type for a barge-in interruption event.
  */
-export type TopologyClass98 = "barge_in";
+export type TopologyClass99 = "barge_in";
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the active node generation cycle that was killed in the Merkle-DAG.
  */
@@ -4601,7 +4613,7 @@ export type EpistemicDisposition = "discard" | "retain_as_context" | "mark_as_fa
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid224 = string;
+export type TenantCid225 = string;
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
@@ -4613,7 +4625,7 @@ export type Timestamp12 = number;
 /**
  * Discriminator type for a counterfactual regret event.
  */
-export type TopologyClass99 = "counterfactual_regret";
+export type TopologyClass100 = "counterfactual_regret";
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the specific historical state node where the agent mathematically diverged to simulate an alternative path.
  */
@@ -4637,7 +4649,7 @@ export type EpistemicRegret = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid225 = string;
+export type TenantCid226 = string;
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
@@ -4649,7 +4661,7 @@ export type Timestamp13 = number;
 /**
  * Discriminator type for a tool invocation event.
  */
-export type TopologyClass100 = "tool_invocation";
+export type TopologyClass101 = "tool_invocation";
 /**
  * The exact tool targeted in the CognitiveActionSpaceManifest.
  */
@@ -4661,7 +4673,7 @@ export type AuthorizedBudgetMagnitude = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid226 = string;
+export type TenantCid227 = string;
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
@@ -4673,7 +4685,7 @@ export type Timestamp14 = number;
 /**
  * Discriminator type for an epistemic promotion event.
  */
-export type TopologyClass101 = "epistemic_promotion";
+export type TopologyClass102 = "epistemic_promotion";
 /**
  * The strict array of CIDs (Content Identifiers) representing the raw logs being compressed and archived.
  */
@@ -4689,7 +4701,7 @@ export type CompressionRatio = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid227 = string;
+export type TenantCid228 = string;
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
@@ -4701,7 +4713,7 @@ export type Timestamp15 = number;
 /**
  * Discriminator type for a persistence commit receipt.
  */
-export type TopologyClass102 = "persistence_commit";
+export type TopologyClass103 = "persistence_commit";
 /**
  * The external cryptographic receipt generated by Iceberg/Delta.
  */
@@ -4717,7 +4729,7 @@ export type TargetTableUri = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid228 = string;
+export type TenantCid229 = string;
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
@@ -4729,7 +4741,7 @@ export type Timestamp16 = number;
 /**
  * Discriminator type for a token burn receipt.
  */
-export type TopologyClass103 = "token_burn";
+export type TopologyClass104 = "token_burn";
 /**
  * A string linking this burn back to the specific ToolInvocationEvent CID.
  */
@@ -4749,7 +4761,7 @@ export type BurnMagnitude = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid229 = string;
+export type TenantCid230 = string;
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
@@ -4761,7 +4773,7 @@ export type Timestamp17 = number;
 /**
  * Discriminator type for a budget exhaustion event.
  */
-export type TopologyClass104 = "budget_exhaustion";
+export type TopologyClass105 = "budget_exhaustion";
 /**
  * A string representing the original escrow boundary breached.
  */
@@ -4773,7 +4785,7 @@ export type FinalBurnReceiptCid = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid230 = string;
+export type TenantCid231 = string;
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
@@ -4785,7 +4797,7 @@ export type Timestamp18 = number;
 /**
  * Discriminator type for telemetry events.
  */
-export type TopologyClass105 = "epistemic_telemetry";
+export type TopologyClass106 = "epistemic_telemetry";
 /**
  * The exact topological action the human operator performed on the projected manifold.
  */
@@ -4801,7 +4813,7 @@ export type DwellDurationMs = number | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid231 = string;
+export type TenantCid232 = string;
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
@@ -4810,7 +4822,7 @@ export type EventCid19 = string;
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
 export type Timestamp19 = number;
-export type TopologyClass106 = "cognitive_prediction";
+export type TopologyClass107 = "cognitive_prediction";
 export type SourceChainCid = string;
 export type TargetSourceConcept = string;
 /**
@@ -4821,7 +4833,7 @@ export type PredictedTopKTokens = [string, ...string[]];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid232 = string;
+export type TenantCid233 = string;
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
@@ -4830,7 +4842,7 @@ export type EventCid20 = string;
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
 export type Timestamp20 = number;
-export type TopologyClass107 = "epistemic_axiom_verification";
+export type TopologyClass108 = "epistemic_axiom_verification";
 export type SourcePredictionCid = string;
 export type SequenceSimilarityScore = number;
 export type FactScorePassed = boolean;
@@ -4841,7 +4853,7 @@ export type ZeroTrustReceiptCid1 = string | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid233 = string;
+export type TenantCid234 = string;
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
@@ -4850,7 +4862,7 @@ export type EventCid21 = string;
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
 export type Timestamp21 = number;
-export type TopologyClass108 = "epistemic_flow_state";
+export type TopologyClass109 = "epistemic_flow_state";
 /**
  * The globally unique decentralized identifier (DID) anchoring the partial CognitiveReasoningTraceState.
  */
@@ -4866,7 +4878,7 @@ export type TerminalRewardFactorized = boolean;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid234 = string;
+export type TenantCid235 = string;
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
@@ -4878,7 +4890,7 @@ export type Timestamp22 = number;
 /**
  * Discriminator type for a causal explanation event.
  */
-export type TopologyClass109 = "causal_explanation";
+export type TopologyClass110 = "causal_explanation";
 /**
  * The globally unique decentralized identifier (DID) anchoring the collective outcome being explained.
  */
@@ -4886,7 +4898,7 @@ export type TargetOutcomeEventCid = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid235 = string;
+export type TenantCid236 = string;
 /**
  * The mathematical measure of the degree of emergence. A high SI indicates strong positive emergence.
  */
@@ -4902,7 +4914,7 @@ export type InformationIntegration = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid236 = string;
+export type TenantCid237 = string;
 /**
  * The exact Shapley value (\phi_i) satisfying efficiency, symmetry, and additivity axioms.
  */
@@ -4926,7 +4938,7 @@ export type AgentAttributions = ShapleyAttributionReceipt[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid237 = string;
+export type TenantCid238 = string;
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
@@ -4938,7 +4950,7 @@ export type Timestamp23 = number;
 /**
  * Discriminator type for an intent classification receipt.
  */
-export type TopologyClass110 = "intent_classification";
+export type TopologyClass111 = "intent_classification";
 /**
  * The raw, unparsed human natural language instruction.
  */
@@ -4958,8 +4970,8 @@ export type RoutingPolicyCid = string | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid238 = string;
-export type TopologyClass111 = "semantic_relational_record";
+export type TenantCid239 = string;
+export type TopologyClass112 = "semantic_relational_record";
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
@@ -4979,11 +4991,11 @@ export type FormalSchemaUrn1 = string | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid239 = string;
+export type TenantCid240 = string;
 /**
  * Discriminator for the reification receipt.
  */
-export type TopologyClass112 = "ontological_reification";
+export type TopologyClass113 = "ontological_reification";
 /**
  * Cryptographic Lineage Watermark binding this node to the Merkle-DAG.
  */
@@ -5015,7 +5027,7 @@ export type IsLatentInference = boolean;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid240 = string;
+export type TenantCid241 = string;
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
@@ -5027,7 +5039,7 @@ export type Timestamp26 = number;
 /**
  * The type of the resilience payload.
  */
-export type TopologyClass113 = "circuit_breaker_event";
+export type TopologyClass114 = "circuit_breaker_event";
 /**
  * Signature or summary of the error causing the trip.
  */
@@ -5035,7 +5047,7 @@ export type ErrorSignature = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid241 = string;
+export type TenantCid242 = string;
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
@@ -5047,7 +5059,7 @@ export type Timestamp27 = number;
 /**
  * Discriminator type for an exogenous event.
  */
-export type TopologyClass114 = "exogenous_event";
+export type TopologyClass115 = "exogenous_event";
 /**
  * Cryptographic identifier for the Black Swan event.
  */
@@ -5063,7 +5075,7 @@ export type BayesianSurpriseScore1 = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid242 = string;
+export type TenantCid243 = string;
 /**
  * The strictly typed boundary requiring locked magnitude to prevent zero-cost griefing of the swarm.
  */
@@ -5071,7 +5083,7 @@ export type LockedMagnitude = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid243 = string;
+export type TenantCid244 = string;
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
@@ -5079,7 +5091,7 @@ export type EventCid28 = string;
 /**
  * Discriminator type for a log event.
  */
-export type TopologyClass115 = "epistemic_log";
+export type TopologyClass116 = "epistemic_log";
 /**
  * The UNIX timestamp of the log event.
  */
@@ -5096,11 +5108,11 @@ export type TelemetryScalarState = string | number | boolean | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid244 = string;
+export type TenantCid245 = string;
 /**
  * The type of the intervention payload.
  */
-export type TopologyClass116 = "verdict";
+export type TopologyClass117 = "verdict";
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
@@ -5124,7 +5136,7 @@ export type Feedback = string | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid245 = string;
+export type TenantCid246 = string;
 /**
  * The SOTA cryptographic mechanism URN used to generate the proof.
  */
@@ -5148,7 +5160,7 @@ export type LivenessChallengeHash = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid246 = string;
+export type TenantCid247 = string;
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
@@ -5157,7 +5169,7 @@ export type EventCid30 = string;
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
 export type Timestamp30 = number;
-export type TopologyClass117 = "custody_receipt";
+export type TopologyClass118 = "custody_receipt";
 /**
  * Unique identifier for this chain-of-custody entry.
  */
@@ -5185,7 +5197,7 @@ export type RedactionTimestampUnixNano = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid247 = string;
+export type TenantCid248 = string;
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
@@ -5194,7 +5206,7 @@ export type EventCid31 = string;
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
 export type Timestamp31 = number;
-export type TopologyClass118 = "defeasible_attack";
+export type TopologyClass119 = "defeasible_attack";
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this directed attack edge.
  */
@@ -5210,7 +5222,7 @@ export type TargetClaimCid = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid248 = string;
+export type TenantCid249 = string;
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
@@ -5219,7 +5231,7 @@ export type EventCid32 = string;
  * Causal Ancestry markers required to resolve decentralized event ordering.
  */
 export type Timestamp32 = number;
-export type TopologyClass119 = "epistemic_rejection";
+export type TopologyClass120 = "epistemic_rejection";
 export type ReceiptCid1 = string;
 export type FailedProjectionCid = string;
 export type ViolatedAlgebraicConstraint = string;
@@ -5228,7 +5240,7 @@ export type StochasticMutationGradient = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid249 = string;
+export type TenantCid250 = string;
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
@@ -5237,7 +5249,7 @@ export type EventCid33 = string;
  * The precise temporal coordinate of the event realization.
  */
 export type Timestamp33 = number;
-export type TopologyClass120 = "formal_verification_receipt";
+export type TopologyClass121 = "formal_verification_receipt";
 /**
  * The definitive Boolean evaluating whether the proof succeeded, the program is satisfiable, or the deduction holds true.
  */
@@ -5259,8 +5271,8 @@ export type ExtractedBindings = {
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid250 = string;
-export type TopologyClass121 = "belief_modulation";
+export type TenantCid251 = string;
+export type TopologyClass122 = "belief_modulation";
 export type ReceiptCid2 = string;
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
@@ -5275,8 +5287,8 @@ export type SeveredEdgeCids = string[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid251 = string;
-export type TopologyClass122 = "rdf_export_receipt";
+export type TenantCid252 = string;
+export type TopologyClass123 = "rdf_export_receipt";
 export type ExportCid1 = string;
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
@@ -5292,10 +5304,10 @@ export type Sha256GraphHash = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid252 = string;
+export type TenantCid253 = string;
 export type EventCid36 = string;
 export type Timestamp36 = number;
-export type TopologyClass123 = "epistemic_starvation";
+export type TopologyClass124 = "epistemic_starvation";
 /**
  * The cryptographic pointer to the specific edge that failed empirical grounding.
  */
@@ -5313,10 +5325,10 @@ export type DiagnosticReason = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid253 = string;
+export type TenantCid254 = string;
 export type EventCid37 = string;
 export type Timestamp37 = number;
-export type TopologyClass124 = "sparql_query_result";
+export type TopologyClass125 = "sparql_query_result";
 /**
  * A pointer back to the SPARQLQueryIntent that authorized this execution.
  */
@@ -5328,11 +5340,11 @@ export type ExecutionTimeMs = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid254 = string;
+export type TenantCid255 = string;
 /**
  * Discriminator for the OracleExecutionReceipt topology.
  */
-export type TopologyClass125 = "oracle_execution_receipt";
+export type TopologyClass126 = "oracle_execution_receipt";
 /**
  * The SHA-256 hash of the complete execution payload, providing undeniable cryptographic provenance for the Merkle-DAG audit trail.
  */
@@ -5352,7 +5364,7 @@ export type HumanAttestationSignature = string | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid255 = string;
+export type TenantCid256 = string;
 /**
  * A Content Identifier (CID) acting as a unique Lineage Watermark for this event. Cryptographic provenance is established via Sigstore.
  */
@@ -5364,7 +5376,7 @@ export type Timestamp38 = number;
 /**
  * The type of the security violation payload.
  */
-export type TopologyClass126 = "guardrail_violation_event";
+export type TopologyClass127 = "guardrail_violation_event";
 /**
  * Unique identifier for the violation event.
  */
@@ -5380,11 +5392,11 @@ export type ViolationType = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid256 = string;
+export type TenantCid257 = string;
 /**
  * Discriminator for the CausalDiscoveryIntent topology.
  */
-export type TopologyClass127 = "causal_discovery_intent";
+export type TopologyClass128 = "causal_discovery_intent";
 /**
  * The URI of the observational dataset.
  */
@@ -5400,19 +5412,19 @@ export type MaxDiscreteBins = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid257 = string;
+export type TenantCid258 = string;
 /**
  * Discriminator for the CausalDiscoveryReceipt topology.
  */
-export type TopologyClass128 = "causal_discovery_receipt";
+export type TopologyClass129 = "causal_discovery_receipt";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid258 = string;
+export type TenantCid259 = string;
 /**
  * Discriminator for the StructuralCausalGraphProfile topology.
  */
-export type TopologyClass129 = "structural_causal_graph";
+export type TopologyClass130 = "structural_causal_graph";
 /**
  * The directed edges of the causal graph.
  */
@@ -5428,11 +5440,11 @@ export type DiscoveryAlgorithmUsed = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid259 = string;
+export type TenantCid260 = string;
 /**
  * Discriminator for the DoWhyEstimationIntent topology.
  */
-export type TopologyClass130 = "dowhy_estimation_intent";
+export type TopologyClass131 = "dowhy_estimation_intent";
 /**
  * The treatment variable.
  */
@@ -5444,11 +5456,11 @@ export type Outcome = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid260 = string;
+export type TenantCid261 = string;
 /**
  * Discriminator for the DoWhyEstimationReceipt topology.
  */
-export type TopologyClass131 = "dowhy_estimation_receipt";
+export type TopologyClass132 = "dowhy_estimation_receipt";
 /**
  * The identified causal estimand.
  */
@@ -5464,11 +5476,11 @@ export type RefutationPValue = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid261 = string;
+export type TenantCid262 = string;
 /**
  * Discriminator for the EconMLCATEIntent topology.
  */
-export type TopologyClass132 = "econml_cate_intent";
+export type TopologyClass133 = "econml_cate_intent";
 /**
  * The features to condition the treatment effect on.
  */
@@ -5476,11 +5488,11 @@ export type Features = string[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid262 = string;
+export type TenantCid263 = string;
 /**
  * Discriminator for the HTEEstimationReceipt topology.
  */
-export type TopologyClass133 = "hte_estimation_receipt";
+export type TopologyClass134 = "hte_estimation_receipt";
 /**
  * The features conditioned on.
  */
@@ -5513,11 +5525,11 @@ export type AnyTransitionEdge = TransitionEdgeProfile | CyclicEdgeProfile;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid263 = string;
+export type TenantCid264 = string;
 /**
  * Discriminator type for an acyclic edge.
  */
-export type TopologyClass134 = "acyclic";
+export type TopologyClass135 = "acyclic";
 /**
  * The coinductive pointer to the destination capability.
  */
@@ -5525,7 +5537,7 @@ export type TargetNodeCid1 = string | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid264 = string;
+export type TenantCid265 = string;
 /**
  * The RFC 6902 JSON Pointer extracting the Covariant output.
  */
@@ -5553,11 +5565,11 @@ export type ComputeWeightMagnitude = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid265 = string;
+export type TenantCid266 = string;
 /**
  * Discriminator type for a cyclic edge.
  */
-export type TopologyClass135 = "cyclic";
+export type TopologyClass136 = "cyclic";
 /**
  * The coinductive pointer to the destination capability.
  */
@@ -5585,7 +5597,7 @@ export type DiscountFactor = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid266 = string;
+export type TenantCid267 = string;
 /**
  * The absolute limit on TraceContextState.causal_clock.
  */
@@ -5599,7 +5611,7 @@ export type AuctionMechanismProfile = "sealed_bid" | "dutch" | "vickrey";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid267 = string;
+export type TenantCid268 = string;
 /**
  * The array of received bids.
  *
@@ -5609,7 +5621,7 @@ export type Bids = AgentBidIntent[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid268 = string;
+export type TenantCid269 = string;
 /**
  * The identifier of the resolved task.
  */
@@ -5633,7 +5645,7 @@ export type BundleContentHashState = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid269 = string;
+export type TenantCid270 = string;
 /**
  * The exact genesis globally unique decentralized identifier (DID) anchoring the document, ensuring continuity.
  */
@@ -5653,7 +5665,7 @@ export type CapabilityPointerState = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid270 = string;
+export type TenantCid271 = string;
 /**
  * The unique identifier for this curated environment of tools.
  */
@@ -5665,7 +5677,7 @@ export type EntryPointCid = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid271 = string;
+export type TenantCid272 = string;
 /**
  * Unique identifier for this specific separation boundary.
  */
@@ -5691,7 +5703,7 @@ export type ExecutionFeeLmsr = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid272 = string;
+export type TenantCid273 = string;
 /**
  * The unconstrained Chain-of-Thought reasoning trace generated by the Frontier model with the Sovereign LLM Proxy's XGrammar AOT FSM bitmask DISABLED. This field captures the full computational runway — scratchpad blocks, intermediate calculations, and heuristic explorations — that the model requires to maximize logical accuracy without suffering the Format Restriction Penalty.
  */
@@ -5699,7 +5711,7 @@ export type DeliberationTrace = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid273 = string;
+export type TenantCid274 = string;
 /**
  * Strict Boolean indicating if BOTH agents mathematically agree on factual alignment.
  */
@@ -5707,7 +5719,7 @@ export type TraceFactualAlignment = boolean;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid274 = string;
+export type TenantCid275 = string;
 /**
  * The globally unique decentralized identifier (DID) anchoring this specific non-monotonic reasoning trace.
  */
@@ -5727,7 +5739,7 @@ export type TracePayload = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid275 = string;
+export type TenantCid276 = string;
 /**
  * The absolute physical limit on path length N.
  */
@@ -5739,7 +5751,7 @@ export type InverseFrequencySmoothingEpsilon = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid276 = string;
+export type TenantCid277 = string;
 /**
  * The main goal.
  */
@@ -5755,7 +5767,7 @@ export type ConsensusMechanism = "majority" | "prediction_market" | "pbft";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid277 = string;
+export type TenantCid278 = string;
 /**
  * Unique identifier for this pre-flight routing policy.
  */
@@ -5768,7 +5780,7 @@ export type CognitiveTierProfile = "working" | "episodic" | "semantic";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid278 = string;
+export type TenantCid279 = string;
 /**
  * The downstream sovereign tenant requesting the commercial exception.
  */
@@ -5780,7 +5792,7 @@ export type RequestedEntitlements = string[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid279 = string;
+export type TenantCid280 = string;
 /**
  * The unique cryptographic identifier of this specific JWT token.
  */
@@ -5808,7 +5820,7 @@ export type IssuedBy = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid280 = string;
+export type TenantCid281 = string;
 /**
  * The license classification governing IP ownership of assets forged by coreason-meta-engineering. 'prosperity-3.0' = forged assets are licensed to CoReason Inc. 'commercial' = the tenant retains full ownership of forged assets.
  */
@@ -5866,7 +5878,7 @@ export type FederationEnabled = boolean;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid281 = string;
+export type TenantCid282 = string;
 /**
  * The identifier of the underlying model.
  */
@@ -5888,7 +5900,7 @@ export type Capabilities1 = string[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid282 = string;
+export type TenantCid283 = string;
 /**
  * The atomic integer cost per 1 million input tokens provided to the model.
  */
@@ -5908,7 +5920,7 @@ export type SupportedFunctionalExperts = string[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid283 = string;
+export type TenantCid284 = string;
 /**
  * Forces non-destructive graph mutations.
  */
@@ -5925,12 +5937,12 @@ export type CrossoverMechanismProfile = "uniform_blend" | "single_point" | "heur
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid284 = string;
+export type TenantCid285 = string;
 export type ProvenanceTraceCid1 = string | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid285 = string;
+export type TenantCid286 = string;
 /**
  * The minimum number of episodic logs needed to statistically prove a crystallized rule.
  */
@@ -5946,7 +5958,7 @@ export type TargetCognitiveTier = "semantic" | "working";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid286 = string;
+export type TenantCid287 = string;
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this automated truth maintenance operation.
  */
@@ -5976,7 +5988,7 @@ export type TemporalBlastRadius = [unknown, unknown] | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid287 = string;
+export type TenantCid288 = string;
 /**
  * A string CID for the delegated capability.
  */
@@ -5998,7 +6010,7 @@ export type CryptographicSignature = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid288 = string;
+export type TenantCid289 = string;
 export type ConstraintCid = string;
 /**
  * The formal SMT-LIB or Lean4 language representation of the symbolic rule.
@@ -6011,7 +6023,7 @@ export type RelaxationEpsilon = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid289 = string;
+export type TenantCid290 = string;
 /**
  * The expected value (mu) of the distribution.
  */
@@ -6028,7 +6040,7 @@ export type DistributionShapeProfile = "gaussian" | "uniform" | "beta";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid290 = string;
+export type TenantCid291 = string;
 /**
  * Directed edges defining the topological sort (chronological flow) of the document.
  */
@@ -6036,7 +6048,7 @@ export type ChronologicalFlowEdges = [unknown, unknown][];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid291 = string;
+export type TenantCid292 = string;
 /**
  * The minimal required PRM score improvement across the lookback window to justify continued compute.
  */
@@ -6052,7 +6064,7 @@ export type MinimumReasoningSteps = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid292 = string;
+export type TenantCid293 = string;
 /**
  * A Python 3.14 t-string template definition for dynamic UI grid evaluation.
  */
@@ -6064,7 +6076,7 @@ export type MaxAstNodeBudget = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid293 = string;
+export type TenantCid294 = string;
 /**
  * The unique Content Identifier (CID) for this routing plan.
  */
@@ -6072,7 +6084,7 @@ export type ManifestCid3 = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid294 = string;
+export type TenantCid295 = string;
 /**
  * The exact genesis globally unique decentralized identifier (DID) anchoring the MultimodalArtifactReceipt entering the routing tier.
  */
@@ -6098,7 +6110,7 @@ export type BypassedSteps = BypassReceipt[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid295 = string;
+export type TenantCid296 = string;
 /**
  * The strict array of strict W3C DIDs (NodeIdentifierStates) representing concurrent topology branches.
  *
@@ -6113,7 +6125,7 @@ export type FusionFunction = "weighted_consensus" | "highest_confidence" | "brie
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid296 = string;
+export type TenantCid297 = string;
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this specific logical proposition.
  */
@@ -6129,7 +6141,7 @@ export type TextChunk2 = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid297 = string;
+export type TenantCid298 = string;
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark for a specific observation in the EpistemicLedgerState.
  */
@@ -6151,11 +6163,11 @@ export type Warrants = EvidentiaryWarrantState[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid298 = string;
+export type TenantCid299 = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid299 = string;
+export type TenantCid300 = string;
 /**
  * The globally unique decentralized identifier (DID) anchoring the origin node.
  */
@@ -6171,7 +6183,7 @@ export type TargetConceptCid = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid300 = string;
+export type TenantCid301 = string;
 export type ChainCid = string;
 /**
  * @minItems 1
@@ -6181,7 +6193,7 @@ export type SemanticLeaves = EpistemicAxiomState[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid301 = string;
+export type TenantCid302 = string;
 /**
  * Unique CID for this training epoch release.
  */
@@ -6195,7 +6207,7 @@ export type Tasks = [EpistemicGroundedTaskManifest, ...EpistemicGroundedTaskMani
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid302 = string;
+export type TenantCid303 = string;
 /**
  * The cryptographic globally unique decentralized identifier (DID) anchoring the task.
  */
@@ -6203,7 +6215,7 @@ export type TaskCid7 = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid303 = string;
+export type TenantCid304 = string;
 /**
  * A Content Identifier (CID) for this specific topological proof.
  */
@@ -6222,7 +6234,7 @@ export type VignettePayload = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid304 = string;
+export type TenantCid305 = string;
 export type GraphCid1 = string;
 /**
  * @minItems 1
@@ -6232,7 +6244,7 @@ export type VerifiedAxioms = [EpistemicAxiomState, ...EpistemicAxiomState[]];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid305 = string;
+export type TenantCid306 = string;
 /**
  * The mathematical measure of uncertainty (e.g., variance in generated hypotheses) required to trigger escalation.
  */
@@ -6248,7 +6260,7 @@ export type MaxEscalationTiers = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid306 = string;
+export type TenantCid307 = string;
 /**
  * The Colang specification version.
  */
@@ -6264,7 +6276,7 @@ export type Severity = "low" | "medium" | "high" | "critical";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid307 = string;
+export type TenantCid308 = string;
 /**
  * Absolute recursive depth limit for DAG deserialization.
  */
@@ -6280,7 +6292,7 @@ export type TruncationStrategy = "hash_pointer" | "nullify" | "scalar_summary";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid308 = string;
+export type TenantCid309 = string;
 /**
  * An append-only, cryptographic ledger of state events. [SITD-Alpha: Non-Monotonic Epistemic Quarantine Isometry]
  *
@@ -6296,7 +6308,7 @@ export type RetractedNodes = string[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid309 = string;
+export type TenantCid310 = string;
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark for the temporal anchor.
  */
@@ -6324,7 +6336,7 @@ export type ActiveRollbacks = RollbackIntent[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid310 = string;
+export type TenantCid311 = string;
 /**
  * The mathematical heuristic used to select which semantic memories are retracted or compressed.
  */
@@ -6346,7 +6358,7 @@ export type ActiveCascades = DefeasibleCascadeEvent[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid311 = string;
+export type TenantCid312 = string;
 /**
  * The deterministic UUID generated by the runtime to represent this field.
  */
@@ -6358,7 +6370,7 @@ export type StructuralType1 = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid312 = string;
+export type TenantCid313 = string;
 /**
  * The basal non-monotonic instruction set currently held in Epistemic Quarantine.
  */
@@ -6366,7 +6378,7 @@ export type SystemPrompt = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid313 = string;
+export type TenantCid314 = string;
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this node to the agent whose mind is being modeled.
  */
@@ -6394,7 +6406,7 @@ export type TheoryOfMindMatrices = TheoryOfMindSnapshot[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid314 = string;
+export type TenantCid315 = string;
 /**
  * A cryptographic Lineage Watermark bounding this specific capability set.
  */
@@ -6416,7 +6428,7 @@ export type SupportedPersonas = ProfileCIDState[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid315 = string;
+export type TenantCid316 = string;
 /**
  * A strict cryptographic string identifier for this L1 procedural pointer.
  */
@@ -6436,7 +6448,7 @@ export type AvailableProceduralManifolds = ProceduralMetadataManifest[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid316 = string;
+export type TenantCid317 = string;
 /**
  * A Content Identifier (CID) for the Standard Operating Procedure.
  */
@@ -6448,7 +6460,7 @@ export type ChronologicalFlowEdges1 = [unknown, unknown][];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid317 = string;
+export type TenantCid318 = string;
 /**
  * If a ThoughtBranchState's prm_score falls below this threshold, the orchestrator MUST halt its generation.
  */
@@ -6478,17 +6490,17 @@ export type EpistemicSecurityPolicy2 = "PUBLIC" | "STANDARD" | "CONFIDENTIAL" | 
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid318 = string;
+export type TenantCid319 = string;
 export type SimilarityThresholdAlpha = number;
 export type RelationDiversityBucketSize = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid319 = string;
+export type TenantCid320 = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid320 = string;
+export type TenantCid321 = string;
 /**
  * Globally unique ID generated once at the root user prompt. Must be a ULID or UUIDv7.
  */
@@ -6508,7 +6520,7 @@ export type CausalClock = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid321 = string;
+export type TenantCid322 = string;
 /**
  * The agent's scratchpad, chat history, and any writable states.
  */
@@ -6522,7 +6534,7 @@ export type IsDelta = boolean;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid322 = string;
+export type TenantCid323 = string;
 /**
  * The mathematical dialect and theorem prover used to compile the proof.
  */
@@ -6538,7 +6550,7 @@ export type CompiledProofHash = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid323 = string;
+export type TenantCid324 = string;
 /**
  * The absolute physical depth limit for recursive encapsulation.
  */
@@ -6554,7 +6566,7 @@ export type MaxSyntheticTokens = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid324 = string;
+export type TenantCid325 = string;
 /**
  * The primary target URN for this geometric schema.
  */
@@ -6572,7 +6584,7 @@ export type MaxDepth1 = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid325 = string;
+export type TenantCid326 = string;
 /**
  * The absolute maximum economic cost allowed for the entire swarm lifecycle.
  */
@@ -6580,7 +6592,7 @@ export type MaxBudgetMagnitude1 = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid326 = string;
+export type TenantCid327 = string;
 /**
  * The formal mathematical operation used to resolve topological forks.
  */
@@ -6604,7 +6616,7 @@ export type GlobalTimeoutSeconds = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid327 = string;
+export type TenantCid328 = string;
 /**
  * The cryptographic Merkle-DAG anchor for the invariant block.
  */
@@ -6622,7 +6634,7 @@ export type TemporalObservationHorizons = TemporalBoundsProfile2[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid328 = string;
+export type TenantCid329 = string;
 /**
  * How to flatten SemanticNodeState.
  */
@@ -6638,7 +6650,7 @@ export type PreserveCryptographicLineage = boolean;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid329 = string;
+export type TenantCid330 = string;
 /**
  * The SPIFFE/SPIRE Identity Protocol execution taint dictating the thread's clearance level within the WASM enclave.
  */
@@ -6650,7 +6662,7 @@ export type IllocutionaryForceProfile1 = "assertive" | "directive_normative" | "
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid330 = string;
+export type TenantCid331 = string;
 /**
  * JSON-RPC version.
  */
@@ -6658,7 +6670,7 @@ export type Jsonrpc3 = "2.0";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid331 = string;
+export type TenantCid332 = string;
 /**
  * The strict integer identifier classifying the specific topological or execution collapse.
  */
@@ -6674,7 +6686,7 @@ export type Id3 = (string | number) | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid332 = string;
+export type TenantCid333 = string;
 /**
  * A Content Identifier (CID) anchoring the continuous telemetry stream.
  */
@@ -6703,7 +6715,7 @@ export type Deltas = [
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid333 = string;
+export type TenantCid334 = string;
 /**
  * The mathematical function dictating how rapidly lateral ThoughtBranches are restricted over time.
  */
@@ -6726,7 +6738,7 @@ export type LifecycleTriggerEvent =
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid334 = string;
+export type TenantCid335 = string;
 /**
  * The deterministic capability pointer representing the MCP server providing this prompt.
  */
@@ -6746,7 +6758,7 @@ export type PromptHash = string | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid335 = string;
+export type TenantCid336 = string;
 /**
  * The deterministic capability pointer representing the MCP server providing these resources.
  */
@@ -6758,7 +6770,7 @@ export type Uris = string[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid336 = string;
+export type TenantCid337 = string;
 /**
  * A matrix defining the layout structure, using panel IDs.
  *
@@ -6784,7 +6796,7 @@ export type ManifoldAlignmentMetricProfile2 = "gromov_wasserstein" | "earth_move
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid337 = string;
+export type TenantCid338 = string;
 /**
  * The minimum atomic token collateral held in escrow.
  */
@@ -6796,7 +6808,7 @@ export type SlashingPenalty = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid338 = string;
+export type TenantCid339 = string;
 /**
  * The definitive Content Identifier (CID) bounding the raw file.
  */
@@ -6816,7 +6828,7 @@ export type TemporalIngestTimestamp = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid339 = string;
+export type TenantCid340 = string;
 /**
  * Structural type of the tensor elements.
  */
@@ -6844,7 +6856,7 @@ export type PatchOperationProfile = "add" | "remove" | "replace" | "copy" | "mov
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid340 = string;
+export type TenantCid341 = string;
 /**
  * The NIST FIPS post-quantum cryptographic algorithm used.
  */
@@ -6860,7 +6872,7 @@ export type PqSignatureBlob = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid341 = string;
+export type TenantCid342 = string;
 /**
  * The absolute Z-axis physical distance to lock the Presentation UI relative to the observer's optical center, resolving vergence-accommodation conflicts.
  */
@@ -6869,7 +6881,7 @@ export type QoSClassificationProfile = "critical" | "high" | "interactive" | "ba
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid342 = string;
+export type TenantCid343 = string;
 /**
  * The continuous stream rate of the thought branch expansion.
  */
@@ -6895,7 +6907,7 @@ export type RiskLevelPolicy = "safe" | "standard" | "critical";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid343 = string;
+export type TenantCid344 = string;
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark binding this semantic edge to the Merkle-DAG.
  */
@@ -6920,7 +6932,7 @@ export type SemanticVersionState = string;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid344 = string;
+export type TenantCid345 = string;
 /**
  * The raw text captured during the session.
  */
@@ -6932,7 +6944,7 @@ export type CapturedAudioUrn = string | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid345 = string;
+export type TenantCid346 = string;
 /**
  * Whether to activate the microphone for audio ingestion.
  */
@@ -6948,7 +6960,7 @@ export type MaxDurationSeconds = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid346 = string;
+export type TenantCid347 = string;
 /**
  * The URN of the avatar actively projected.
  */
@@ -6964,7 +6976,7 @@ export type ProjectedOverlayText = string | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid347 = string;
+export type TenantCid348 = string;
 /**
  * Optional URN for the visual avatar or face projection.
  */
@@ -6984,7 +6996,7 @@ export type OverlayText = string | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid348 = string;
+export type TenantCid349 = string;
 /**
  * The fully qualified URN available for hot-swapping.
  */
@@ -6996,7 +7008,7 @@ export type ImprovementDelta = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid349 = string;
+export type TenantCid350 = string;
 /**
  * The currently loaded URN in the active session.
  */
@@ -7012,7 +7024,7 @@ export type UpgradeRationaleScore = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid350 = string;
+export type TenantCid351 = string;
 /**
  * The unique cryptographic identifier for this local spatial volume.
  */
@@ -7028,7 +7040,7 @@ export type PhysicalRoomHash = string | null;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid351 = string;
+export type TenantCid352 = string;
 /**
  * A Content Identifier (CID) acting as a cryptographic Lineage Watermark for this state differential.
  */
@@ -7050,7 +7062,7 @@ export type Patches = StateMutationIntent[];
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid352 = string;
+export type TenantCid353 = string;
 /**
  * A string ID representing the session or specific spatial trace binding.
  */
@@ -7068,7 +7080,7 @@ export type MaxRetainedTokens1 = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid353 = string;
+export type TenantCid354 = string;
 /**
  * Unique identifier for this simulation profile.
  */
@@ -7114,7 +7126,7 @@ export type UpperOntologyClassProfile1 = "continuant" | "occurrent";
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid354 = string;
+export type TenantCid355 = string;
 /**
  * The statistical variance threshold below which deterministic fallback is enforced.
  */
@@ -7122,7 +7134,7 @@ export type SuperpositionVarianceThreshold = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid355 = string;
+export type TenantCid356 = string;
 /**
  * The linear algebraic projection operator applied to collapse the topology.
  */
@@ -7142,7 +7154,7 @@ export type ClippingPlaneFar = number;
 /**
  * The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {"date_of_incorporation":"2025-10-16","file_number":"10369312","jurisdiction":"US-DE","legal_name":"CoReason, Inc."}
  */
-export type TenantCid356 = string;
+export type TenantCid357 = string;
 /**
  * The ephemeral session boundary for this execution.
  */
@@ -7341,6 +7353,7 @@ export interface CoReasonSharedKernelOntology {
   ExhaustiveDiscoveryIntent?: ExhaustiveDiscoveryIntent;
   ExogenousEpistemicEvent?: ExogenousEpistemicEvent;
   ExploratoryDiscoveryIntent?: ExploratoryDiscoveryIntent;
+  ExtismInProcessProfile?: ExtismInProcessProfile;
   FYIIntent?: FYIIntent;
   FacetMatrixProfile?: FacetMatrixProfile;
   FallbackIntent?: FallbackIntent;
@@ -8141,10 +8154,33 @@ export interface Headers1 {
   [k: string]: string;
 }
 /**
+ * CoReason Shared Kernel Ontology
+ *
+ * AGENT INSTRUCTION: Formalizes local, in-process WebAssembly execution using the Extism SDK to bypass OS process boundaries safely.
+ *
+ * CAUSAL AFFORDANCE: Loads pre-compiled WASM binary files directly into the host process memory space, running sandboxed functions using the underlying Wasmtime runtime engine.
+ *
+ * EPISTEMIC BOUNDS: The `wasm_path` must be a valid path string (`max_length=2000`). Environment variables are restricted to standard bounds.
+ *
+ * MCP ROUTING TRIGGERS: In-Process WASM, WebAssembly Sandbox, Extism SDK, Local Memory Sandbox, Fast Micro-Execution
+ */
+export interface ExtismInProcessProfile {
+  tenant_cid?: TenantCid28;
+  topology_class?: TopologyClass10;
+  wasm_path: WasmPath;
+  env_vars?: EnvVars1;
+}
+/**
+ * Environment variables required by the transport.
+ */
+export interface EnvVars1 {
+  [k: string]: string;
+}
+/**
  * The strict capability bounds (tools, resources, prompts) enforced by the orchestrator prior to connection.
  */
 export interface MCPCapabilityWhitelistPolicy {
-  tenant_cid?: TenantCid28;
+  tenant_cid?: TenantCid29;
   authorized_capability_array?: AuthorizedCapabilityArray;
   allowed_resources?: AllowedResources;
   allowed_prompts?: AllowedPrompts;
@@ -8180,7 +8216,7 @@ export interface VerifiableCredentialPresentationReceipt1 {
  * MCP ROUTING TRIGGERS: Category Theory, Profunctor Optics, Lens, Prism, Isomorphic State Synchronization
  */
 export interface OpticalMappingContract {
-  tenant_cid?: TenantCid29;
+  tenant_cid?: TenantCid30;
   lens_source_pointer: LensSourcePointer;
   prism_target_pointer: PrismTargetPointer;
   strict_isomorphism?: StrictIsomorphism;
@@ -8197,8 +8233,8 @@ export interface OpticalMappingContract {
  * MCP ROUTING TRIGGERS: WebAssembly System Interface, Zero-Knowledge Virtual Machine, eBPF, Execution Sandbox, Arbitrary Code Execution Mitigation
  */
 export interface EphemeralNamespacePartitionState {
-  tenant_cid?: TenantCid30;
-  topology_class?: TopologyClass10;
+  tenant_cid?: TenantCid31;
+  topology_class?: TopologyClass11;
   partition_cid: PartitionCid;
   execution_runtime: ExecutionRuntime;
   authorized_bytecode_hashes: AuthorizedBytecodeHashes;
@@ -8219,8 +8255,8 @@ export interface EphemeralNamespacePartitionState {
  * MCP ROUTING TRIGGERS: Bipartite Proposer-Verifier, Test-Time Compute, Zero-Trust Execution, Active Inference, Contract Topology
  */
 export interface EpistemicZeroTrustContract {
-  tenant_cid?: TenantCid31;
-  topology_class?: TopologyClass11;
+  tenant_cid?: TenantCid32;
+  topology_class?: TopologyClass12;
   intent_cid: IntentCid;
   semantic_planning_task: SemanticPlanningTask;
   schema_blueprint_name: SchemaBlueprintName;
@@ -8240,7 +8276,7 @@ export interface EpistemicZeroTrustContract {
  * MCP ROUTING TRIGGERS: Design-by-Contract, AST Evaluation, Invariant Checking, SymbolicAI DbC, Zero-Trust Execution
  */
 export interface EpistemicConstraintPolicy {
-  tenant_cid?: TenantCid32;
+  tenant_cid?: TenantCid33;
   assertion_ast: AssertionAst;
   remediation_prompt: RemediationPrompt;
 }
@@ -8265,12 +8301,12 @@ export interface EpistemicConstraintPolicy {
  * Heuristic Search, Backtracking
  */
 export interface ThoughtBranchState {
-  tenant_cid?: TenantCid33;
+  tenant_cid?: TenantCid34;
   branch_cid: BranchCid;
   parent_branch_cid?: ParentBranchCid;
   latent_content_hash: LatentContentHash;
   prm_score?: PrmScore;
-  topology_class?: TopologyClass12;
+  topology_class?: TopologyClass13;
 }
 /**
  * CoReason Shared Kernel Ontology
@@ -8284,9 +8320,9 @@ export interface ThoughtBranchState {
  * MCP ROUTING TRIGGERS: Directed Acyclic Graphs, Topological MCTS Container, Epistemic Immutability, Acyclic Integrity
  */
 export interface StochasticTopologyManifest {
-  tenant_cid?: TenantCid34;
+  tenant_cid?: TenantCid35;
   topology_cid: TopologyCid;
-  topology_class?: TopologyClass13;
+  topology_class?: TopologyClass14;
   phase: IdeationPhaseProfile;
   stochastic_graph: StochasticGraph;
   superposition?: HypothesisSuperpositionState | null;
@@ -8304,7 +8340,7 @@ export interface StochasticTopologyManifest {
  * MCP ROUTING TRIGGERS: Latent Space Coordinates, MCTS Nodes, Shannon Entropy Bounding
  */
 export interface StochasticNodeState {
-  tenant_cid?: TenantCid35;
+  tenant_cid?: TenantCid36;
   node_cid: NodeCid;
   parent_node_cid?: ParentNodeCid;
   agent_role: AgentRole;
@@ -8323,7 +8359,7 @@ export interface StochasticNodeState {
  * MCP ROUTING TRIGGERS: Hypothesis Superposition, Wave Collapse, Probability Mass, Defeasible Superposition
  */
 export interface HypothesisSuperpositionState {
-  tenant_cid?: TenantCid36;
+  tenant_cid?: TenantCid37;
   superposition_cid: SuperpositionCid;
   competing_manifolds: CompetingManifolds;
   wave_collapse_function: WaveCollapseFunction;
@@ -8344,8 +8380,8 @@ export interface CompetingManifolds {
  * MCP ROUTING TRIGGERS: Monte Carlo Tree Search, UCT Formula, Strategic Planning, Claw Code Deliberation, Test-Time Compute, Thought Node, Tree of Thoughts
  */
 export interface StrategicThoughtNodeIntent {
-  tenant_cid?: TenantCid37;
-  topology_class?: TopologyClass14;
+  tenant_cid?: TenantCid38;
+  topology_class?: TopologyClass15;
   parent_node_hash: ParentNodeHash;
   proposed_action: ProposedAction;
   rationale: Rationale;
@@ -8360,8 +8396,8 @@ export interface StrategicThoughtNodeIntent {
  * MCP ROUTING TRIGGERS: Graph CRDTs, Topological Retraction, Non-Monotonic Logic, Edge Invalidation
  */
 export interface TemporalEdgeInvalidationIntent {
-  tenant_cid?: TenantCid38;
-  topology_class?: TopologyClass15;
+  tenant_cid?: TenantCid39;
+  topology_class?: TopologyClass16;
   /**
    * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
    */
@@ -8384,8 +8420,8 @@ export interface TemporalEdgeInvalidationIntent {
  * MCP ROUTING TRIGGERS: Popperian Falsification, Null Hypothesis, Defeasible Logic, Empirical Falsifiability, Structural Boundary
  */
 export interface EmpiricalFalsificationContract {
-  tenant_cid?: TenantCid39;
-  topology_class?: TopologyClass16;
+  tenant_cid?: TenantCid40;
+  topology_class?: TopologyClass17;
   condition_cid: ConditionCid;
   description: Description2;
   required_tool_name?: RequiredToolName;
@@ -8403,8 +8439,8 @@ export interface EmpiricalFalsificationContract {
  * MCP ROUTING TRIGGERS: Proof by Contradiction, Counter-Model Discovery, Epistemic Falsification, Constraint Programming, Non-Monotonic Reasoning
  */
 export interface FalsificationContract {
-  tenant_cid?: TenantCid40;
-  topology_class?: TopologyClass17;
+  tenant_cid?: TenantCid41;
+  topology_class?: TopologyClass18;
   falsification_solver?: FalsificationSolver;
   /**
    * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
@@ -8427,8 +8463,8 @@ export interface FalsificationContract {
  * MCP ROUTING TRIGGERS: Bipartite Ontological Mapping, Grounding Oracle, CURIE Resolution, Isometry Thresholding, Semantic Crosswalk
  */
 export interface EpistemicOntologicalCrosswalkIntent {
-  tenant_cid?: TenantCid41;
-  topology_class?: TopologyClass18;
+  tenant_cid?: TenantCid42;
+  topology_class?: TopologyClass19;
   target_graph_cid: TargetGraphCid;
   source_strings: SourceStrings;
   target_ontology_registries: TargetOntologyRegistries;
@@ -8446,8 +8482,8 @@ export interface EpistemicOntologicalCrosswalkIntent {
  * MCP ROUTING TRIGGERS: Synchronous Epistemic Signaling, Mixed-Initiative Control, Finite State Machine, Oracle Projection, Halting Problem
  */
 export interface CognitiveSemanticIntent {
-  tenant_cid?: TenantCid42;
-  topology_class?: TopologyClass19;
+  tenant_cid?: TenantCid43;
+  topology_class?: TopologyClass20;
   message: Message;
   timeout_action: TimeoutAction1;
 }
@@ -8463,8 +8499,8 @@ export interface CognitiveSemanticIntent {
  * MCP ROUTING TRIGGERS: Active Inference, Expected Free Energy, Shannon Entropy Reduction, Zero-Shot Elicitation, Epistemic Gap
  */
 export interface CognitiveDraftingIntent {
-  tenant_cid?: TenantCid43;
-  topology_class?: TopologyClass20;
+  tenant_cid?: TenantCid44;
+  topology_class?: TopologyClass21;
   context_prompt: ContextPrompt;
   resolution_schema: ResolutionSchema1;
   timeout_action: TimeoutAction2;
@@ -8487,8 +8523,8 @@ export interface ResolutionSchema1 {
  * MCP ROUTING TRIGGERS: Epistemic Deficit Escalation, Forge-to-Claw Handoff, Sovereign LLM Proxy, Thermodynamic Circuit Breaker, MCTS Delegation
  */
 export interface EscalationIntent {
-  tenant_cid?: TenantCid44;
-  topology_class?: TopologyClass21;
+  tenant_cid?: TenantCid45;
+  topology_class?: TopologyClass22;
   target_solver_urn: TargetSolverUrn;
   epistemic_deficit_description: EpistemicDeficitDescription;
   context_window_cids: ContextWindowCids;
@@ -8506,8 +8542,8 @@ export interface EscalationIntent {
  * MCP ROUTING TRIGGERS: Zero-Shot Tool Discovery, Capability Routing, Dense Vector Embedding, Epistemic Deficit Resolution
  */
 export interface SemanticDiscoveryIntent {
-  tenant_cid?: TenantCid45;
-  topology_class?: TopologyClass22;
+  tenant_cid?: TenantCid46;
+  topology_class?: TopologyClass23;
   query_vector: VectorEmbeddingState1;
   min_isometry_score: MinIsometryScore;
   required_structural_types: RequiredStructuralTypes;
@@ -8554,8 +8590,8 @@ export interface VectorEmbeddingState1 {
  * MCP ROUTING TRIGGERS: Graph Isomorphism, UI State Mutation, Heuristic Regrouping, Dynamic Manifold, Spatial Reorganization
  */
 export interface SpatialTaxonomicRestructureIntent {
-  tenant_cid?: TenantCid46;
-  topology_class?: TopologyClass23;
+  tenant_cid?: TenantCid47;
+  topology_class?: TopologyClass24;
   restructure_heuristic: RestructureHeuristic;
   target_taxonomy: SpatialGenerativeTaxonomyManifest;
 }
@@ -8563,7 +8599,7 @@ export interface SpatialTaxonomicRestructureIntent {
  * The newly synthesized topology projected to the frontend.
  */
 export interface SpatialGenerativeTaxonomyManifest {
-  tenant_cid?: TenantCid47;
+  tenant_cid?: TenantCid48;
   manifest_cid: ManifestCid;
   root_node_cid: RootNodeCid;
   nodes: Nodes;
@@ -8594,7 +8630,7 @@ export interface Nodes {
  * Virtual File System, Semantic Coordinate
  */
 export interface SpatialTaxonomicNodeState {
-  tenant_cid?: TenantCid48;
+  tenant_cid?: TenantCid49;
   node_cid: NodeCid1;
   semantic_label: SemanticLabel;
   children_node_cids?: ChildrenNodeCids;
@@ -8616,7 +8652,7 @@ export interface SpatialTaxonomicNodeState {
  * MCP ROUTING TRIGGERS: Data Provenance, Causal Tracing, Epistemic Anchoring, Bijective Mapping, Genesis Block
  */
 export interface EpistemicProvenanceReceipt {
-  tenant_cid?: TenantCid49;
+  tenant_cid?: TenantCid50;
   fidelity_receipt_hash?: FidelityReceiptHash;
   revision_loops_executed?: RevisionLoopsExecuted;
   /**
@@ -8658,7 +8694,7 @@ export interface EpistemicProvenanceReceipt {
  * Spatial Tracking, Geometric Affine Transforms, Coordinate Bounding
  */
 export interface MultimodalTokenAnchorState {
-  tenant_cid?: TenantCid50;
+  tenant_cid?: TenantCid51;
   token_span_start?: TokenSpanStart;
   token_span_end?: TokenSpanEnd;
   temporal_frame_start_ms?: TemporalFrameStartMs;
@@ -8679,7 +8715,7 @@ export interface MultimodalTokenAnchorState {
  * MCP ROUTING TRIGGERS: Cryptographic Watermarking, Homomorphic MAC, Byzantine Fault Detection, Zero-Trust Lineage, Chain of Custody
  */
 export interface LineageWatermarkReceipt {
-  tenant_cid?: TenantCid51;
+  tenant_cid?: TenantCid52;
   watermark_protocol: WatermarkProtocol;
   hop_signatures: HopSignatures;
   tamper_evident_root: TamperEvidentRoot;
@@ -8702,7 +8738,7 @@ export interface HopSignatures {
  * MCP ROUTING TRIGGERS: Material Reference, Shader Artifact, Spatial Rendering, Visual Identity
  */
 export interface SpatialRenderMaterialState {
-  tenant_cid?: TenantCid52;
+  tenant_cid?: TenantCid53;
   material_urn?: MaterialUrn;
   compiled_shader_cid?: CompiledShaderCid;
 }
@@ -8718,8 +8754,8 @@ export interface SpatialRenderMaterialState {
  * MCP ROUTING TRIGGERS: Maximum Inner Product Search, k-Nearest Neighbors, Latent Manifold Projection, Retrieval-Augmented Generation
  */
 export interface LatentProjectionIntent {
-  tenant_cid?: TenantCid53;
-  topology_class?: TopologyClass24;
+  tenant_cid?: TenantCid54;
+  topology_class?: TopologyClass25;
   synthetic_target_vector: VectorEmbeddingState2;
   top_k_candidates: TopKCandidates;
   min_isometry_score: MinIsometryScore1;
@@ -8783,7 +8819,7 @@ export interface VectorEmbeddingState2 {
  * Random Walk with Restart
  */
 export interface TopologicalRetrievalContract {
-  tenant_cid?: TenantCid54;
+  tenant_cid?: TenantCid55;
   max_hop_depth: MaxHopDepth;
   allowed_causal_relationships: AllowedCausalRelationships;
   enforce_isometry?: EnforceIsometry;
@@ -8809,7 +8845,7 @@ export interface TopologicalRetrievalContract {
  * Optimization, Semantic Merging
  */
 export interface ContextExpansionPolicy {
-  tenant_cid?: TenantCid55;
+  tenant_cid?: TenantCid56;
   expansion_paradigm: ExpansionParadigm;
   max_token_budget: MaxTokenBudget;
   surrounding_sentences_k?: SurroundingSentencesK;
@@ -8827,8 +8863,8 @@ export interface ContextExpansionPolicy {
  * MCP ROUTING TRIGGERS: Schema Inference, Memory Heap Parsing, Abductive Reasoning, XHR Interception, Unstructured Transmutation
  */
 export interface LatentSchemaInferenceIntent {
-  tenant_cid?: TenantCid56;
-  topology_class?: TopologyClass25;
+  tenant_cid?: TenantCid57;
+  topology_class?: TopologyClass26;
   target_buffer_cid: TargetBufferCid;
   max_schema_depth: MaxSchemaDepth;
   max_properties: MaxProperties;
@@ -8846,8 +8882,8 @@ export interface LatentSchemaInferenceIntent {
  * MCP ROUTING TRIGGERS: Human-in-the-Loop, Intent Translation, Agentic Forge, Objective Setting, Budget Allocation
  */
 export interface FederatedHumanDirectiveIntent {
-  tenant_cid?: TenantCid57;
-  topology_class?: TopologyClass26;
+  tenant_cid?: TenantCid58;
+  topology_class?: TopologyClass27;
   natural_language_goal: NaturalLanguageGoal;
   allocated_budget_magnitude: AllocatedBudgetMagnitude;
   /**
@@ -8867,8 +8903,8 @@ export interface FederatedHumanDirectiveIntent {
  *     MCP ROUTING TRIGGERS: Semantic Resolution, Optimal Transport, ETL Bypass, Dynamic Ontology
  */
 export interface ContextualSemanticResolutionIntent {
-  tenant_cid?: TenantCid58;
-  topology_class?: TopologyClass27;
+  tenant_cid?: TenantCid59;
+  topology_class?: TopologyClass28;
   source_record_cid: SourceRecordCid;
   target_ontology_graph_cid: TargetOntologyGraphCid;
   encoding_profile: TabularEncodingProfile;
@@ -8881,8 +8917,8 @@ export interface ContextualSemanticResolutionIntent {
  * AGENT INSTRUCTION: Authorizes a Semantic Watchdog Agent to perform strict out-of-band polling against external semantic registries to monitor for ontological deprecation or semantic drift.
  */
 export interface EpistemicOntologyDiscoveryIntent {
-  tenant_cid?: TenantCid59;
-  topology_class?: TopologyClass28;
+  tenant_cid?: TenantCid60;
+  topology_class?: TopologyClass29;
   jsonrpc: Jsonrpc;
   method: Method;
   params?: Params;
@@ -8903,8 +8939,8 @@ export interface EpistemicOntologyDiscoveryIntent {
  *     MCP ROUTING TRIGGERS: Semantic Mapping, Heuristic Injection, Cryptographic Petition, Swarm Logic
  */
 export interface SemanticMappingHeuristicIntent {
-  tenant_cid?: TenantCid60;
-  topology_class?: TopologyClass29;
+  tenant_cid?: TenantCid61;
+  topology_class?: TopologyClass30;
   proposal_cid: ProposalCid;
   source_ontology_namespace: SourceOntologyNamespace;
   target_ontology_namespace: TargetOntologyNamespace;
@@ -8923,8 +8959,8 @@ export interface SemanticMappingHeuristicIntent {
  * MCP ROUTING TRIGGERS: Optimistic Locking, Affine CRDT, Spherical Linear Interpolation, Continuous Reconciliation, Kinematic Drag
  */
 export interface ContinuousSpatialMutationIntent {
-  tenant_cid?: TenantCid61;
-  topology_class?: TopologyClass30;
+  tenant_cid?: TenantCid62;
+  topology_class?: TopologyClass31;
   /**
    * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
    */
@@ -8936,7 +8972,7 @@ export interface ContinuousSpatialMutationIntent {
  * The requested absolute SE(3) spatial terminus.
  */
 export interface SE3TransformProfile {
-  tenant_cid?: TenantCid62;
+  tenant_cid?: TenantCid63;
   reference_frame_cid: ReferenceFrameCid;
   x: X;
   y: Y;
@@ -8964,7 +9000,7 @@ export interface SE3TransformProfile {
  * MCP ROUTING TRIGGERS: Kinematic Derivatives, Hermite Spline Extrapolation, Continuous Collision Detection, Newtonian Mechanics
  */
 export interface KinematicDerivativeProfile {
-  tenant_cid?: TenantCid63;
+  tenant_cid?: TenantCid64;
   linear_velocity: LinearVelocity;
   angular_velocity: AngularVelocity;
   linear_acceleration: LinearAcceleration;
@@ -8982,8 +9018,8 @@ export interface KinematicDerivativeProfile {
  * MCP ROUTING TRIGGERS: SkyPilot Orchestration, Multi-Cloud Provisioning, Spot-Market Acquisition, Thermodynamic Expansion, Substrate Instantiation
  */
 export interface ComputeProvisioningIntent {
-  tenant_cid?: TenantCid64;
-  topology_class?: TopologyClass31;
+  tenant_cid?: TenantCid65;
+  topology_class?: TopologyClass32;
   provisioning_engine?: ProvisioningEngine;
   max_budget: MaxBudget;
   /**
@@ -9010,7 +9046,7 @@ export interface ComputeProvisioningIntent {
  * MCP ROUTING TRIGGERS: Thermodynamic Bounding, VRAM Allocation, Spot Market Routing, Hardware Provisioning, Silicon Constraints
  */
 export interface SpatialHardwareProfile {
-  tenant_cid?: TenantCid65;
+  tenant_cid?: TenantCid66;
   compute_tier?: ComputeTier;
   min_vram_gb?: MinVramGb;
   coreason_network_mode?: CoreasonNetworkMode;
@@ -9029,8 +9065,8 @@ export interface SpatialHardwareProfile {
  * MCP ROUTING TRIGGERS: Decentralized Spot Market, Request for Proposal, Thermodynamic Compute Allocation, Algorithmic Mechanism Design, Kinetic Execution Trigger
  */
 export interface TaskAnnouncementIntent {
-  tenant_cid?: TenantCid66;
-  topology_class?: TopologyClass32;
+  tenant_cid?: TenantCid67;
+  topology_class?: TopologyClass33;
   task_cid: TaskCid2;
   required_action_space_cid?: RequiredActionSpaceCid;
   max_budget_magnitude: MaxBudgetMagnitude;
@@ -9047,8 +9083,8 @@ export interface TaskAnnouncementIntent {
  * MCP ROUTING TRIGGERS: Spectral Graph Partitioning, Byzantine Fault Isolation, Epistemic Contagion, Defeasible Logic, Algebraic Connectivity
  */
 export interface QuarantineIntent {
-  tenant_cid?: TenantCid67;
-  topology_class?: TopologyClass33;
+  tenant_cid?: TenantCid68;
+  topology_class?: TopologyClass34;
   /**
    * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
    */
@@ -9067,8 +9103,8 @@ export interface QuarantineIntent {
  * MCP ROUTING TRIGGERS: Supervisory Control Theory, Mixed-Initiative System, Discrete-Event System, Bounded Delay, DoWhy Intervention
  */
 export interface InterventionIntent {
-  tenant_cid?: TenantCid68;
-  topology_class?: TopologyClass34;
+  tenant_cid?: TenantCid69;
+  topology_class?: TopologyClass35;
   /**
    * The scope constraints bounding the intervention.
    */
@@ -9109,7 +9145,7 @@ export interface InterventionIntent {
  * Zero-Trust Architecture, RFC 8785 Canonicalization, Bounded Surface Area
  */
 export interface BoundedInterventionScopePolicy {
-  tenant_cid?: TenantCid69;
+  tenant_cid?: TenantCid70;
   allowed_fields: AllowedFields;
   json_schema_whitelist: JsonSchemaWhitelist;
 }
@@ -9139,7 +9175,7 @@ export interface JsonSchemaWhitelist {
  * Deadlock Prevention, Bounded Delay, Liveness Guarantee
  */
 export interface FallbackSLA {
-  tenant_cid?: TenantCid70;
+  tenant_cid?: TenantCid71;
   timeout_seconds: TimeoutSeconds;
   timeout_action: TimeoutAction3;
   /**
@@ -9165,7 +9201,7 @@ export interface ProposedAction1 {
  * MCP ROUTING TRIGGERS: Proposer-Verifier Macro-Topology, Terminal State, Execution Halting, Human-in-the-Loop Routing, Cognitive Failure Packaging
  */
 export interface TerminalCognitiveEvent {
-  tenant_cid?: TenantCid71;
+  tenant_cid?: TenantCid72;
   source_entity: ContextualizedSourceState;
   last_rejected_hypothesis_hash: LastRejectedHypothesisHash;
   final_critique_schema: CognitiveCritiqueProfile;
@@ -9175,7 +9211,7 @@ export interface TerminalCognitiveEvent {
  * The original contextualized input data the system attempted to process.
  */
 export interface ContextualizedSourceState {
-  tenant_cid?: TenantCid72;
+  tenant_cid?: TenantCid73;
   target_string: TargetString;
   contextual_envelope: ContextualEnvelope;
   source_system_provenance_flag: SourceSystemProvenanceFlag;
@@ -9184,7 +9220,7 @@ export interface ContextualizedSourceState {
  * The exact penalty gradient that the Proposer failed to resolve.
  */
 export interface CognitiveCritiqueProfile {
-  tenant_cid?: TenantCid73;
+  tenant_cid?: TenantCid74;
   reasoning_trace_hash: ReasoningTraceHash;
   /**
    * A dense latent space representation of the specific logical fallacy identified, used to mathematically repel future generation trajectories.
@@ -9211,8 +9247,8 @@ export interface CognitiveCritiqueProfile {
  * Projection, Human-in-the-Loop
  */
 export interface FYIIntent {
-  tenant_cid?: TenantCid74;
-  topology_class?: TopologyClass35;
+  tenant_cid?: TenantCid75;
+  topology_class?: TopologyClass36;
 }
 /**
  * CoReason Shared Kernel Ontology
@@ -9226,8 +9262,8 @@ export interface FYIIntent {
  * MCP ROUTING TRIGGERS: Markov Decision Process, Absorbing State, Graceful Degradation, Control-Flow Override, Policy Intervention
  */
 export interface FallbackIntent {
-  tenant_cid?: TenantCid75;
-  topology_class?: TopologyClass36;
+  tenant_cid?: TenantCid76;
+  topology_class?: TopologyClass37;
   /**
    * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
    */
@@ -9249,8 +9285,8 @@ export interface FallbackIntent {
  * MCP ROUTING TRIGGERS: Dictatorial Override, Byzantine Fault Resolution, DoWhy Intervention, Causal Shattering, Zero-Trust Override
  */
 export interface OverrideIntent {
-  tenant_cid?: TenantCid76;
-  topology_class?: TopologyClass37;
+  tenant_cid?: TenantCid77;
+  topology_class?: TopologyClass38;
   /**
    * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
    */
@@ -9280,8 +9316,8 @@ export interface OverrideAction {
  * MCP ROUTING TRIGGERS: Defeasible Logic, Non-Monotonic Revision, Out-of-Distribution Adaptation, Normative Drift Resolution, DoWhy Intervention
  */
 export interface ConstitutionalAmendmentIntent {
-  tenant_cid?: TenantCid77;
-  topology_class?: TopologyClass38;
+  tenant_cid?: TenantCid78;
+  topology_class?: TopologyClass39;
   drift_event_cid: DriftEventCid;
   proposed_patch: ProposedPatch;
   justification: Justification1;
@@ -9304,8 +9340,8 @@ export interface ProposedPatch {
  * MCP ROUTING TRIGGERS: Mathematical Kinematics, Bezier Geometry, Fitts's Law, OS-Level Actuation, Non-Linear Trajectory
  */
 export interface SpatialKinematicActionIntent {
-  tenant_cid?: TenantCid78;
-  topology_class?: TopologyClass39;
+  tenant_cid?: TenantCid79;
+  topology_class?: TopologyClass40;
   action_class: ActionClass;
   /**
    * The primary spatial terminus for clicks or hovers.
@@ -9327,7 +9363,7 @@ export interface SpatialKinematicActionIntent {
  * MCP ROUTING TRIGGERS: Special Euclidean Group, SE(3) Manifold, Rigid Body Transformation, Hamiltonian Unit Quaternion, Kinematic Topology
  */
 export interface SE3TransformProfile1 {
-  tenant_cid?: TenantCid62;
+  tenant_cid?: TenantCid63;
   reference_frame_cid: ReferenceFrameCid;
   x: X;
   y: Y;
@@ -9355,8 +9391,8 @@ export interface SE3TransformProfile1 {
  * MCP ROUTING TRIGGERS: Dual-Process Theory, Non-Monotonic Revision, System 2 Remediation, Backtracking Search, Abstract Syntax Tree
  */
 export interface System2RemediationIntent {
-  tenant_cid?: TenantCid79;
-  topology_class?: TopologyClass40;
+  tenant_cid?: TenantCid80;
+  topology_class?: TopologyClass41;
   fault_cid: FaultCid;
   /**
    * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
@@ -9380,7 +9416,7 @@ export interface System2RemediationIntent {
  * MCP ROUTING TRIGGERS: Fault Receipt, RFC 6902, Epistemic Loss Prevention, Surgical Patching, Traceback Serialization
  */
 export interface ManifestViolationReceipt {
-  tenant_cid?: TenantCid80;
+  tenant_cid?: TenantCid81;
   failing_pointer: FailingPointer;
   violation_category: ViolationCategory;
   diagnostic_message: DiagnosticMessage;
@@ -9397,20 +9433,20 @@ export interface ManifestViolationReceipt {
  * MCP ROUTING TRIGGERS: Environment Initialization, Supply-Chain Verification, Dynamic Import, JIT Mounting
  */
 export interface SubstrateHydrationManifest {
-  tenant_cid?: TenantCid81;
+  tenant_cid?: TenantCid82;
   /**
    * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
    */
   target_node_cid: string;
   substrate_profile: ExecutionSubstrateProfile;
-  topology_class?: TopologyClass41;
+  topology_class?: TopologyClass42;
   cryptographic_checksums?: CryptographicChecksums;
 }
 /**
  * The exact blueprint geometry being loaded into VRAM.
  */
 export interface ExecutionSubstrateProfile {
-  tenant_cid?: TenantCid82;
+  tenant_cid?: TenantCid83;
   dialect: Dialect;
   required_package_signatures: RequiredPackageSignatures;
   vram_overhead_mb: VramOverheadMb;
@@ -9434,8 +9470,8 @@ export interface CryptographicChecksums {
  *     MCP ROUTING TRIGGERS: Pre-Inference Gate, Neurosymbolic Request, Probability Envelope, SLA Enforcement, Inference Termination
  */
 export interface NeurosymbolicInferenceIntent {
-  tenant_cid?: TenantCid83;
-  topology_class?: TopologyClass42;
+  tenant_cid?: TenantCid84;
+  topology_class?: TopologyClass43;
   source_entity: ContextualizedSourceState1;
   fidelity_receipt: TopologicalFidelityReceipt;
   uncertainty_profile: CognitiveUncertaintyProfile;
@@ -9445,7 +9481,7 @@ export interface NeurosymbolicInferenceIntent {
  * The structurally isolated 1D boundary representing the semantic payload injected into the context window.
  */
 export interface ContextualizedSourceState1 {
-  tenant_cid?: TenantCid72;
+  tenant_cid?: TenantCid73;
   target_string: TargetString;
   contextual_envelope: ContextualEnvelope;
   source_system_provenance_flag: SourceSystemProvenanceFlag;
@@ -9454,7 +9490,7 @@ export interface ContextualizedSourceState1 {
  * The immutable scalar matrix capturing pre-inference mathematical contextual completeness.
  */
 export interface TopologicalFidelityReceipt {
-  tenant_cid?: TenantCid84;
+  tenant_cid?: TenantCid85;
   contextual_completeness_score: ContextualCompletenessScore;
   surrounding_token_density: SurroundingTokenDensity;
 }
@@ -9462,7 +9498,7 @@ export interface TopologicalFidelityReceipt {
  * The rigid matrix evaluating probabilistic uncertainty vectors bounding the initial request state.
  */
 export interface CognitiveUncertaintyProfile {
-  tenant_cid?: TenantCid85;
+  tenant_cid?: TenantCid86;
   aleatoric_noise_ratio: AleatoricNoiseRatio;
   epistemic_knowledge_gap: EpistemicKnowledgeGap;
   semantic_consistency_score: SemanticConsistencyScore;
@@ -9472,7 +9508,7 @@ export interface CognitiveUncertaintyProfile {
  * The mathematical structural boundaries defining acceptable epistemic loss perimeters.
  */
 export interface EpistemicCompressionSLA {
-  tenant_cid?: TenantCid86;
+  tenant_cid?: TenantCid87;
   strict_probability_retention?: StrictProbabilityRetention;
   max_allowed_entropy_loss: MaxAllowedEntropyLoss;
   required_grounding_density: RequiredGroundingDensity;
@@ -9490,9 +9526,9 @@ export interface EpistemicCompressionSLA {
  * MCP ROUTING TRIGGERS: Gromov-Wasserstein Distance, Topological Compiler, Optimal Transport Mapping, Manifold Collapse, Deterministic Projection
  */
 export interface TopologicalProjectionIntent {
-  tenant_cid?: TenantCid87;
+  tenant_cid?: TenantCid88;
   provenance_trace_cid?: ProvenanceTraceCid;
-  topology_class?: TopologyClass43;
+  topology_class?: TopologyClass44;
   projection_cid: ProjectionCid;
   source_superposition_cid: SourceSuperpositionCid;
   target_topology: TargetTopologyProfile;
@@ -9512,8 +9548,8 @@ export interface TopologicalProjectionIntent {
  * MCP ROUTING TRIGGERS: Automated Theorem Proving, Constraint Satisfaction, Logic Programming, Substrate Oracle
  */
 export interface FormalLogicPremise {
-  tenant_cid?: TenantCid88;
-  topology_class?: TopologyClass44;
+  tenant_cid?: TenantCid89;
+  topology_class?: TopologyClass45;
   dialect_urn: DialectUrn;
   formal_statement: FormalStatement;
   verification_script?: VerificationScript;
@@ -9530,8 +9566,8 @@ export interface FormalLogicPremise {
  * MCP ROUTING TRIGGERS: Causal Propagation, What-If Analysis, Counterfactual Reasoning, Directed Graph Traversal, Edge Activation
  */
 export interface CausalPropagationIntent {
-  tenant_cid?: TenantCid89;
-  topology_class?: TopologyClass45;
+  tenant_cid?: TenantCid90;
+  topology_class?: TopologyClass46;
   target_graph_cid: TargetGraphCid1;
   task_cid: TaskCid3;
   grounding_sla: EvidentiaryGroundingSLA;
@@ -9549,7 +9585,7 @@ export interface CausalPropagationIntent {
  * MCP ROUTING TRIGGERS: Evidentiary Grounding, Hallucination Prevention, Truth Maintenance, Evidence Retrieval, Epistemic Justification
  */
 export interface EvidentiaryGroundingSLA {
-  tenant_cid?: TenantCid90;
+  tenant_cid?: TenantCid91;
   minimum_nli_entailment_score: MinimumNliEntailmentScore;
   require_independent_sources?: RequireIndependentSources;
   ungrounded_link_action?: UngroundedLinkAction;
@@ -9581,7 +9617,7 @@ export interface EvidentiaryGroundingSLA {
  * d-separation, Do-Calculus, Directed Edge
  */
 export interface CausalDirectedEdgeState {
-  tenant_cid?: TenantCid91;
+  tenant_cid?: TenantCid92;
   source_variable: SourceVariable;
   target_variable: TargetVariable;
   /**
@@ -9605,7 +9641,7 @@ export interface CausalDirectedEdgeState {
  * MCP ROUTING TRIGGERS: Parametric Spline Interpolation, Catmull-Rom, Bezier Geometry, C1 Continuity, Volumetric Edge
  */
 export interface VolumetricEdgeProfile {
-  tenant_cid?: TenantCid92;
+  tenant_cid?: TenantCid93;
   curve_class: CurveClass;
   tension?: Tension;
   flow_velocity?: FlowVelocity;
@@ -9624,7 +9660,7 @@ export interface VolumetricEdgeProfile {
  *     MCP ROUTING TRIGGERS: Dempster-Shafer, Epistemic Conflict, Evidence Discounting, Composite Tri-Vector
  */
 export interface EpistemicDempsterShaferBeliefVectorState {
-  tenant_cid?: TenantCid93;
+  tenant_cid?: TenantCid94;
   lexical_confidence: LexicalConfidence;
   semantic_distance: SemanticDistance;
   structural_graph_confidence: StructuralGraphConfidence;
@@ -9643,7 +9679,7 @@ export interface EpistemicDempsterShaferBeliefVectorState {
  * MCP ROUTING TRIGGERS: Retrieval-Augmented Fact-Checking, Natural Language Inference, Evidentiary Coordinate, Cross-Encoder Validation
  */
 export interface EvidentiaryCitationState {
-  tenant_cid?: TenantCid94;
+  tenant_cid?: TenantCid95;
   citation_cid: CitationCid;
   source_url: SourceUrl;
   extracted_snippet: ExtractedSnippet;
@@ -9662,8 +9698,8 @@ export interface EvidentiaryCitationState {
  * MCP ROUTING TRIGGERS: RDF Export, Semantic Web, Interoperability, Triplestore Integration, Knowledge Sharing
  */
 export interface RDFSerializationIntent {
-  tenant_cid?: TenantCid95;
-  topology_class?: TopologyClass46;
+  tenant_cid?: TenantCid96;
+  topology_class?: TopologyClass47;
   export_cid: ExportCid;
   target_graph_cid: TargetGraphCid2;
   target_format?: TargetFormat;
@@ -9685,7 +9721,7 @@ export interface RDFSerializationIntent {
  * MCP ROUTING TRIGGERS: SHACL, Topological Validation, Schema Evaluation, Triplestore
  */
 export interface SHACLValidationSLA {
-  tenant_cid?: TenantCid96;
+  tenant_cid?: TenantCid97;
   shacl_shape_graph_uri: ShaclShapeGraphUri;
   violation_action: ViolationAction;
 }
@@ -9701,10 +9737,10 @@ export interface SHACLValidationSLA {
  * MCP ROUTING TRIGGERS: SPARQL, Semantic Web Query, Triplestore Query, Network Boundary
  */
 export interface SPARQLQueryIntent {
-  tenant_cid?: TenantCid97;
+  tenant_cid?: TenantCid98;
   query_string: QueryString;
   target_endpoint: TargetEndpoint;
-  topology_class?: TopologyClass47;
+  topology_class?: TopologyClass48;
 }
 /**
  * CoReason Shared Kernel Ontology
@@ -9718,8 +9754,8 @@ export interface SPARQLQueryIntent {
  * MCP ROUTING TRIGGERS: JSON-RPC, IPC Security, Payload Validation, Structural Contract, Kinetic Execution Bridge
  */
 export interface BoundedJSONRPCIntent {
-  tenant_cid?: TenantCid98;
-  topology_class?: TopologyClass48;
+  tenant_cid?: TenantCid99;
+  topology_class?: TopologyClass49;
   jsonrpc: Jsonrpc1;
   method: Method1;
   params?: Params1;
@@ -9737,8 +9773,8 @@ export interface BoundedJSONRPCIntent {
  * MCP ROUTING TRIGGERS: Semantic Transmutation, Multimodal Extraction, Entropy Reduction, Knowledge Consolidation, Pydantic Mapping
  */
 export interface EpistemicTransmutationTask {
-  tenant_cid?: TenantCid99;
-  topology_class?: TopologyClass49;
+  tenant_cid?: TenantCid100;
+  topology_class?: TopologyClass50;
   task_cid: TaskCid4;
   artifact_event_cid: ArtifactEventCid;
   target_modalities: TargetModalities;
@@ -9761,7 +9797,7 @@ export interface EpistemicTransmutationTask {
  * MCP ROUTING TRIGGERS: Constrained Decoding, AOT FSM, Schema Enforcement, Logit Masking, Deterministic Extraction
  */
 export interface SchemaDrivenExtractionSLA {
-  tenant_cid?: TenantCid100;
+  tenant_cid?: TenantCid101;
   schema_registry_uri: SchemaRegistryUri;
   extraction_framework: ExtractionFramework;
   max_schema_retries: MaxSchemaRetries;
@@ -9783,7 +9819,7 @@ export interface SchemaDrivenExtractionSLA {
  * MCP ROUTING TRIGGERS: LinkML, Graph-Shape Governance, Structural Isomorphism, SHACL, Domain and Range Enforcement
  */
 export interface EpistemicSemanticValidationSLA {
-  tenant_cid?: TenantCid101;
+  tenant_cid?: TenantCid102;
   linkml_schema_uri: LinkmlSchemaUri;
 }
 /**
@@ -9798,7 +9834,7 @@ export interface EpistemicSemanticValidationSLA {
  * MCP ROUTING TRIGGERS: Optical Thermodynamic Bounding, RT-DETR, VRAM Throttling, LayoutLMv3, Hardware Guillotine
  */
 export interface OpticalParsingSLA {
-  tenant_cid?: TenantCid102;
+  tenant_cid?: TenantCid103;
   force_ocr?: ForceOcr;
   bitmap_dpi_resolution?: BitmapDpiResolution;
   table_structure_recognition?: TableStructureRecognition;
@@ -9815,8 +9851,8 @@ export interface OpticalParsingSLA {
  * MCP ROUTING TRIGGERS: Abductive Reasoning, Information Entropy, Semantic Expansion, Epistemic Uncertainty Reduction, Knowledge Consolidation
  */
 export interface EpistemicUpsamplingTask {
-  tenant_cid?: TenantCid103;
-  topology_class?: TopologyClass50;
+  tenant_cid?: TenantCid104;
+  topology_class?: TopologyClass51;
   source_entity: ContextualizedSourceState2;
   target_ontological_granularity: TargetOntologicalGranularity;
   upsampling_confidence_threshold: UpsamplingConfidenceThreshold;
@@ -9826,7 +9862,7 @@ export interface EpistemicUpsamplingTask {
  * The specific source contextualized entity subject to topological upsampling.
  */
 export interface ContextualizedSourceState2 {
-  tenant_cid?: TenantCid72;
+  tenant_cid?: TenantCid73;
   target_string: TargetString;
   contextual_envelope: ContextualEnvelope;
   source_system_provenance_flag: SourceSystemProvenanceFlag;
@@ -9843,8 +9879,8 @@ export interface ContextualizedSourceState2 {
  * MCP ROUTING TRIGGERS: Causal Intervention, Do-Operator, Treatment Effect, Counterfactual Analysis, Structural Causal Model
  */
 export interface DoWhyInterventionIntent {
-  tenant_cid?: TenantCid104;
-  topology_class?: TopologyClass51;
+  tenant_cid?: TenantCid105;
+  topology_class?: TopologyClass52;
   task_cid: TaskCid5;
   treatment_variable: TreatmentVariable;
   outcome_variable: OutcomeVariable;
@@ -9854,8 +9890,8 @@ export interface DoWhyInterventionIntent {
  * CoReason Shared Kernel Ontology
  */
 export interface MCPClientIntent {
-  tenant_cid?: TenantCid105;
-  topology_class?: TopologyClass52;
+  tenant_cid?: TenantCid106;
+  topology_class?: TopologyClass53;
   jsonrpc: Jsonrpc2;
   method: Method2;
   params?: Params2;
@@ -9866,8 +9902,8 @@ export interface MCPClientIntent {
  * The mathematically pre-calculated view manifold tailored to the observer's frustum.
  */
 export interface DynamicManifoldProjectionManifest {
-  tenant_cid?: TenantCid106;
-  topology_class?: TopologyClass53;
+  tenant_cid?: TenantCid107;
+  topology_class?: TopologyClass54;
   manifest_cid: ManifestCid1;
   active_forge_cid: ActiveForgeCid;
   ast_gradient_visual_mapping: GrammarPanelProfile;
@@ -9881,9 +9917,9 @@ export interface DynamicManifoldProjectionManifest {
  * Algebraically maps the ASTGradientReceipt loss vectors into a 2D plot.
  */
 export interface GrammarPanelProfile {
-  tenant_cid?: TenantCid107;
+  tenant_cid?: TenantCid108;
   panel_cid: PanelCid;
-  topology_class?: TopologyClass54;
+  topology_class?: TopologyClass55;
   title: Title;
   ledger_source_cid: LedgerSourceCid;
   /**
@@ -9909,7 +9945,7 @@ export interface GrammarPanelProfile {
  * MCP ROUTING TRIGGERS: Spherical Billboarding, View Frustum Alignment, Z-Buffer Occlusion, Projective Geometry, UI Anchoring
  */
 export interface SpatialBillboardContract {
-  tenant_cid?: TenantCid108;
+  tenant_cid?: TenantCid109;
   /**
    * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
    */
@@ -9931,7 +9967,7 @@ export interface SpatialBillboardContract {
  * MCP ROUTING TRIGGERS: Bijective Mapping, Retinal Variables, Dimensionality Reduction, Geometric Plotting, Visual Channel Encoding
  */
 export interface VisualEncodingProfile {
-  tenant_cid?: TenantCid109;
+  tenant_cid?: TenantCid110;
   channel: Channel;
   field: Field;
   /**
@@ -9951,8 +9987,8 @@ export interface VisualEncodingProfile {
  * MCP ROUTING TRIGGERS: Grammar of Graphics, Metric Tensor Distortion, Levels of Measurement, Scale Projection, FSM Literal
  */
 export interface ScalePolicy {
-  tenant_cid?: TenantCid110;
-  topology_class: TopologyClass55;
+  tenant_cid?: TenantCid111;
+  topology_class: TopologyClass56;
   domain_min?: DomainMin;
   domain_max?: DomainMax;
 }
@@ -9968,7 +10004,7 @@ export interface ScalePolicy {
  * MCP ROUTING TRIGGERS: Small Multiples, Trellis Display, Isomorphic Sub-Manifold, High-Dimensional Projection, Categorical Partitioning
  */
 export interface FacetMatrixProfile {
-  tenant_cid?: TenantCid111;
+  tenant_cid?: TenantCid112;
   row_field?: RowField;
   column_field?: ColumnField;
 }
@@ -9984,9 +10020,9 @@ export interface FacetMatrixProfile {
  * MCP ROUTING TRIGGERS: Grammar of Graphics, Data Visualization, Geometric Projection, Declarative UI, Retinal Variables
  */
 export interface GrammarPanelProfile1 {
-  tenant_cid?: TenantCid107;
+  tenant_cid?: TenantCid108;
   panel_cid: PanelCid;
-  topology_class?: TopologyClass54;
+  topology_class?: TopologyClass55;
   title: Title;
   ledger_source_cid: LedgerSourceCid;
   /**
@@ -10012,9 +10048,9 @@ export interface GrammarPanelProfile1 {
  * MCP ROUTING TRIGGERS: Information Bottleneck, Semantic Compression, XSS Sanitization, Markdown Projection, Zero-Trust UI
  */
 export interface InsightCardProfile {
-  tenant_cid?: TenantCid112;
+  tenant_cid?: TenantCid113;
   panel_cid: PanelCid1;
-  topology_class?: TopologyClass56;
+  topology_class?: TopologyClass57;
   title: Title1;
   markdown_content: MarkdownContent;
   /**
@@ -10026,7 +10062,7 @@ export interface InsightCardProfile {
  * Governs Spectral Graph Coarsening as the human alters their Euclidean distance from the graph.
  */
 export interface SpatialSemanticZoomProfile {
-  tenant_cid?: TenantCid113;
+  tenant_cid?: TenantCid114;
   macro_distance_threshold: MacroDistanceThreshold;
   meso_distance_threshold: MesoDistanceThreshold;
   micro_distance_threshold: MicroDistanceThreshold;
@@ -10043,8 +10079,8 @@ export interface SpatialSemanticZoomProfile {
  * MCP ROUTING TRIGGERS: Non-Monotonic Logic, State Rollback, Epistemic Quarantine, Temporal Invalidation, Fault Recovery
  */
 export interface RollbackIntent {
-  tenant_cid?: TenantCid114;
-  topology_class?: TopologyClass57;
+  tenant_cid?: TenantCid115;
+  topology_class?: TopologyClass58;
   request_cid: RequestCid;
   target_event_cid: TargetEventCid;
   invalidated_node_cids?: InvalidatedNodeCids;
@@ -10061,8 +10097,8 @@ export interface RollbackIntent {
  * MCP ROUTING TRIGGERS: State Transition, Merkle-DAG Mutation, Kinetic Execution, Design-by-Contract, Supervisory Control
  */
 export interface StateMutationIntent {
-  tenant_cid?: TenantCid115;
-  topology_class?: TopologyClass58;
+  tenant_cid?: TenantCid116;
+  topology_class?: TopologyClass59;
   /**
    * The strict RFC 6902 JSON Patch operation, acting as a deterministic state vector mutation.
    */
@@ -10087,8 +10123,8 @@ export interface StateMutationIntent {
  * MCP ROUTING TRIGGERS: Semantic Crosswalk, ETL Pipeline, Data Normalization, Knowledge Graph Extraction
  */
 export interface EpistemicOntologicalNormalizationIntent {
-  tenant_cid?: TenantCid116;
-  topology_class?: TopologyClass59;
+  tenant_cid?: TenantCid117;
+  topology_class?: TopologyClass60;
   source_artifact_cid: SourceArtifactCid1;
   target_ontology_urn: TargetOntologyUrn;
 }
@@ -10105,8 +10141,8 @@ export interface EpistemicOntologicalNormalizationIntent {
  * MCP ROUTING TRIGGERS: Federated Discovery, Semantic Search, Capability Routing, Zero-Trust Discovery.
  */
 export interface FederatedDiscoveryIntent {
-  tenant_cid?: TenantCid117;
-  topology_class?: TopologyClass60;
+  tenant_cid?: TenantCid118;
+  topology_class?: TopologyClass61;
   domain_filter: DomainFilter;
   minimum_epistemic_status?: MinimumEpistemicStatus;
 }
@@ -10122,8 +10158,8 @@ export interface FederatedDiscoveryIntent {
  * MCP ROUTING TRIGGERS: Known-Item Search, Navigational Intent, Exact Match Routing, O(1) Resolution.
  */
 export interface NavigationalDiscoveryIntent {
-  tenant_cid?: TenantCid118;
-  topology_class?: TopologyClass61;
+  tenant_cid?: TenantCid119;
+  topology_class?: TopologyClass62;
   target_urn: TargetUrn;
 }
 /**
@@ -10138,8 +10174,8 @@ export interface NavigationalDiscoveryIntent {
  * MCP ROUTING TRIGGERS: Exploratory Search, Semantic Routing, Epistemic Foraging, Dense Vector Retrieval.
  */
 export interface ExploratoryDiscoveryIntent {
-  tenant_cid?: TenantCid119;
-  topology_class?: TopologyClass62;
+  tenant_cid?: TenantCid120;
+  topology_class?: TopologyClass63;
   semantic_query: SemanticQuery;
   minimum_congruence_score?: MinimumCongruenceScore;
   max_results?: MaxResults;
@@ -10156,8 +10192,8 @@ export interface ExploratoryDiscoveryIntent {
  * MCP ROUTING TRIGGERS: Recall-Oriented Search, Systematic Review, Topological Mapping, Exhaustive Enumeration.
  */
 export interface ExhaustiveDiscoveryIntent {
-  tenant_cid?: TenantCid120;
-  topology_class?: TopologyClass63;
+  tenant_cid?: TenantCid121;
+  topology_class?: TopologyClass64;
   namespace_prefix: NamespacePrefix;
   include_quarantined?: IncludeQuarantined;
 }
@@ -10173,7 +10209,7 @@ export interface ExhaustiveDiscoveryIntent {
  * MCP ROUTING TRIGGERS: POMDP, Stochastic Actor, Active Inference, Representation Engineering, Policy Gradient
  */
 export interface CognitiveAgentNodeProfile {
-  tenant_cid?: TenantCid121;
+  tenant_cid?: TenantCid122;
   architectural_intent?: ArchitecturalIntent;
   justification?: Justification2;
   intervention_policies?: InterventionPolicies;
@@ -10191,7 +10227,7 @@ export interface CognitiveAgentNodeProfile {
    */
   render_material?: SpatialRenderMaterialState | null;
   description: Description3;
-  topology_class?: TopologyClass64;
+  topology_class?: TopologyClass65;
   hardware?: SpatialHardwareProfile1;
   security?: EpistemicSecurityProfile;
   /**
@@ -10292,7 +10328,7 @@ export interface CognitiveAgentNodeProfile {
  * Lifecycle Hook, Execution Halting, Mixed-Initiative Interaction
  */
 export interface InterventionPolicy {
-  tenant_cid?: TenantCid122;
+  tenant_cid?: TenantCid123;
   /**
    * The exact topological lifecycle event that triggers this intervention.
    */
@@ -10323,7 +10359,7 @@ export interface InterventionPolicy {
  * MCP ROUTING TRIGGERS: Information Bottleneck, Semantic Compression, Euclidean Distance, Level of Detail, Entropy Degradation
  */
 export interface SpatialSemanticZoomProfile1 {
-  tenant_cid?: TenantCid113;
+  tenant_cid?: TenantCid114;
   macro_distance_threshold: MacroDistanceThreshold;
   meso_distance_threshold: MesoDistanceThreshold;
   micro_distance_threshold: MicroDistanceThreshold;
@@ -10345,7 +10381,7 @@ export interface SpatialSemanticZoomProfile1 {
  * MCP ROUTING TRIGGERS: Fristonian Active Inference, Markov Blanket, Epistemic Isolation, Volumetric Penetration, Conditional Independence
  */
 export interface MarkovBlanketRenderingPolicy {
-  tenant_cid?: TenantCid123;
+  tenant_cid?: TenantCid124;
   pierce_distance_meters: PierceDistanceMeters;
   expose_sensory_active_states?: ExposeSensoryActiveStates;
   occlude_internal_mechanistics?: OccludeInternalMechanistics;
@@ -10362,7 +10398,7 @@ export interface MarkovBlanketRenderingPolicy {
  * MCP ROUTING TRIGGERS: Thermodynamic Bounding, VRAM Allocation, Spot Market Routing, Hardware Provisioning, Silicon Constraints
  */
 export interface SpatialHardwareProfile1 {
-  tenant_cid?: TenantCid65;
+  tenant_cid?: TenantCid66;
   compute_tier?: ComputeTier;
   min_vram_gb?: MinVramGb;
   coreason_network_mode?: CoreasonNetworkMode;
@@ -10373,7 +10409,7 @@ export interface SpatialHardwareProfile1 {
  * The rigid cryptographic rules dictating the agent's isolation boundaries.
  */
 export interface EpistemicSecurityProfile {
-  tenant_cid?: TenantCid124;
+  tenant_cid?: TenantCid125;
   epistemic_security?: EpistemicSecurityPolicy;
   clearance_tiers?: ClearanceTiers;
   network_boundary?: NetworkBoundary;
@@ -10393,7 +10429,7 @@ export interface EpistemicSecurityProfile {
  * MCP ROUTING TRIGGERS: Logit Steganography, Gumbel-Softmax Watermarking, Pseudo-Random Function, Shannon Entropy, Provenance Tracking
  */
 export interface LogitSteganographyContract {
-  tenant_cid?: TenantCid125;
+  tenant_cid?: TenantCid126;
   verification_public_key_cid: VerificationPublicKeyCid;
   prf_seed_hash: PrfSeedHash;
   watermark_strength_delta: WatermarkStrengthDelta;
@@ -10412,7 +10448,7 @@ export interface LogitSteganographyContract {
  * MCP ROUTING TRIGGERS: Spatial Raycasting, Joint Attention, Cognitive Frustum Intersection, Vector Math, Gaze Tracking
  */
 export interface EpistemicAttentionState {
-  tenant_cid?: TenantCid126;
+  tenant_cid?: TenantCid127;
   origin: SE3TransformProfile2;
   direction_unit_vector: DirectionUnitVector;
   intersected_node_cids?: IntersectedNodeCids;
@@ -10430,7 +10466,7 @@ export interface EpistemicAttentionState {
  * MCP ROUTING TRIGGERS: Special Euclidean Group, SE(3) Manifold, Rigid Body Transformation, Hamiltonian Unit Quaternion, Kinematic Topology
  */
 export interface SE3TransformProfile2 {
-  tenant_cid?: TenantCid62;
+  tenant_cid?: TenantCid63;
   reference_frame_cid: ReferenceFrameCid;
   x: X;
   y: Y;
@@ -10458,7 +10494,7 @@ export interface SE3TransformProfile2 {
  * MCP ROUTING TRIGGERS: Pareto Efficiency, Multi-Objective Optimization, Spot-Market Routing, Carbon Budget, Compute Allocation
  */
 export interface RoutingFrontierPolicy {
-  tenant_cid?: TenantCid127;
+  tenant_cid?: TenantCid128;
   max_latency_ms: MaxLatencyMs;
   max_cost_magnitude_per_token: MaxCostMagnitudePerToken;
   min_capability_score: MinCapabilityScore;
@@ -10477,7 +10513,7 @@ export interface RoutingFrontierPolicy {
  * MCP ROUTING TRIGGERS: Epistemic Rigidity Matrix, Execution Routing Policy, Logit Suffocation, Probabilistic Escalation, Semantic Tax Bounding
  */
 export interface EpistemicRigidityPolicy {
-  tenant_cid?: TenantCid128;
+  tenant_cid?: TenantCid129;
   minimum_rigidity_tier?: MinimumRigidityTier;
   max_retries_on_semantic_tax?: MaxRetriesOnSemanticTax;
   permitted_remote_decoding_protocols?: PermittedRemoteDecodingProtocols;
@@ -10497,7 +10533,7 @@ export interface EpistemicRigidityPolicy {
  * MCP ROUTING TRIGGERS: Low-Rank Adaptation, Matrix Factorization, LoRA, GPU VRAM Allocation, Attention Head Injection
  */
 export interface PeftAdapterContract {
-  tenant_cid?: TenantCid129;
+  tenant_cid?: TenantCid130;
   adapter_cid: AdapterCid;
   safetensors_hash: SafetensorsHash;
   base_model_hash: BaseModelHash;
@@ -10517,7 +10553,7 @@ export interface PeftAdapterContract {
  * MCP ROUTING TRIGGERS: Principle of Least Privilege, Time-Based Access Control, Secret Vaulting, Ephemeral Partition, Cryptographic Isolation
  */
 export interface SecureSubSessionState {
-  tenant_cid?: TenantCid130;
+  tenant_cid?: TenantCid131;
   session_cid: SessionCid;
   allowed_vault_keys: AllowedVaultKeys;
   max_ttl_seconds: MaxTtlSeconds1;
@@ -10535,7 +10571,7 @@ export interface SecureSubSessionState {
  * MCP ROUTING TRIGGERS: POMDP, Continuous Belief Distribution, Heuristic Routing, State Progression, Cognitive Constraining
  */
 export interface CognitiveStateProfile {
-  tenant_cid?: TenantCid131;
+  tenant_cid?: TenantCid132;
   urgency_index: UrgencyIndex;
   caution_index: CautionIndex;
   divergence_tolerance: DivergenceTolerance;
@@ -10564,7 +10600,7 @@ export interface CognitiveStateProfile {
  * MCP ROUTING TRIGGERS: Sparse Mixture of Experts, Softmax Gating, Logit Biasing, Functional Expert Routing, FSM Masking
  */
 export interface CognitiveRoutingContract {
-  tenant_cid?: TenantCid132;
+  tenant_cid?: TenantCid133;
   dynamic_top_k: DynamicTopK;
   routing_temperature: RoutingTemperature;
   expert_logit_biases?: ExpertLogitBiases;
@@ -10588,7 +10624,7 @@ export interface ExpertLogitBiases {
  * MCP ROUTING TRIGGERS: Mandatory Access Control, Zero-Trust Execution, Context Window Partitioning, Cognitive Load Theory, Epistemic Firewall
  */
 export interface SemanticSlicingPolicy {
-  tenant_cid?: TenantCid133;
+  tenant_cid?: TenantCid134;
   permitted_classification_tiers: PermittedClassificationTiers;
   required_semantic_labels?: RequiredSemanticLabels;
   context_window_token_ceiling: ContextWindowTokenCeiling;
@@ -10613,7 +10649,7 @@ export interface SemanticSlicingPolicy {
  * Metacognition, Amygdala Hijack Prevention
  */
 export interface System1ReflexPolicy {
-  tenant_cid?: TenantCid134;
+  tenant_cid?: TenantCid135;
   confidence_threshold: ConfidenceThreshold;
   allowed_passive_tools: AllowedPassiveTools;
 }
@@ -10629,7 +10665,7 @@ export interface System1ReflexPolicy {
  * MCP ROUTING TRIGGERS: Metacognitive Monitoring, Active Inference, Cognitive Dissonance, Epistemic Foraging, Shannon Entropy
  */
 export interface EpistemicScanningPolicy {
-  tenant_cid?: TenantCid135;
+  tenant_cid?: TenantCid136;
   active: Active;
   dissonance_threshold: DissonanceThreshold;
   action_on_gap: ActionOnGap;
@@ -10655,7 +10691,7 @@ export interface EpistemicScanningPolicy {
  * Backtracking Search, State-Space Explosion Prevention
  */
 export interface SelfCorrectionPolicy {
-  tenant_cid?: TenantCid136;
+  tenant_cid?: TenantCid137;
   max_loops: MaxLoops;
   rollback_on_failure: RollbackOnFailure;
 }
@@ -10678,7 +10714,7 @@ export interface SelfCorrectionPolicy {
  * Non-Monotonic Escalation, Token Budgeting
  */
 export interface EscalationContract {
-  tenant_cid?: TenantCid137;
+  tenant_cid?: TenantCid138;
   uncertainty_escalation_threshold: UncertaintyEscalationThreshold;
   max_latent_tokens_budget: MaxLatentTokensBudget;
   max_test_time_compute_ms: MaxTestTimeComputeMs;
@@ -10695,7 +10731,7 @@ export interface EscalationContract {
  * MCP ROUTING TRIGGERS: Satisfiability Modulo Theories, Curry-Howard Correspondence, Theorem Proving, Symbolic Handoff, Halting Problem Mitigation
  */
 export interface NeuroSymbolicHandoffContract {
-  tenant_cid?: TenantCid138;
+  tenant_cid?: TenantCid139;
   handoff_cid: HandoffCid;
   solver_protocol: SolverProtocol;
   execution_substrate?: ExecutionSubstrate;
@@ -10715,7 +10751,7 @@ export interface NeuroSymbolicHandoffContract {
  * MCP ROUTING TRIGGERS: Latent State Extraction, Mechanistic Interpretability, Sparse Autoencoder, Zero-Knowledge Commitments, VRAM Optimization, TransformerLens, SAELens
  */
 export interface MechanisticAuditContract {
-  tenant_cid?: TenantCid139;
+  tenant_cid?: TenantCid140;
   trigger_conditions: TriggerConditions;
   target_hook_points: TargetHookPoints1;
   max_features_per_layer: MaxFeaturesPerLayer;
@@ -10733,7 +10769,7 @@ export interface MechanisticAuditContract {
  * MCP ROUTING TRIGGERS: Generative Flow Networks, Detailed Balance, Markov Chain Monte Carlo, Trajectory Flow, Credit Assignment Problem
  */
 export interface CognitiveDetailedBalanceContract {
-  tenant_cid?: TenantCid140;
+  tenant_cid?: TenantCid141;
   target_balance_epsilon: TargetBalanceEpsilon;
   flow_estimation_matrix: FlowEstimationMatrix;
   local_exploration_k: LocalExplorationK;
@@ -10750,7 +10786,7 @@ export interface CognitiveDetailedBalanceContract {
  * MCP ROUTING TRIGGERS: Supervisory Control Theory, Oracle Node, Mixed-Initiative, Proof of Humanity, Out-of-Band Entropy
  */
 export interface CognitiveHumanNodeProfile {
-  tenant_cid?: TenantCid141;
+  tenant_cid?: TenantCid142;
   description: Description5;
   architectural_intent?: ArchitecturalIntent1;
   justification?: Justification3;
@@ -10768,7 +10804,7 @@ export interface CognitiveHumanNodeProfile {
    * The physics-agnostic visual identity or shader governing the spatial rendering of this node.
    */
   render_material?: SpatialRenderMaterialState | null;
-  topology_class?: TopologyClass65;
+  topology_class?: TopologyClass66;
   required_attestation: RequiredAttestation;
   /**
    * The continuous spatial vector representing the human operator's localized cognitive focus.
@@ -10787,7 +10823,7 @@ export interface CognitiveHumanNodeProfile {
  * MCP ROUTING TRIGGERS: Lambda Calculus, Finite State Machine, Referential Transparency, Deterministic Execution, Zero Variance
  */
 export interface CognitiveSystemNodeProfile {
-  tenant_cid?: TenantCid142;
+  tenant_cid?: TenantCid143;
   description: Description6;
   architectural_intent?: ArchitecturalIntent2;
   justification?: Justification4;
@@ -10817,7 +10853,7 @@ export interface CognitiveSystemNodeProfile {
    * The mathematical functor blueprint authorizing the runtime to hydrate a specific open-source engine (e.g., SymbolicAI) for this node.
    */
   execution_substrate?: ExecutionSubstrateProfile1 | null;
-  topology_class?: TopologyClass66;
+  topology_class?: TopologyClass67;
 }
 /**
  * CoReason Shared Kernel Ontology
@@ -10831,7 +10867,7 @@ export interface CognitiveSystemNodeProfile {
  * MCP ROUTING TRIGGERS: Coalgebraic Thunking, Dependency Isomorphism, JIT Hydration, VRAM Allocation
  */
 export interface ExecutionSubstrateProfile1 {
-  tenant_cid?: TenantCid82;
+  tenant_cid?: TenantCid83;
   dialect: Dialect;
   required_package_signatures: RequiredPackageSignatures;
   vram_overhead_mb: VramOverheadMb;
@@ -10849,7 +10885,7 @@ export interface ExecutionSubstrateProfile1 {
  * MCP ROUTING TRIGGERS: Fractal Graph Abstraction, Recursive Encapsulation, State Projection, Bijective Mapping, Sub-Topology
  */
 export interface CompositeNodeProfile {
-  tenant_cid?: TenantCid143;
+  tenant_cid?: TenantCid144;
   description: Description7;
   architectural_intent?: ArchitecturalIntent3;
   justification?: Justification5;
@@ -10867,7 +10903,7 @@ export interface CompositeNodeProfile {
    * The physics-agnostic visual identity or shader governing the spatial rendering of this node.
    */
   render_material?: SpatialRenderMaterialState | null;
-  topology_class?: TopologyClass67;
+  topology_class?: TopologyClass68;
   /**
    * The encapsulated subgraph to execute.
    */
@@ -10903,7 +10939,7 @@ export interface CompositeNodeProfile {
  * MCP ROUTING TRIGGERS: Directed Acyclic Graph, Kahn's Algorithm, Topological Sort, Causal Edge, Algorithmic Complexity
  */
 export interface DAGTopologyManifest {
-  tenant_cid?: TenantCid144;
+  tenant_cid?: TenantCid145;
   /**
    * Ties the topology to the Truth Maintenance layer.
    */
@@ -10924,7 +10960,7 @@ export interface DAGTopologyManifest {
    * The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph.
    */
   observability?: ObservabilityLODPolicy | null;
-  topology_class?: TopologyClass68;
+  topology_class?: TopologyClass69;
   edges?: Edges;
   allow_cycles?: AllowCycles;
   /**
@@ -10947,7 +10983,7 @@ export interface DAGTopologyManifest {
  * MCP ROUTING TRIGGERS: Truth Maintenance System, Non-Monotonic Logic, Defeasible Reasoning, Belief Revision, Causal Graph Ablation
  */
 export interface TruthMaintenancePolicy {
-  tenant_cid?: TenantCid145;
+  tenant_cid?: TenantCid146;
   decay_propagation_rate: DecayPropagationRate;
   epistemic_quarantine_threshold: EpistemicQuarantineThreshold;
   enforce_cross_agent_quarantine?: EnforceCrossAgentQuarantine;
@@ -10982,7 +11018,7 @@ export interface Nodes1 {
  * Finite State Automaton, Epistemic Synchronization
  */
 export interface StateContract {
-  tenant_cid?: TenantCid146;
+  tenant_cid?: TenantCid147;
   schema_definition: SchemaDefinition;
   formal_schema_urn?: FormalSchemaUrn;
   strict_validation?: StrictValidation;
@@ -11009,7 +11045,7 @@ export interface SchemaDefinition {
  * MCP ROUTING TRIGGERS: FSM Logit Masking, Constrained Decoding, Tokenizer Interception, Hardware Execution Boundary, Pushdown Automaton
  */
 export interface ConstrainedDecodingPolicy {
-  tenant_cid?: TenantCid147;
+  tenant_cid?: TenantCid148;
   enforcement_strategy?: EnforcementStrategy;
   compiler_backend: CompilerBackend;
   formal_grammar_string?: FormalGrammarString;
@@ -11036,7 +11072,7 @@ export interface ConstrainedDecodingPolicy {
  * Security, Biba Integrity Model, Defense-in-Depth
  */
 export interface EpistemicSemanticFlowPolicy {
-  tenant_cid?: TenantCid148;
+  tenant_cid?: TenantCid149;
   policy_cid: PolicyCid;
   active?: Active1;
   /**
@@ -11065,7 +11101,7 @@ export interface EpistemicSemanticFlowPolicy {
  * Zero-Trust Perimeter, Control-Flow Hijacking
  */
 export interface EpistemicSemanticFirewallPolicy {
-  tenant_cid?: TenantCid149;
+  tenant_cid?: TenantCid150;
   max_input_tokens: MaxInputTokens;
   forbidden_intents?: ForbiddenIntents;
   action_on_violation: ActionOnViolation;
@@ -11082,7 +11118,7 @@ export interface EpistemicSemanticFirewallPolicy {
  * MCP ROUTING TRIGGERS: Mechanistic Interpretability, Sparse Autoencoders, Residual Stream Steering, Tensor Remediation, Monosemantic Features, TransformerLens, SAELens
  */
 export interface SaeLatentPolicy {
-  tenant_cid?: TenantCid150;
+  tenant_cid?: TenantCid151;
   target_feature_index: TargetFeatureIndex;
   monitored_hook_points: MonitoredHookPoints;
   max_activation_threshold: MaxActivationThreshold;
@@ -11106,7 +11142,7 @@ export interface SaeLatentPolicy {
  * MCP ROUTING TRIGGERS: Mechanistic Interpretability, Tensor Attenuation, Cosine Annealing, Logit Collapse Prevention, Activation Smoothing
  */
 export interface LatentSmoothingProfile {
-  tenant_cid?: TenantCid151;
+  tenant_cid?: TenantCid152;
   decay_function: DecayFunction;
   transition_window_tokens: TransitionWindowTokens;
   decay_rate_param?: DecayRateParam;
@@ -11128,7 +11164,7 @@ export interface LatentSmoothingProfile {
  * MCP ROUTING TRIGGERS: Spectral Graph Coarsening, Hierarchical Level of Detail, HLOD, Topology Collapse, VRAM Optimization
  */
 export interface ObservabilityLODPolicy {
-  tenant_cid?: TenantCid152;
+  tenant_cid?: TenantCid153;
   max_rendered_vertices: MaxRenderedVertices;
   spectral_coarsening_active?: SpectralCoarseningActive;
   telemetry_backpressure: TelemetryBackpressureContract;
@@ -11139,7 +11175,7 @@ export interface ObservabilityLODPolicy {
  * The network flow constraints mathematically bound to the observer's kinematics.
  */
 export interface TelemetryBackpressureContract {
-  tenant_cid?: TenantCid153;
+  tenant_cid?: TenantCid154;
   focal_refresh_rate_hz: FocalRefreshRateHz;
   peripheral_refresh_rate_hz: PeripheralRefreshRateHz;
   occluded_refresh_rate_hz?: OccludedRefreshRateHz;
@@ -11157,7 +11193,7 @@ export interface TelemetryBackpressureContract {
  * MCP ROUTING TRIGGERS: Area of Interest Management, Hierarchical Spatial Hashing, Telemetry Isolation, Spatial Partitioning, Culling
  */
 export interface VolumetricPartitionState {
-  tenant_cid?: TenantCid154;
+  tenant_cid?: TenantCid155;
   partition_boundary: VolumetricBoundingProfile;
   subscription_ttl_ms: SubscriptionTtlMs;
   /**
@@ -11169,7 +11205,7 @@ export interface VolumetricPartitionState {
  * The 3D physical cage defining the observer's subscribed spatial area.
  */
 export interface VolumetricBoundingProfile {
-  tenant_cid?: TenantCid155;
+  tenant_cid?: TenantCid156;
   center_transform: SE3TransformProfile3;
   extents_x: ExtentsX;
   extents_y: ExtentsY;
@@ -11187,7 +11223,7 @@ export interface VolumetricBoundingProfile {
  * MCP ROUTING TRIGGERS: Special Euclidean Group, SE(3) Manifold, Rigid Body Transformation, Hamiltonian Unit Quaternion, Kinematic Topology
  */
 export interface SE3TransformProfile3 {
-  tenant_cid?: TenantCid62;
+  tenant_cid?: TenantCid63;
   reference_frame_cid: ReferenceFrameCid;
   x: X;
   y: Y;
@@ -11215,7 +11251,7 @@ export interface SE3TransformProfile3 {
  * MCP ROUTING TRIGGERS: Computational Integrity, Verifiable Computing, Zero-Knowledge Proofs, zk-SNARK, State Attestation
  */
 export interface ZeroKnowledgeReceipt {
-  tenant_cid?: TenantCid156;
+  tenant_cid?: TenantCid157;
   proof_protocol: ProofProtocol;
   logical_circuit_hash: LogicalCircuitHash;
   public_inputs_hash: PublicInputsHash;
@@ -11255,7 +11291,7 @@ export interface LatentStateCommitments {
  * Shedding, Thermodynamic Flow Control
  */
 export interface BackpressurePolicy {
-  tenant_cid?: TenantCid157;
+  tenant_cid?: TenantCid158;
   max_queue_depth: MaxQueueDepth;
   token_budget_per_branch?: TokenBudgetPerBranch;
   max_tokens_per_minute?: MaxTokensPerMinute;
@@ -11275,7 +11311,7 @@ export interface BackpressurePolicy {
  * MCP ROUTING TRIGGERS: Speculative Topology, Time-Rewinding Geometry, Probabilistic Divergence, Subgraph Fork, Execution Boundary
  */
 export interface SpeculativeExecutionPolicy {
-  tenant_cid?: TenantCid158;
+  tenant_cid?: TenantCid159;
   boundary_cid: BoundaryCid;
   is_speculative?: IsSpeculative;
   commit_probability: CommitProbability;
@@ -11295,7 +11331,7 @@ export interface SpeculativeExecutionPolicy {
  * MCP ROUTING TRIGGERS: Social Choice Theory, PBFT Consensus, Multi-Agent Debate, Byzantine Fault Tolerance, Slashing Condition
  */
 export interface CouncilTopologyManifest {
-  tenant_cid?: TenantCid159;
+  tenant_cid?: TenantCid160;
   /**
    * Ties the topology to the Truth Maintenance layer.
    */
@@ -11316,7 +11352,7 @@ export interface CouncilTopologyManifest {
    * The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph.
    */
   observability?: ObservabilityLODPolicy | null;
-  topology_class?: TopologyClass69;
+  topology_class?: TopologyClass70;
   /**
    * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
    */
@@ -11364,7 +11400,7 @@ export interface Nodes2 {
  * Mitigation, Red Teaming, Adversarial Perturbation
  */
 export interface DiversityPolicy {
-  tenant_cid?: TenantCid160;
+  tenant_cid?: TenantCid161;
   min_adversaries: MinAdversaries;
   model_variance_required: ModelVarianceRequired;
   temperature_variance?: TemperatureVariance;
@@ -11391,7 +11427,7 @@ export interface DiversityPolicy {
  * Algorithmic Consensus, Deadlock Resolution
  */
 export interface ConsensusPolicy {
-  tenant_cid?: TenantCid161;
+  tenant_cid?: TenantCid162;
   strategy: Strategy;
   /**
    * The node authorized to break deadlocks if unanimity or majority fails.
@@ -11444,7 +11480,7 @@ export interface PredictionMarketPolicy1 {
  * Resistance, Distributed Consensus
  */
 export interface QuorumPolicy {
-  tenant_cid?: TenantCid162;
+  tenant_cid?: TenantCid163;
   max_tolerable_faults: MaxTolerableFaults;
   min_quorum_size: MinQuorumSize;
   state_validation_metric: StateValidationMetric;
@@ -11472,7 +11508,7 @@ export interface QuorumPolicy {
  * Semantic Alignment, Zero-Trust Federation, Geometric Projection
  */
 export interface EpistemicOntologicalAlignmentPolicy {
-  tenant_cid?: TenantCid163;
+  tenant_cid?: TenantCid164;
   min_cosine_similarity: MinCosineSimilarity;
   require_isometry_proof: RequireIsometryProof;
   /**
@@ -11492,7 +11528,7 @@ export interface EpistemicOntologicalAlignmentPolicy {
  * MCP ROUTING TRIGGERS: Algorithmic Mechanism Design, Proof-of-Stake, Nash Equilibrium, Sybil Resistance, Escrow Collateralization
  */
 export interface EscrowPolicy {
-  tenant_cid?: TenantCid164;
+  tenant_cid?: TenantCid165;
   escrow_locked_magnitude: EscrowLockedMagnitude;
   release_condition_metric: ReleaseConditionMetric;
   refund_target_node_cid: RefundTargetNodeCid;
@@ -11509,7 +11545,7 @@ export interface EscrowPolicy {
  * MCP ROUTING TRIGGERS: Complex Adaptive Systems, Swarm Intelligence, Algorithmic Mechanism Design, Spot Market Routing, Multi-Agent Reinforcement Learning
  */
 export interface SwarmTopologyManifest {
-  tenant_cid?: TenantCid165;
+  tenant_cid?: TenantCid166;
   /**
    * Ties the topology to the Truth Maintenance layer.
    */
@@ -11530,7 +11566,7 @@ export interface SwarmTopologyManifest {
    * The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph.
    */
   observability?: ObservabilityLODPolicy | null;
-  topology_class?: TopologyClass70;
+  topology_class?: TopologyClass71;
   spawning_threshold?: SpawningThreshold;
   max_concurrent_agents?: MaxConcurrentAgents;
   /**
@@ -11558,7 +11594,7 @@ export interface Nodes3 {
  * MCP ROUTING TRIGGERS: Algorithmic Mechanism Design, Vickrey-Clarke-Groves, Strategyproofness, Market Clearing Heuristic
  */
 export interface AuctionPolicy {
-  tenant_cid?: TenantCid166;
+  tenant_cid?: TenantCid167;
   /**
    * The market mechanism governing the auction.
    */
@@ -11581,7 +11617,7 @@ export interface AuctionPolicy {
  * MCP ROUTING TRIGGERS: Logarithmic Market Scoring Rule, Automated Market Maker, Prediction Market, Infinite Liquidity, Brier Score
  */
 export interface PredictionMarketState {
-  tenant_cid?: TenantCid167;
+  tenant_cid?: TenantCid168;
   market_cid: MarketCid;
   resolution_oracle_condition_cid: ResolutionOracleConditionCid;
   lmsr_b_parameter: LmsrBParameter;
@@ -11600,7 +11636,7 @@ export interface PredictionMarketState {
  * MCP ROUTING TRIGGERS: Epistemic Staking, Brier Score Input, Belief Freezing, Market Order
  */
 export interface HypothesisStakeReceipt {
-  tenant_cid?: TenantCid168;
+  tenant_cid?: TenantCid169;
   agent_cid: AgentCid1;
   target_hypothesis_cid: TargetHypothesisCid1;
   staked_magnitude: StakedMagnitude;
@@ -11624,7 +11660,7 @@ export interface CurrentMarketProbabilities {
  * MCP ROUTING TRIGGERS: Brier Scoring, Market Settlement, Probability Wave Collapse, Truth Crystallization
  */
 export interface MarketResolutionState {
-  tenant_cid?: TenantCid169;
+  tenant_cid?: TenantCid170;
   market_cid: MarketCid1;
   winning_hypothesis_cid: WinningHypothesisCid;
   falsified_hypothesis_cids: FalsifiedHypothesisCids;
@@ -11648,7 +11684,7 @@ export interface PayoutDistribution {
  * MCP ROUTING TRIGGERS: Genetic Algorithm, Evolutionary Strategy, Gradient-Free Optimization, Population Dynamics, Multi-Objective Optimization
  */
 export interface EvolutionaryTopologyManifest {
-  tenant_cid?: TenantCid170;
+  tenant_cid?: TenantCid171;
   /**
    * Ties the topology to the Truth Maintenance layer.
    */
@@ -11669,7 +11705,7 @@ export interface EvolutionaryTopologyManifest {
    * The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph.
    */
   observability?: ObservabilityLODPolicy | null;
-  topology_class?: TopologyClass71;
+  topology_class?: TopologyClass72;
   generations: Generations;
   population_size: PopulationSize;
   mutation: MutationPolicy;
@@ -11686,7 +11722,7 @@ export interface Nodes4 {
  * The constraints governing random heuristic mutations.
  */
 export interface MutationPolicy {
-  tenant_cid?: TenantCid171;
+  tenant_cid?: TenantCid172;
   mutation_rate: MutationRate;
   temperature_shift_variance: TemperatureShiftVariance;
   /**
@@ -11706,7 +11742,7 @@ export interface MutationPolicy {
  * MCP ROUTING TRIGGERS: Verifiable Random Function, VRF, Stochastic Fairness, Elliptic Curve Cryptography, Zero-Knowledge Entropy
  */
 export interface VerifiableEntropyReceipt {
-  tenant_cid?: TenantCid172;
+  tenant_cid?: TenantCid173;
   vrf_proof: VrfProof;
   public_key: PublicKey;
   seed_hash: SeedHash;
@@ -11715,7 +11751,7 @@ export interface VerifiableEntropyReceipt {
  * The mathematical rules for combining elite agents.
  */
 export interface CrossoverPolicy {
-  tenant_cid?: TenantCid173;
+  tenant_cid?: TenantCid174;
   /**
    * The heuristic method for blending successful parent agents.
    */
@@ -11746,7 +11782,7 @@ export interface CrossoverPolicy {
  * Optimization, Phenotype Scoring, Pareto Efficiency
  */
 export interface FitnessObjectiveProfile {
-  tenant_cid?: TenantCid174;
+  tenant_cid?: TenantCid175;
   target_metric: TargetMetric;
   /**
    * Whether the algorithm should maximize or minimize this metric.
@@ -11766,7 +11802,7 @@ export interface FitnessObjectiveProfile {
  * MCP ROUTING TRIGGERS: Secure Multi-Party Computation, Garbled Circuits, Secret Sharing, Oblivious Transfer, Zero-Trust Cryptography
  */
 export interface SMPCTopologyManifest {
-  tenant_cid?: TenantCid175;
+  tenant_cid?: TenantCid176;
   /**
    * Ties the topology to the Truth Maintenance layer.
    */
@@ -11787,7 +11823,7 @@ export interface SMPCTopologyManifest {
    * The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph.
    */
   observability?: ObservabilityLODPolicy | null;
-  topology_class?: TopologyClass72;
+  topology_class?: TopologyClass73;
   smpc_protocol: SmpcProtocol;
   joint_function_uri: JointFunctionUri;
   participant_node_cids: ParticipantNodeCids;
@@ -11814,7 +11850,7 @@ export interface Nodes5 {
  * MCP ROUTING TRIGGERS: Actor-Critic Architecture, Minimax Optimization, Adversarial Critique, Dual-Process Revision, Generative Adversarial Loop
  */
 export interface EvaluatorOptimizerTopologyManifest {
-  tenant_cid?: TenantCid176;
+  tenant_cid?: TenantCid177;
   /**
    * Ties the topology to the Truth Maintenance layer.
    */
@@ -11835,7 +11871,7 @@ export interface EvaluatorOptimizerTopologyManifest {
    * The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph.
    */
   observability?: ObservabilityLODPolicy | null;
-  topology_class?: TopologyClass73;
+  topology_class?: TopologyClass74;
   /**
    * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
    */
@@ -11865,7 +11901,7 @@ export interface Nodes6 {
  * MCP ROUTING TRIGGERS: Digital Twin, Cyber-Physical Systems, Sandbox Simulation, Markov Blanket, Shadow Graph
  */
 export interface DigitalTwinTopologyManifest {
-  tenant_cid?: TenantCid177;
+  tenant_cid?: TenantCid178;
   /**
    * Ties the topology to the Truth Maintenance layer.
    */
@@ -11886,7 +11922,7 @@ export interface DigitalTwinTopologyManifest {
    * The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph.
    */
   observability?: ObservabilityLODPolicy | null;
-  topology_class?: TopologyClass74;
+  topology_class?: TopologyClass75;
   target_topology_cid: TargetTopologyCid;
   convergence_sla: SimulationConvergenceSLA;
   enforce_no_side_effects?: EnforceNoSideEffects;
@@ -11901,7 +11937,7 @@ export interface Nodes7 {
  * The strict mathematical boundaries for the simulation.
  */
 export interface SimulationConvergenceSLA {
-  tenant_cid?: TenantCid178;
+  tenant_cid?: TenantCid179;
   max_monte_carlo_rollouts: MaxMonteCarloRollouts;
   variance_tolerance: VarianceTolerance;
 }
@@ -11917,8 +11953,8 @@ export interface SimulationConvergenceSLA {
  * MCP ROUTING TRIGGERS: Practical Byzantine Fault Tolerance, pBFT, Distributed Consensus, Sybil Resistance, Macro Abstraction
  */
 export interface ConsensusFederationTopologyManifest {
-  tenant_cid?: TenantCid179;
-  topology_class?: TopologyClass75;
+  tenant_cid?: TenantCid180;
+  topology_class?: TopologyClass76;
   participant_cids: ParticipantCids;
   /**
    * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
@@ -11946,7 +11982,7 @@ export interface ConsensusFederationTopologyManifest {
  * Resistance, Distributed Consensus
  */
 export interface QuorumPolicy1 {
-  tenant_cid?: TenantCid162;
+  tenant_cid?: TenantCid163;
   max_tolerable_faults: MaxTolerableFaults;
   min_quorum_size: MinQuorumSize;
   state_validation_metric: StateValidationMetric;
@@ -11964,7 +12000,7 @@ export interface QuorumPolicy1 {
  * MCP ROUTING TRIGGERS: Tool Synthesis, Capability Generation, Verification Matrix, Ephemeral Execution, Macro Topology
  */
 export interface CapabilityForgeTopologyManifest {
-  tenant_cid?: TenantCid180;
+  tenant_cid?: TenantCid181;
   /**
    * Ties the topology to the Truth Maintenance layer.
    */
@@ -11985,7 +12021,7 @@ export interface CapabilityForgeTopologyManifest {
    * The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph.
    */
   observability?: ObservabilityLODPolicy | null;
-  topology_class?: TopologyClass76;
+  topology_class?: TopologyClass77;
   target_epistemic_deficit: SemanticDiscoveryIntent1;
   /**
    * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
@@ -12026,8 +12062,8 @@ export interface Nodes8 {
  * MCP ROUTING TRIGGERS: Zero-Shot Tool Discovery, Capability Routing, Dense Vector Embedding, Epistemic Deficit Resolution
  */
 export interface SemanticDiscoveryIntent1 {
-  tenant_cid?: TenantCid45;
-  topology_class?: TopologyClass22;
+  tenant_cid?: TenantCid46;
+  topology_class?: TopologyClass23;
   query_vector: VectorEmbeddingState1;
   min_isometry_score: MinIsometryScore;
   required_structural_types: RequiredStructuralTypes;
@@ -12044,7 +12080,7 @@ export interface SemanticDiscoveryIntent1 {
  *     MCP ROUTING TRIGGERS: Teleological Isometry, Tool Forging Validation, Cosine Similarity, Generative Deficit, Empirical Behavior
  */
 export interface TeleologicalIsometryReceipt {
-  tenant_cid?: TenantCid181;
+  tenant_cid?: TenantCid182;
   source_intent_cid: SourceIntentCid;
   target_intent_vector: VectorEmbeddingState3;
   forged_output_vector: VectorEmbeddingState4;
@@ -12123,7 +12159,7 @@ export interface VectorEmbeddingState4 {
  * MCP ROUTING TRIGGERS: Intent Elicitation, Zero-Entropy Distillation, Cyclical Routing, Human Interrogation, Multimodal Transmutation
  */
 export interface IntentElicitationTopologyManifest {
-  tenant_cid?: TenantCid182;
+  tenant_cid?: TenantCid183;
   /**
    * Ties the topology to the Truth Maintenance layer.
    */
@@ -12144,7 +12180,7 @@ export interface IntentElicitationTopologyManifest {
    * The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph.
    */
   observability?: ObservabilityLODPolicy | null;
-  topology_class?: TopologyClass77;
+  topology_class?: TopologyClass78;
   raw_human_artifact_cid: RawHumanArtifactCid;
   /**
    * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
@@ -12178,7 +12214,7 @@ export interface Nodes9 {
  * MCP ROUTING TRIGGERS: Neurosymbolic Ingestion, Zero-Cost Macro, Substrate Oracles, Deterministic Pipeline, Functorial Semantics
  */
 export interface NeurosymbolicIngestionTopologyManifest {
-  tenant_cid?: TenantCid183;
+  tenant_cid?: TenantCid184;
   /**
    * Ties the topology to the Truth Maintenance layer.
    */
@@ -12199,7 +12235,7 @@ export interface NeurosymbolicIngestionTopologyManifest {
    * The dynamic Level of Detail physics bound to this graph.
    */
   observability?: ObservabilityLODPolicy | null;
-  topology_class?: TopologyClass78;
+  topology_class?: TopologyClass79;
   /**
    * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
    */
@@ -12240,7 +12276,7 @@ export interface Nodes10 {
  *     MCP ROUTING TRIGGERS: Proposer-Verifier Loop, Bipartite Graph, Symbolic Validation, Cyclic Computation
  */
 export interface NeurosymbolicVerificationTopologyManifest {
-  tenant_cid?: TenantCid184;
+  tenant_cid?: TenantCid185;
   /**
    * Ties the topology to the Truth Maintenance layer.
    */
@@ -12261,7 +12297,7 @@ export interface NeurosymbolicVerificationTopologyManifest {
    * The dynamic Level of Detail and Spectral Coarsening physics bound to this macroscopic execution graph.
    */
   observability?: ObservabilityLODPolicy | null;
-  topology_class?: TopologyClass79;
+  topology_class?: TopologyClass80;
   proposer_node_cid: ProposerNodeCid;
   verifier_node_cid: VerifierNodeCid;
   max_revision_loops: MaxRevisionLoops1;
@@ -12285,8 +12321,8 @@ export interface Nodes11 {
  *     MCP ROUTING TRIGGERS: Discourse Geometry, Rhetorical Flattening, Directed Acyclic Graph, Hierarchical Extraction
  */
 export interface DiscourseTreeManifest {
-  tenant_cid?: TenantCid185;
-  topology_class?: TopologyClass80;
+  tenant_cid?: TenantCid186;
+  topology_class?: TopologyClass81;
   manifest_cid: ManifestCid2;
   /**
    * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
@@ -12312,7 +12348,7 @@ export interface DiscourseNodes {
  *     MCP ROUTING TRIGGERS: Rhetorical Block, Discourse Parsing, Graph Traversal, Structural Vertex
  */
 export interface DiscourseNodeState {
-  tenant_cid?: TenantCid186;
+  tenant_cid?: TenantCid187;
   /**
    * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
    */
@@ -12336,8 +12372,8 @@ export interface DiscourseNodeState {
  * MCP ROUTING TRIGGERS: Knowledge Graph, Document Extraction, Semantic Relations, Hierarchical Mapping, TDA Projection
  */
 export interface DocumentKnowledgeGraphManifest {
-  tenant_cid?: TenantCid187;
-  topology_class?: TopologyClass81;
+  tenant_cid?: TenantCid188;
+  topology_class?: TopologyClass82;
   graph_cid: GraphCid;
   source_artifact_cid: SourceArtifactCid2;
   nodes: Nodes12;
@@ -12369,7 +12405,7 @@ export interface DocumentKnowledgeGraphManifest {
  * via the `patternProperty` "^[a-zA-Z0-9_.:-]+$".
  */
 export interface SemanticNodeState {
-  tenant_cid?: TenantCid188;
+  tenant_cid?: TenantCid189;
   node_cid: NodeCid2;
   canonical_uri?: CanonicalUri;
   label: Label;
@@ -12407,7 +12443,7 @@ export interface SemanticNodeState {
  * MCP ROUTING TRIGGERS: Data Provenance, Causal Tracing, Epistemic Anchoring, Bijective Mapping, Genesis Block
  */
 export interface EpistemicProvenanceReceipt1 {
-  tenant_cid?: TenantCid49;
+  tenant_cid?: TenantCid50;
   fidelity_receipt_hash?: FidelityReceiptHash;
   revision_loops_executed?: RevisionLoopsExecuted;
   /**
@@ -12431,7 +12467,7 @@ export interface EpistemicProvenanceReceipt1 {
  * The strict time window during which this node is considered valid.
  */
 export interface TemporalBoundsProfile {
-  tenant_cid?: TenantCid189;
+  tenant_cid?: TenantCid190;
   valid_from: ValidFrom;
   valid_to?: ValidTo;
   /**
@@ -12460,7 +12496,7 @@ export interface TemporalBoundsProfile {
  * MCP ROUTING TRIGGERS: Ebbinghaus Forgetting Curve, Temporal Difference, Attention Decay, GPU VRAM Optimization, Memory Salience
  */
 export interface SalienceProfile {
-  tenant_cid?: TenantCid190;
+  tenant_cid?: TenantCid191;
   baseline_importance: BaselineImportance;
   decay_rate: DecayRate;
 }
@@ -12476,7 +12512,7 @@ export interface SalienceProfile {
  * MCP ROUTING TRIGGERS: Fully Homomorphic Encryption, Lattice-Based Cryptography, CKKS Scheme, Privacy-Preserving Computation, Encrypted Tensor
  */
 export interface HomomorphicEncryptionProfile {
-  tenant_cid?: TenantCid191;
+  tenant_cid?: TenantCid192;
   fhe_scheme: FheScheme;
   public_key_cid: PublicKeyCid;
   ciphertext_blob: CiphertextBlob;
@@ -12490,8 +12526,8 @@ export interface HomomorphicEncryptionProfile {
  * MCP ROUTING TRIGGERS: Cross-Modal Isomorphism, Semantic Fusion, Volumetric Projection, Profunctor Optics
  */
 export interface ContinuousManifoldMappingContract {
-  tenant_cid?: TenantCid192;
-  topology_class?: TopologyClass82;
+  tenant_cid?: TenantCid193;
+  topology_class?: TopologyClass83;
   /**
    * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
    */
@@ -12511,7 +12547,7 @@ export interface ContinuousManifoldMappingContract {
  * MCP ROUTING TRIGGERS: Special Euclidean Group, SE(3) Manifold, Rigid Body Transformation, Hamiltonian Unit Quaternion, Kinematic Topology
  */
 export interface SE3TransformProfile4 {
-  tenant_cid?: TenantCid62;
+  tenant_cid?: TenantCid63;
   reference_frame_cid: ReferenceFrameCid;
   x: X;
   y: Y;
@@ -12539,8 +12575,8 @@ export interface SE3TransformProfile4 {
  * MCP ROUTING TRIGGERS: Spatial-Semantic Isomorphism, Document Object Model, Containment DAG, Visual Hierarchy, Rhetorical Bounding
  */
 export interface HierarchicalDOMManifest {
-  tenant_cid?: TenantCid193;
-  topology_class?: TopologyClass83;
+  tenant_cid?: TenantCid194;
+  topology_class?: TopologyClass84;
   dom_cid: DomCid;
   root_block_cid: RootBlockCid;
   blocks: Blocks;
@@ -12573,7 +12609,7 @@ export interface Blocks {
  * Classification, Bounding Box Geometry, Semantic Region Isolation
  */
 export interface DocumentLayoutRegionState {
-  tenant_cid?: TenantCid194;
+  tenant_cid?: TenantCid195;
   block_cid: BlockCid;
   block_class: BlockClass1;
   tabular_matrix?: TabularMatrixProfile | null;
@@ -12591,7 +12627,7 @@ export interface DocumentLayoutRegionState {
  * MCP ROUTING TRIGGERS: TableFormer, Relational Matrix, Grid Topology, Spatial Bounding, 2D Array
  */
 export interface TabularMatrixProfile {
-  tenant_cid?: TenantCid195;
+  tenant_cid?: TenantCid196;
   matrix_cid: MatrixCid;
   total_rows: TotalRows;
   total_columns: TotalColumns;
@@ -12609,7 +12645,7 @@ export interface TabularMatrixProfile {
  * MCP ROUTING TRIGGERS: Tabular Matrix Geometry, Table Structure Recognition, Bipartite Graph, Cartesian Coordinate, Spatial Grid
  */
 export interface TabularCellState {
-  tenant_cid?: TenantCid196;
+  tenant_cid?: TenantCid197;
   cell_cid: CellCid;
   row_index: RowIndex;
   column_index: ColumnIndex;
@@ -12639,7 +12675,7 @@ export interface TabularCellState {
  * Spatial Tracking, Geometric Affine Transforms, Coordinate Bounding
  */
 export interface MultimodalTokenAnchorState1 {
-  tenant_cid?: TenantCid50;
+  tenant_cid?: TenantCid51;
   token_span_start?: TokenSpanStart;
   token_span_end?: TokenSpanEnd;
   temporal_frame_start_ms?: TemporalFrameStartMs;
@@ -12669,7 +12705,7 @@ export interface MultimodalTokenAnchorState1 {
  * State Projection, Bijective Mapping
  */
 export interface InputMappingContract {
-  tenant_cid?: TenantCid197;
+  tenant_cid?: TenantCid198;
   parent_key: ParentKey;
   child_key: ChildKey;
 }
@@ -12694,7 +12730,7 @@ export interface InputMappingContract {
  * Side-Effect Free Mutation, Graph Isomorphism
  */
 export interface OutputMappingContract {
-  tenant_cid?: TenantCid198;
+  tenant_cid?: TenantCid199;
   child_key: ChildKey1;
   parent_key: ParentKey1;
 }
@@ -12710,7 +12746,7 @@ export interface OutputMappingContract {
  * MCP ROUTING TRIGGERS: Dynamic Programming, O(1) Retrieval, Cryptographic Cache, Graph Isomorphism, Compute Conservation
  */
 export interface MemoizedNodeProfile {
-  tenant_cid?: TenantCid199;
+  tenant_cid?: TenantCid200;
   description: Description8;
   architectural_intent?: ArchitecturalIntent15;
   justification?: Justification17;
@@ -12728,7 +12764,7 @@ export interface MemoizedNodeProfile {
    * The physics-agnostic visual identity or shader governing the spatial rendering of this node.
    */
   render_material?: SpatialRenderMaterialState | null;
-  topology_class?: TopologyClass84;
+  topology_class?: TopologyClass85;
   /**
    * The exact SHA-256 fingerprint of the executed topology.
    */
@@ -12750,8 +12786,8 @@ export interface ExpectedOutputSchema {
  * MCP ROUTING TRIGGERS: Conflict-Free Replicated Data Types, State-based Semilattice, Eventual Consistency, G-Set
  */
 export interface TemporalGraphCRDTManifest {
-  tenant_cid?: TenantCid200;
-  topology_class?: TopologyClass85;
+  tenant_cid?: TenantCid201;
+  topology_class?: TopologyClass86;
   diff_cid: DiffCid;
   author_node_cid: AuthorNodeCid;
   lamport_timestamp: LamportTimestamp;
@@ -12777,8 +12813,8 @@ export interface VectorClock {
  * MCP ROUTING TRIGGERS: Model Context Protocol, Kinetic Tooling, Substrate Projection, Capability Discovery, Zero-Trust Execution
  */
 export interface EpistemicMCPToolDefinitionState {
-  tenant_cid?: TenantCid201;
-  topology_class?: TopologyClass86;
+  tenant_cid?: TenantCid202;
+  topology_class?: TopologyClass87;
   event_cid?: EventCid1;
   timestamp?: Timestamp1;
   name: Name;
@@ -12803,10 +12839,10 @@ export interface Inputschema {
  * MCP ROUTING TRIGGERS: Epistemic Provenance, Crosswalk Resolution, Grounding Receipt, Ontology Access Kit, CURIE
  */
 export interface CrosswalkResolutionReceipt {
-  tenant_cid?: TenantCid202;
+  tenant_cid?: TenantCid203;
   event_cid: EventCid2;
   timestamp: Timestamp2;
-  topology_class?: TopologyClass87;
+  topology_class?: TopologyClass88;
   receipt_cid: ReceiptCid;
   target_graph_cid: TargetGraphCid3;
   resolved_curies: ResolvedCuries;
@@ -12830,7 +12866,7 @@ export interface ResolvedCuries {
  *     MCP ROUTING TRIGGERS: Dempster-Shafer, Epistemic Conflict, Evidence Discounting, Composite Tri-Vector
  */
 export interface EpistemicDempsterShaferBeliefVectorState1 {
-  tenant_cid?: TenantCid93;
+  tenant_cid?: TenantCid94;
   lexical_confidence: LexicalConfidence;
   semantic_distance: SemanticDistance;
   structural_graph_confidence: StructuralGraphConfidence;
@@ -12849,10 +12885,10 @@ export interface EpistemicDempsterShaferBeliefVectorState1 {
  * MCP ROUTING TRIGGERS: Cryptographic Ledger, Formal Verification Receipt, Immutable Provenance, Hash Canonicalization, Data Masking
  */
 export interface EpistemicZeroTrustReceipt {
-  tenant_cid?: TenantCid203;
+  tenant_cid?: TenantCid204;
   event_cid: EventCid3;
   timestamp: Timestamp3;
-  topology_class?: TopologyClass88;
+  topology_class?: TopologyClass89;
   intent_reference_cid: IntentReferenceCid;
   llm_blind_plan_hash: LlmBlindPlanHash;
   firewall_breach_detected?: FirewallBreachDetected;
@@ -12871,10 +12907,10 @@ export interface EpistemicZeroTrustReceipt {
  * MCP ROUTING TRIGGERS: Bayesian Evidence, Neurosymbolic Binding, Exogenous Truth, Epistemic Grounding, Payload Topological Bounding
  */
 export interface ObservationEvent {
-  tenant_cid?: TenantCid204;
+  tenant_cid?: TenantCid205;
   event_cid: EventCid4;
   timestamp: Timestamp4;
-  topology_class?: TopologyClass89;
+  topology_class?: TopologyClass90;
   payload: Payload;
   /**
    * The specific topological node that appended this observation.
@@ -12928,7 +12964,7 @@ export interface Payload {
  * MCP ROUTING TRIGGERS: Trusted Execution Environment, Remote Attestation, Platform Configuration Register, Hardware Root-of-Trust, SGX/TDX/Nitro
  */
 export interface HardwareEnclaveReceipt {
-  tenant_cid?: TenantCid205;
+  tenant_cid?: TenantCid206;
   enclave_class: EnclaveClass;
   platform_measurement_hash: PlatformMeasurementHash;
   hardware_signature_blob: HardwareSignatureBlob;
@@ -12945,8 +12981,8 @@ export interface HardwareEnclaveReceipt {
  * MCP ROUTING TRIGGERS: Exogenous Perturbation, DOM Topography, Spatial Execution Bound, Accessibility Tree
  */
 export interface SpatialBrowserDOMState {
-  tenant_cid?: TenantCid206;
-  topology_class?: TopologyClass90;
+  tenant_cid?: TenantCid207;
+  topology_class?: TopologyClass91;
   current_url: CurrentUrl;
   viewport_size: ViewportSize;
   dom_hash: DomHash;
@@ -12965,8 +13001,8 @@ export interface SpatialBrowserDOMState {
  * MCP ROUTING TRIGGERS: POSIX Environment, Exogenous Perturbation, TTY Buffer, Causal Actuator, Stream Crystallization
  */
 export interface TerminalBufferState {
-  tenant_cid?: TenantCid207;
-  topology_class?: TopologyClass91;
+  tenant_cid?: TenantCid208;
+  topology_class?: TopologyClass92;
   working_directory: WorkingDirectory;
   stdout_hash: StdoutHash;
   stderr_hash: StderrHash;
@@ -12984,7 +13020,7 @@ export interface TerminalBufferState {
  * MCP ROUTING TRIGGERS: Bayesian Surprise, Multimodal Sensor Fusion, Kullback-Leibler Divergence, Exteroceptive Vector, Proprioception
  */
 export interface EmbodiedSensoryVectorProfile {
-  tenant_cid?: TenantCid208;
+  tenant_cid?: TenantCid209;
   sensory_modality: SensoryModality;
   bayesian_surprise_score: BayesianSurpriseScore;
   temporal_duration_ms: TemporalDurationMs;
@@ -13002,7 +13038,7 @@ export interface EmbodiedSensoryVectorProfile {
  * MCP ROUTING TRIGGERS: Causal Scrubbing, Epistemic Provenance, Mechanistic Audit, RFC 8785 Canonicalization, Cryptographic Brain-Scan, TransformerLens, SAELens
  */
 export interface NeuralAuditAttestationReceipt {
-  tenant_cid?: TenantCid209;
+  tenant_cid?: TenantCid210;
   audit_cid: AuditCid;
   hook_activations: HookActivations;
   causal_scrubbing_applied?: CausalScrubbingApplied;
@@ -13025,7 +13061,7 @@ export interface HookActivations {
  * MCP ROUTING TRIGGERS: Sparse Autoencoder, Monosemantic Feature, Concept Vector, Mechanistic Interpretability, Euclidean Magnitude
  */
 export interface SaeFeatureActivationState {
-  tenant_cid?: TenantCid210;
+  tenant_cid?: TenantCid211;
   feature_index: FeatureIndex;
   activation_magnitude: ActivationMagnitude;
   interpretability_label?: InterpretabilityLabel;
@@ -13042,7 +13078,7 @@ export interface SaeFeatureActivationState {
  * MCP ROUTING TRIGGERS: Continuous Observation, State Space Models, Temporal Decay, Forget Gate, Streaming Disfluency
  */
 export interface ContinuousObservationState {
-  tenant_cid?: TenantCid211;
+  tenant_cid?: TenantCid212;
   stream_cid: StreamCid;
   token_buffer: TokenBuffer;
   temporal_decay_matrix: TemporalDecayMatrix;
@@ -13066,7 +13102,7 @@ export interface TemporalDecayMatrix {
  * MCP ROUTING TRIGGERS: Streaming Disfluency, Forget Gate, Token Excise, Sequence Repair, Temporal Lookback
  */
 export interface StreamingDisfluencyContract {
-  tenant_cid?: TenantCid212;
+  tenant_cid?: TenantCid213;
   repair_marker_regex: RepairMarkerRegex;
   decay_threshold: DecayThreshold;
   max_lookback_window: MaxLookbackWindow;
@@ -13083,10 +13119,10 @@ export interface StreamingDisfluencyContract {
  * MCP ROUTING TRIGGERS: Bayesian Belief Updating, Causal Tracing, Cognitive Synthesis, Merkle-DAG Coordinate, Non-Monotonic Leap
  */
 export interface BeliefMutationEvent {
-  tenant_cid?: TenantCid213;
+  tenant_cid?: TenantCid214;
   event_cid: EventCid5;
   timestamp: Timestamp5;
-  topology_class?: TopologyClass92;
+  topology_class?: TopologyClass93;
   payload: Payload1;
   /**
    * The specific topological node that synthesized this belief assertion.
@@ -13139,7 +13175,7 @@ export interface Payload1 {
  * Attention Weighting, Influence Distribution
  */
 export interface CausalAttributionState {
-  tenant_cid?: TenantCid214;
+  tenant_cid?: TenantCid215;
   source_event_cid: SourceEventCid1;
   influence_weight: InfluenceWeight;
 }
@@ -13155,7 +13191,7 @@ export interface CausalAttributionState {
  * MCP ROUTING TRIGGERS: Structural Causal Models, Active Inference, Variational Free Energy, Aleatoric Entropy, DoWhy Do-Calculus
  */
 export interface CognitiveUncertaintyProfile1 {
-  tenant_cid?: TenantCid85;
+  tenant_cid?: TenantCid86;
   aleatoric_noise_ratio: AleatoricNoiseRatio;
   epistemic_knowledge_gap: EpistemicKnowledgeGap;
   semantic_consistency_score: SemanticConsistencyScore;
@@ -13182,7 +13218,7 @@ export interface CognitiveUncertaintyProfile1 {
  * Probability Wave Collapse, State-Space Exploration
  */
 export interface LatentScratchpadReceipt {
-  tenant_cid?: TenantCid215;
+  tenant_cid?: TenantCid216;
   trace_cid: TraceCid;
   explored_branches: ExploredBranches;
   discarded_branches: DiscardedBranches;
@@ -13201,10 +13237,10 @@ export interface LatentScratchpadReceipt {
  * MCP ROUTING TRIGGERS: Byzantine Fault Tolerance, Circuit Breaker, Terminal State, Execution Collapse, Fault Isolation
  */
 export interface SystemFaultEvent {
-  tenant_cid?: TenantCid216;
+  tenant_cid?: TenantCid217;
   event_cid: EventCid6;
   timestamp: Timestamp6;
-  topology_class?: TopologyClass93;
+  topology_class?: TopologyClass94;
 }
 /**
  * CoReason Shared Kernel Ontology
@@ -13218,8 +13254,8 @@ export interface SystemFaultEvent {
  *     MCP ROUTING TRIGGERS: Atomic Proposition, Discourse Extraction, Labeled Property Graph, Verifiable Statement
  */
 export interface AtomicPropositionState {
-  tenant_cid?: TenantCid217;
-  topology_class?: TopologyClass94;
+  tenant_cid?: TenantCid218;
+  topology_class?: TopologyClass95;
   event_cid: EventCid7;
   timestamp: Timestamp7;
   proposition_cid: PropositionCid;
@@ -13241,7 +13277,7 @@ export interface AtomicPropositionState {
  *     MCP ROUTING TRIGGERS: Empirical Statistics, Mathematical Boundary, Epistemic Smoothing, Proposition Certainty
  */
 export interface EmpiricalStatisticalProfile {
-  tenant_cid?: TenantCid218;
+  tenant_cid?: TenantCid219;
   qualifier_type: QualifierType;
   algebraic_operator: AlgebraicOperator;
   value: Value;
@@ -13260,8 +13296,8 @@ export interface EmpiricalStatisticalProfile {
  *     MCP ROUTING TRIGGERS: Post-Coordinated Semantics, Latent Manifold Alignment, Semantic Specificity, Entity Assembly
  */
 export interface PostCoordinatedSemanticState {
-  tenant_cid?: TenantCid219;
-  topology_class?: TopologyClass95;
+  tenant_cid?: TenantCid220;
+  topology_class?: TopologyClass96;
   event_cid: EventCid8;
   timestamp: Timestamp8;
   concept_cid: ConceptCid;
@@ -13291,10 +13327,10 @@ export interface ContextualModifiers {
  * MCP ROUTING TRIGGERS: Artifact Contagion Prevention, Terminal Fault, VLM Crash, Malformed Bytes, DRM Lock
  */
 export interface ArtifactCorruptionEvent {
-  tenant_cid?: TenantCid220;
+  tenant_cid?: TenantCid221;
   event_cid: EventCid9;
   timestamp: Timestamp9;
-  topology_class?: TopologyClass96;
+  topology_class?: TopologyClass97;
   artifact_cid: ArtifactCid;
   corruption_class: CorruptionClass;
   diagnostic_hash: DiagnosticHash;
@@ -13311,10 +13347,10 @@ export interface ArtifactCorruptionEvent {
  * MCP ROUTING TRIGGERS: Abductive Reasoning, Popperian Falsification, Bayesian Prior, Causal Hypothesis, Epistemic Commitment
  */
 export interface HypothesisGenerationEvent {
-  tenant_cid?: TenantCid221;
+  tenant_cid?: TenantCid222;
   event_cid: EventCid10;
   timestamp: Timestamp10;
-  topology_class?: TopologyClass97;
+  topology_class?: TopologyClass98;
   hypothesis_cid: HypothesisCid;
   premise_text: PremiseText;
   bayesian_prior: BayesianPrior;
@@ -13337,7 +13373,7 @@ export interface HypothesisGenerationEvent {
  * MCP ROUTING TRIGGERS: DoWhy, PyWhy, Causal Graph, DOT, GML, CausalModel
  */
 export interface EpistemicCausalGraphDefinitionState {
-  tenant_cid?: TenantCid222;
+  tenant_cid?: TenantCid223;
   graph_format: GraphFormat;
   graph_payload: GraphPayload;
 }
@@ -13353,10 +13389,10 @@ export interface EpistemicCausalGraphDefinitionState {
  * MCP ROUTING TRIGGERS: Asynchronous Interrupt, Generative Severing, Context Switching, Defeasible Disposition, Wave Collapse
  */
 export interface BargeInInterruptEvent {
-  tenant_cid?: TenantCid223;
+  tenant_cid?: TenantCid224;
   event_cid: EventCid11;
   timestamp: Timestamp11;
-  topology_class?: TopologyClass98;
+  topology_class?: TopologyClass99;
   target_event_cid: TargetEventCid1;
   /**
    * The continuous multimodal trigger (e.g., audio spike, user saying 'stop') that justified the interruption.
@@ -13377,10 +13413,10 @@ export interface BargeInInterruptEvent {
  * MCP ROUTING TRIGGERS: Counterfactual Regret Minimization, DoWhy Do-Calculus, Opportunity Cost, Alternative Timeline, Policy Gradient Update
  */
 export interface CounterfactualRegretEvent {
-  tenant_cid?: TenantCid224;
+  tenant_cid?: TenantCid225;
   event_cid: EventCid12;
   timestamp: Timestamp12;
-  topology_class?: TopologyClass99;
+  topology_class?: TopologyClass100;
   historical_event_cid: HistoricalEventCid;
   counterfactual_intervention: CounterfactualIntervention;
   expected_utility_actual: ExpectedUtilityActual;
@@ -13406,10 +13442,10 @@ export interface PolicyMutationGradients {
  * MCP ROUTING TRIGGERS: DoWhy Do-Operator, Kinetic Commitment, Active Inference, Thermodynamic Escrow, Zero-Trust Actuation
  */
 export interface ToolInvocationEvent {
-  tenant_cid?: TenantCid225;
+  tenant_cid?: TenantCid226;
   event_cid: EventCid13;
   timestamp: Timestamp13;
-  topology_class?: TopologyClass100;
+  topology_class?: TopologyClass101;
   tool_name: ToolName1;
   parameters: Parameters;
   authorized_budget_magnitude: AuthorizedBudgetMagnitude;
@@ -13452,7 +13488,7 @@ export interface AgentAttestationReceipt1 {
  * MCP ROUTING TRIGGERS: Computational Integrity, Verifiable Computing, Zero-Knowledge Proofs, zk-SNARK, State Attestation
  */
 export interface ZeroKnowledgeReceipt1 {
-  tenant_cid?: TenantCid156;
+  tenant_cid?: TenantCid157;
   proof_protocol: ProofProtocol;
   logical_circuit_hash: LogicalCircuitHash;
   public_inputs_hash: PublicInputsHash;
@@ -13474,10 +13510,10 @@ export interface ZeroKnowledgeReceipt1 {
  * MCP ROUTING TRIGGERS: Hippocampal Consolidation, Knowledge Distillation, Semantic Memory, Shannon Entropy Compression, Epistemic Promotion
  */
 export interface EpistemicPromotionEvent {
-  tenant_cid?: TenantCid226;
+  tenant_cid?: TenantCid227;
   event_cid: EventCid14;
   timestamp: Timestamp14;
-  topology_class?: TopologyClass101;
+  topology_class?: TopologyClass102;
   source_episodic_event_cids: SourceEpisodicEventCids;
   crystallized_semantic_node_cid: CrystallizedSemanticNodeCid;
   compression_ratio: CompressionRatio;
@@ -13494,10 +13530,10 @@ export interface EpistemicPromotionEvent {
  * MCP ROUTING TRIGGERS: Event Sourcing, Write-Ahead Logging, Two-Phase Commit, Lakehouse Serialization, State Differential Flush
  */
 export interface PersistenceCommitReceipt {
-  tenant_cid?: TenantCid227;
+  tenant_cid?: TenantCid228;
   event_cid: EventCid15;
   timestamp: Timestamp15;
-  topology_class?: TopologyClass102;
+  topology_class?: TopologyClass103;
   lakehouse_snapshot_cid: LakehouseSnapshotCid;
   committed_temporal_crdt_cid: CommittedTemporalCrdtCid;
   target_table_uri: TargetTableUri;
@@ -13514,10 +13550,10 @@ export interface PersistenceCommitReceipt {
  * MCP ROUTING TRIGGERS: Landauer's Principle, Thermodynamic Compute, Token Burn, Resource Exhaustion, Lock-Free Tallying
  */
 export interface TokenBurnReceipt {
-  tenant_cid?: TenantCid228;
+  tenant_cid?: TenantCid229;
   event_cid: EventCid16;
   timestamp: Timestamp16;
-  topology_class?: TopologyClass103;
+  topology_class?: TopologyClass104;
   tool_invocation_cid: ToolInvocationCid;
   input_tokens: InputTokens;
   output_tokens: OutputTokens;
@@ -13535,10 +13571,10 @@ export interface TokenBurnReceipt {
  * MCP ROUTING TRIGGERS: Optimal Stopping Theory, Escrow Exhaustion, Sybil Resistance, Algorithmic Circuit Breaker, Generation Halting
  */
 export interface BudgetExhaustionEvent {
-  tenant_cid?: TenantCid229;
+  tenant_cid?: TenantCid230;
   event_cid: EventCid17;
   timestamp: Timestamp17;
-  topology_class?: TopologyClass104;
+  topology_class?: TopologyClass105;
   exhausted_escrow_cid: ExhaustedEscrowCid;
   final_burn_receipt_cid: FinalBurnReceiptCid;
 }
@@ -13554,10 +13590,10 @@ export interface BudgetExhaustionEvent {
  * MCP ROUTING TRIGGERS: Epistemic Regret, Supervisory Control Theory, Human-in-the-Loop, Dwell Time, Spatial Telemetry
  */
 export interface EpistemicTelemetryEvent {
-  tenant_cid?: TenantCid230;
+  tenant_cid?: TenantCid231;
   event_cid: EventCid18;
   timestamp: Timestamp18;
-  topology_class?: TopologyClass105;
+  topology_class?: TopologyClass106;
   interaction_modality: InteractionModality;
   target_node_cid: TargetNodeCid;
   dwell_duration_ms?: DwellDurationMs;
@@ -13578,10 +13614,10 @@ export interface EpistemicTelemetryEvent {
  * MCP ROUTING TRIGGERS: Predictive Distribution, Softmax Logits, Generative Manifold, Probability Wave Collapse, Entropy
  */
 export interface CognitivePredictionReceipt {
-  tenant_cid?: TenantCid231;
+  tenant_cid?: TenantCid232;
   event_cid: EventCid19;
   timestamp: Timestamp19;
-  topology_class?: TopologyClass106;
+  topology_class?: TopologyClass107;
   source_chain_cid: SourceChainCid;
   target_source_concept: TargetSourceConcept;
   predicted_top_k_tokens: PredictedTopKTokens;
@@ -13598,10 +13634,10 @@ export interface CognitivePredictionReceipt {
  * MCP ROUTING TRIGGERS: Entailment Verification, Natural Language Inference, Truth Maintenance System, Epistemic Quarantine, Hallucination Filtering
  */
 export interface EpistemicAxiomVerificationReceipt {
-  tenant_cid?: TenantCid232;
+  tenant_cid?: TenantCid233;
   event_cid: EventCid20;
   timestamp: Timestamp20;
-  topology_class?: TopologyClass107;
+  topology_class?: TopologyClass108;
   source_prediction_cid: SourcePredictionCid;
   sequence_similarity_score: SequenceSimilarityScore;
   fact_score_passed: FactScorePassed;
@@ -13632,10 +13668,10 @@ export interface EpistemicAxiomVerificationReceipt {
  * Scalar Backpropagation, Acyclic Path
  */
 export interface EpistemicFlowStateReceipt {
-  tenant_cid?: TenantCid233;
+  tenant_cid?: TenantCid234;
   event_cid: EventCid21;
   timestamp: Timestamp21;
-  topology_class?: TopologyClass108;
+  topology_class?: TopologyClass109;
   source_trajectory_cid: SourceTrajectoryCid;
   estimated_flow_value: EstimatedFlowValue;
   terminal_reward_factorized: TerminalRewardFactorized;
@@ -13661,10 +13697,10 @@ export interface EpistemicFlowStateReceipt {
  * Macroscopic Explanation, Deterministic Sorting
  */
 export interface CausalExplanationEvent {
-  tenant_cid?: TenantCid234;
+  tenant_cid?: TenantCid235;
   event_cid: EventCid22;
   timestamp: Timestamp22;
-  topology_class?: TopologyClass109;
+  topology_class?: TopologyClass110;
   target_outcome_event_cid: TargetOutcomeEventCid;
   collective_intelligence: CollectiveIntelligenceProfile;
   agent_attributions: AgentAttributions;
@@ -13673,7 +13709,7 @@ export interface CausalExplanationEvent {
  * The system-level emergence metrics.
  */
 export interface CollectiveIntelligenceProfile {
-  tenant_cid?: TenantCid235;
+  tenant_cid?: TenantCid236;
   synergy_index: SynergyIndex;
   coordination_score: CoordinationScore;
   information_integration: InformationIntegration;
@@ -13698,7 +13734,7 @@ export interface CollectiveIntelligenceProfile {
  * Marginal Contribution, Monte Carlo Approximation
  */
 export interface ShapleyAttributionReceipt {
-  tenant_cid?: TenantCid236;
+  tenant_cid?: TenantCid237;
   /**
    * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
    */
@@ -13727,10 +13763,10 @@ export interface ShapleyAttributionReceipt {
  * Routing Heuristic, Semantic Wave Collapse
  */
 export interface IntentClassificationReceipt {
-  tenant_cid?: TenantCid237;
+  tenant_cid?: TenantCid238;
   event_cid: EventCid23;
   timestamp: Timestamp23;
-  topology_class?: TopologyClass110;
+  topology_class?: TopologyClass111;
   raw_input_string: RawInputString;
   classified_intent: ClassifiedIntent;
   confidence_score: ConfidenceScore1;
@@ -13748,8 +13784,8 @@ export interface IntentClassificationReceipt {
  *     MCP ROUTING TRIGGERS: Semantic Relational Record, Payload Injection, Hardware Guillotine, Structured Telemetry
  */
 export interface SemanticRelationalVectorState {
-  tenant_cid?: TenantCid238;
-  topology_class?: TopologyClass111;
+  tenant_cid?: TenantCid239;
+  topology_class?: TopologyClass112;
   event_cid: EventCid24;
   timestamp: Timestamp24;
   ontology_class: UpperOntologyClassProfile;
@@ -13765,7 +13801,7 @@ export interface SemanticRelationalVectorState {
  * The temporal mapping of the event.
  */
 export interface TemporalBoundsProfile1 {
-  tenant_cid?: TenantCid189;
+  tenant_cid?: TenantCid190;
   valid_from: ValidFrom;
   valid_to?: ValidTo;
   /**
@@ -13794,8 +13830,8 @@ export interface PayloadInjectionZone {
  *     MCP ROUTING TRIGGERS: Ontological Reification, Bimodal Semantic Transformation, Epistemic Ledger, Traceability Collapse
  */
 export interface EpistemicOntologicalReificationReceipt {
-  tenant_cid?: TenantCid239;
-  topology_class?: TopologyClass112;
+  tenant_cid?: TenantCid240;
+  topology_class?: TopologyClass113;
   event_cid: EventCid25;
   timestamp: Timestamp25;
   source_data_hash: SourceDataHash;
@@ -13816,7 +13852,7 @@ export interface EpistemicOntologicalReificationReceipt {
  *     MCP ROUTING TRIGGERS: Dempster-Shafer, Epistemic Conflict, Evidence Discounting, Composite Tri-Vector
  */
 export interface EpistemicDempsterShaferBeliefVectorState2 {
-  tenant_cid?: TenantCid93;
+  tenant_cid?: TenantCid94;
   lexical_confidence: LexicalConfidence;
   semantic_distance: SemanticDistance;
   structural_graph_confidence: StructuralGraphConfidence;
@@ -13835,10 +13871,10 @@ export interface EpistemicDempsterShaferBeliefVectorState2 {
  * MCP ROUTING TRIGGERS: Lyapunov Stability, Control Theory, Circuit Breaker, Cascading Failure, State Equilibrium
  */
 export interface CircuitBreakerEvent {
-  tenant_cid?: TenantCid240;
+  tenant_cid?: TenantCid241;
   event_cid: EventCid26;
   timestamp: Timestamp26;
-  topology_class?: TopologyClass113;
+  topology_class?: TopologyClass114;
   /**
    * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
    */
@@ -13866,10 +13902,10 @@ export interface CircuitBreakerEvent {
  * Energy, Exogenous Perturbation, Epistemic Stress Test
  */
 export interface ExogenousEpistemicEvent {
-  tenant_cid?: TenantCid241;
+  tenant_cid?: TenantCid242;
   event_cid: EventCid27;
   timestamp: Timestamp27;
-  topology_class?: TopologyClass114;
+  topology_class?: TopologyClass115;
   shock_cid: ShockCid;
   target_node_hash: TargetNodeHash;
   bayesian_surprise_score: BayesianSurpriseScore1;
@@ -13886,7 +13922,7 @@ export interface SyntheticPayload {
  * The cryptographic Proof-of-Stake funding the shock.
  */
 export interface SimulationEscrowContract {
-  tenant_cid?: TenantCid242;
+  tenant_cid?: TenantCid243;
   locked_magnitude: LockedMagnitude;
 }
 /**
@@ -13901,9 +13937,9 @@ export interface SimulationEscrowContract {
  * MCP ROUTING TRIGGERS: Out-of-Band Telemetry, Asynchronous Logging, Severity Masking, Peripheral Audit, Ephemeral Context
  */
 export interface EpistemicLogEvent {
-  tenant_cid?: TenantCid243;
+  tenant_cid?: TenantCid244;
   event_cid: EventCid28;
-  topology_class?: TopologyClass115;
+  topology_class?: TopologyClass116;
   timestamp: Timestamp28;
   level: Level;
   message: Message1;
@@ -13934,8 +13970,8 @@ export interface TelemetryContextProfile {
  * MCP ROUTING TRIGGERS: Cryptographic Nonce, State Resumption, Replay Attack Prevention, Wetware Attestation, Liveness Resolution
  */
 export interface InterventionReceipt {
-  tenant_cid?: TenantCid244;
-  topology_class?: TopologyClass116;
+  tenant_cid?: TenantCid245;
+  topology_class?: TopologyClass117;
   event_cid: EventCid29;
   timestamp: Timestamp29;
   intervention_request_cid: InterventionRequestCid;
@@ -13974,7 +14010,7 @@ export interface InterventionReceipt {
  * Prevention, Wetware Entropy
  */
 export interface WetwareAttestationContract {
-  tenant_cid?: TenantCid245;
+  tenant_cid?: TenantCid246;
   mechanism: Mechanism;
   did_subject: DidSubject;
   cryptographic_payload: CryptographicPayload;
@@ -13993,10 +14029,10 @@ export interface WetwareAttestationContract {
  * MCP ROUTING TRIGGERS: Chain of Custody, Cryptographic Provenance, Merkle-DAG Audit, Non-Repudiation, Data Isomorphism
  */
 export interface CustodyReceipt {
-  tenant_cid?: TenantCid246;
+  tenant_cid?: TenantCid247;
   event_cid: EventCid30;
   timestamp: Timestamp30;
-  topology_class?: TopologyClass117;
+  topology_class?: TopologyClass118;
   custody_cid: CustodyCid;
   source_node_cid: SourceNodeCid;
   applied_policy_cid: AppliedPolicyCid;
@@ -14016,10 +14052,10 @@ export interface CustodyReceipt {
  * MCP ROUTING TRIGGERS: Undercutting Defeater, Dialectical Edge, Truth Maintenance System, Bipartite Mapping, Non-Monotonic Retraction
  */
 export interface DefeasibleAttackEvent {
-  tenant_cid?: TenantCid247;
+  tenant_cid?: TenantCid248;
   event_cid: EventCid31;
   timestamp: Timestamp31;
-  topology_class?: TopologyClass118;
+  topology_class?: TopologyClass119;
   attack_cid: AttackCid;
   source_claim_cid: SourceClaimCid;
   target_claim_cid: TargetClaimCid;
@@ -14040,10 +14076,10 @@ export interface DefeasibleAttackEvent {
  * MCP ROUTING TRIGGERS: Rejection Receipt, Free Energy Feedback, MCTS Backpropagation, Variational Free Energy, Mutation Gradient
  */
 export interface EpistemicRejectionReceipt {
-  tenant_cid?: TenantCid248;
+  tenant_cid?: TenantCid249;
   event_cid: EventCid32;
   timestamp: Timestamp32;
-  topology_class?: TopologyClass119;
+  topology_class?: TopologyClass120;
   receipt_cid: ReceiptCid1;
   failed_projection_cid: FailedProjectionCid;
   violated_algebraic_constraint: ViolatedAlgebraicConstraint;
@@ -14062,10 +14098,10 @@ export interface EpistemicRejectionReceipt {
  * MCP ROUTING TRIGGERS: System 2 Remediation, Mathematical Truth, Proof Verification, Epistemic Ledger
  */
 export interface FormalVerificationReceipt {
-  tenant_cid?: TenantCid249;
+  tenant_cid?: TenantCid250;
   event_cid: EventCid33;
   timestamp: Timestamp33;
-  topology_class?: TopologyClass120;
+  topology_class?: TopologyClass121;
   /**
    * Pointer to the specific node or intent that requested this formal verification.
    */
@@ -14087,8 +14123,8 @@ export interface FormalVerificationReceipt {
  * MCP ROUTING TRIGGERS: Belief Update, Dempster-Shafer, Evidence Fusion, Uncertainty Modulation, Knowledge Integration
  */
 export interface BeliefModulationReceipt {
-  tenant_cid?: TenantCid250;
-  topology_class?: TopologyClass121;
+  tenant_cid?: TenantCid251;
+  topology_class?: TopologyClass122;
   receipt_cid: ReceiptCid2;
   event_cid: EventCid34;
   timestamp: Timestamp34;
@@ -14111,8 +14147,8 @@ export interface GroundedEdges {
  * MCP ROUTING TRIGGERS: Export Verification, Audit Trail, RDF Integrity, Data Provenance, Semantic Web Compliance
  */
 export interface RDFExportReceipt {
-  tenant_cid?: TenantCid251;
-  topology_class?: TopologyClass122;
+  tenant_cid?: TenantCid252;
+  topology_class?: TopologyClass123;
   export_cid: ExportCid1;
   event_cid: EventCid35;
   timestamp: Timestamp35;
@@ -14132,10 +14168,10 @@ export interface RDFExportReceipt {
  * MCP ROUTING TRIGGERS: Epistemic Starvation, Natural Language Inference, Truth Maintenance System, Defeasible Logic, Belief Mass Depletion
  */
 export interface EpistemicStarvationEvent {
-  tenant_cid?: TenantCid252;
+  tenant_cid?: TenantCid253;
   event_cid: EventCid36;
   timestamp: Timestamp36;
-  topology_class?: TopologyClass123;
+  topology_class?: TopologyClass124;
   starved_edge_cid: StarvedEdgeCid;
   failed_citations: FailedCitations;
   diagnostic_reason: DiagnosticReason;
@@ -14152,10 +14188,10 @@ export interface EpistemicStarvationEvent {
  * MCP ROUTING TRIGGERS: SPARQL Result, RDF Bindings, Epistemic Projection, Payload Bounding, Ledger Commit
  */
 export interface SPARQLQueryResultReceipt {
-  tenant_cid?: TenantCid253;
+  tenant_cid?: TenantCid254;
   event_cid: EventCid37;
   timestamp: Timestamp37;
-  topology_class?: TopologyClass124;
+  topology_class?: TopologyClass125;
   query_intent_cid: QueryIntentCid;
   returned_bindings: ReturnedBindings;
   execution_time_ms: ExecutionTimeMs;
@@ -14178,8 +14214,8 @@ export interface ReturnedBindings {
  * MCP ROUTING TRIGGERS: Execution Audit, Merkle-DAG Provenance, Thermodynamic Accounting, Oracle Telemetry, Human-in-the-Loop Attestation, Cryptographic Receipt
  */
 export interface OracleExecutionReceipt {
-  tenant_cid?: TenantCid254;
-  topology_class?: TopologyClass125;
+  tenant_cid?: TenantCid255;
+  topology_class?: TopologyClass126;
   execution_hash: ExecutionHash;
   solver_urn: SolverUrn;
   tokens_burned: TokensBurned;
@@ -14197,10 +14233,10 @@ export interface OracleExecutionReceipt {
  * MCP ROUTING TRIGGERS: Security, Guardrails, Data Loss Prevention, Policy Violation, Telemetry
  */
 export interface GuardrailViolationEvent {
-  tenant_cid?: TenantCid255;
+  tenant_cid?: TenantCid256;
   event_cid: EventCid38;
   timestamp: Timestamp38;
-  topology_class?: TopologyClass126;
+  topology_class?: TopologyClass127;
   violation_id: ViolationId;
   status_code: StatusCode;
   violation_type: ViolationType;
@@ -14221,8 +14257,8 @@ export interface ViolationDetails {
  * MCP ROUTING TRIGGERS: Causal Inference, Structural Causal Models, PyWhy, Directed Acyclic Graph, causallearn
  */
 export interface CausalDiscoveryIntent {
-  tenant_cid?: TenantCid256;
-  topology_class?: TopologyClass127;
+  tenant_cid?: TenantCid257;
+  topology_class?: TopologyClass128;
   dataset_uri: DatasetUri;
   discovery_algorithm: DiscoveryAlgorithm;
   max_discrete_bins?: MaxDiscreteBins;
@@ -14236,8 +14272,8 @@ export interface CausalDiscoveryIntent {
  * MCP ROUTING TRIGGERS: Causal Inference, Structural Causal Models, PyWhy, Directed Acyclic Graph, causallearn
  */
 export interface CausalDiscoveryReceipt {
-  tenant_cid?: TenantCid257;
-  topology_class?: TopologyClass128;
+  tenant_cid?: TenantCid258;
+  topology_class?: TopologyClass129;
   causal_graph: StructuralCausalGraphProfile;
   discovery_algorithm_used: DiscoveryAlgorithmUsed;
 }
@@ -14245,8 +14281,8 @@ export interface CausalDiscoveryReceipt {
  * The structural causal graph discovered.
  */
 export interface StructuralCausalGraphProfile {
-  tenant_cid?: TenantCid258;
-  topology_class?: TopologyClass129;
+  tenant_cid?: TenantCid259;
+  topology_class?: TopologyClass130;
   edges?: Edges1;
   nodes?: Nodes13;
 }
@@ -14259,8 +14295,8 @@ export interface StructuralCausalGraphProfile {
  * MCP ROUTING TRIGGERS: Causal Inference, Average Treatment Effect, DoWhy, Causal Estimand
  */
 export interface DoWhyEstimationIntent {
-  tenant_cid?: TenantCid259;
-  topology_class?: TopologyClass130;
+  tenant_cid?: TenantCid260;
+  topology_class?: TopologyClass131;
   causal_graph: StructuralCausalGraphProfile1;
   treatment: Treatment;
   outcome: Outcome;
@@ -14269,8 +14305,8 @@ export interface DoWhyEstimationIntent {
  * The structural causal graph to use for estimation.
  */
 export interface StructuralCausalGraphProfile1 {
-  tenant_cid?: TenantCid258;
-  topology_class?: TopologyClass129;
+  tenant_cid?: TenantCid259;
+  topology_class?: TopologyClass130;
   edges?: Edges1;
   nodes?: Nodes13;
 }
@@ -14283,8 +14319,8 @@ export interface StructuralCausalGraphProfile1 {
  * MCP ROUTING TRIGGERS: Causal Inference, Average Treatment Effect, DoWhy, Causal Estimand
  */
 export interface DoWhyEstimationReceipt {
-  tenant_cid?: TenantCid260;
-  topology_class?: TopologyClass131;
+  tenant_cid?: TenantCid261;
+  topology_class?: TopologyClass132;
   identified_estimand: IdentifiedEstimand;
   average_treatment_effect: AverageTreatmentEffect;
   refutation_p_value: RefutationPValue;
@@ -14298,8 +14334,8 @@ export interface DoWhyEstimationReceipt {
  * MCP ROUTING TRIGGERS: Causal Inference, Heterogeneous Treatment Effect, Double Machine Learning, EconML
  */
 export interface EconMLCATEIntent {
-  tenant_cid?: TenantCid261;
-  topology_class?: TopologyClass132;
+  tenant_cid?: TenantCid262;
+  topology_class?: TopologyClass133;
   base_estimation_receipt: DoWhyEstimationReceipt1;
   features?: Features;
 }
@@ -14312,8 +14348,8 @@ export interface EconMLCATEIntent {
  * MCP ROUTING TRIGGERS: Causal Inference, Average Treatment Effect, DoWhy, Causal Estimand
  */
 export interface DoWhyEstimationReceipt1 {
-  tenant_cid?: TenantCid260;
-  topology_class?: TopologyClass131;
+  tenant_cid?: TenantCid261;
+  topology_class?: TopologyClass132;
   identified_estimand: IdentifiedEstimand;
   average_treatment_effect: AverageTreatmentEffect;
   refutation_p_value: RefutationPValue;
@@ -14327,8 +14363,8 @@ export interface DoWhyEstimationReceipt1 {
  * MCP ROUTING TRIGGERS: Causal Inference, Heterogeneous Treatment Effect, Double Machine Learning, EconML
  */
 export interface HTEEstimationReceipt {
-  tenant_cid?: TenantCid262;
-  topology_class?: TopologyClass133;
+  tenant_cid?: TenantCid263;
+  topology_class?: TopologyClass134;
   features?: Features1;
   cate_estimate: CateEstimate;
 }
@@ -14344,8 +14380,8 @@ export interface HTEEstimationReceipt {
  * MCP ROUTING TRIGGERS: Markov Decision Process, Acyclic Edge, Stochastic Routing, Transition Probability, Directed Graph
  */
 export interface TransitionEdgeProfile {
-  tenant_cid?: TenantCid263;
-  topology_class?: TopologyClass134;
+  tenant_cid?: TenantCid264;
+  topology_class?: TopologyClass135;
   target_node_cid?: TargetNodeCid1;
   /**
    * Dynamic discovery intent for bridging nodes.
@@ -14374,7 +14410,7 @@ export interface TransitionEdgeProfile {
  * Algebraic Translation, Lens, Prism
  */
 export interface EdgeMappingContract {
-  tenant_cid?: TenantCid264;
+  tenant_cid?: TenantCid265;
   source_pointer: SourcePointer;
   target_pointer: TargetPointer;
 }
@@ -14390,8 +14426,8 @@ export interface EdgeMappingContract {
  * MCP ROUTING TRIGGERS: Markov Decision Process, Cyclic Edge, Bellman Equation, Thermodynamic Discounting, Recursive Traversal
  */
 export interface CyclicEdgeProfile {
-  tenant_cid?: TenantCid265;
-  topology_class?: TopologyClass135;
+  tenant_cid?: TenantCid266;
+  topology_class?: TopologyClass136;
   target_node_cid?: TargetNodeCid2;
   /**
    * Dynamic discovery intent for bridging nodes.
@@ -14408,7 +14444,7 @@ export interface CyclicEdgeProfile {
  * The mandatory structural conditions guaranteed to eventually halt traversal.
  */
 export interface TerminalConditionContract {
-  tenant_cid?: TenantCid266;
+  tenant_cid?: TenantCid267;
   max_causal_depth?: MaxCausalDepth;
   minimum_budget_magnitude?: MinimumBudgetMagnitude;
 }
@@ -14424,7 +14460,7 @@ export interface TerminalConditionContract {
  * MCP ROUTING TRIGGERS: Order Book Snapshot, Market Convergence, RFC 8785 Canonicalization, Liquidity Aggregation, Declarative Coordinate
  */
 export interface AuctionState {
-  tenant_cid?: TenantCid267;
+  tenant_cid?: TenantCid268;
   announcement: TaskAnnouncementIntent1;
   bids?: Bids;
   /**
@@ -14446,8 +14482,8 @@ export interface AuctionState {
  * MCP ROUTING TRIGGERS: Decentralized Spot Market, Request for Proposal, Thermodynamic Compute Allocation, Algorithmic Mechanism Design, Kinetic Execution Trigger
  */
 export interface TaskAnnouncementIntent1 {
-  tenant_cid?: TenantCid66;
-  topology_class?: TopologyClass32;
+  tenant_cid?: TenantCid67;
+  topology_class?: TopologyClass33;
   task_cid: TaskCid2;
   required_action_space_cid?: RequiredActionSpaceCid;
   max_budget_magnitude: MaxBudgetMagnitude;
@@ -14464,7 +14500,7 @@ export interface TaskAnnouncementIntent1 {
  * MCP ROUTING TRIGGERS: Market Clearing, Escrow Lock, Cryptographic Provenance, Syndicate Allocation, Thermodynamic Execution
  */
 export interface TaskAwardReceipt {
-  tenant_cid?: TenantCid268;
+  tenant_cid?: TenantCid269;
   task_cid: TaskCid6;
   awarded_syndicate: AwardedSyndicate;
   cleared_price_magnitude: ClearedPriceMagnitude;
@@ -14502,7 +14538,7 @@ export interface AwardedSyndicate {
  * Starvation, DAG Integrity, Lazy Evaluation
  */
 export interface BypassReceipt {
-  tenant_cid?: TenantCid269;
+  tenant_cid?: TenantCid270;
   artifact_event_cid: ArtifactEventCid1;
   /**
    * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
@@ -14523,7 +14559,7 @@ export interface BypassReceipt {
  * MCP ROUTING TRIGGERS: Markov Decision Process, Action Space, Affordance Theory, State Transition Matrix, Directed Cyclic Graph
  */
 export interface CognitiveActionSpaceManifest {
-  tenant_cid?: TenantCid270;
+  tenant_cid?: TenantCid271;
   action_space_cid: ActionSpaceCid1;
   capabilities: Capabilities;
   transition_matrix: TransitionMatrix;
@@ -14567,7 +14603,7 @@ export interface TransitionMatrix {
  * MCP ROUTING TRIGGERS: Bipartite Graph Separation, Toxic Capability Quarantine, Finite State Machine, Structural Interlock, Conflict Graph
  */
 export interface KineticSeparationPolicy {
-  tenant_cid?: TenantCid271;
+  tenant_cid?: TenantCid272;
   policy_cid: PolicyCid1;
   mutually_exclusive_clusters: MutuallyExclusiveClusters;
   enforcement_action: EnforcementAction;
@@ -14584,7 +14620,7 @@ export interface KineticSeparationPolicy {
  * MCP ROUTING TRIGGERS: Process Reward Model, Step-Level Verification, Representation Engineering, Latent Repulsion, Test-Time Supervision
  */
 export interface CognitiveCritiqueProfile1 {
-  tenant_cid?: TenantCid73;
+  tenant_cid?: TenantCid74;
   reasoning_trace_hash: ReasoningTraceHash;
   /**
    * A dense latent space representation of the specific logical fallacy identified, used to mathematically repel future generation trajectories.
@@ -14604,7 +14640,7 @@ export interface CognitiveCritiqueProfile1 {
  * MCP ROUTING TRIGGERS: Semantic Tax Neutralization, Decoupled Reasoning Pipeline, XGrammar FSM Toggle, Constrained Decoding, Two-Stage Generation, Deliberation Envelope
  */
 export interface CognitiveDeliberativeEnvelopeState {
-  tenant_cid?: TenantCid272;
+  tenant_cid?: TenantCid273;
   deliberation_trace: DeliberationTrace;
   payload: Payload2;
 }
@@ -14634,7 +14670,7 @@ export interface Payload2 {
  * Cryptography, Symmetric Consensus, Zero-Trust Evaluation
  */
 export interface CognitiveDualVerificationReceipt {
-  tenant_cid?: TenantCid273;
+  tenant_cid?: TenantCid274;
   /**
    * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
    */
@@ -14665,7 +14701,7 @@ export interface CognitiveDualVerificationReceipt {
  * Latent Monologue, Verifiable Reasoning
  */
 export interface CognitiveReasoningTraceState {
-  tenant_cid?: TenantCid274;
+  tenant_cid?: TenantCid275;
   trace_cid: TraceCid1;
   source_proof_cid: SourceProofCid;
   token_length: TokenLength;
@@ -14683,7 +14719,7 @@ export interface CognitiveReasoningTraceState {
  * MCP ROUTING TRIGGERS: Monte Carlo Tree Search, Upper Confidence Bound, Inverse Frequency Smoothing, Heuristic Exploration, Graph Traversal
  */
 export interface CognitiveSamplingPolicy {
-  tenant_cid?: TenantCid275;
+  tenant_cid?: TenantCid276;
   max_complexity_hops: MaxComplexityHops;
   inverse_frequency_smoothing_epsilon?: InverseFrequencySmoothingEpsilon;
 }
@@ -14699,7 +14735,7 @@ export interface CognitiveSamplingPolicy {
  *     MCP ROUTING TRIGGERS: Cognitive Swarm, Agent Deployment, Routing Topology, Bootstrapping Macro
  */
 export interface CognitiveSwarmDeploymentManifest {
-  tenant_cid?: TenantCid276;
+  tenant_cid?: TenantCid277;
   swarm_objective_prompt: SwarmObjectivePrompt;
   agent_node_count: AgentNodeCount;
   consensus_mechanism: ConsensusMechanism;
@@ -14716,7 +14752,7 @@ export interface CognitiveSwarmDeploymentManifest {
  * MCP ROUTING TRIGGERS: Softmax Gating, Cognitive Load Theory, Pre-Flight Routing, Dictionary Bombing Prevention, Token Exhaustion Mitigation
  */
 export interface CognitiveTaxonomicRoutingPolicy {
-  tenant_cid?: TenantCid277;
+  tenant_cid?: TenantCid278;
   policy_cid: PolicyCid2;
   intent_to_heuristic_matrix: IntentToHeuristicMatrix;
   fallback_heuristic: FallbackHeuristic;
@@ -14747,7 +14783,7 @@ export interface IntentToHeuristicMatrix {
  * Mutual Information, Synergy Index, Multi-Agent Coupling
  */
 export interface CollectiveIntelligenceProfile1 {
-  tenant_cid?: TenantCid235;
+  tenant_cid?: TenantCid236;
   synergy_index: SynergyIndex;
   coordination_score: CoordinationScore;
   information_integration: InformationIntegration;
@@ -14764,7 +14800,7 @@ export interface CollectiveIntelligenceProfile1 {
  * MCP ROUTING TRIGGERS: Commercial Exclusivity, Cryptographic License, Token Supersession, JWT Issuance
  */
 export interface CommercialLicenseIntent {
-  tenant_cid?: TenantCid278;
+  tenant_cid?: TenantCid279;
   target_tenant_cid: TargetTenantCid;
   requested_entitlements?: RequestedEntitlements;
 }
@@ -14780,7 +14816,7 @@ export interface CommercialLicenseIntent {
  * MCP ROUTING TRIGGERS: License Validation, Air-Gapped PKI, Zero-Trust Architecture, Token Rotation, IP Sovereignty
  */
 export interface CommercialLicenseState {
-  tenant_cid?: TenantCid279;
+  tenant_cid?: TenantCid280;
   jti: Jti;
   supersedes?: Supersedes;
   exp: Exp;
@@ -14799,7 +14835,7 @@ export interface CommercialLicenseState {
  * MCP ROUTING TRIGGERS: Commercial License Override, VCDM v2.0, SD-JWT, zk-SNARK, ML-DSA, FIPS 204, Distr Integration, IP Sovereignty Receipt, Zero-Trust License Verification, WASM Feature Gating
  */
 export interface CommercialOverrideReceipt {
-  tenant_cid?: TenantCid280;
+  tenant_cid?: TenantCid281;
   license_tier: LicenseTier;
   signer_did: SignerDid;
   signature_algorithm?: SignatureAlgorithm;
@@ -14834,7 +14870,7 @@ export interface CommercialOverrideReceipt {
  * Thermodynamic Rate Card, Substrate Abstraction
  */
 export interface ComputeEngineProfile {
-  tenant_cid?: TenantCid281;
+  tenant_cid?: TenantCid282;
   foundation_matrix_name: FoundationMatrixName1;
   provider: Provider;
   context_window_size: ContextWindowSize;
@@ -14846,7 +14882,7 @@ export interface ComputeEngineProfile {
  * The economic cost definition associated with the model.
  */
 export interface ComputeRateContract {
-  tenant_cid?: TenantCid282;
+  tenant_cid?: TenantCid283;
   cost_per_million_input_tokens: CostPerMillionInputTokens;
   cost_per_million_output_tokens: CostPerMillionOutputTokens;
   magnitude_unit: MagnitudeUnit;
@@ -14863,7 +14899,7 @@ export interface ComputeRateContract {
  * MCP ROUTING TRIGGERS: Thermodynamic Cost, Monte Carlo Tree Search, Economic Escrow, Token Burn, Budget Calculation
  */
 export interface ComputeRateContract1 {
-  tenant_cid?: TenantCid282;
+  tenant_cid?: TenantCid283;
   cost_per_million_input_tokens: CostPerMillionInputTokens;
   cost_per_million_output_tokens: CostPerMillionOutputTokens;
   magnitude_unit: MagnitudeUnit;
@@ -14880,7 +14916,7 @@ export interface ComputeRateContract1 {
  *     MCP ROUTING TRIGGERS: Semantic Envelope, Contextual Projection, Spatial Token Footprint, Source Entity, Topos Sorting
  */
 export interface ContextualizedSourceState3 {
-  tenant_cid?: TenantCid72;
+  tenant_cid?: TenantCid73;
   target_string: TargetString;
   contextual_envelope: ContextualEnvelope;
   source_system_provenance_flag: SourceSystemProvenanceFlag;
@@ -14907,7 +14943,7 @@ export interface ContextualizedSourceState3 {
  * Backpressure, Buffer Memory Bounding
  */
 export interface ContinuousMutationPolicy {
-  tenant_cid?: TenantCid283;
+  tenant_cid?: TenantCid284;
   mutation_paradigm: MutationParadigm;
   max_uncommitted_edges: MaxUncommittedEdges;
   micro_batch_interval_ms: MicroBatchIntervalMs;
@@ -14933,7 +14969,7 @@ export interface ContinuousMutationPolicy {
  * Interpolation, Elitism, Reproduction Heuristic
  */
 export interface CrossoverPolicy1 {
-  tenant_cid?: TenantCid173;
+  tenant_cid?: TenantCid174;
   /**
    * The heuristic method for blending successful parent agents.
    */
@@ -14956,7 +14992,7 @@ export interface CrossoverPolicy1 {
  * MCP ROUTING TRIGGERS: Homotopy Type Theory, Cryptographic Provenance, Execution Causal Chain, Merkle-DAG Identity, Path Equivalence
  */
 export interface CryptographicProvenancePolicy {
-  tenant_cid?: TenantCid284;
+  tenant_cid?: TenantCid285;
   provenance_trace_cid?: ProvenanceTraceCid1;
 }
 /**
@@ -14977,7 +15013,7 @@ export interface CryptographicProvenancePolicy {
  * MCP ROUTING TRIGGERS: Hebbian Learning, Memory Consolidation, Inductive Logic Programming, Aleatoric Entropy, Knowledge Distillation
  */
 export interface CrystallizationPolicy {
-  tenant_cid?: TenantCid285;
+  tenant_cid?: TenantCid286;
   min_observations_required: MinObservationsRequired;
   aleatoric_entropy_threshold: AleatoricEntropyThreshold;
   target_cognitive_tier: TargetCognitiveTier;
@@ -14994,7 +15030,7 @@ export interface CrystallizationPolicy {
  * MCP ROUTING TRIGGERS: Jon Doyle TMS, Epistemic Contagion, Belief Retraction, Shannon Entropy Penalty, Graph Quarantine
  */
 export interface DefeasibleCascadeEvent {
-  tenant_cid?: TenantCid286;
+  tenant_cid?: TenantCid287;
   cascade_cid: CascadeCid;
   root_falsified_event_cid: RootFalsifiedEventCid;
   propagated_decay_factor: PropagatedDecayFactor;
@@ -15014,7 +15050,7 @@ export interface DefeasibleCascadeEvent {
  * MCP ROUTING TRIGGERS: Macaroons, Delegation Chain, Public Key Infrastructure, Object Capability Model, Decentralized Identifiers
  */
 export interface DelegatedCapabilityManifest {
-  tenant_cid?: TenantCid287;
+  tenant_cid?: TenantCid288;
   capability_cid: CapabilityCid2;
   /**
    * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
@@ -15040,7 +15076,7 @@ export interface DelegatedCapabilityManifest {
  * MCP ROUTING TRIGGERS: Satisfiability Modulo Theories, Neurosymbolic Relaxation, Differentiable Theorem Proving, Probabilistic Logic Networks, Continuous Penalty
  */
 export interface DifferentiableLogicPolicy {
-  tenant_cid?: TenantCid288;
+  tenant_cid?: TenantCid289;
   constraint_cid: ConstraintCid;
   formal_syntax_smt: FormalSyntaxSmt;
   relaxation_epsilon: RelaxationEpsilon;
@@ -15064,7 +15100,7 @@ export interface DifferentiableLogicPolicy {
  * MCP ROUTING TRIGGERS: Probability Density Function, Bayesian Inference, Stochastic Geometry, Parametric Distribution, Variance Bounding
  */
 export interface DistributionProfile {
-  tenant_cid?: TenantCid289;
+  tenant_cid?: TenantCid290;
   /**
    * The mathematical shape of the probability density function.
    */
@@ -15093,7 +15129,7 @@ export interface DistributionProfile {
  * Sort, Referential Integrity, Spatial Reading Order
  */
 export interface DocumentLayoutManifest {
-  tenant_cid?: TenantCid290;
+  tenant_cid?: TenantCid291;
   blocks: Blocks1;
   chronological_flow_edges?: ChronologicalFlowEdges;
 }
@@ -15123,7 +15159,7 @@ export interface Blocks1 {
  * Bellman Equation
  */
 export interface DynamicConvergenceSLA {
-  tenant_cid?: TenantCid291;
+  tenant_cid?: TenantCid292;
   convergence_delta_epsilon: ConvergenceDeltaEpsilon;
   lookback_window_steps: LookbackWindowSteps;
   minimum_reasoning_steps: MinimumReasoningSteps;
@@ -15140,7 +15176,7 @@ export interface DynamicConvergenceSLA {
  * MCP ROUTING TRIGGERS: Abstract Syntax Tree Validation, Zero-Trust UI Projection, Arbitrary Code Execution Prevention, Declarative Templating
  */
 export interface DynamicLayoutManifest {
-  tenant_cid?: TenantCid292;
+  tenant_cid?: TenantCid293;
   layout_tstring: LayoutTstring;
   max_ast_node_budget?: MaxAstNodeBudget;
 }
@@ -15156,8 +15192,8 @@ export interface DynamicLayoutManifest {
  * MCP ROUTING TRIGGERS: Grammar of Graphics, Retinal Variables, UI Rendering, Semantic Zooming, Dynamic Manifold
  */
 export interface DynamicManifoldProjectionManifest1 {
-  tenant_cid?: TenantCid106;
-  topology_class?: TopologyClass53;
+  tenant_cid?: TenantCid107;
+  topology_class?: TopologyClass54;
   manifest_cid: ManifestCid1;
   active_forge_cid: ActiveForgeCid;
   ast_gradient_visual_mapping: GrammarPanelProfile;
@@ -15179,7 +15215,7 @@ export interface DynamicManifoldProjectionManifest1 {
  * MCP ROUTING TRIGGERS: Softmax Router Gate, Sparse Mixture of Experts, Conservation of Custody, Topos Theory, Spot Compute Allocation
  */
 export interface DynamicRoutingManifest {
-  tenant_cid?: TenantCid293;
+  tenant_cid?: TenantCid294;
   manifest_cid: ManifestCid3;
   artifact_profile: GlobalSemanticProfile;
   active_subgraphs: ActiveSubgraphs;
@@ -15190,7 +15226,7 @@ export interface DynamicRoutingManifest {
  * The semantic profile governing this route.
  */
 export interface GlobalSemanticProfile {
-  tenant_cid?: TenantCid294;
+  tenant_cid?: TenantCid295;
   artifact_event_cid: ArtifactEventCid2;
   detected_modalities: DetectedModalities;
   token_density: TokenDensity;
@@ -15219,7 +15255,7 @@ export interface BranchBudgetsMagnitude {
  * MCP ROUTING TRIGGERS: Ensemble Learning, Superposition Wave Collapse, Brier Score, Parallel Execution, Condorcet's Jury Theorem
  */
 export interface EnsembleTopologyProfile {
-  tenant_cid?: TenantCid295;
+  tenant_cid?: TenantCid296;
   concurrent_branch_cids: ConcurrentBranchCids;
   fusion_function: FusionFunction;
 }
@@ -15235,7 +15271,7 @@ export interface EnsembleTopologyProfile {
  * MCP ROUTING TRIGGERS: Dung's AAF, Defeasible Logic, Abstract Argumentation, Non-Monotonic Node, Grounded Extension Premise
  */
 export interface EpistemicArgumentClaimState {
-  tenant_cid?: TenantCid296;
+  tenant_cid?: TenantCid297;
   claim_cid: ClaimCid;
   proponent_cid: ProponentCid;
   text_chunk: TextChunk2;
@@ -15253,7 +15289,7 @@ export interface EpistemicArgumentClaimState {
  * MCP ROUTING TRIGGERS: Toulmin Model, Evidentiary Warrant, Inferential Bridge, Grounding Coordinate, Argumentation Theory
  */
 export interface EvidentiaryWarrantState {
-  tenant_cid?: TenantCid297;
+  tenant_cid?: TenantCid298;
   source_event_cid?: SourceEventCid2;
   source_semantic_node_cid?: SourceSemanticNodeCid;
   justification: Justification19;
@@ -15270,7 +15306,7 @@ export interface EvidentiaryWarrantState {
  * MCP ROUTING TRIGGERS: Dung's AAF, Adjacency Matrix, Grounded Extension, State-Space Bounding, Dialectical Justification
  */
 export interface EpistemicArgumentGraphState {
-  tenant_cid?: TenantCid298;
+  tenant_cid?: TenantCid299;
   claims: Claims;
   attacks?: Attacks;
 }
@@ -15298,7 +15334,7 @@ export interface Attacks {
  * MCP ROUTING TRIGGERS: First-Order Logic, RDF Triple, Semantic Distillation, Causal Edge, Directed Graph
  */
 export interface EpistemicAxiomState {
-  tenant_cid?: TenantCid299;
+  tenant_cid?: TenantCid300;
   source_concept_cid: SourceConceptCid;
   directed_edge_class: DirectedEdgeClass;
   target_concept_cid: TargetConceptCid;
@@ -15315,7 +15351,7 @@ export interface EpistemicAxiomState {
  * MCP ROUTING TRIGGERS: Markov Blanket, Reachability Matrix, Abstract Argumentation, RFC 8785 Canonicalization, Graph Traversal
  */
 export interface EpistemicChainGraphState {
-  tenant_cid?: TenantCid300;
+  tenant_cid?: TenantCid301;
   chain_cid: ChainCid;
   syntactic_roots: SyntacticRoots;
   semantic_leaves: SemanticLeaves;
@@ -15341,7 +15377,7 @@ export interface EpistemicChainGraphState {
  * Semantic Compression, Multimodal Grounding, Autoencoder Distillation
  */
 export interface EpistemicCompressionSLA1 {
-  tenant_cid?: TenantCid86;
+  tenant_cid?: TenantCid87;
   strict_probability_retention?: StrictProbabilityRetention;
   max_allowed_entropy_loss: MaxAllowedEntropyLoss;
   required_grounding_density: RequiredGroundingDensity;
@@ -15367,7 +15403,7 @@ export interface EpistemicCompressionSLA1 {
  * Canonical Hashing, Knowledge Distillation
  */
 export interface EpistemicCurriculumManifest {
-  tenant_cid?: TenantCid301;
+  tenant_cid?: TenantCid302;
   curriculum_cid: CurriculumCid;
   tasks: Tasks;
 }
@@ -15392,7 +15428,7 @@ export interface EpistemicCurriculumManifest {
  * Reinforcement Learning, Dual Verification, Curry-Howard Correspondence
  */
 export interface EpistemicGroundedTaskManifest {
-  tenant_cid?: TenantCid302;
+  tenant_cid?: TenantCid303;
   task_cid: TaskCid7;
   topological_proof: EpistemicTopologicalProofManifest;
   vignette_payload: VignettePayload;
@@ -15403,7 +15439,7 @@ export interface EpistemicGroundedTaskManifest {
  * The underlying latent path.
  */
 export interface EpistemicTopologicalProofManifest {
-  tenant_cid?: TenantCid303;
+  tenant_cid?: TenantCid304;
   proof_cid: ProofCid;
   axiomatic_chain: AxiomaticChain;
 }
@@ -15427,7 +15463,7 @@ export interface EpistemicTopologicalProofManifest {
  * Latent Monologue, Verifiable Reasoning
  */
 export interface CognitiveReasoningTraceState1 {
-  tenant_cid?: TenantCid274;
+  tenant_cid?: TenantCid275;
   trace_cid: TraceCid1;
   source_proof_cid: SourceProofCid;
   token_length: TokenLength;
@@ -15453,7 +15489,7 @@ export interface CognitiveReasoningTraceState1 {
  * Cryptography, Symmetric Consensus, Zero-Trust Evaluation
  */
 export interface CognitiveDualVerificationReceipt1 {
-  tenant_cid?: TenantCid273;
+  tenant_cid?: TenantCid274;
   /**
    * A Decentralized Identifier (DID) representing a cryptographically accountable principal within the swarm.
    */
@@ -15476,7 +15512,7 @@ export interface CognitiveDualVerificationReceipt1 {
  * MCP ROUTING TRIGGERS: Formal Epistemology, Bounded Semilattice, Knowledge Graph Partition, Deterministic Alignment, Subdomain Projection
  */
 export interface EpistemicDomainGraphManifest {
-  tenant_cid?: TenantCid304;
+  tenant_cid?: TenantCid305;
   graph_cid: GraphCid1;
   verified_axioms: VerifiedAxioms;
 }
@@ -15492,7 +15528,7 @@ export interface EpistemicDomainGraphManifest {
  * MCP ROUTING TRIGGERS: System 2 Processing, Test-Time Compute, Shannon Entropy, Epistemic Escalation, Non-Monotonic Scaling
  */
 export interface EpistemicEscalationContract {
-  tenant_cid?: TenantCid305;
+  tenant_cid?: TenantCid306;
   baseline_entropy_threshold: BaselineEntropyThreshold;
   test_time_multiplier: TestTimeMultiplier;
   max_escalation_tiers: MaxEscalationTiers;
@@ -15513,7 +15549,7 @@ export interface EpistemicEscalationContract {
  * MCP ROUTING TRIGGERS: NeMo Guardrails, Colang, Reverse Proxy, Constitutional Alignment, Envoy Mesh
  */
 export interface EpistemicGuardrailsManifest {
-  tenant_cid?: TenantCid306;
+  tenant_cid?: TenantCid307;
   colang_version?: ColangVersion;
   colang_payload: ColangPayload;
   severity?: Severity;
@@ -15527,7 +15563,7 @@ export interface EpistemicGuardrailsManifest {
  * MCP ROUTING TRIGGERS: Coalgebraic Unfolding, Lazy Evaluation, State-Space Bounding, VRAM Exhaustion Prevention
  */
 export interface EpistemicHydrationPolicy {
-  tenant_cid?: TenantCid307;
+  tenant_cid?: TenantCid308;
   max_unfold_depth: MaxUnfoldDepth;
   lazy_fetch_timeout_ms: LazyFetchTimeoutMs;
   truncation_strategy: TruncationStrategy;
@@ -15544,7 +15580,7 @@ export interface EpistemicHydrationPolicy {
  * MCP ROUTING TRIGGERS: Event Sourcing, Sigstore, Rekor Transparency Log, Immutable Ledger, Truth Crystallization, Chronological Sort
  */
 export interface EpistemicLedgerState {
-  tenant_cid?: TenantCid308;
+  tenant_cid?: TenantCid309;
   history: History;
   defeasible_claims?: DefeasibleClaims;
   retracted_nodes?: RetractedNodes;
@@ -15592,7 +15628,7 @@ export interface DefeasibleClaims {
  * Restoration, Temporal Logic, O(1) Rollback
  */
 export interface TemporalCheckpointState {
-  tenant_cid?: TenantCid309;
+  tenant_cid?: TenantCid310;
   checkpoint_cid: CheckpointCid;
   ledger_index: LedgerIndex;
   state_hash: StateHash;
@@ -15615,7 +15651,7 @@ export interface TemporalCheckpointState {
  * MCP ROUTING TRIGGERS: Information Bottleneck, Ebbinghaus Forgetting Curve, Salience Decay, LRU Cache Eviction, Attention Dilution
  */
 export interface EvictionPolicy {
-  tenant_cid?: TenantCid310;
+  tenant_cid?: TenantCid311;
   strategy: Strategy1;
   max_retained_tokens: MaxRetainedTokens;
   protected_event_cids?: ProtectedEventCids;
@@ -15632,7 +15668,7 @@ export interface EvictionPolicy {
  * MCP ROUTING TRIGGERS: Truth Maintenance System, Non-Monotonic Logic, Defeasible Reasoning, Belief Revision, Causal Graph Ablation
  */
 export interface TruthMaintenancePolicy1 {
-  tenant_cid?: TenantCid145;
+  tenant_cid?: TenantCid146;
   decay_propagation_rate: DecayPropagationRate;
   epistemic_quarantine_threshold: EpistemicQuarantineThreshold;
   enforce_cross_agent_quarantine?: EnforceCrossAgentQuarantine;
@@ -15652,7 +15688,7 @@ export interface TruthMaintenancePolicy1 {
  * MCP ROUTING TRIGGERS: Zero-Trust Isolation, Symbolic Firewall, Epistemic Quarantine, OpenSymbolicAI Projection
  */
 export interface EpistemicProxyState {
-  tenant_cid?: TenantCid311;
+  tenant_cid?: TenantCid312;
   proxy_cid: ProxyCid1;
   structural_type: StructuralType1;
 }
@@ -15679,7 +15715,7 @@ export interface EpistemicProxyState {
  * of Mind, Volatile State Isolation, Semantic Sandbox
  */
 export interface EpistemicQuarantineSnapshot {
-  tenant_cid?: TenantCid312;
+  tenant_cid?: TenantCid313;
   system_prompt: SystemPrompt;
   active_context: ActiveContext;
   /**
@@ -15710,7 +15746,7 @@ export interface ActiveContext {
  * MCP ROUTING TRIGGERS: Bayesian Theory of Mind, Epistemic Logic, Cognitive Modeling, Common Knowledge, Multi-Agent Inference
  */
 export interface TheoryOfMindSnapshot {
-  tenant_cid?: TenantCid313;
+  tenant_cid?: TenantCid314;
   target_agent_cid: TargetAgentCid;
   assumed_shared_beliefs: AssumedSharedBeliefs;
   identified_knowledge_gaps: IdentifiedKnowledgeGaps;
@@ -15728,7 +15764,7 @@ export interface TheoryOfMindSnapshot {
  * MCP ROUTING TRIGGERS: Gibsonian Affordances, Bipartite Graph Projection, Action Space Manifold, RFC 8785 Canonicalization, Holographic Subgraph
  */
 export interface SpatialOntologicalSurfaceProjectionManifest {
-  tenant_cid?: TenantCid314;
+  tenant_cid?: TenantCid315;
   projection_cid: ProjectionCid1;
   action_spaces?: ActionSpaces;
   supported_personas?: SupportedPersonas;
@@ -15746,7 +15782,7 @@ export interface SpatialOntologicalSurfaceProjectionManifest {
  * MCP ROUTING TRIGGERS: Lazy Evaluation, Progressive Disclosure, Information Bottleneck, Discovery Surface, Epistemic Pointer
  */
 export interface ProceduralMetadataManifest {
-  tenant_cid?: TenantCid315;
+  tenant_cid?: TenantCid316;
   metadata_cid: MetadataCid;
   target_sop_cid: TargetSopCid;
   trigger_description: TriggerDescription;
@@ -15778,7 +15814,7 @@ export interface ProceduralMetadataManifest {
  * Topological Flow, Referential Integrity
  */
 export interface EpistemicSOPManifest {
-  tenant_cid?: TenantCid316;
+  tenant_cid?: TenantCid317;
   sop_cid: SopCid;
   /**
    * A deterministic cognitive routing boundary that defines the non-monotonic instruction set for the agent.
@@ -15813,7 +15849,7 @@ export interface StructuralGrammarHashes {
  * MCP ROUTING TRIGGERS: Process Reward Model, Beam Search Pruning, Latent Trajectory, State-Space Explosion, A* Search
  */
 export interface ProcessRewardContract {
-  tenant_cid?: TenantCid317;
+  tenant_cid?: TenantCid318;
   /**
    * The dynamic circuit breaker that halts the search when PRM variance converges, preventing VRAM waste.
    */
@@ -15834,7 +15870,7 @@ export interface ProcessRewardContract {
  * MCP ROUTING TRIGGERS: Sovereign Execution, Trusted Execution Environment, Egress Obfuscation, Mixnet Routing, Network Isolation
  */
 export interface EpistemicSecurityProfile1 {
-  tenant_cid?: TenantCid124;
+  tenant_cid?: TenantCid125;
   epistemic_security?: EpistemicSecurityPolicy;
   clearance_tiers?: ClearanceTiers;
   network_boundary?: NetworkBoundary;
@@ -15862,7 +15898,7 @@ export interface EpistemicSecurityProfile1 {
  * Sampling, Topological Diversity, Semantic Seeding
  */
 export interface EpistemicSeedInjectionPolicy {
-  tenant_cid?: TenantCid318;
+  tenant_cid?: TenantCid319;
   similarity_threshold_alpha: SimilarityThresholdAlpha;
   relation_diversity_bucket_size: RelationDiversityBucketSize;
 }
@@ -15878,7 +15914,7 @@ export interface EpistemicSeedInjectionPolicy {
  * MCP ROUTING TRIGGERS: Curry-Howard Correspondence, Constructive Proof, Topological Sort, Deductive Reasoning, Automated Theorem Proving
  */
 export interface EpistemicTopologicalProofManifest1 {
-  tenant_cid?: TenantCid303;
+  tenant_cid?: TenantCid304;
   proof_cid: ProofCid;
   axiomatic_chain: AxiomaticChain;
 }
@@ -15894,7 +15930,7 @@ export interface EpistemicTopologicalProofManifest1 {
  *     MCP ROUTING TRIGGERS: Reader Writer State Monad, Pure Functions, Envelope Functor, Execution Context, Algebraic Structures
  */
 export interface ExecutionEnvelopeState {
-  tenant_cid?: TenantCid319;
+  tenant_cid?: TenantCid320;
   trace_context: TraceContextState;
   state_vector: StateVectorProfile;
   payload: Payload3;
@@ -15903,7 +15939,7 @@ export interface ExecutionEnvelopeState {
  * Represents the Reader/Writer monad for causality and recursion.
  */
 export interface TraceContextState {
-  tenant_cid?: TenantCid320;
+  tenant_cid?: TenantCid321;
   trace_cid: TraceCid2;
   span_cid: SpanCid;
   parent_span_cid?: ParentSpanCid;
@@ -15913,7 +15949,7 @@ export interface TraceContextState {
  * Represents the State monad of Labeled Transition Systems.
  */
 export interface StateVectorProfile {
-  tenant_cid?: TenantCid321;
+  tenant_cid?: TenantCid322;
   immutable_matrix?: ImmutableMatrix;
   mutable_matrix?: MutableMatrix;
   is_delta?: IsDelta;
@@ -15952,7 +15988,7 @@ export interface Payload3 {
  * Safety Invariant, TLA+, Formal Methods
  */
 export interface FormalVerificationContract {
-  tenant_cid?: TenantCid322;
+  tenant_cid?: TenantCid323;
   proof_system: ProofSystem1;
   invariant_theorem: InvariantTheorem;
   compiled_proof_hash: CompiledProofHash;
@@ -15981,7 +16017,7 @@ export interface FormalVerificationContract {
  * Explosion, Fractal Graph Bounding, Gas Limit
  */
 export interface GenerativeManifoldSLA {
-  tenant_cid?: TenantCid323;
+  tenant_cid?: TenantCid324;
   max_topological_depth: MaxTopologicalDepth;
   max_node_fanout: MaxNodeFanout;
   max_synthetic_tokens: MaxSyntheticTokens;
@@ -15998,7 +16034,7 @@ export interface GenerativeManifoldSLA {
  * MCP ROUTING TRIGGERS: Structural Topology, Server-Driven UI, Geometric Schema, Ast Transformer, Sensory Mapping
  */
 export interface GeometricSchemaIntent {
-  tenant_cid?: TenantCid324;
+  tenant_cid?: TenantCid325;
   target_urn: TargetUrn1;
   nested_urns: NestedUrns;
   max_depth: MaxDepth1;
@@ -16026,7 +16062,7 @@ export interface GeometricSchemaIntent {
  * Bounding, ESG Constraint, Execution Envelope
  */
 export interface GlobalGovernancePolicy {
-  tenant_cid?: TenantCid325;
+  tenant_cid?: TenantCid326;
   mandatory_license_rule: EpistemicGuardrailsManifest1;
   max_budget_magnitude: MaxBudgetMagnitude1;
   /**
@@ -16057,7 +16093,7 @@ export interface GlobalGovernancePolicy {
  * MCP ROUTING TRIGGERS: NeMo Guardrails, Colang, Reverse Proxy, Constitutional Alignment, Envoy Mesh
  */
 export interface EpistemicGuardrailsManifest1 {
-  tenant_cid?: TenantCid306;
+  tenant_cid?: TenantCid307;
   colang_version?: ColangVersion;
   colang_payload: ColangPayload;
   severity?: Severity;
@@ -16071,7 +16107,7 @@ export interface EpistemicGuardrailsManifest1 {
  * MCP ROUTING TRIGGERS: Conflict Resolution, Graph CRDT, Merge Algebra, Eventual Consistency
  */
 export interface TemporalConflictResolutionPolicy {
-  tenant_cid?: TenantCid326;
+  tenant_cid?: TenantCid327;
   merge_algebra: MergeAlgebra;
   enforce_idempotence?: EnforceIdempotence;
 }
@@ -16087,7 +16123,7 @@ export interface TemporalConflictResolutionPolicy {
  *     MCP ROUTING TRIGGERS: Contextual Qualifiers, Topological Container, Semantic Invariant, Context Collapse
  */
 export interface GlobalSemanticInvariantProfile {
-  tenant_cid?: TenantCid327;
+  tenant_cid?: TenantCid328;
   invariant_cid: InvariantCid;
   categorical_cohorts?: CategoricalCohorts;
   operational_perimeters?: OperationalPerimeters;
@@ -16111,7 +16147,7 @@ export interface OperationalPerimeters {
  * MCP ROUTING TRIGGERS: Allen's Interval Algebra, Temporal Geometry, Chronological Bounding, Topological Time, State Transition
  */
 export interface TemporalBoundsProfile2 {
-  tenant_cid?: TenantCid189;
+  tenant_cid?: TenantCid190;
   valid_from: ValidFrom;
   valid_to?: ValidTo;
   /**
@@ -16134,7 +16170,7 @@ export interface TemporalBoundsProfile2 {
  * MCP ROUTING TRIGGERS: Structural Indexing, VRAM Budgeting, Representation Engineering, Modality Detection, RFC 8785 Canonicalization
  */
 export interface GlobalSemanticProfile1 {
-  tenant_cid?: TenantCid294;
+  tenant_cid?: TenantCid295;
   artifact_event_cid: ArtifactEventCid2;
   detected_modalities: DetectedModalities;
   token_density: TokenDensity;
@@ -16161,7 +16197,7 @@ export interface GlobalSemanticProfile1 {
  * Wide-Columnar Projection, Structural Serialization
  */
 export interface GraphFlatteningPolicy {
-  tenant_cid?: TenantCid328;
+  tenant_cid?: TenantCid329;
   node_projection_mode: NodeProjectionMode;
   edge_projection_mode: EdgeProjectionMode;
   preserve_cryptographic_lineage?: PreserveCryptographicLineage;
@@ -16178,7 +16214,7 @@ export interface GraphFlatteningPolicy {
  * MCP ROUTING TRIGGERS: OIDC, Zero-Trust Architecture, SPIFFE/SPIRE, Epistemic Quarantine, Identity Decoupling, Open Policy Agent
  */
 export interface IdentityContextProxy {
-  tenant_cid?: TenantCid329;
+  tenant_cid?: TenantCid330;
   jwt_payload: JwtPayload;
   execution_taint: ExecutionTaint;
 }
@@ -16206,7 +16242,7 @@ export interface JwtPayload {
  * Truth Maintenance, Fault Envelope
  */
 export interface JSONRPCErrorResponseState {
-  tenant_cid?: TenantCid330;
+  tenant_cid?: TenantCid331;
   jsonrpc: Jsonrpc3;
   error: JSONRPCErrorState;
   id?: Id3;
@@ -16215,7 +16251,7 @@ export interface JSONRPCErrorResponseState {
  * The error object.
  */
 export interface JSONRPCErrorState {
-  tenant_cid?: TenantCid331;
+  tenant_cid?: TenantCid332;
   code: Code;
   message: Message2;
   /**
@@ -16244,7 +16280,7 @@ export interface JSONRPCErrorState {
  * Log Poisoning, Stateful Rollback
  */
 export interface JSONRPCErrorState1 {
-  tenant_cid?: TenantCid331;
+  tenant_cid?: TenantCid332;
   code: Code;
   message: Message2;
   /**
@@ -16264,7 +16300,7 @@ export interface JSONRPCErrorState1 {
  * MCP ROUTING TRIGGERS: Zero-Allocation Telemetry, Struct of Arrays, High-Velocity Buffer, SE3 Delta, Kinematic Stream
  */
 export interface KinematicDeltaManifest {
-  tenant_cid?: TenantCid332;
+  tenant_cid?: TenantCid333;
   stream_cid: StreamCid1;
   deltas: Deltas;
 }
@@ -16280,7 +16316,7 @@ export interface KinematicDeltaManifest {
  * MCP ROUTING TRIGGERS: Optimal Stopping Theory, Simulated Annealing, Probability Wave Collapse, Exploration-Exploitation Dilemma, Kinetic Thermodynamics
  */
 export interface KineticBudgetPolicy {
-  tenant_cid?: TenantCid333;
+  tenant_cid?: TenantCid334;
   exploration_decay_curve: ExplorationDecayCurve;
   forced_exploitation_threshold_ms: ForcedExploitationThresholdMs;
   dynamic_temperature_asymptote: DynamicTemperatureAsymptote;
@@ -16297,7 +16333,7 @@ export interface KineticBudgetPolicy {
  * MCP ROUTING TRIGGERS: Zero-Trust Architecture, SPIFFE/SPIRE, Envoy Service Mesh, Least Privilege, RPC Firewall
  */
 export interface MCPCapabilityWhitelistPolicy1 {
-  tenant_cid?: TenantCid28;
+  tenant_cid?: TenantCid29;
   authorized_capability_array?: AuthorizedCapabilityArray;
   allowed_resources?: AllowedResources;
   allowed_prompts?: AllowedPrompts;
@@ -16315,7 +16351,7 @@ export interface MCPCapabilityWhitelistPolicy1 {
  * MCP ROUTING TRIGGERS: Higher-Order Function, Latent Prompt Manifold, Template Interpolation, Supply-Chain Verification, Stateless RPC
  */
 export interface MCPPromptReferenceState {
-  tenant_cid?: TenantCid334;
+  tenant_cid?: TenantCid335;
   server_cid: ServerCid1;
   prompt_name: PromptName;
   arguments?: Arguments;
@@ -16340,7 +16376,7 @@ export interface Arguments {
  * MCP ROUTING TRIGGERS: Resource Description Framework, Zero-Trust Perception, Epistemic Projection, Passive URI Mapping, Data Topography
  */
 export interface MCPResourceManifest {
-  tenant_cid?: TenantCid335;
+  tenant_cid?: TenantCid336;
   server_cid: ServerCid2;
   uris?: Uris;
 }
@@ -16356,7 +16392,7 @@ export interface MCPResourceManifest {
  * MCP ROUTING TRIGGERS: Cartesian Coordinate System, Small Multiples, Spatial Topology, Referential Integrity, Layout Matrix
  */
 export interface MacroGridProfile {
-  tenant_cid?: TenantCid336;
+  tenant_cid?: TenantCid337;
   layout_matrix: LayoutMatrix;
   column_fractional_weights?: ColumnFractionalWeights;
   row_fractional_weights?: RowFractionalWeights;
@@ -16374,7 +16410,7 @@ export interface MacroGridProfile {
  * MCP ROUTING TRIGGERS: Proof-of-Stake, Slashing Condition, Byzantine Fault Tolerance, Economic Escrow
  */
 export interface MarketContract {
-  tenant_cid?: TenantCid337;
+  tenant_cid?: TenantCid338;
   minimum_collateral: MinimumCollateral;
   slashing_penalty: SlashingPenalty;
 }
@@ -16390,7 +16426,7 @@ export interface MarketContract {
  * MCP ROUTING TRIGGERS: Genesis Block, Merkle-DAG, Content Addressable Storage, Cryptographic Anchoring, Unstructured Ingestion
  */
 export interface MultimodalArtifactReceipt {
-  tenant_cid?: TenantCid338;
+  tenant_cid?: TenantCid339;
   artifact_cid: ArtifactCid1;
   mime_type: MimeType;
   byte_stream_hash: ByteStreamHash;
@@ -16420,7 +16456,7 @@ export interface MultimodalArtifactReceipt {
  * Parameter Variance, Verifiable Random Function
  */
 export interface MutationPolicy1 {
-  tenant_cid?: TenantCid171;
+  tenant_cid?: TenantCid172;
   mutation_rate: MutationRate;
   temperature_shift_variance: TemperatureShiftVariance;
   /**
@@ -16448,7 +16484,7 @@ export interface MutationPolicy1 {
  * MCP ROUTING TRIGGERS: Tensor Calculus, Differential Geometry, Merkle Tree Verification, Zero-Trust Computing, Memory Allocation
  */
 export interface NDimensionalTensorManifest {
-  tenant_cid?: TenantCid339;
+  tenant_cid?: TenantCid340;
   structural_format: TensorStructuralFormatProfile;
   shape: Shape;
   vram_footprint_bytes: VramFootprintBytes;
@@ -16485,7 +16521,7 @@ export interface PermissionBoundaryPolicy1 {
  * MCP ROUTING TRIGGERS: Post-Quantum Cryptography, ML-DSA, SLH-DSA, Shor's Algorithm Resistance, Lattice-based Cryptography
  */
 export interface PostQuantumSignatureReceipt {
-  tenant_cid?: TenantCid340;
+  tenant_cid?: TenantCid341;
   pq_algorithm: PqAlgorithm;
   public_key_cid: PublicKeyCid1;
   pq_signature_blob: PqSignatureBlob;
@@ -16511,7 +16547,7 @@ export interface PostQuantumSignatureReceipt {
  * Binding, Structural Manifold Envelope, Human-in-the-Loop
  */
 export interface PresentationManifest {
-  tenant_cid?: TenantCid341;
+  tenant_cid?: TenantCid342;
   /**
    * The reason an agent is presenting this data to a human.
    */
@@ -16535,7 +16571,7 @@ export interface PresentationManifest {
  * MCP ROUTING TRIGGERS: Cartesian Coordinate System, Small Multiples, Spatial Topology, Referential Integrity, Layout Matrix
  */
 export interface MacroGridProfile1 {
-  tenant_cid?: TenantCid336;
+  tenant_cid?: TenantCid337;
   layout_matrix: LayoutMatrix;
   column_fractional_weights?: ColumnFractionalWeights;
   row_fractional_weights?: RowFractionalWeights;
@@ -16553,7 +16589,7 @@ export interface MacroGridProfile1 {
  * MCP ROUTING TRIGGERS: Supervisory Control Theory, MCTS Bending, Penalty Scalar, Trace Evaluation, Cognitive Engineering
  */
 export interface ReasoningEngineeringPolicy {
-  tenant_cid?: TenantCid342;
+  tenant_cid?: TenantCid343;
   telemetry_export_frequency_hz: TelemetryExportFrequencyHz;
   human_override_gradient: HumanOverrideGradient;
 }
@@ -16581,7 +16617,7 @@ export interface ReasoningEngineeringPolicy {
  * Triplet, Adjacency Matrix, Epistemic Link
  */
 export interface SemanticEdgeState {
-  tenant_cid?: TenantCid343;
+  tenant_cid?: TenantCid344;
   edge_cid: EdgeCid;
   subject_node_cid: SubjectNodeCid;
   object_node_cid: ObjectNodeCid;
@@ -16615,7 +16651,7 @@ export interface SemanticEdgeState {
  * MCP ROUTING TRIGGERS: Allen's Interval Algebra, Temporal Geometry, Chronological Bounding, Topological Time, State Transition
  */
 export interface TemporalBoundsProfile3 {
-  tenant_cid?: TenantCid189;
+  tenant_cid?: TenantCid190;
   valid_from: ValidFrom;
   valid_to?: ValidTo;
   /**
@@ -16638,7 +16674,7 @@ export interface TemporalBoundsProfile3 {
  * MCP ROUTING TRIGGERS: Sensory Ingestion Complete, Multimodal Payload, ASR Processing
  */
 export interface SensoryMultimodalCaptureEvent {
-  tenant_cid?: TenantCid344;
+  tenant_cid?: TenantCid345;
   captured_text?: CapturedText;
   captured_audio_urn?: CapturedAudioUrn;
 }
@@ -16654,7 +16690,7 @@ export interface SensoryMultimodalCaptureEvent {
  * MCP ROUTING TRIGGERS: Audio Capture, Multimodal Ingestion, ASR Transcription, Real-time Sensing
  */
 export interface SensoryMultimodalCaptureIntent {
-  tenant_cid?: TenantCid345;
+  tenant_cid?: TenantCid346;
   enable_audio_capture: EnableAudioCapture;
   enable_text_capture: EnableTextCapture;
   max_duration_seconds: MaxDurationSeconds;
@@ -16671,7 +16707,7 @@ export interface SensoryMultimodalCaptureIntent {
  * MCP ROUTING TRIGGERS: SSE Telemetry Event, Multimodal Broadcast, Active UI Synchronization
  */
 export interface SensoryMultimodalProjectionEvent {
-  tenant_cid?: TenantCid346;
+  tenant_cid?: TenantCid347;
   projected_avatar_urn?: ProjectedAvatarUrn;
   projected_audio_urn?: ProjectedAudioUrn;
   projected_overlay_text?: ProjectedOverlayText;
@@ -16688,7 +16724,7 @@ export interface SensoryMultimodalProjectionEvent {
  * MCP ROUTING TRIGGERS: Multimodal Projection, Avatar Rendering, TTS Output, Spatial Overlay
  */
 export interface SensoryMultimodalProjectionIntent {
-  tenant_cid?: TenantCid347;
+  tenant_cid?: TenantCid348;
   avatar_urn?: AvatarUrn;
   audio_tts_string?: AudioTtsString;
   audio_stream_urn?: AudioStreamUrn;
@@ -16706,7 +16742,7 @@ export interface SensoryMultimodalProjectionIntent {
  * MCP ROUTING TRIGGERS: SSE Telemetry Event, UI Optimization Notification, Zero-Trust Projection Update
  */
 export interface SensoryUIUpgradeAvailableEvent {
-  tenant_cid?: TenantCid348;
+  tenant_cid?: TenantCid349;
   available_upgrade_urn: AvailableUpgradeUrn;
   improvement_delta: ImprovementDelta;
 }
@@ -16722,7 +16758,7 @@ export interface SensoryUIUpgradeAvailableEvent {
  * MCP ROUTING TRIGGERS: TDA Optimization, Sensory Hot-Swap, AOT UI Upgrade, Epistemic Modality Shift
  */
 export interface SensoryUIUpgradeIntent {
-  tenant_cid?: TenantCid349;
+  tenant_cid?: TenantCid350;
   current_active_urn: CurrentActiveUrn;
   target_upgrade_urn: TargetUpgradeUrn;
   upgrade_rationale_score: UpgradeRationaleScore;
@@ -16762,7 +16798,7 @@ export interface SideEffectProfile1 {
  * Reduction, Probability Wave Collapse, Simulation Convergence
  */
 export interface SimulationConvergenceSLA1 {
-  tenant_cid?: TenantCid178;
+  tenant_cid?: TenantCid179;
   max_monte_carlo_rollouts: MaxMonteCarloRollouts;
   variance_tolerance: VarianceTolerance;
 }
@@ -16785,7 +16821,7 @@ export interface SimulationConvergenceSLA1 {
  * Cost, Sandbox Funding
  */
 export interface SimulationEscrowContract1 {
-  tenant_cid?: TenantCid242;
+  tenant_cid?: TenantCid243;
   locked_magnitude: LockedMagnitude;
 }
 /**
@@ -16809,7 +16845,7 @@ export interface SimulationEscrowContract1 {
  * Graph, Generative Taxonomy, Holographic Projection
  */
 export interface SpatialGenerativeTaxonomyManifest1 {
-  tenant_cid?: TenantCid47;
+  tenant_cid?: TenantCid48;
   manifest_cid: ManifestCid;
   root_node_cid: RootNodeCid;
   nodes: Nodes;
@@ -16826,7 +16862,7 @@ export interface SpatialGenerativeTaxonomyManifest1 {
  * MCP ROUTING TRIGGERS: Federated Pose Graph, Spatial Reference Frame, SLAM Anchor, Relative Coordinate Geometry, Origin Point
  */
 export interface SpatialReferenceFrameManifest {
-  tenant_cid?: TenantCid350;
+  tenant_cid?: TenantCid351;
   frame_cid: FrameCid;
   anchor_protocol: AnchorProtocol;
   physical_room_hash?: PhysicalRoomHash;
@@ -16852,7 +16888,7 @@ export interface SpatialReferenceFrameManifest {
  * Vector Clock, Eventual Consistency, Last-Writer-Wins
  */
 export interface StateDifferentialManifest {
-  tenant_cid?: TenantCid351;
+  tenant_cid?: TenantCid352;
   diff_cid: DiffCid1;
   author_node_cid: AuthorNodeCid1;
   lamport_timestamp: LamportTimestamp1;
@@ -16888,7 +16924,7 @@ export interface VectorClock1 {
  * Partitioning, VRAM Bounding, Serialization Geometry
  */
 export interface StateHydrationManifest {
-  tenant_cid?: TenantCid352;
+  tenant_cid?: TenantCid353;
   epistemic_coordinate: EpistemicCoordinate;
   crystallized_ledger_cids: CrystallizedLedgerCids;
   working_context_variables: WorkingContextVariables;
@@ -16916,7 +16952,7 @@ export interface WorkingContextVariables {
  *     MCP ROUTING TRIGGERS: Labeled Transition System, Markov Process, Full Observability, State Vector, Memory Boundary
  */
 export interface StateVectorProfile1 {
-  tenant_cid?: TenantCid321;
+  tenant_cid?: TenantCid322;
   immutable_matrix?: ImmutableMatrix;
   mutable_matrix?: MutableMatrix;
   is_delta?: IsDelta;
@@ -16930,8 +16966,8 @@ export interface StateVectorProfile1 {
  * MCP ROUTING TRIGGERS: Causal Inference, Structural Causal Models, PyWhy, Directed Acyclic Graph, causallearn
  */
 export interface StructuralCausalGraphProfile2 {
-  tenant_cid?: TenantCid258;
-  topology_class?: TopologyClass129;
+  tenant_cid?: TenantCid259;
+  topology_class?: TopologyClass130;
   edges?: Edges1;
   nodes?: Nodes13;
 }
@@ -16956,7 +16992,7 @@ export interface StructuralCausalGraphProfile2 {
  * Structural Entropy, Fuzzing Blueprint, Synthetic Permutation
  */
 export interface SyntheticGenerationProfile {
-  tenant_cid?: TenantCid353;
+  tenant_cid?: TenantCid354;
   profile_cid: ProfileCid;
   manifold_sla: GenerativeManifoldSLA1;
   target_schema_ref: TargetSchemaRef;
@@ -16981,7 +17017,7 @@ export interface SyntheticGenerationProfile {
  * Explosion, Fractal Graph Bounding, Gas Limit
  */
 export interface GenerativeManifoldSLA1 {
-  tenant_cid?: TenantCid323;
+  tenant_cid?: TenantCid324;
   max_topological_depth: MaxTopologicalDepth;
   max_node_fanout: MaxNodeFanout;
   max_synthetic_tokens: MaxSyntheticTokens;
@@ -16995,7 +17031,7 @@ export interface GenerativeManifoldSLA1 {
  * MCP ROUTING TRIGGERS: Observer Effect, Frustum Culling, Thermodynamic Flow Control, Telemetry Backpressure, Spatial Masking
  */
 export interface TelemetryBackpressureContract1 {
-  tenant_cid?: TenantCid153;
+  tenant_cid?: TenantCid154;
   focal_refresh_rate_hz: FocalRefreshRateHz;
   peripheral_refresh_rate_hz: PeripheralRefreshRateHz;
   occluded_refresh_rate_hz?: OccludedRefreshRateHz;
@@ -17016,7 +17052,7 @@ export interface TelemetryContextProfile1 {
  * MCP ROUTING TRIGGERS: Halting Problem, Recursion Boundary, Causal Depth, Compute Budget Decay, Structural Circuit Breaker
  */
 export interface TerminalConditionContract1 {
-  tenant_cid?: TenantCid266;
+  tenant_cid?: TenantCid267;
   max_causal_depth?: MaxCausalDepth;
   minimum_budget_magnitude?: MinimumBudgetMagnitude;
 }
@@ -17032,7 +17068,7 @@ export interface TerminalConditionContract1 {
  *     MCP ROUTING TRIGGERS: Data Fidelity, Density Calculation, Probability Space, Pre-Inference Validation, Completeness Score
  */
 export interface TopologicalFidelityReceipt1 {
-  tenant_cid?: TenantCid84;
+  tenant_cid?: TenantCid85;
   contextual_completeness_score: ContextualCompletenessScore;
   surrounding_token_density: SurroundingTokenDensity;
 }
@@ -17048,7 +17084,7 @@ export interface TopologicalFidelityReceipt1 {
  *     MCP ROUTING TRIGGERS: Distributed Causality, Vector Clocks, Trace Context, Topological Ordering, Causal Graph
  */
 export interface TraceContextState1 {
-  tenant_cid?: TenantCid320;
+  tenant_cid?: TenantCid321;
   trace_cid: TraceCid2;
   span_cid: SpanCid;
   parent_span_cid?: ParentSpanCid;
@@ -17066,7 +17102,7 @@ export interface TraceContextState1 {
  * MCP ROUTING TRIGGERS: Multi-Attribute Utility Theory, Pareto Efficiency, Variance Reduction, Fallback Superposition, Utility Routing
  */
 export interface UtilityJustificationGraphReceipt {
-  tenant_cid?: TenantCid354;
+  tenant_cid?: TenantCid355;
   optimizing_vectors?: OptimizingVectors;
   degrading_vectors?: DegradingVectors;
   superposition_variance_threshold: SuperpositionVarianceThreshold;
@@ -17099,7 +17135,7 @@ export interface DegradingVectors {
  * MCP ROUTING TRIGGERS: Viewport Projection Matrix, View Frustum, Field of View, Clipping Planes, Linear Algebraic Projection
  */
 export interface ViewportProjectionContract {
-  tenant_cid?: TenantCid355;
+  tenant_cid?: TenantCid356;
   projection_class: ProjectionClass;
   field_of_view_degrees?: FieldOfViewDegrees;
   clipping_plane_near: ClippingPlaneNear;
@@ -17117,7 +17153,7 @@ export interface ViewportProjectionContract {
  * MCP ROUTING TRIGGERS: Volumetric Boundary, Holographic Cage, Oriented Bounding Box, Spatial Kinematics, Collision Perimeter
  */
 export interface VolumetricBoundingProfile1 {
-  tenant_cid?: TenantCid155;
+  tenant_cid?: TenantCid156;
   center_transform: SE3TransformProfile3;
   extents_x: ExtentsX;
   extents_y: ExtentsY;
@@ -17135,7 +17171,7 @@ export interface VolumetricBoundingProfile1 {
  * MCP ROUTING TRIGGERS: Topos Theory, Cybernetics, Execution Envelope, Macroscopic Topology, Viable System Model
  */
 export interface WorkflowManifest {
-  tenant_cid?: TenantCid356;
+  tenant_cid?: TenantCid357;
   genesis_provenance: EpistemicProvenanceReceipt2;
   /**
    * An Immutable structural checkpoint.
@@ -17187,7 +17223,7 @@ export interface WorkflowManifest {
  * MCP ROUTING TRIGGERS: Data Provenance, Causal Tracing, Epistemic Anchoring, Bijective Mapping, Genesis Block
  */
 export interface EpistemicProvenanceReceipt2 {
-  tenant_cid?: TenantCid49;
+  tenant_cid?: TenantCid50;
   fidelity_receipt_hash?: FidelityReceiptHash;
   revision_loops_executed?: RevisionLoopsExecuted;
   /**
