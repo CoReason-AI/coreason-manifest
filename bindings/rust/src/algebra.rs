@@ -347,9 +347,7 @@ pub fn canonicalize_json_and_hash(val: &serde_json::Value) -> Result<(Vec<u8>, S
 #[pyfunction]
 #[pyo3(name = "canonicalize_json_and_hash")]
 pub fn py_canonicalize_json_and_hash(json_str: &str) -> PyResult<(Vec<u8>, String)> {
-    let val: serde_json::Value = serde_json::from_str(json_str).map_err(|e| {
-        pyo3::exceptions::PyValueError::new_err(format!("Invalid JSON: {}", e))
-    })?;
+    let val: serde_json::Value = serde_json::from_str(json_str)
+        .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("Invalid JSON: {}", e)))?;
     canonicalize_json_and_hash(&val).map_err(|e| pyo3::exceptions::PyValueError::new_err(e))
 }
-
