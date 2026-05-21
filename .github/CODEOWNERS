@@ -1,5 +1,8 @@
+# Default owners for all files
+* @gowthamrao
+
 # The God Context
-src/coreason_manifest/spec/ontology.py @CoReason-AI/core-architects
+src/coreason_manifest/spec/ontology.py @CoReason-AI/core-architects @gowthamrao
 
 # Architectural CI Gates (Universal Ontology Compiler)
-scripts/universal_ontology_compiler.py @CoReason-AI/core-architects
+scripts/universal_ontology_compiler.py @CoReason-AI/core-architects @gowthamrao
