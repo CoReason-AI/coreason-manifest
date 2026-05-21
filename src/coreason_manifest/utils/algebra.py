@@ -59,7 +59,7 @@ from coreason_manifest.spec.ontology import (
 
 _RUST_ALGEBRA: Any = None
 try:
-    from coreason_manifest import coreason_manifest_rust
+    from coreason_manifest import coreason_manifest_rust  # type: ignore[attr-defined]
 
     _RUST_ALGEBRA = coreason_manifest_rust
 except ImportError:
