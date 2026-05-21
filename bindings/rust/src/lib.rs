@@ -11,7 +11,10 @@ use pyo3::prelude::*;
 #[pymodule]
 fn coreason_manifest_rust(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(algebra::py_validate_ssrf_safety, m)?)?;
-    m.add_function(wrap_pyfunction!(algebra::py_compute_merkle_directory_cid, m)?)?;
+    m.add_function(wrap_pyfunction!(
+        algebra::py_compute_merkle_directory_cid,
+        m
+    )?)?;
     m.add_function(wrap_pyfunction!(algebra::py_calculate_latent_alignment, m)?)?;
     m.add_function(wrap_pyfunction!(algebra::py_compute_topology_hash, m)?)?;
     Ok(())
