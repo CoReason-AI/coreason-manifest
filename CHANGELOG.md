@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.94.2](https://github.com/CoReason-AI/coreason-manifest/compare/v0.94.1...v0.94.2) (2026-05-22)
+
+
+### Bug Fixes
+
+* **release:** test final auto-merge workflow v2 ([4ce25ce](https://github.com/CoReason-AI/coreason-manifest/commit/4ce25cefdfe29c6ee580fbd0afe15b3215f1b961))
+* **release:** test fromJSON merge logic ([8e5d746](https://github.com/CoReason-AI/coreason-manifest/commit/8e5d7464916dddcdf339744c55bce306dbae5078))
+* **release:** test robust auto-merge pipeline ([a94f45b](https://github.com/CoReason-AI/coreason-manifest/commit/a94f45bd9a4ebd6e53d9e114551dc80a1cf19fff))
+
 ## [0.94.1](https://github.com/CoReason-AI/coreason-manifest/compare/v0.94.0...v0.94.1) (2026-05-22)
 
 
