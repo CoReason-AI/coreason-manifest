@@ -121,6 +121,9 @@ Use the central workspace release manager to run coordinated tasks:
     python scripts/release_helper.py --tag <version> --repo <repo-name>
     ```
 
+    > [!IMPORTANT]
+    > **Release Please (Release Me) Only:** `coreason-infrastructure` uses Release Please exclusively for release orchestration. Direct local tag creation via the helper CLI and direct tag pushes to origin are blocked. Releases for this repository must be triggered by merging a Release Please PR.
+
 ---
 
 ## 6. Agent Boundary Constraints
@@ -130,3 +133,4 @@ AI agents operating in this workspace must strictly adhere to the following safe
 1.  **No Direct Registry Publishes:** Do not run commands that upload packages or images directly to registries (e.g. `npm publish`, `cargo publish`, `docker push`, `pypi publish`). All publishes must go through GitHub Actions triggered by tag merges.
 2.  **No Direct Workflow Modifications:** Do not modify `.github/workflows/` scripts unless specifically directed and approved.
 3.  **Strict Commit Conventions:** Use conventional commit formats (`feat(...)`, `fix(...)`, `chore(...)`) for all code modifications.
+4.  **Enforce Release Please for Infrastructure:** Do not attempt to bypass `release-please` for `coreason-infrastructure`. Any release tag must be generated via a merged Release Please pull request.
