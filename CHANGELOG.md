@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.94.5](https://github.com/CoReason-AI/coreason-manifest/compare/v0.94.4...v0.94.5) (2026-05-22)
+
+
+### Bug Fixes
+
+* **ci:** handle policy-blocked release-please merge gracefully ([c442a29](https://github.com/CoReason-AI/coreason-manifest/commit/c442a29722293ecdbc419f8ecfe2ebd054110e83))
+
 ## [0.94.4](https://github.com/CoReason-AI/coreason-manifest/compare/v0.94.3...v0.94.4) (2026-05-22)
 
 
