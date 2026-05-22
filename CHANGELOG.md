@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.94.3](https://github.com/CoReason-AI/coreason-manifest/compare/v0.94.2...v0.94.3) (2026-05-22)
+
+
+### Bug Fixes
+
+* **release:** prevent fromJSON parser error when release PR is empty ([7d05ed0](https://github.com/CoReason-AI/coreason-manifest/commit/7d05ed0bfd0d54e1d8ffa12d0e1df36c35b1a8f6))
+
 ## [0.94.2](https://github.com/CoReason-AI/coreason-manifest/compare/v0.94.1...v0.94.2) (2026-05-22)
 
 
