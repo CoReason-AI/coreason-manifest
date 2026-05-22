@@ -18,19 +18,88 @@ jobs:
         with:
           egress-policy: audit
 
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check Custom Release Commits
+        id: check-commits
+        run: |
+          python3 -c '
+          import subprocess
+          import re
+          import sys
+          import os
+          import json
+
+          config = {
+              "changelog-sections": [
+                  { "type": "feat", "section": "Features" },
+                  { "type": "feature", "section": "Features" },
+                  { "type": "fix", "section": "Bug Fixes" },
+                  { "type": "release", "section": "Releases", "hidden": False }
+              ]
+          }
+
+          try:
+              subprocess.run(["git", "fetch", "--tags"], check=False)
+              try:
+                  tag = subprocess.run(
+                      ["git", "describe", "--tags", "--abbrev=0"],
+                      stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True
+                  ).stdout.strip()
+              except Exception:
+                  tag = ""
+                  
+              if tag:
+                  print(f"Latest tag: {tag}")
+                  commits = subprocess.run(
+                      ["git", "log", f"{tag}..HEAD", "--oneline"],
+                      stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True
+                  ).stdout.strip().splitlines()
+                  print(f"Found {len(commits)} commits since {tag}")
+                  
+                  trigger_minor = False
+                  for commit in commits:
+                      parts = commit.split(" ", 1)
+                      if len(parts) < 2:
+                          continue
+                      msg = parts[1].strip().lower()
+                      if msg.startswith(("release:", "feature:", "release(", "feature(")):
+                          trigger_minor = True
+                          print(f"Found triggering commit: {commit}")
+                          break
+                          
+                  if trigger_minor:
+                      m = re.search(r"v?(\d+\.\d+\.\d+)", tag)
+                      if m:
+                          version_str = m.group(1)
+                          parts = version_str.split(".")
+                          major, minor, patch = int(parts[0]), int(parts[1]), int(parts[2])
+                          next_minor = f"{major}.{minor + 1}.0"
+                          print(f"Calculated next minor version: {next_minor}")
+                          config["release-as"] = next_minor
+                      else:
+                          print("Could not parse version from tag.")
+              else:
+                  print("No tags found.")
+          except Exception as e:
+              print(f"Error checking commits: {e}")
+          finally:
+              config_json = json.dumps(config)
+              print(f"Generated config overrides: {config_json}")
+              if "GITHUB_OUTPUT" in os.environ:
+                  with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+                      f.write(f"config_overrides={config_json}\n")
+          '
+
       - uses: googleapis/release-please-action@v4
         id: release
         with:
           token: ${{ secrets.GITOPS_PROMOTION_TOKEN || secrets.GITHUB_TOKEN }}
           release-type: python
-          config-overrides-json: |
-            {
-              "changelog-sections": [
-                { "type": "feat", "section": "Features" },
-                { "type": "fix", "section": "Bug Fixes" },
-                { "type": "release", "section": "Releases", "hidden": false }
-              ]
-            }
+          config-overrides-json: ${{ steps.check-commits.outputs.config_overrides }}
 
       - name: Enable Auto-Merge or Merge for Release PR
         if: ${{ steps.release.outputs.pr != '' && steps.release.outputs.pr != null }}
