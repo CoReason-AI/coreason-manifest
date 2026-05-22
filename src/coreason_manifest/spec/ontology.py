@@ -14953,6 +14953,12 @@ class OntologicalVocabularyLookupIntent(CoreasonBaseState):
     target_domains: Annotated[list[str], Field(description="List of target domain IDs to filter by")]
     max_results: Annotated[int, Field(description="Maximum results to return", gt=0, le=100)] = 10
 
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> "OntologicalVocabularyLookupIntent":
+        if self.target_domains is not None:
+            object.__setattr__(self, "target_domains", sorted(self.target_domains))
+        return self
+
 
 class OntologicalVocabularyLookupReceipt(CoreasonBaseState):
     """
@@ -14967,6 +14973,12 @@ class OntologicalVocabularyLookupReceipt(CoreasonBaseState):
     ]
     results: Annotated[list[ClinicalVocabularyMappingState], Field(description="Mapped vocabulary concepts")]
     duration_ms: Annotated[float, Field(description="Resolution duration in milliseconds", ge=0.0)]
+
+    @model_validator(mode="after")
+    def _enforce_canonical_sort(self) -> "OntologicalVocabularyLookupReceipt":
+        if self.results is not None:
+            object.__setattr__(self, "results", sorted(self.results, key=lambda x: x.target_concept_id))
+        return self
 
 
 ClinicalVocabularyMappingState.model_rebuild()
