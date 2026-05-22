@@ -23,3 +23,10 @@ jobs:
         with:
           token: ${{ secrets.GITOPS_PROMOTION_TOKEN || secrets.GHCR_PAT || secrets.GITHUB_TOKEN }}
           release-type: python
+
+      - name: Enable Auto-Merge for Release PR
+        if: ${{ steps.release.outputs.pr }}
+        run: |
+          gh pr merge "${{ steps.release.outputs.pr.number }}" --auto --merge
+        env:
+          GH_TOKEN: ${{ secrets.GITOPS_PROMOTION_TOKEN || secrets.GHCR_PAT || secrets.GITHUB_TOKEN }}
