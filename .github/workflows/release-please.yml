@@ -23,6 +23,14 @@ jobs:
         with:
           token: ${{ secrets.GITOPS_PROMOTION_TOKEN || secrets.GITHUB_TOKEN }}
           release-type: python
+          config-overrides-json: |
+            {
+              "changelog-sections": [
+                { "type": "feat", "section": "Features" },
+                { "type": "fix", "section": "Bug Fixes" },
+                { "type": "release", "section": "Releases", "hidden": false }
+              ]
+            }
 
       - name: Enable Auto-Merge or Merge for Release PR
         if: ${{ steps.release.outputs.pr != '' && steps.release.outputs.pr != null }}
