@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.94.1](https://github.com/CoReason-AI/coreason-manifest/compare/v0.94.0...v0.94.1) (2026-05-22)
+
+
+### Bug Fixes
+
+* **release:** test release-please auto-merge pipeline ([0f08d12](https://github.com/CoReason-AI/coreason-manifest/commit/0f08d12a2c0afcdc2d80646d3e046e699cee6fc6))
+
 ## [0.54.1](https://github.com/CoReason-AI/coreason-manifest/releases) (2026-05-13)
 
 
