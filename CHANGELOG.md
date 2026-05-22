@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.94.4](https://github.com/CoReason-AI/coreason-manifest/compare/v0.94.3...v0.94.4) (2026-05-22)
+
+
+### Bug Fixes
+
+* **ci:** remove GHCR_PAT fallback from release-please token ([fcfa201](https://github.com/CoReason-AI/coreason-manifest/commit/fcfa2011788a0e4d0c9d0d59c54cd3cb08e78038))
+
 ## [0.94.3](https://github.com/CoReason-AI/coreason-manifest/compare/v0.94.2...v0.94.3) (2026-05-22)
 
 
