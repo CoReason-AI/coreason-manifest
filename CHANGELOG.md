@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.94.6](https://github.com/CoReason-AI/coreason-manifest/compare/v0.94.5...v0.94.6) (2026-05-22)
+
+
+### Documentation
+
+* sync RELEASE.md with updated infrastructure release policy ([43cd4e3](https://github.com/CoReason-AI/coreason-manifest/commit/43cd4e3acf1e04415b4d6a75ec170b843bce0cab))
+
 ## [0.94.5](https://github.com/CoReason-AI/coreason-manifest/compare/v0.94.4...v0.94.5) (2026-05-22)
 
 
