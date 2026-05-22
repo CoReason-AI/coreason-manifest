@@ -2939,6 +2939,100 @@
       "title": "CircuitBreakerEvent",
       "type": "object"
     },
+    "ClinicalVocabularyMappingState": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Tracks the mapping validation between local clinical source codes and standardized OMOP vocabularies.\nCAUSAL AFFORDANCE: Permits semantic translation from high-entropy source records to standardized concept sets.\nEPISTEMIC BOUNDS: target_concept_id must be positive; confidence_score must reside within the closed interval [0.0, 1.0].\nMCP ROUTING TRIGGERS: OMOP CDM, Vocabulary Mapping, Health Informatics, SNOMED, LOINC, RxNorm",
+      "properties": {
+        "tenant_cid": {
+          "default": "889955217295c2bfef2d6812071b633b0819477e67f57853febf116f69f30531",
+          "description": "The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\"date_of_incorporation\":\"2025-10-16\",\"file_number\":\"10369312\",\"jurisdiction\":\"US-DE\",\"legal_name\":\"CoReason, Inc.\"}",
+          "maxLength": 128,
+          "minLength": 4,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Tenant Cid",
+          "type": "string"
+        },
+        "source_code": {
+          "description": "Local billing/EHR code",
+          "maxLength": 256,
+          "title": "Source Code",
+          "type": "string"
+        },
+        "source_vocabulary": {
+          "description": "The source vocabulary identifier",
+          "maxLength": 256,
+          "title": "Source Vocabulary",
+          "type": "string"
+        },
+        "target_concept_id": {
+          "description": "OMOP standard concept ID",
+          "exclusiveMinimum": 0,
+          "title": "Target Concept Id",
+          "type": "integer"
+        },
+        "target_concept_name": {
+          "description": "Preferred standard term",
+          "maxLength": 256,
+          "title": "Target Concept Name",
+          "type": "string"
+        },
+        "domain_id": {
+          "description": "OMOP domain identifier",
+          "enum": [
+            "Condition",
+            "Drug",
+            "Procedure",
+            "Measurement",
+            "Observation",
+            "Device"
+          ],
+          "title": "Domain Id",
+          "type": "string"
+        },
+        "mapping_status": {
+          "description": "Status of the concept mapping",
+          "enum": [
+            "APPROVED",
+            "PENDING_REVIEW",
+            "UNMAPPED"
+          ],
+          "title": "Mapping Status",
+          "type": "string"
+        },
+        "confidence_score": {
+          "description": "Confidence score of mapping",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence Score",
+          "type": "number"
+        },
+        "formal_backing_receipt_cid": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional cryptographic CID of formal backing receipt",
+          "title": "Formal Backing Receipt Cid"
+        }
+      },
+      "required": [
+        "source_code",
+        "source_vocabulary",
+        "target_concept_id",
+        "target_concept_name",
+        "domain_id",
+        "mapping_status",
+        "confidence_score"
+      ],
+      "title": "ClinicalVocabularyMappingState",
+      "type": "object"
+    },
     "CognitiveActionSpaceManifest": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the finite, discrete Markov Decision Process (MDP) Action Space and affordance landscape available to a specific execution node. As a ...Manifest suffix, this defines a frozen, N-dimensional coordinate state.\n\nCAUSAL AFFORDANCE: Projects the combined multi-dimensional matrix of capabilities into the agent's context, mathematically dictating which kinetic operations it can initiate via its `transition_matrix`. Optionally enforces kinetic separation.\n\nEPISTEMIC BOUNDS: The `action_space_cid` is geometrically constrained to a 128-char CID. A `@model_validator` strictly bounds the topology by enforcing uniqueness across all capability namespaces and ensures deterministic RFC 8785 representation by sorting the transition matrix.\n\nMCP ROUTING TRIGGERS: Markov Decision Process, Action Space, Affordance Theory, State Transition Matrix, Directed Cyclic Graph",
@@ -16861,6 +16955,91 @@
         "payload"
       ],
       "title": "ObservationEvent",
+      "type": "object"
+    },
+    "OntologicalVocabularyLookupIntent": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A request intent to perform lookup across clinical vocabularies.\nCAUSAL AFFORDANCE: Triggers the execution engine to traverse clinical ontology schemas and resolve standardized mappings.\nEPISTEMIC BOUNDS: max_results must be positive and bounded to prevent resource exhaustion.\nMCP ROUTING TRIGGERS: OMOP CDM, Vocabulary Lookup, Concept Resolution",
+      "properties": {
+        "tenant_cid": {
+          "default": "889955217295c2bfef2d6812071b633b0819477e67f57853febf116f69f30531",
+          "description": "The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\"date_of_incorporation\":\"2025-10-16\",\"file_number\":\"10369312\",\"jurisdiction\":\"US-DE\",\"legal_name\":\"CoReason, Inc.\"}",
+          "maxLength": 128,
+          "minLength": 4,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Tenant Cid",
+          "type": "string"
+        },
+        "query_term": {
+          "description": "Query term or source code to search for",
+          "maxLength": 1024,
+          "title": "Query Term",
+          "type": "string"
+        },
+        "target_domains": {
+          "description": "List of target domain IDs to filter by",
+          "items": {
+            "type": "string"
+          },
+          "title": "Target Domains",
+          "type": "array"
+        },
+        "max_results": {
+          "default": 10,
+          "description": "Maximum results to return",
+          "exclusiveMinimum": 0,
+          "maximum": 100,
+          "title": "Max Results",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "query_term",
+        "target_domains"
+      ],
+      "title": "OntologicalVocabularyLookupIntent",
+      "type": "object"
+    },
+    "OntologicalVocabularyLookupReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A frozen historical receipt of an ontological vocabulary lookup resolution.\nCAUSAL AFFORDANCE: Delivers standard mapped clinical concept states to the caller.\nEPISTEMIC BOUNDS: duration_ms must be non-negative.\nMCP ROUTING TRIGGERS: Vocabulary Resolution Receipt, Lookup Logging",
+      "properties": {
+        "tenant_cid": {
+          "default": "889955217295c2bfef2d6812071b633b0819477e67f57853febf116f69f30531",
+          "description": "The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\"date_of_incorporation\":\"2025-10-16\",\"file_number\":\"10369312\",\"jurisdiction\":\"US-DE\",\"legal_name\":\"CoReason, Inc.\"}",
+          "maxLength": 128,
+          "minLength": 4,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Tenant Cid",
+          "type": "string"
+        },
+        "lookup_intent_cid": {
+          "description": "Cryptographic CID of the triggering lookup intent",
+          "maxLength": 256,
+          "title": "Lookup Intent Cid",
+          "type": "string"
+        },
+        "results": {
+          "description": "Mapped vocabulary concepts",
+          "items": {
+            "$ref": "#/$defs/ClinicalVocabularyMappingState"
+          },
+          "title": "Results",
+          "type": "array"
+        },
+        "duration_ms": {
+          "description": "Resolution duration in milliseconds",
+          "minimum": 0.0,
+          "title": "Duration Ms",
+          "type": "number"
+        }
+      },
+      "required": [
+        "lookup_intent_cid",
+        "results",
+        "duration_ms"
+      ],
+      "title": "OntologicalVocabularyLookupReceipt",
       "type": "object"
     },
     "OpticalMappingContract": {

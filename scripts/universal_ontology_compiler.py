@@ -503,6 +503,9 @@ def evaluate_topological_reachability() -> None:
         "SensoryMultimodalProjectionEvent",
         "SensoryMultimodalCaptureIntent",
         "SensoryMultimodalCaptureEvent",
+        "ClinicalVocabularyMappingState",
+        "OntologicalVocabularyLookupIntent",
+        "OntologicalVocabularyLookupReceipt",
     ]
     reachable_indices = set()
     for root in root_nodes:
