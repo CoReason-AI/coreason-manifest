@@ -392,7 +392,8 @@ def compute_merkle_directory_cid(file_contents: dict[str, bytes]) -> str:
     file_hashes: list[str] = []
     for filename in sorted(file_contents.keys()):
         content = file_contents[filename]
-        if _is_text_bytes(content):
+        # ⚡ Bolt Optimization: Fast-path to avoid expensive UTF-8 decoding for files that don't contain \r\n
+        if b"\r\n" in content and _is_text_bytes(content):
             content = content.replace(b"\r\n", b"\n")
         file_hash = hashlib.sha256(content).hexdigest()
         file_hashes.append(f"{filename}:{file_hash}")
