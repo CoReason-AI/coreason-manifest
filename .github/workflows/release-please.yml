@@ -29,7 +29,8 @@ jobs:
         run: |
           gh pr merge "${{ fromJSON(steps.release.outputs.pr || '{}').number }}" --auto --merge --repo "${{ github.repository }}" || \
           gh pr merge "${{ fromJSON(steps.release.outputs.pr || '{}').number }}" --admin --merge --repo "${{ github.repository }}" || \
-          gh pr merge "${{ fromJSON(steps.release.outputs.pr || '{}').number }}" --merge --repo "${{ github.repository }}"
+          gh pr merge "${{ fromJSON(steps.release.outputs.pr || '{}').number }}" --merge --repo "${{ github.repository }}" || \
+          echo "PR auto-merge bypassed, will require manual review/merging"
         env:
           GH_TOKEN: ${{ secrets.GITOPS_PROMOTION_TOKEN || secrets.GITHUB_TOKEN }}
 
