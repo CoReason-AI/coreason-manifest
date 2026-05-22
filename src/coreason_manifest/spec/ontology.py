@@ -14780,7 +14780,7 @@ class GeometricSchemaIntent(CoreasonBaseState):
 
     target_urn: Annotated[str, Field(description="The primary target URN for this geometric schema.", max_length=256)]
     nested_urns: Annotated[
-        list[str], Field(description="The sorted array of nested child URNs in the geometric topology.", max_items=100)
+        list[str], Field(description="The sorted array of nested child URNs in the geometric topology.", max_length=100)
     ]
     max_depth: Annotated[
         int, Field(description="The maximum allowed recursion depth for topological unfolding.", ge=1, le=10)
