@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.94.12](https://github.com/CoReason-AI/coreason-manifest/compare/v0.94.11...v0.94.12) (2026-05-22)
+
+
+### Bug Fixes
+
+* **deps:** bump dependencies for synchronized release v0.94.12 ([f65246c](https://github.com/CoReason-AI/coreason-manifest/commit/f65246c094b4b6382d7f72732689dc575053721f))
+
 ## [0.94.11](https://github.com/CoReason-AI/coreason-manifest/compare/v0.94.10...v0.94.11) (2026-05-22)
 
 
