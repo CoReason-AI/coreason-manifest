@@ -25,6 +25,8 @@ graph TD
     SA["3d. coreason-sensory-app"] --> I
     
     SC["UI Primitives: coreason-sensory-core"] --> SA
+    
+    I --> INST["6. coreason-installer (Enclave Installer)"]
 ```
 
 ### Topological Cascade Rules:
@@ -36,7 +38,7 @@ graph TD
 ## 2. Versioning & Hook Validations
 
 ### Version Schemes:
-*   **VCS-Dynamic (Hatch/Python):** All Python packages (`coreason-manifest`, `coreason-urn-authority`, `coreason-runtime`, `coreason-ecosystem`, `coreason-meta-engineering`, `coreason-documentation`, `coreason-infrastructure`, `coreason-isv-admin`) resolve their versions dynamically from Git tags using `hatch-vcs`. They retrieve version at runtime using `importlib.metadata` with fallback `"0.0.0-dev"`.
+*   **VCS-Dynamic (Hatch/Python):** All Python packages (`coreason-manifest`, `coreason-urn-authority`, `coreason-runtime`, `coreason-ecosystem`, `coreason-meta-engineering`, `coreason-documentation`, `coreason-infrastructure`, `coreason-isv-admin`, `coreason-installer`) resolve their versions dynamically from Git tags using `hatch-vcs`. They retrieve version at runtime using `importlib.metadata` with fallback `"0.0.0-dev"`.
 *   **VCS-Dynamic (NPM/Node):** NPM packages (`coreason-sensory-app`, `coreason-sensory-core`, and `coreason-sensory-embed`) specify version `"0.0.0-dev"` in `package.json` in Git. The release/publishing workflows dynamically inject the tag version (e.g. `vX.Y.Z`) at build/publish time.
 
 ### Git Verification Hooks:
