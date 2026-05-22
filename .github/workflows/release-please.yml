@@ -21,7 +21,7 @@ jobs:
       - uses: googleapis/release-please-action@v4
         id: release
         with:
-          token: ${{ secrets.GITOPS_PROMOTION_TOKEN || secrets.GHCR_PAT || secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITOPS_PROMOTION_TOKEN || secrets.GITHUB_TOKEN }}
           release-type: python
 
       - name: Enable Auto-Merge or Merge for Release PR
@@ -31,5 +31,5 @@ jobs:
           gh pr merge "${{ fromJSON(steps.release.outputs.pr || '{}').number }}" --admin --merge --repo "${{ github.repository }}" || \
           gh pr merge "${{ fromJSON(steps.release.outputs.pr || '{}').number }}" --merge --repo "${{ github.repository }}"
         env:
-          GH_TOKEN: ${{ secrets.GITOPS_PROMOTION_TOKEN || secrets.GHCR_PAT || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITOPS_PROMOTION_TOKEN || secrets.GITHUB_TOKEN }}
 
