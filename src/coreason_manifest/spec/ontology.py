@@ -14556,6 +14556,10 @@ class CommercialOverrideReceipt(CoreasonBaseState):
         default=None,
         description="The zk-SNARK proof confirming possession of the authorized cluster hardware fingerprint without revealing the raw physical identifiers over the wire.",
     )
+    signature: str | None = Field(
+        default=None,
+        description="The cryptographic signature of the receipt.",
+    )
     issued_at_epoch: int = Field(
         ge=0,
         description="The POSIX timestamp (seconds since epoch) when this receipt was cryptographically issued by the gateway.",

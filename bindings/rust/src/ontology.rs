@@ -16378,6 +16378,18 @@ impl CommercialLicenseState {
 #[doc = "        \"private\""]
 #[doc = "      ]"]
 #[doc = "    },"]
+#[doc = "    \"signature\": {"]
+#[doc = "      \"title\": \"Signature\","]
+#[doc = "      \"description\": \"The cryptographic signature of the receipt.\","]
+#[doc = "      \"anyOf\": ["]
+#[doc = "        {"]
+#[doc = "          \"type\": \"string\""]
+#[doc = "        },"]
+#[doc = "        {"]
+#[doc = "          \"type\": \"null\""]
+#[doc = "        }"]
+#[doc = "      ]"]
+#[doc = "    },"]
 #[doc = "    \"signature_algorithm\": {"]
 #[doc = "      \"title\": \"Signature Algorithm\","]
 #[doc = "      \"description\": \"The cryptographic algorithm used for the signature. Defaults to NIST FIPS 204 post-quantum ML-DSA-65.\","]
@@ -16439,6 +16451,9 @@ pub struct CommercialOverrideReceipt {
     pub license_tier: LicenseTier,
     #[doc = "The network topology this receipt authorizes. 'public' = CoReason-managed network. 'private' = client-operated isolated network."]
     pub network_mode: NetworkMode,
+    #[doc = "The cryptographic signature of the receipt."]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub signature: ::std::option::Option<::std::string::String>,
     #[doc = "The cryptographic algorithm used for the signature. Defaults to NIST FIPS 204 post-quantum ML-DSA-65."]
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub signature_algorithm: ::std::option::Option<SignatureAlgorithm>,
@@ -90277,6 +90292,10 @@ pub mod builder {
         issued_at_epoch: ::std::result::Result<u64, ::std::string::String>,
         license_tier: ::std::result::Result<super::LicenseTier, ::std::string::String>,
         network_mode: ::std::result::Result<super::NetworkMode, ::std::string::String>,
+        signature: ::std::result::Result<
+            ::std::option::Option<::std::string::String>,
+            ::std::string::String,
+        >,
         signature_algorithm: ::std::result::Result<
             ::std::option::Option<super::SignatureAlgorithm>,
             ::std::string::String,
@@ -90299,6 +90318,7 @@ pub mod builder {
                 issued_at_epoch: Err("no value supplied for issued_at_epoch".to_string()),
                 license_tier: Err("no value supplied for license_tier".to_string()),
                 network_mode: Err("no value supplied for network_mode".to_string()),
+                signature: Ok(Default::default()),
                 signature_algorithm: Ok(Default::default()),
                 signer_did: Err("no value supplied for signer_did".to_string()),
                 tenant_cid: Ok(Default::default()),
@@ -90416,6 +90436,16 @@ pub mod builder {
                 .map_err(|e| format!("error converting supplied value for network_mode: {e}"));
             self
         }
+        pub fn signature<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<::std::string::String>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.signature = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for signature: {e}"));
+            self
+        }
         pub fn signature_algorithm<T>(mut self, value: T) -> Self
         where
             T: ::std::convert::TryInto<::std::option::Option<super::SignatureAlgorithm>>,
@@ -90464,6 +90494,7 @@ pub mod builder {
                 issued_at_epoch: value.issued_at_epoch?,
                 license_tier: value.license_tier?,
                 network_mode: value.network_mode?,
+                signature: value.signature?,
                 signature_algorithm: value.signature_algorithm?,
                 signer_did: value.signer_did?,
                 tenant_cid: value.tenant_cid?,
@@ -90484,6 +90515,7 @@ pub mod builder {
                 issued_at_epoch: Ok(value.issued_at_epoch),
                 license_tier: Ok(value.license_tier),
                 network_mode: Ok(value.network_mode),
+                signature: Ok(value.signature),
                 signature_algorithm: Ok(value.signature_algorithm),
                 signer_did: Ok(value.signer_did),
                 tenant_cid: Ok(value.tenant_cid),

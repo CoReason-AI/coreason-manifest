@@ -347,6 +347,17 @@ def calculate_latent_alignment(
     return similarity
 
 
+def _is_text_bytes(data: bytes) -> bool:
+    """Check if the bytes contain no null bytes and decode cleanly to UTF-8."""
+    if b"\x00" in data:
+        return False
+    try:
+        data.decode("utf-8")
+        return True
+    except UnicodeDecodeError:
+        return False
+
+
 def compute_merkle_directory_cid(file_contents: dict[str, bytes]) -> str:
     """Compute a Merkle-style SHA-256 CID over a set of named files.
 
@@ -380,7 +391,10 @@ def compute_merkle_directory_cid(file_contents: dict[str, bytes]) -> str:
 
     file_hashes: list[str] = []
     for filename in sorted(file_contents.keys()):
-        file_hash = hashlib.sha256(file_contents[filename]).hexdigest()
+        content = file_contents[filename]
+        if _is_text_bytes(content):
+            content = content.replace(b"\r\n", b"\n")
+        file_hash = hashlib.sha256(content).hexdigest()
         file_hashes.append(f"{filename}:{file_hash}")
 
     merkle_input = "\n".join(file_hashes).encode("utf-8")

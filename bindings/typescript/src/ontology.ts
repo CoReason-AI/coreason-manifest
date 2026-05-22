@@ -5846,6 +5846,10 @@ export type DistrLicenseCid = string;
  */
 export type HardwareZkProof = string | null;
 /**
+ * The cryptographic signature of the receipt.
+ */
+export type Signature = string | null;
+/**
  * The POSIX timestamp (seconds since epoch) when this receipt was cryptographically issued by the gateway.
  */
 export type IssuedAtEpoch = number;
@@ -14842,6 +14846,7 @@ export interface CommercialOverrideReceipt {
   credential_format?: CredentialFormat;
   distr_license_cid: DistrLicenseCid;
   hardware_zk_proof?: HardwareZkProof;
+  signature?: Signature;
   issued_at_epoch: IssuedAtEpoch;
   expires_at_epoch: ExpiresAtEpoch;
   exp: Exp1;

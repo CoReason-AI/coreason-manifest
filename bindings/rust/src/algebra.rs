@@ -1,6 +1,12 @@
 // Copyright (c) 2026 CoReason, Inc
-// Licensed under the Prosperity Public License 3.0
-// https://github.com/CoReason-AI/coreason-manifest
+//
+// This software is proprietary and dual-licensed
+// Licensed under the Prosperity Public License 3.0 (the "License")
+// A copy of the license is available at <https://prosperitylicense.com/versions/3.0.0>
+// For details, see the LICENSE file
+// Commercial use beyond a 30-day trial requires a separate license
+//
+// Source Code: <https://github.com/CoReason-AI/coreason-runtime>
 
 use crate::ontology::{EpistemicOntologicalAlignmentPolicy, VectorEmbeddingState};
 use sha2::{Digest, Sha256};
@@ -140,16 +146,96 @@ fn is_global_ipv4(ipv4: &std::net::Ipv4Addr) -> bool {
     true
 }
 
-fn parse_packed_ipv4(s: &str) -> Option<std::net::Ipv4Addr> {
-    if let Ok(val) = s.parse::<u32>() {
-        return Some(std::net::Ipv4Addr::from(val));
+fn parse_part(part_str: &str) -> Option<u64> {
+    if part_str.is_empty() {
+        return None;
     }
-    if s.starts_with("0x") || s.starts_with("0X") {
-        if let Ok(val) = u32::from_str_radix(&s[2..], 16) {
-            return Some(std::net::Ipv4Addr::from(val));
+    if part_str.starts_with("0x") || part_str.starts_with("0X") {
+        u64::from_str_radix(&part_str[2..], 16).ok()
+    } else if part_str.starts_with('0') && part_str.len() > 1 {
+        u64::from_str_radix(part_str, 8).ok()
+    } else {
+        u64::from_str_radix(part_str, 10).ok()
+    }
+}
+
+fn parse_packed_ipv4(s: &str) -> Option<std::net::Ipv4Addr> {
+    let parts: Vec<&str> = s.split('.').collect();
+    if parts.is_empty() || parts.len() > 4 {
+        return None;
+    }
+
+    let mut parsed_parts = Vec::new();
+    for part in &parts {
+        if let Some(val) = parse_part(part) {
+            parsed_parts.push(val);
+        } else {
+            return None;
         }
     }
-    None
+
+    match parsed_parts.len() {
+        4 => {
+            if parsed_parts[0] <= 255
+                && parsed_parts[1] <= 255
+                && parsed_parts[2] <= 255
+                && parsed_parts[3] <= 255
+            {
+                Some(std::net::Ipv4Addr::new(
+                    parsed_parts[0] as u8,
+                    parsed_parts[1] as u8,
+                    parsed_parts[2] as u8,
+                    parsed_parts[3] as u8,
+                ))
+            } else {
+                None
+            }
+        }
+        3 => {
+            if parsed_parts[0] <= 255 && parsed_parts[1] <= 255 && parsed_parts[2] <= 65535 {
+                let p2_high = (parsed_parts[2] >> 8) as u8;
+                let p2_low = (parsed_parts[2] & 0xFF) as u8;
+                Some(std::net::Ipv4Addr::new(
+                    parsed_parts[0] as u8,
+                    parsed_parts[1] as u8,
+                    p2_high,
+                    p2_low,
+                ))
+            } else {
+                None
+            }
+        }
+        2 => {
+            if parsed_parts[0] <= 255 && parsed_parts[1] <= 16777215 {
+                let p1_high = (parsed_parts[1] >> 16) as u8;
+                let p1_mid = ((parsed_parts[1] >> 8) & 0xFF) as u8;
+                let p1_low = (parsed_parts[1] & 0xFF) as u8;
+                Some(std::net::Ipv4Addr::new(
+                    parsed_parts[0] as u8,
+                    p1_high,
+                    p1_mid,
+                    p1_low,
+                ))
+            } else {
+                None
+            }
+        }
+        1 => {
+            if parsed_parts[0] <= 4294967295 {
+                Some(std::net::Ipv4Addr::from(parsed_parts[0] as u32))
+            } else {
+                None
+            }
+        }
+        _ => None,
+    }
+}
+
+fn is_text_bytes(data: &[u8]) -> bool {
+    if data.contains(&0) {
+        return false;
+    }
+    std::str::from_utf8(data).is_ok()
 }
 
 /// Compute a Merkle-style SHA-256 CID over a set of named files.
@@ -161,8 +247,25 @@ pub fn compute_merkle_directory_cid(file_contents: &HashMap<String, Vec<u8>>) ->
     let mut file_hashes = Vec::new();
     for filename in sorted_keys {
         let content = &file_contents[filename];
+        let normalized_content = if is_text_bytes(content) {
+            let mut normalized = Vec::with_capacity(content.len());
+            let mut i = 0;
+            while i < content.len() {
+                if i + 1 < content.len() && content[i] == b'\r' && content[i + 1] == b'\n' {
+                    normalized.push(b'\n');
+                    i += 2;
+                } else {
+                    normalized.push(content[i]);
+                    i += 1;
+                }
+            }
+            std::borrow::Cow::Owned(normalized)
+        } else {
+            std::borrow::Cow::Borrowed(content.as_slice())
+        };
+
         let mut hasher = Sha256::new();
-        hasher.update(content);
+        hasher.update(&normalized_content);
         let hash_hex = hex::encode(hasher.finalize());
         file_hashes.push(format!("{}:{}", filename, hash_hex));
     }

@@ -4655,6 +4655,19 @@
           "description": "The zk-SNARK proof confirming possession of the authorized cluster hardware fingerprint without revealing the raw physical identifiers over the wire.",
           "title": "Hardware Zk Proof"
         },
+        "signature": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The cryptographic signature of the receipt.",
+          "title": "Signature"
+        },
         "issued_at_epoch": {
           "description": "The POSIX timestamp (seconds since epoch) when this receipt was cryptographically issued by the gateway.",
           "minimum": 0,
