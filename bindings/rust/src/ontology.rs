@@ -9588,6 +9588,133 @@ impl<'de> ::serde::Deserialize<'de> for ClassifiedIntent {
             })
     }
 }
+#[doc = "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Tracks the mapping validation between local clinical source codes and standardized OMOP vocabularies.\nCAUSAL AFFORDANCE: Permits semantic translation from high-entropy source records to standardized concept sets.\nEPISTEMIC BOUNDS: target_concept_id must be positive; confidence_score must reside within the closed interval [0.0, 1.0].\nMCP ROUTING TRIGGERS: OMOP CDM, Vocabulary Mapping, Health Informatics, SNOMED, LOINC, RxNorm"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"ClinicalVocabularyMappingState\","]
+#[doc = "  \"description\": \"CoReason Shared Kernel Ontology\\n\\nAGENT INSTRUCTION: Tracks the mapping validation between local clinical source codes and standardized OMOP vocabularies.\\nCAUSAL AFFORDANCE: Permits semantic translation from high-entropy source records to standardized concept sets.\\nEPISTEMIC BOUNDS: target_concept_id must be positive; confidence_score must reside within the closed interval [0.0, 1.0].\\nMCP ROUTING TRIGGERS: OMOP CDM, Vocabulary Mapping, Health Informatics, SNOMED, LOINC, RxNorm\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"confidence_score\","]
+#[doc = "    \"domain_id\","]
+#[doc = "    \"mapping_status\","]
+#[doc = "    \"source_code\","]
+#[doc = "    \"source_vocabulary\","]
+#[doc = "    \"target_concept_id\","]
+#[doc = "    \"target_concept_name\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"confidence_score\": {"]
+#[doc = "      \"title\": \"Confidence Score\","]
+#[doc = "      \"description\": \"Confidence score of mapping\","]
+#[doc = "      \"type\": \"number\","]
+#[doc = "      \"maximum\": 1.0,"]
+#[doc = "      \"minimum\": 0.0"]
+#[doc = "    },"]
+#[doc = "    \"domain_id\": {"]
+#[doc = "      \"title\": \"Domain Id\","]
+#[doc = "      \"description\": \"OMOP domain identifier\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"Condition\","]
+#[doc = "        \"Drug\","]
+#[doc = "        \"Procedure\","]
+#[doc = "        \"Measurement\","]
+#[doc = "        \"Observation\","]
+#[doc = "        \"Device\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"formal_backing_receipt_cid\": {"]
+#[doc = "      \"title\": \"Formal Backing Receipt Cid\","]
+#[doc = "      \"description\": \"Optional cryptographic CID of formal backing receipt\","]
+#[doc = "      \"anyOf\": ["]
+#[doc = "        {"]
+#[doc = "          \"type\": \"string\""]
+#[doc = "        },"]
+#[doc = "        {"]
+#[doc = "          \"type\": \"null\""]
+#[doc = "        }"]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"mapping_status\": {"]
+#[doc = "      \"title\": \"Mapping Status\","]
+#[doc = "      \"description\": \"Status of the concept mapping\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"APPROVED\","]
+#[doc = "        \"PENDING_REVIEW\","]
+#[doc = "        \"UNMAPPED\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"source_code\": {"]
+#[doc = "      \"title\": \"Source Code\","]
+#[doc = "      \"description\": \"Local billing/EHR code\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"maxLength\": 256"]
+#[doc = "    },"]
+#[doc = "    \"source_vocabulary\": {"]
+#[doc = "      \"title\": \"Source Vocabulary\","]
+#[doc = "      \"description\": \"The source vocabulary identifier\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"maxLength\": 256"]
+#[doc = "    },"]
+#[doc = "    \"target_concept_id\": {"]
+#[doc = "      \"title\": \"Target Concept Id\","]
+#[doc = "      \"description\": \"OMOP standard concept ID\","]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"exclusiveMinimum\": 0.0"]
+#[doc = "    },"]
+#[doc = "    \"target_concept_name\": {"]
+#[doc = "      \"title\": \"Target Concept Name\","]
+#[doc = "      \"description\": \"Preferred standard term\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"maxLength\": 256"]
+#[doc = "    },"]
+#[doc = "    \"tenant_cid\": {"]
+#[doc = "      \"title\": \"Tenant Cid\","]
+#[doc = "      \"description\": \"The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\\\"date_of_incorporation\\\":\\\"2025-10-16\\\",\\\"file_number\\\":\\\"10369312\\\",\\\"jurisdiction\\\":\\\"US-DE\\\",\\\"legal_name\\\":\\\"CoReason, Inc.\\\"}\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"maxLength\": 128,"]
+#[doc = "      \"minLength\": 4,"]
+#[doc = "      \"pattern\": \"^[a-zA-Z0-9_.:-]+$\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct ClinicalVocabularyMappingState {
+    #[doc = "Confidence score of mapping"]
+    pub confidence_score: f64,
+    #[doc = "OMOP domain identifier"]
+    pub domain_id: DomainId,
+    #[doc = "Optional cryptographic CID of formal backing receipt"]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub formal_backing_receipt_cid: ::std::option::Option<::std::string::String>,
+    #[doc = "Status of the concept mapping"]
+    pub mapping_status: MappingStatus,
+    #[doc = "Local billing/EHR code"]
+    pub source_code: SourceCode,
+    #[doc = "The source vocabulary identifier"]
+    pub source_vocabulary: SourceVocabulary,
+    #[doc = "OMOP standard concept ID"]
+    pub target_concept_id: ::std::num::NonZeroU64,
+    #[doc = "Preferred standard term"]
+    pub target_concept_name: TargetConceptName,
+    #[doc = "The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\"date_of_incorporation\":\"2025-10-16\",\"file_number\":\"10369312\",\"jurisdiction\":\"US-DE\",\"legal_name\":\"CoReason, Inc.\"}"]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub tenant_cid: ::std::option::Option<TenantCid>,
+}
+impl ClinicalVocabularyMappingState {
+    pub fn builder() -> builder::ClinicalVocabularyMappingState {
+        Default::default()
+    }
+}
 #[doc = "CoReason Shared Kernel Ontology\n\nUnified JSON Schema for the Coreason Manifest"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -9744,6 +9871,9 @@ impl<'de> ::serde::Deserialize<'de> for ClassifiedIntent {
 #[doc = "    },"]
 #[doc = "    \"CircuitBreakerEvent\": {"]
 #[doc = "      \"$ref\": \"#/$defs/CircuitBreakerEvent\""]
+#[doc = "    },"]
+#[doc = "    \"ClinicalVocabularyMappingState\": {"]
+#[doc = "      \"$ref\": \"#/$defs/ClinicalVocabularyMappingState\""]
 #[doc = "    },"]
 #[doc = "    \"CognitiveActionSpaceManifest\": {"]
 #[doc = "      \"$ref\": \"#/$defs/CognitiveActionSpaceManifest\""]
@@ -10398,6 +10528,12 @@ impl<'de> ::serde::Deserialize<'de> for ClassifiedIntent {
 #[doc = "    },"]
 #[doc = "    \"ObservationEvent\": {"]
 #[doc = "      \"$ref\": \"#/$defs/ObservationEvent\""]
+#[doc = "    },"]
+#[doc = "    \"OntologicalVocabularyLookupIntent\": {"]
+#[doc = "      \"$ref\": \"#/$defs/OntologicalVocabularyLookupIntent\""]
+#[doc = "    },"]
+#[doc = "    \"OntologicalVocabularyLookupReceipt\": {"]
+#[doc = "      \"$ref\": \"#/$defs/OntologicalVocabularyLookupReceipt\""]
 #[doc = "    },"]
 #[doc = "    \"OpticalMappingContract\": {"]
 #[doc = "      \"$ref\": \"#/$defs/OpticalMappingContract\""]
@@ -11099,6 +11235,12 @@ pub struct CoReasonSharedKernelOntology {
         skip_serializing_if = "::std::option::Option::is_none"
     )]
     pub circuit_breaker_event: ::std::option::Option<CircuitBreakerEvent>,
+    #[serde(
+        rename = "ClinicalVocabularyMappingState",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub clinical_vocabulary_mapping_state: ::std::option::Option<ClinicalVocabularyMappingState>,
     #[serde(
         rename = "CognitiveActionSpaceManifest",
         default,
@@ -12430,6 +12572,20 @@ pub struct CoReasonSharedKernelOntology {
     )]
     pub observation_event: ::std::option::Option<ObservationEvent>,
     #[serde(
+        rename = "OntologicalVocabularyLookupIntent",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub ontological_vocabulary_lookup_intent:
+        ::std::option::Option<OntologicalVocabularyLookupIntent>,
+    #[serde(
+        rename = "OntologicalVocabularyLookupReceipt",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub ontological_vocabulary_lookup_receipt:
+        ::std::option::Option<OntologicalVocabularyLookupReceipt>,
+    #[serde(
         rename = "OpticalMappingContract",
         default,
         skip_serializing_if = "::std::option::Option::is_none"
@@ -13288,6 +13444,7 @@ impl ::std::default::Default for CoReasonSharedKernelOntology {
             causal_interval_profile: Default::default(),
             causal_propagation_intent: Default::default(),
             circuit_breaker_event: Default::default(),
+            clinical_vocabulary_mapping_state: Default::default(),
             cognitive_action_space_manifest: Default::default(),
             cognitive_agent_node_profile: Default::default(),
             cognitive_critique_profile: Default::default(),
@@ -13506,6 +13663,8 @@ impl ::std::default::Default for CoReasonSharedKernelOntology {
             node_cid_state: Default::default(),
             observability_lod_policy: Default::default(),
             observation_event: Default::default(),
+            ontological_vocabulary_lookup_intent: Default::default(),
+            ontological_vocabulary_lookup_receipt: Default::default(),
             optical_mapping_contract: Default::default(),
             optical_parsing_sla: Default::default(),
             optimization_direction_profile: Default::default(),
@@ -24641,6 +24800,94 @@ impl<'de> ::serde::Deserialize<'de> for DomHash {
             .map_err(|e: self::error::ConversionError| {
                 <D::Error as ::serde::de::Error>::custom(e.to_string())
             })
+    }
+}
+#[doc = "OMOP domain identifier"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"Domain Id\","]
+#[doc = "  \"description\": \"OMOP domain identifier\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"Condition\","]
+#[doc = "    \"Drug\","]
+#[doc = "    \"Procedure\","]
+#[doc = "    \"Measurement\","]
+#[doc = "    \"Observation\","]
+#[doc = "    \"Device\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum DomainId {
+    Condition,
+    Drug,
+    Procedure,
+    Measurement,
+    Observation,
+    Device,
+}
+impl ::std::fmt::Display for DomainId {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Condition => f.write_str("Condition"),
+            Self::Drug => f.write_str("Drug"),
+            Self::Procedure => f.write_str("Procedure"),
+            Self::Measurement => f.write_str("Measurement"),
+            Self::Observation => f.write_str("Observation"),
+            Self::Device => f.write_str("Device"),
+        }
+    }
+}
+impl ::std::str::FromStr for DomainId {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "Condition" => Ok(Self::Condition),
+            "Drug" => Ok(Self::Drug),
+            "Procedure" => Ok(Self::Procedure),
+            "Measurement" => Ok(Self::Measurement),
+            "Observation" => Ok(Self::Observation),
+            "Device" => Ok(Self::Device),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for DomainId {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for DomainId {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for DomainId {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
     }
 }
 #[doc = "The globally unique decentralized identifier (DID) anchoring the GuardrailViolationEvent that justified triggering this proposal."]
@@ -42590,6 +42837,76 @@ impl LogitSteganographyContract {
         Default::default()
     }
 }
+#[doc = "Cryptographic CID of the triggering lookup intent"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"Lookup Intent Cid\","]
+#[doc = "  \"description\": \"Cryptographic CID of the triggering lookup intent\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 256"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct LookupIntentCid(::std::string::String);
+impl ::std::ops::Deref for LookupIntentCid {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<LookupIntentCid> for ::std::string::String {
+    fn from(value: LookupIntentCid) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for LookupIntentCid {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 256usize {
+            return Err("longer than 256 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for LookupIntentCid {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for LookupIntentCid {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for LookupIntentCid {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for LookupIntentCid {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
 #[doc = "`LossyTranslationDivergenceItem`"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -43034,6 +43351,85 @@ impl ::std::convert::TryFrom<&::std::string::String> for ManifoldAlignmentMetric
     }
 }
 impl ::std::convert::TryFrom<::std::string::String> for ManifoldAlignmentMetricProfile {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "Status of the concept mapping"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"Mapping Status\","]
+#[doc = "  \"description\": \"Status of the concept mapping\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"APPROVED\","]
+#[doc = "    \"PENDING_REVIEW\","]
+#[doc = "    \"UNMAPPED\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum MappingStatus {
+    #[serde(rename = "APPROVED")]
+    Approved,
+    #[serde(rename = "PENDING_REVIEW")]
+    PendingReview,
+    #[serde(rename = "UNMAPPED")]
+    Unmapped,
+}
+impl ::std::fmt::Display for MappingStatus {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Approved => f.write_str("APPROVED"),
+            Self::PendingReview => f.write_str("PENDING_REVIEW"),
+            Self::Unmapped => f.write_str("UNMAPPED"),
+        }
+    }
+}
+impl ::std::str::FromStr for MappingStatus {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "APPROVED" => Ok(Self::Approved),
+            "PENDING_REVIEW" => Ok(Self::PendingReview),
+            "UNMAPPED" => Ok(Self::Unmapped),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for MappingStatus {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for MappingStatus {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for MappingStatus {
     type Error = self::error::ConversionError;
     fn try_from(
         value: ::std::string::String,
@@ -47346,6 +47742,139 @@ pub struct ObservationEvent {
 }
 impl ObservationEvent {
     pub fn builder() -> builder::ObservationEvent {
+        Default::default()
+    }
+}
+#[doc = "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A request intent to perform lookup across clinical vocabularies.\nCAUSAL AFFORDANCE: Triggers the execution engine to traverse clinical ontology schemas and resolve standardized mappings.\nEPISTEMIC BOUNDS: max_results must be positive and bounded to prevent resource exhaustion.\nMCP ROUTING TRIGGERS: OMOP CDM, Vocabulary Lookup, Concept Resolution"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"OntologicalVocabularyLookupIntent\","]
+#[doc = "  \"description\": \"CoReason Shared Kernel Ontology\\n\\nAGENT INSTRUCTION: A request intent to perform lookup across clinical vocabularies.\\nCAUSAL AFFORDANCE: Triggers the execution engine to traverse clinical ontology schemas and resolve standardized mappings.\\nEPISTEMIC BOUNDS: max_results must be positive and bounded to prevent resource exhaustion.\\nMCP ROUTING TRIGGERS: OMOP CDM, Vocabulary Lookup, Concept Resolution\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"query_term\","]
+#[doc = "    \"target_domains\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"max_results\": {"]
+#[doc = "      \"title\": \"Max Results\","]
+#[doc = "      \"description\": \"Maximum results to return\","]
+#[doc = "      \"type\": \"integer\","]
+#[doc = "      \"maximum\": 100.0,"]
+#[doc = "      \"exclusiveMinimum\": 0.0"]
+#[doc = "    },"]
+#[doc = "    \"query_term\": {"]
+#[doc = "      \"title\": \"Query Term\","]
+#[doc = "      \"description\": \"Query term or source code to search for\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"maxLength\": 1024"]
+#[doc = "    },"]
+#[doc = "    \"target_domains\": {"]
+#[doc = "      \"title\": \"Target Domains\","]
+#[doc = "      \"description\": \"List of target domain IDs to filter by\","]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"type\": \"string\""]
+#[doc = "      }"]
+#[doc = "    },"]
+#[doc = "    \"tenant_cid\": {"]
+#[doc = "      \"title\": \"Tenant Cid\","]
+#[doc = "      \"description\": \"The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\\\"date_of_incorporation\\\":\\\"2025-10-16\\\",\\\"file_number\\\":\\\"10369312\\\",\\\"jurisdiction\\\":\\\"US-DE\\\",\\\"legal_name\\\":\\\"CoReason, Inc.\\\"}\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"maxLength\": 128,"]
+#[doc = "      \"minLength\": 4,"]
+#[doc = "      \"pattern\": \"^[a-zA-Z0-9_.:-]+$\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct OntologicalVocabularyLookupIntent {
+    #[doc = "Maximum results to return"]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub max_results: ::std::option::Option<::std::num::NonZeroU64>,
+    #[doc = "Query term or source code to search for"]
+    pub query_term: QueryTerm,
+    #[doc = "List of target domain IDs to filter by"]
+    pub target_domains: ::std::vec::Vec<::std::string::String>,
+    #[doc = "The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\"date_of_incorporation\":\"2025-10-16\",\"file_number\":\"10369312\",\"jurisdiction\":\"US-DE\",\"legal_name\":\"CoReason, Inc.\"}"]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub tenant_cid: ::std::option::Option<TenantCid>,
+}
+impl OntologicalVocabularyLookupIntent {
+    pub fn builder() -> builder::OntologicalVocabularyLookupIntent {
+        Default::default()
+    }
+}
+#[doc = "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: A frozen historical receipt of an ontological vocabulary lookup resolution.\nCAUSAL AFFORDANCE: Delivers standard mapped clinical concept states to the caller.\nEPISTEMIC BOUNDS: duration_ms must be non-negative.\nMCP ROUTING TRIGGERS: Vocabulary Resolution Receipt, Lookup Logging"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"OntologicalVocabularyLookupReceipt\","]
+#[doc = "  \"description\": \"CoReason Shared Kernel Ontology\\n\\nAGENT INSTRUCTION: A frozen historical receipt of an ontological vocabulary lookup resolution.\\nCAUSAL AFFORDANCE: Delivers standard mapped clinical concept states to the caller.\\nEPISTEMIC BOUNDS: duration_ms must be non-negative.\\nMCP ROUTING TRIGGERS: Vocabulary Resolution Receipt, Lookup Logging\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"duration_ms\","]
+#[doc = "    \"lookup_intent_cid\","]
+#[doc = "    \"results\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"duration_ms\": {"]
+#[doc = "      \"title\": \"Duration Ms\","]
+#[doc = "      \"description\": \"Resolution duration in milliseconds\","]
+#[doc = "      \"type\": \"number\","]
+#[doc = "      \"minimum\": 0.0"]
+#[doc = "    },"]
+#[doc = "    \"lookup_intent_cid\": {"]
+#[doc = "      \"title\": \"Lookup Intent Cid\","]
+#[doc = "      \"description\": \"Cryptographic CID of the triggering lookup intent\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"maxLength\": 256"]
+#[doc = "    },"]
+#[doc = "    \"results\": {"]
+#[doc = "      \"title\": \"Results\","]
+#[doc = "      \"description\": \"Mapped vocabulary concepts\","]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/$defs/ClinicalVocabularyMappingState\""]
+#[doc = "      }"]
+#[doc = "    },"]
+#[doc = "    \"tenant_cid\": {"]
+#[doc = "      \"title\": \"Tenant Cid\","]
+#[doc = "      \"description\": \"The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\\\"date_of_incorporation\\\":\\\"2025-10-16\\\",\\\"file_number\\\":\\\"10369312\\\",\\\"jurisdiction\\\":\\\"US-DE\\\",\\\"legal_name\\\":\\\"CoReason, Inc.\\\"}\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"maxLength\": 128,"]
+#[doc = "      \"minLength\": 4,"]
+#[doc = "      \"pattern\": \"^[a-zA-Z0-9_.:-]+$\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct OntologicalVocabularyLookupReceipt {
+    #[doc = "Resolution duration in milliseconds"]
+    pub duration_ms: f64,
+    #[doc = "Cryptographic CID of the triggering lookup intent"]
+    pub lookup_intent_cid: LookupIntentCid,
+    #[doc = "Mapped vocabulary concepts"]
+    pub results: ::std::vec::Vec<ClinicalVocabularyMappingState>,
+    #[doc = "The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\"date_of_incorporation\":\"2025-10-16\",\"file_number\":\"10369312\",\"jurisdiction\":\"US-DE\",\"legal_name\":\"CoReason, Inc.\"}"]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub tenant_cid: ::std::option::Option<TenantCid>,
+}
+impl OntologicalVocabularyLookupReceipt {
+    pub fn builder() -> builder::OntologicalVocabularyLookupReceipt {
         Default::default()
     }
 }
@@ -52461,6 +52990,76 @@ impl ::std::convert::TryFrom<::std::string::String> for QueryIntentCid {
     }
 }
 impl<'de> ::serde::Deserialize<'de> for QueryIntentCid {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
+#[doc = "Query term or source code to search for"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"Query Term\","]
+#[doc = "  \"description\": \"Query term or source code to search for\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 1024"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct QueryTerm(::std::string::String);
+impl ::std::ops::Deref for QueryTerm {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<QueryTerm> for ::std::string::String {
+    fn from(value: QueryTerm) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for QueryTerm {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 1024usize {
+            return Err("longer than 1024 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for QueryTerm {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for QueryTerm {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for QueryTerm {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for QueryTerm {
     fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
     where
         D: ::serde::Deserializer<'de>,
@@ -59937,6 +60536,76 @@ impl<'de> ::serde::Deserialize<'de> for SourceClaimCid {
             })
     }
 }
+#[doc = "Local billing/EHR code"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"Source Code\","]
+#[doc = "  \"description\": \"Local billing/EHR code\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 256"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct SourceCode(::std::string::String);
+impl ::std::ops::Deref for SourceCode {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<SourceCode> for ::std::string::String {
+    fn from(value: SourceCode) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for SourceCode {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 256usize {
+            return Err("longer than 256 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for SourceCode {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for SourceCode {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for SourceCode {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for SourceCode {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
 #[doc = "The globally unique decentralized identifier (DID) anchoring the origin node."]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -61136,6 +61805,76 @@ impl ::std::convert::TryFrom<::std::string::String> for SourceVariable {
     }
 }
 impl<'de> ::serde::Deserialize<'de> for SourceVariable {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
+#[doc = "The source vocabulary identifier"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"Source Vocabulary\","]
+#[doc = "  \"description\": \"The source vocabulary identifier\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 256"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct SourceVocabulary(::std::string::String);
+impl ::std::ops::Deref for SourceVocabulary {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<SourceVocabulary> for ::std::string::String {
+    fn from(value: SourceVocabulary) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for SourceVocabulary {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 256usize {
+            return Err("longer than 256 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for SourceVocabulary {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for SourceVocabulary {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for SourceVocabulary {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for SourceVocabulary {
     fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
     where
         D: ::serde::Deserializer<'de>,
@@ -66770,6 +67509,76 @@ impl ::std::convert::TryFrom<::std::string::String> for TargetConceptCid {
     }
 }
 impl<'de> ::serde::Deserialize<'de> for TargetConceptCid {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
+#[doc = "Preferred standard term"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"Target Concept Name\","]
+#[doc = "  \"description\": \"Preferred standard term\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 256"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct TargetConceptName(::std::string::String);
+impl ::std::ops::Deref for TargetConceptName {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<TargetConceptName> for ::std::string::String {
+    fn from(value: TargetConceptName) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for TargetConceptName {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 256usize {
+            return Err("longer than 256 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for TargetConceptName {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for TargetConceptName {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for TargetConceptName {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for TargetConceptName {
     fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
     where
         D: ::serde::Deserializer<'de>,
@@ -80384,6 +81193,166 @@ pub mod builder {
         }
     }
     #[derive(Clone, Debug)]
+    pub struct ClinicalVocabularyMappingState {
+        confidence_score: ::std::result::Result<f64, ::std::string::String>,
+        domain_id: ::std::result::Result<super::DomainId, ::std::string::String>,
+        formal_backing_receipt_cid: ::std::result::Result<
+            ::std::option::Option<::std::string::String>,
+            ::std::string::String,
+        >,
+        mapping_status: ::std::result::Result<super::MappingStatus, ::std::string::String>,
+        source_code: ::std::result::Result<super::SourceCode, ::std::string::String>,
+        source_vocabulary: ::std::result::Result<super::SourceVocabulary, ::std::string::String>,
+        target_concept_id: ::std::result::Result<::std::num::NonZeroU64, ::std::string::String>,
+        target_concept_name: ::std::result::Result<super::TargetConceptName, ::std::string::String>,
+        tenant_cid:
+            ::std::result::Result<::std::option::Option<super::TenantCid>, ::std::string::String>,
+    }
+    impl ::std::default::Default for ClinicalVocabularyMappingState {
+        fn default() -> Self {
+            Self {
+                confidence_score: Err("no value supplied for confidence_score".to_string()),
+                domain_id: Err("no value supplied for domain_id".to_string()),
+                formal_backing_receipt_cid: Ok(Default::default()),
+                mapping_status: Err("no value supplied for mapping_status".to_string()),
+                source_code: Err("no value supplied for source_code".to_string()),
+                source_vocabulary: Err("no value supplied for source_vocabulary".to_string()),
+                target_concept_id: Err("no value supplied for target_concept_id".to_string()),
+                target_concept_name: Err("no value supplied for target_concept_name".to_string()),
+                tenant_cid: Ok(Default::default()),
+            }
+        }
+    }
+    impl ClinicalVocabularyMappingState {
+        pub fn confidence_score<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<f64>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.confidence_score = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for confidence_score: {e}"));
+            self
+        }
+        pub fn domain_id<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<super::DomainId>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.domain_id = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for domain_id: {e}"));
+            self
+        }
+        pub fn formal_backing_receipt_cid<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<::std::string::String>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.formal_backing_receipt_cid = value.try_into().map_err(|e| {
+                format!("error converting supplied value for formal_backing_receipt_cid: {e}")
+            });
+            self
+        }
+        pub fn mapping_status<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<super::MappingStatus>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.mapping_status = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for mapping_status: {e}"));
+            self
+        }
+        pub fn source_code<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<super::SourceCode>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.source_code = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for source_code: {e}"));
+            self
+        }
+        pub fn source_vocabulary<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<super::SourceVocabulary>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.source_vocabulary = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for source_vocabulary: {e}"));
+            self
+        }
+        pub fn target_concept_id<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::num::NonZeroU64>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.target_concept_id = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for target_concept_id: {e}"));
+            self
+        }
+        pub fn target_concept_name<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<super::TargetConceptName>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.target_concept_name = value.try_into().map_err(|e| {
+                format!("error converting supplied value for target_concept_name: {e}")
+            });
+            self
+        }
+        pub fn tenant_cid<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<super::TenantCid>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.tenant_cid = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for tenant_cid: {e}"));
+            self
+        }
+    }
+    impl ::std::convert::TryFrom<ClinicalVocabularyMappingState>
+        for super::ClinicalVocabularyMappingState
+    {
+        type Error = super::error::ConversionError;
+        fn try_from(
+            value: ClinicalVocabularyMappingState,
+        ) -> ::std::result::Result<Self, super::error::ConversionError> {
+            Ok(Self {
+                confidence_score: value.confidence_score?,
+                domain_id: value.domain_id?,
+                formal_backing_receipt_cid: value.formal_backing_receipt_cid?,
+                mapping_status: value.mapping_status?,
+                source_code: value.source_code?,
+                source_vocabulary: value.source_vocabulary?,
+                target_concept_id: value.target_concept_id?,
+                target_concept_name: value.target_concept_name?,
+                tenant_cid: value.tenant_cid?,
+            })
+        }
+    }
+    impl ::std::convert::From<super::ClinicalVocabularyMappingState>
+        for ClinicalVocabularyMappingState
+    {
+        fn from(value: super::ClinicalVocabularyMappingState) -> Self {
+            Self {
+                confidence_score: Ok(value.confidence_score),
+                domain_id: Ok(value.domain_id),
+                formal_backing_receipt_cid: Ok(value.formal_backing_receipt_cid),
+                mapping_status: Ok(value.mapping_status),
+                source_code: Ok(value.source_code),
+                source_vocabulary: Ok(value.source_vocabulary),
+                target_concept_id: Ok(value.target_concept_id),
+                target_concept_name: Ok(value.target_concept_name),
+                tenant_cid: Ok(value.tenant_cid),
+            }
+        }
+    }
+    #[derive(Clone, Debug)]
     pub struct CoReasonSharedKernelOntology {
         activation_steering_contract: ::std::result::Result<
             ::std::option::Option<super::ActivationSteeringContract>,
@@ -80577,6 +81546,10 @@ pub mod builder {
         >,
         circuit_breaker_event: ::std::result::Result<
             ::std::option::Option<super::CircuitBreakerEvent>,
+            ::std::string::String,
+        >,
+        clinical_vocabulary_mapping_state: ::std::result::Result<
+            ::std::option::Option<super::ClinicalVocabularyMappingState>,
             ::std::string::String,
         >,
         cognitive_action_space_manifest: ::std::result::Result<
@@ -81447,6 +82420,14 @@ pub mod builder {
             ::std::option::Option<super::ObservationEvent>,
             ::std::string::String,
         >,
+        ontological_vocabulary_lookup_intent: ::std::result::Result<
+            ::std::option::Option<super::OntologicalVocabularyLookupIntent>,
+            ::std::string::String,
+        >,
+        ontological_vocabulary_lookup_receipt: ::std::result::Result<
+            ::std::option::Option<super::OntologicalVocabularyLookupReceipt>,
+            ::std::string::String,
+        >,
         optical_mapping_contract: ::std::result::Result<
             ::std::option::Option<super::OpticalMappingContract>,
             ::std::string::String,
@@ -82030,6 +83011,7 @@ pub mod builder {
                 causal_interval_profile: Ok(Default::default()),
                 causal_propagation_intent: Ok(Default::default()),
                 circuit_breaker_event: Ok(Default::default()),
+                clinical_vocabulary_mapping_state: Ok(Default::default()),
                 cognitive_action_space_manifest: Ok(Default::default()),
                 cognitive_agent_node_profile: Ok(Default::default()),
                 cognitive_critique_profile: Ok(Default::default()),
@@ -82248,6 +83230,8 @@ pub mod builder {
                 node_cid_state: Ok(Default::default()),
                 observability_lod_policy: Ok(Default::default()),
                 observation_event: Ok(Default::default()),
+                ontological_vocabulary_lookup_intent: Ok(Default::default()),
+                ontological_vocabulary_lookup_receipt: Ok(Default::default()),
                 optical_mapping_contract: Ok(Default::default()),
                 optical_parsing_sla: Ok(Default::default()),
                 optimization_direction_profile: Ok(Default::default()),
@@ -82884,6 +83868,20 @@ pub mod builder {
         {
             self.circuit_breaker_event = value.try_into().map_err(|e| {
                 format!("error converting supplied value for circuit_breaker_event: {e}")
+            });
+            self
+        }
+        pub fn clinical_vocabulary_mapping_state<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<
+                ::std::option::Option<super::ClinicalVocabularyMappingState>,
+            >,
+            T::Error: ::std::fmt::Display,
+        {
+            self.clinical_vocabulary_mapping_state = value.try_into().map_err(|e| {
+                format!(
+                    "error converting supplied value for clinical_vocabulary_mapping_state: {e}"
+                )
             });
             self
         }
@@ -85141,6 +86139,30 @@ pub mod builder {
                 .map_err(|e| format!("error converting supplied value for observation_event: {e}"));
             self
         }
+        pub fn ontological_vocabulary_lookup_intent<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<
+                ::std::option::Option<super::OntologicalVocabularyLookupIntent>,
+            >,
+            T::Error: ::std::fmt::Display,
+        {
+            self.ontological_vocabulary_lookup_intent = value.try_into().map_err(|e| {
+                format!(
+                    "error converting supplied value for ontological_vocabulary_lookup_intent: {e}"
+                )
+            });
+            self
+        }
+        pub fn ontological_vocabulary_lookup_receipt<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<
+                ::std::option::Option<super::OntologicalVocabularyLookupReceipt>,
+            >,
+            T::Error: ::std::fmt::Display,
+        {
+            self . ontological_vocabulary_lookup_receipt = value . try_into () . map_err (| e | format ! ("error converting supplied value for ontological_vocabulary_lookup_receipt: {e}")) ;
+            self
+        }
         pub fn optical_mapping_contract<T>(mut self, value: T) -> Self
         where
             T: ::std::convert::TryInto<::std::option::Option<super::OpticalMappingContract>>,
@@ -86569,6 +87591,7 @@ pub mod builder {
                 causal_interval_profile: value.causal_interval_profile?,
                 causal_propagation_intent: value.causal_propagation_intent?,
                 circuit_breaker_event: value.circuit_breaker_event?,
+                clinical_vocabulary_mapping_state: value.clinical_vocabulary_mapping_state?,
                 cognitive_action_space_manifest: value.cognitive_action_space_manifest?,
                 cognitive_agent_node_profile: value.cognitive_agent_node_profile?,
                 cognitive_critique_profile: value.cognitive_critique_profile?,
@@ -86799,6 +87822,9 @@ pub mod builder {
                 node_cid_state: value.node_cid_state?,
                 observability_lod_policy: value.observability_lod_policy?,
                 observation_event: value.observation_event?,
+                ontological_vocabulary_lookup_intent: value.ontological_vocabulary_lookup_intent?,
+                ontological_vocabulary_lookup_receipt: value
+                    .ontological_vocabulary_lookup_receipt?,
                 optical_mapping_contract: value.optical_mapping_contract?,
                 optical_parsing_sla: value.optical_parsing_sla?,
                 optimization_direction_profile: value.optimization_direction_profile?,
@@ -86989,6 +88015,7 @@ pub mod builder {
                 causal_interval_profile: Ok(value.causal_interval_profile),
                 causal_propagation_intent: Ok(value.causal_propagation_intent),
                 circuit_breaker_event: Ok(value.circuit_breaker_event),
+                clinical_vocabulary_mapping_state: Ok(value.clinical_vocabulary_mapping_state),
                 cognitive_action_space_manifest: Ok(value.cognitive_action_space_manifest),
                 cognitive_agent_node_profile: Ok(value.cognitive_agent_node_profile),
                 cognitive_critique_profile: Ok(value.cognitive_critique_profile),
@@ -87231,6 +88258,10 @@ pub mod builder {
                 node_cid_state: Ok(value.node_cid_state),
                 observability_lod_policy: Ok(value.observability_lod_policy),
                 observation_event: Ok(value.observation_event),
+                ontological_vocabulary_lookup_intent: Ok(value.ontological_vocabulary_lookup_intent),
+                ontological_vocabulary_lookup_receipt: Ok(
+                    value.ontological_vocabulary_lookup_receipt
+                ),
                 optical_mapping_contract: Ok(value.optical_mapping_contract),
                 optical_parsing_sla: Ok(value.optical_parsing_sla),
                 optimization_direction_profile: Ok(value.optimization_direction_profile),
@@ -112767,6 +113798,187 @@ pub mod builder {
                 topology_class: Ok(value.topology_class),
                 triggering_invocation_cid: Ok(value.triggering_invocation_cid),
                 zk_proof: Ok(value.zk_proof),
+            }
+        }
+    }
+    #[derive(Clone, Debug)]
+    pub struct OntologicalVocabularyLookupIntent {
+        max_results: ::std::result::Result<
+            ::std::option::Option<::std::num::NonZeroU64>,
+            ::std::string::String,
+        >,
+        query_term: ::std::result::Result<super::QueryTerm, ::std::string::String>,
+        target_domains:
+            ::std::result::Result<::std::vec::Vec<::std::string::String>, ::std::string::String>,
+        tenant_cid:
+            ::std::result::Result<::std::option::Option<super::TenantCid>, ::std::string::String>,
+    }
+    impl ::std::default::Default for OntologicalVocabularyLookupIntent {
+        fn default() -> Self {
+            Self {
+                max_results: Ok(Default::default()),
+                query_term: Err("no value supplied for query_term".to_string()),
+                target_domains: Err("no value supplied for target_domains".to_string()),
+                tenant_cid: Ok(Default::default()),
+            }
+        }
+    }
+    impl OntologicalVocabularyLookupIntent {
+        pub fn max_results<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<::std::num::NonZeroU64>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.max_results = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for max_results: {e}"));
+            self
+        }
+        pub fn query_term<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<super::QueryTerm>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.query_term = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for query_term: {e}"));
+            self
+        }
+        pub fn target_domains<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::vec::Vec<::std::string::String>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.target_domains = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for target_domains: {e}"));
+            self
+        }
+        pub fn tenant_cid<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<super::TenantCid>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.tenant_cid = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for tenant_cid: {e}"));
+            self
+        }
+    }
+    impl ::std::convert::TryFrom<OntologicalVocabularyLookupIntent>
+        for super::OntologicalVocabularyLookupIntent
+    {
+        type Error = super::error::ConversionError;
+        fn try_from(
+            value: OntologicalVocabularyLookupIntent,
+        ) -> ::std::result::Result<Self, super::error::ConversionError> {
+            Ok(Self {
+                max_results: value.max_results?,
+                query_term: value.query_term?,
+                target_domains: value.target_domains?,
+                tenant_cid: value.tenant_cid?,
+            })
+        }
+    }
+    impl ::std::convert::From<super::OntologicalVocabularyLookupIntent>
+        for OntologicalVocabularyLookupIntent
+    {
+        fn from(value: super::OntologicalVocabularyLookupIntent) -> Self {
+            Self {
+                max_results: Ok(value.max_results),
+                query_term: Ok(value.query_term),
+                target_domains: Ok(value.target_domains),
+                tenant_cid: Ok(value.tenant_cid),
+            }
+        }
+    }
+    #[derive(Clone, Debug)]
+    pub struct OntologicalVocabularyLookupReceipt {
+        duration_ms: ::std::result::Result<f64, ::std::string::String>,
+        lookup_intent_cid: ::std::result::Result<super::LookupIntentCid, ::std::string::String>,
+        results: ::std::result::Result<
+            ::std::vec::Vec<super::ClinicalVocabularyMappingState>,
+            ::std::string::String,
+        >,
+        tenant_cid:
+            ::std::result::Result<::std::option::Option<super::TenantCid>, ::std::string::String>,
+    }
+    impl ::std::default::Default for OntologicalVocabularyLookupReceipt {
+        fn default() -> Self {
+            Self {
+                duration_ms: Err("no value supplied for duration_ms".to_string()),
+                lookup_intent_cid: Err("no value supplied for lookup_intent_cid".to_string()),
+                results: Err("no value supplied for results".to_string()),
+                tenant_cid: Ok(Default::default()),
+            }
+        }
+    }
+    impl OntologicalVocabularyLookupReceipt {
+        pub fn duration_ms<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<f64>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.duration_ms = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for duration_ms: {e}"));
+            self
+        }
+        pub fn lookup_intent_cid<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<super::LookupIntentCid>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.lookup_intent_cid = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for lookup_intent_cid: {e}"));
+            self
+        }
+        pub fn results<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::vec::Vec<super::ClinicalVocabularyMappingState>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.results = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for results: {e}"));
+            self
+        }
+        pub fn tenant_cid<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<super::TenantCid>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.tenant_cid = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for tenant_cid: {e}"));
+            self
+        }
+    }
+    impl ::std::convert::TryFrom<OntologicalVocabularyLookupReceipt>
+        for super::OntologicalVocabularyLookupReceipt
+    {
+        type Error = super::error::ConversionError;
+        fn try_from(
+            value: OntologicalVocabularyLookupReceipt,
+        ) -> ::std::result::Result<Self, super::error::ConversionError> {
+            Ok(Self {
+                duration_ms: value.duration_ms?,
+                lookup_intent_cid: value.lookup_intent_cid?,
+                results: value.results?,
+                tenant_cid: value.tenant_cid?,
+            })
+        }
+    }
+    impl ::std::convert::From<super::OntologicalVocabularyLookupReceipt>
+        for OntologicalVocabularyLookupReceipt
+    {
+        fn from(value: super::OntologicalVocabularyLookupReceipt) -> Self {
+            Self {
+                duration_ms: Ok(value.duration_ms),
+                lookup_intent_cid: Ok(value.lookup_intent_cid),
+                results: Ok(value.results),
+                tenant_cid: Ok(value.tenant_cid),
             }
         }
     }
