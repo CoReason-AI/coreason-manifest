@@ -127,9 +127,14 @@ jobs:
           cd bindings/typescript
           npm ci
           npm run build
-          # NOTE: npm provenance verification only supports public repositories.
-          # Re-enable when the repository is made public.
-          npm publish --access public --verbose
+          VERSION="${GITHUB_REF_NAME#v}"
+          if npm view "@coreason-ai/coreason-manifest@$VERSION" version >/dev/null 2>&1; then
+            echo "Version $VERSION already exists on the npm registry. Skipping publish."
+          else
+            # NOTE: npm provenance verification only supports public repositories.
+            # Re-enable when the repository is made public.
+            npm publish --access public --verbose
+          fi
 
   publish-crate:
     needs: release
