@@ -506,6 +506,10 @@ def evaluate_topological_reachability() -> None:
         "ClinicalVocabularyMappingState",
         "OntologicalVocabularyLookupIntent",
         "OntologicalVocabularyLookupReceipt",
+        "CausalRelationEdge",
+        "PolicyCoordinates",
+        "SpeculativeTokenNode",
+        "TransmutationReceipt",
     ]
     reachable_indices = set()
     for root in root_nodes:

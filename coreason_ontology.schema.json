@@ -2884,6 +2884,54 @@
       "title": "CausalPropagationIntent",
       "type": "object"
     },
+    "CausalRelationEdge": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Maps the causal relational directed edges inside the active topological DAG.\n\nCAUSAL AFFORDANCE: Enables do-calculus estimation and blast radius visualizations before performing node overrides.\n\nEPISTEMIC BOUNDS: Edges strictly map source and target CIDs and resolve relation typings under Pearl's SCM.\n\nMCP ROUTING TRIGGERS: Causal Graph Edge, Directed Relation, Do-Calculus Interaction, SCM Boundary",
+      "properties": {
+        "tenant_cid": {
+          "default": "889955217295c2bfef2d6812071b633b0819477e67f57853febf116f69f30531",
+          "description": "The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\"date_of_incorporation\":\"2025-10-16\",\"file_number\":\"10369312\",\"jurisdiction\":\"US-DE\",\"legal_name\":\"CoReason, Inc.\"}",
+          "maxLength": 128,
+          "minLength": 4,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Tenant Cid",
+          "type": "string"
+        },
+        "source_node_id": {
+          "description": "The source CID representing the causal parent.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Source Node Id",
+          "type": "string"
+        },
+        "target_node_id": {
+          "description": "The target CID representing the downstream dependent node.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Target Node Id",
+          "type": "string"
+        },
+        "relation_type": {
+          "description": "The Pearl SCM structural classification of the causal edge.",
+          "enum": [
+            "confounder",
+            "collider",
+            "direct_cause"
+          ],
+          "title": "Relation Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_node_id",
+        "target_node_id",
+        "relation_type"
+      ],
+      "title": "CausalRelationEdge",
+      "type": "object"
+    },
     "CircuitBreakerEvent": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements Lyapunov Stability and distributed Control Theory to guarantee that the neurosymbolic network returns to a deterministic equilibrium when facing catastrophic variance. As an ...Event suffix, this is a cryptographically frozen coordinate.\n\nCAUSAL AFFORDANCE: Physically severs the active execution thread for the targeted node, acting as a hardware guillotine that immediately halts out-of-memory cascades, runaway generative loops, or API rate-limit breaches.\n\nEPISTEMIC BOUNDS: The fault perimeter is mathematically restricted to a specific `target_node_cid` (`NodeCIDState`). To prevent log-poisoning and VRAM exhaustion during the crash, the `error_signature` is strictly clamped at `max_length=2000`.\n\nMCP ROUTING TRIGGERS: Lyapunov Stability, Control Theory, Circuit Breaker, Cascading Failure, State Equilibrium",
@@ -17504,6 +17552,47 @@
       "title": "PersistenceCommitReceipt",
       "type": "object"
     },
+    "PolicyCoordinates": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Declares the normalized coordinate metrics comparing expected human boundaries with active agent execution paths.\n\nCAUSAL AFFORDANCE: Empowers the EpistemicDeficitRadar to plot the Free Energy Gap divergence canvas.\n\nEPISTEMIC BOUNDS: All metric values are strictly clamped within the closed coordinate interval [0.0, 1.0].\n\nMCP ROUTING TRIGGERS: Policy Coordinates, Active Inference telemetry, Polar Radar Canvas, VFE Divergence",
+      "properties": {
+        "tenant_cid": {
+          "default": "889955217295c2bfef2d6812071b633b0819477e67f57853febf116f69f30531",
+          "description": "The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\"date_of_incorporation\":\"2025-10-16\",\"file_number\":\"10369312\",\"jurisdiction\":\"US-DE\",\"legal_name\":\"CoReason, Inc.\"}",
+          "maxLength": 128,
+          "minLength": 4,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Tenant Cid",
+          "type": "string"
+        },
+        "dimension_id": {
+          "description": "The unique identifier mapping the active inference dimension.",
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Dimension Id",
+          "type": "string"
+        },
+        "dimension_name": {
+          "description": "The human-readable label of the coordination axis.",
+          "title": "Dimension Name",
+          "type": "string"
+        },
+        "metric_value": {
+          "description": "The normalized value of the metric coordinate.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Metric Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "dimension_id",
+        "dimension_name",
+        "metric_value"
+      ],
+      "title": "PolicyCoordinates",
+      "type": "object"
+    },
     "PostCoordinatedSemanticState": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The definitive output of a successful latent manifold alignment. Represents a dynamic assembly of a standardized entity (Base Concept + Contextual Modifiers) to achieve infinite semantic specificity without requiring an infinitely large pre-coordinated vocabulary.\n\n    CAUSAL AFFORDANCE: Physically authorizes the orchestrator to assemble a standardized entity with contextual modifiers.\n\n    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.\n\n    MCP ROUTING TRIGGERS: Post-Coordinated Semantics, Latent Manifold Alignment, Semantic Specificity, Entity Assembly",
@@ -21038,6 +21127,81 @@
       "title": "SpeculativeExecutionPolicy",
       "type": "object"
     },
+    "SpeculativeTokenNode": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the speculative logit node contract representing token branches before validation target commitments.\n\nCAUSAL AFFORDANCE: Permits the visual renderer to draw predictive decay paths and transition committed logs.\n\nEPISTEMIC BOUNDS: The `logit_probability` is strictly clamped [0.0, 1.0]. The `token_id` must match `^tok_[a-zA-Z0-9_.-]+$`.\n\nMCP ROUTING TRIGGERS: Speculative Logits, Token Branch, SVG Decay, Visual Telemetry",
+      "properties": {
+        "tenant_cid": {
+          "default": "889955217295c2bfef2d6812071b633b0819477e67f57853febf116f69f30531",
+          "description": "The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\"date_of_incorporation\":\"2025-10-16\",\"file_number\":\"10369312\",\"jurisdiction\":\"US-DE\",\"legal_name\":\"CoReason, Inc.\"}",
+          "maxLength": 128,
+          "minLength": 4,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Tenant Cid",
+          "type": "string"
+        },
+        "token_id": {
+          "description": "The unique token logit identification string.",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^tok_[a-zA-Z0-9_.-]+$",
+          "title": "Token Id",
+          "type": "string"
+        },
+        "token_value": {
+          "description": "The decoded string value of the predicted token.",
+          "title": "Token Value",
+          "type": "string"
+        },
+        "logit_probability": {
+          "description": "The mathematical probability value of this logit node.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Logit Probability",
+          "type": "number"
+        },
+        "validation_status": {
+          "description": "The current evaluation state of the speculative logit.",
+          "enum": [
+            "speculative_draft",
+            "target_validated",
+            "target_rejected"
+          ],
+          "title": "Validation Status",
+          "type": "string"
+        },
+        "associated_urn": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional URN identifier associated with the generating model.",
+          "title": "Associated Urn"
+        },
+        "child_speculations": {
+          "description": "Topological child logit nodes in the prediction tree.",
+          "items": {
+            "$ref": "#/$defs/SpeculativeTokenNode"
+          },
+          "title": "Child Speculations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "token_id",
+        "token_value",
+        "logit_probability",
+        "validation_status"
+      ],
+      "title": "SpeculativeTokenNode",
+      "type": "object"
+    },
     "StateContract": {
       "additionalProperties": false,
       "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Implements a Cryptographic Tuple Space (Blackboard Pattern)\nserving as the strictly typed epistemic synchronization layer for multi-agent\nmanifolds. As a ...Contract suffix, this enforces rigid mathematical boundaries\nglobally.\n\nCAUSAL AFFORDANCE: Physically restricts all state mutations within the topology\nto conform to the explicit schema_definition (JSON Schema dict, key\nmax_length=255), acting as a deterministic Schema-on-Write validation gate.\n\nEPISTEMIC BOUNDS: The strict_validation boolean (default=True) acts as a\nphysical barrier against stochastic drift, forcing the orchestrator to reject\nany state mutation that fails the schema definition. Property names are capped\nat max_length=255 to prevent dictionary bombing.\n\nMCP ROUTING TRIGGERS: Tuple Space, Blackboard Architecture, Schema-on-Write,\nFinite State Automaton, Epistemic Synchronization",
@@ -23606,6 +23770,58 @@
         "compute_weight_magnitude"
       ],
       "title": "TransitionEdgeProfile",
+      "type": "object"
+    },
+    "TransmutationReceipt": {
+      "additionalProperties": false,
+      "description": "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents a cryptographically signed receipt of zk-SNARK attestation proof results and SD-JWT routing checks.\n\nCAUSAL AFFORDANCE: Updates the caging verification badge state on the Sensory Command Center from unverified to attested or forged.\n\nEPISTEMIC BOUNDS: Anchors transaction CIDs and requires hex-encoded proof receipts.\n\nMCP ROUTING TRIGGERS: Transmutation Receipt, zk-SNARK proof, SD-JWT attestation, Cryptographic Verification badge",
+      "properties": {
+        "tenant_cid": {
+          "default": "889955217295c2bfef2d6812071b633b0819477e67f57853febf116f69f30531",
+          "description": "The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\"date_of_incorporation\":\"2025-10-16\",\"file_number\":\"10369312\",\"jurisdiction\":\"US-DE\",\"legal_name\":\"CoReason, Inc.\"}",
+          "maxLength": 128,
+          "minLength": 4,
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "title": "Tenant Cid",
+          "type": "string"
+        },
+        "transaction_id": {
+          "description": "The unique cryptographic transaction CID.",
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Transaction Id",
+          "type": "string"
+        },
+        "originating_agent_urn": {
+          "description": "The sovereign URN of the agent executing the verified transaction.",
+          "maxLength": 256,
+          "title": "Originating Agent Urn",
+          "type": "string"
+        },
+        "zk_snark_proof_hex": {
+          "description": "The hex-encoded succinct proof attestation.",
+          "title": "Zk Snark Proof Hex",
+          "type": "string"
+        },
+        "sd_jwt_attestation_hash": {
+          "description": "The SHA-256 selectively disclosed credential receipt hash.",
+          "title": "Sd Jwt Attestation Hash",
+          "type": "string"
+        },
+        "verification_timestamp": {
+          "description": "The ISO-8601 formatted verification timestamp.",
+          "title": "Verification Timestamp",
+          "type": "string"
+        }
+      },
+      "required": [
+        "transaction_id",
+        "originating_agent_urn",
+        "zk_snark_proof_hex",
+        "sd_jwt_attestation_hash",
+        "verification_timestamp"
+      ],
+      "title": "TransmutationReceipt",
       "type": "object"
     },
     "TruthMaintenancePolicy": {
