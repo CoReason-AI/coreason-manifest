@@ -16557,7 +16557,8 @@ impl CommercialLicenseState {
 #[doc = "        \"Ed25519\","]
 #[doc = "        \"ML-DSA-44\","]
 #[doc = "        \"ML-DSA-65\","]
-#[doc = "        \"ML-DSA-87\""]
+#[doc = "        \"ML-DSA-87\","]
+#[doc = "        \"ES256\""]
 #[doc = "      ]"]
 #[doc = "    },"]
 #[doc = "    \"signer_did\": {"]
@@ -59511,7 +59512,8 @@ impl SideEffectProfile {
 #[doc = "    \"Ed25519\","]
 #[doc = "    \"ML-DSA-44\","]
 #[doc = "    \"ML-DSA-65\","]
-#[doc = "    \"ML-DSA-87\""]
+#[doc = "    \"ML-DSA-87\","]
+#[doc = "    \"ES256\""]
 #[doc = "  ]"]
 #[doc = "}"]
 #[doc = r" ```"]
@@ -59536,6 +59538,8 @@ pub enum SignatureAlgorithm {
     MlDsa65,
     #[serde(rename = "ML-DSA-87")]
     MlDsa87,
+    #[serde(rename = "ES256")]
+    Es256,
 }
 impl ::std::fmt::Display for SignatureAlgorithm {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
@@ -59544,6 +59548,7 @@ impl ::std::fmt::Display for SignatureAlgorithm {
             Self::MlDsa44 => f.write_str("ML-DSA-44"),
             Self::MlDsa65 => f.write_str("ML-DSA-65"),
             Self::MlDsa87 => f.write_str("ML-DSA-87"),
+            Self::Es256 => f.write_str("ES256"),
         }
     }
 }
@@ -59555,6 +59560,7 @@ impl ::std::str::FromStr for SignatureAlgorithm {
             "ML-DSA-44" => Ok(Self::MlDsa44),
             "ML-DSA-65" => Ok(Self::MlDsa65),
             "ML-DSA-87" => Ok(Self::MlDsa87),
+            "ES256" => Ok(Self::Es256),
             _ => Err("invalid value".into()),
         }
     }

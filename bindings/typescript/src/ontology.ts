@@ -5868,7 +5868,7 @@ export type SignerDid = string;
 /**
  * The cryptographic algorithm used for the signature. Defaults to NIST FIPS 204 post-quantum ML-DSA-65.
  */
-export type SignatureAlgorithm = "Ed25519" | "ML-DSA-44" | "ML-DSA-65" | "ML-DSA-87";
+export type SignatureAlgorithm = "Ed25519" | "ML-DSA-44" | "ML-DSA-65" | "ML-DSA-87" | "ES256";
 /**
  * The W3C VCDM v2.0 serialization format. 'sd-jwt' enables Selective Disclosure of entitlements.
  */
