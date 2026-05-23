@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.97.0](https://github.com/CoReason-AI/coreason-manifest/compare/v0.96.1...v0.97.0) (2026-05-23)
+
+
+### Features
+
+* **spec:** add visual telemetry contract schemas (SpeculativeTokenNode, PolicyCoordinates, CausalRelationEdge, TransmutationReceipt) (Issue [#348](https://github.com/CoReason-AI/coreason-manifest/issues/348)) ([482d809](https://github.com/CoReason-AI/coreason-manifest/commit/482d8097ab0f268d939d7e1505d7c4c0c3c6cd00))
+
 ## [0.96.1](https://github.com/CoReason-AI/coreason-manifest/compare/v0.96.0...v0.96.1) (2026-05-23)
 
 
