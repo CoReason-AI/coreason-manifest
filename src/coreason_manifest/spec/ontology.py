@@ -14792,7 +14792,9 @@ class SpeculativeTokenNode(CoreasonBaseState):
         default=None, description="Optional URN identifier associated with the generating model."
     )
     child_speculations: list[SpeculativeTokenNode] = Field(
-        default_factory=list, description="Topological child logit nodes in the prediction tree."
+        default_factory=list,
+        description="Topological child logit nodes in the prediction tree.",
+        json_schema_extra={"coreason_topological_exemption": True},
     )
 
 
