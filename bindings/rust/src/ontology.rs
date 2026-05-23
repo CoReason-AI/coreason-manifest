@@ -8642,6 +8642,78 @@ impl CausalPropagationIntent {
         Default::default()
     }
 }
+#[doc = "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Maps the causal relational directed edges inside the active topological DAG.\n\nCAUSAL AFFORDANCE: Enables do-calculus estimation and blast radius visualizations before performing node overrides.\n\nEPISTEMIC BOUNDS: Edges strictly map source and target CIDs and resolve relation typings under Pearl's SCM.\n\nMCP ROUTING TRIGGERS: Causal Graph Edge, Directed Relation, Do-Calculus Interaction, SCM Boundary"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"CausalRelationEdge\","]
+#[doc = "  \"description\": \"CoReason Shared Kernel Ontology\\n\\nAGENT INSTRUCTION: Maps the causal relational directed edges inside the active topological DAG.\\n\\nCAUSAL AFFORDANCE: Enables do-calculus estimation and blast radius visualizations before performing node overrides.\\n\\nEPISTEMIC BOUNDS: Edges strictly map source and target CIDs and resolve relation typings under Pearl's SCM.\\n\\nMCP ROUTING TRIGGERS: Causal Graph Edge, Directed Relation, Do-Calculus Interaction, SCM Boundary\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"relation_type\","]
+#[doc = "    \"source_node_id\","]
+#[doc = "    \"target_node_id\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"relation_type\": {"]
+#[doc = "      \"title\": \"Relation Type\","]
+#[doc = "      \"description\": \"The Pearl SCM structural classification of the causal edge.\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"confounder\","]
+#[doc = "        \"collider\","]
+#[doc = "        \"direct_cause\""]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"source_node_id\": {"]
+#[doc = "      \"title\": \"Source Node Id\","]
+#[doc = "      \"description\": \"The source CID representing the causal parent.\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"maxLength\": 128,"]
+#[doc = "      \"minLength\": 1,"]
+#[doc = "      \"pattern\": \"^[a-zA-Z0-9_.:-]+$\""]
+#[doc = "    },"]
+#[doc = "    \"target_node_id\": {"]
+#[doc = "      \"title\": \"Target Node Id\","]
+#[doc = "      \"description\": \"The target CID representing the downstream dependent node.\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"maxLength\": 128,"]
+#[doc = "      \"minLength\": 1,"]
+#[doc = "      \"pattern\": \"^[a-zA-Z0-9_.:-]+$\""]
+#[doc = "    },"]
+#[doc = "    \"tenant_cid\": {"]
+#[doc = "      \"title\": \"Tenant Cid\","]
+#[doc = "      \"description\": \"The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\\\"date_of_incorporation\\\":\\\"2025-10-16\\\",\\\"file_number\\\":\\\"10369312\\\",\\\"jurisdiction\\\":\\\"US-DE\\\",\\\"legal_name\\\":\\\"CoReason, Inc.\\\"}\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"maxLength\": 128,"]
+#[doc = "      \"minLength\": 4,"]
+#[doc = "      \"pattern\": \"^[a-zA-Z0-9_.:-]+$\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct CausalRelationEdge {
+    #[doc = "The Pearl SCM structural classification of the causal edge."]
+    pub relation_type: RelationType,
+    #[doc = "The source CID representing the causal parent."]
+    pub source_node_id: SourceNodeId,
+    #[doc = "The target CID representing the downstream dependent node."]
+    pub target_node_id: TargetNodeId,
+    #[doc = "The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\"date_of_incorporation\":\"2025-10-16\",\"file_number\":\"10369312\",\"jurisdiction\":\"US-DE\",\"legal_name\":\"CoReason, Inc.\"}"]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub tenant_cid: ::std::option::Option<TenantCid>,
+}
+impl CausalRelationEdge {
+    pub fn builder() -> builder::CausalRelationEdge {
+        Default::default()
+    }
+}
 #[doc = "The DoWhy directionality of the semantic relationship."]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -9869,6 +9941,9 @@ impl ClinicalVocabularyMappingState {
 #[doc = "    \"CausalPropagationIntent\": {"]
 #[doc = "      \"$ref\": \"#/$defs/CausalPropagationIntent\""]
 #[doc = "    },"]
+#[doc = "    \"CausalRelationEdge\": {"]
+#[doc = "      \"$ref\": \"#/$defs/CausalRelationEdge\""]
+#[doc = "    },"]
 #[doc = "    \"CircuitBreakerEvent\": {"]
 #[doc = "      \"$ref\": \"#/$defs/CircuitBreakerEvent\""]
 #[doc = "    },"]
@@ -10565,6 +10640,9 @@ impl ClinicalVocabularyMappingState {
 #[doc = "    \"PersistenceCommitReceipt\": {"]
 #[doc = "      \"$ref\": \"#/$defs/PersistenceCommitReceipt\""]
 #[doc = "    },"]
+#[doc = "    \"PolicyCoordinates\": {"]
+#[doc = "      \"$ref\": \"#/$defs/PolicyCoordinates\""]
+#[doc = "    },"]
 #[doc = "    \"PostCoordinatedSemanticState\": {"]
 #[doc = "      \"$ref\": \"#/$defs/PostCoordinatedSemanticState\""]
 #[doc = "    },"]
@@ -10748,6 +10826,9 @@ impl ClinicalVocabularyMappingState {
 #[doc = "    \"SpeculativeExecutionPolicy\": {"]
 #[doc = "      \"$ref\": \"#/$defs/SpeculativeExecutionPolicy\""]
 #[doc = "    },"]
+#[doc = "    \"SpeculativeTokenNode\": {"]
+#[doc = "      \"$ref\": \"#/$defs/SpeculativeTokenNode\""]
+#[doc = "    },"]
 #[doc = "    \"StateContract\": {"]
 #[doc = "      \"$ref\": \"#/$defs/StateContract\""]
 #[doc = "    },"]
@@ -10891,6 +10972,9 @@ impl ClinicalVocabularyMappingState {
 #[doc = "    },"]
 #[doc = "    \"TransitionEdgeProfile\": {"]
 #[doc = "      \"$ref\": \"#/$defs/TransitionEdgeProfile\""]
+#[doc = "    },"]
+#[doc = "    \"TransmutationReceipt\": {"]
+#[doc = "      \"$ref\": \"#/$defs/TransmutationReceipt\""]
 #[doc = "    },"]
 #[doc = "    \"TruthMaintenancePolicy\": {"]
 #[doc = "      \"$ref\": \"#/$defs/TruthMaintenancePolicy\""]
@@ -11229,6 +11313,12 @@ pub struct CoReasonSharedKernelOntology {
         skip_serializing_if = "::std::option::Option::is_none"
     )]
     pub causal_propagation_intent: ::std::option::Option<CausalPropagationIntent>,
+    #[serde(
+        rename = "CausalRelationEdge",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub causal_relation_edge: ::std::option::Option<CausalRelationEdge>,
     #[serde(
         rename = "CircuitBreakerEvent",
         default,
@@ -12646,6 +12736,12 @@ pub struct CoReasonSharedKernelOntology {
     )]
     pub persistence_commit_receipt: ::std::option::Option<PersistenceCommitReceipt>,
     #[serde(
+        rename = "PolicyCoordinates",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub policy_coordinates: ::std::option::Option<PolicyCoordinates>,
+    #[serde(
         rename = "PostCoordinatedSemanticState",
         default,
         skip_serializing_if = "::std::option::Option::is_none"
@@ -13011,6 +13107,12 @@ pub struct CoReasonSharedKernelOntology {
     )]
     pub speculative_execution_policy: ::std::option::Option<SpeculativeExecutionPolicy>,
     #[serde(
+        rename = "SpeculativeTokenNode",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub speculative_token_node: ::std::option::Option<SpeculativeTokenNode>,
+    #[serde(
         rename = "SSETransportProfile",
         default,
         skip_serializing_if = "::std::option::Option::is_none"
@@ -13306,6 +13408,12 @@ pub struct CoReasonSharedKernelOntology {
     )]
     pub transition_edge_profile: ::std::option::Option<TransitionEdgeProfile>,
     #[serde(
+        rename = "TransmutationReceipt",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub transmutation_receipt: ::std::option::Option<TransmutationReceipt>,
+    #[serde(
         rename = "TruthMaintenancePolicy",
         default,
         skip_serializing_if = "::std::option::Option::is_none"
@@ -13443,6 +13551,7 @@ impl ::std::default::Default for CoReasonSharedKernelOntology {
             causal_explanation_event: Default::default(),
             causal_interval_profile: Default::default(),
             causal_propagation_intent: Default::default(),
+            causal_relation_edge: Default::default(),
             circuit_breaker_event: Default::default(),
             clinical_vocabulary_mapping_state: Default::default(),
             cognitive_action_space_manifest: Default::default(),
@@ -13675,6 +13784,7 @@ impl ::std::default::Default for CoReasonSharedKernelOntology {
             peft_adapter_contract: Default::default(),
             permission_boundary_policy: Default::default(),
             persistence_commit_receipt: Default::default(),
+            policy_coordinates: Default::default(),
             post_coordinated_semantic_state: Default::default(),
             post_quantum_signature_receipt: Default::default(),
             prediction_market_policy: Default::default(),
@@ -13735,6 +13845,7 @@ impl ::std::default::Default for CoReasonSharedKernelOntology {
             spatial_taxonomic_restructure_intent: Default::default(),
             spatial_tool_manifest: Default::default(),
             speculative_execution_policy: Default::default(),
+            speculative_token_node: Default::default(),
             sse_transport_profile: Default::default(),
             state_contract: Default::default(),
             state_differential_manifest: Default::default(),
@@ -13784,6 +13895,7 @@ impl ::std::default::Default for CoReasonSharedKernelOntology {
             trace_context_state: Default::default(),
             transformation_mechanism_profile: Default::default(),
             transition_edge_profile: Default::default(),
+            transmutation_receipt: Default::default(),
             truth_maintenance_policy: Default::default(),
             upper_ontology_class_profile: Default::default(),
             utility_justification_graph_receipt: Default::default(),
@@ -23375,6 +23487,80 @@ pub struct DigitalTwinTopologyManifest {
 impl DigitalTwinTopologyManifest {
     pub fn builder() -> builder::DigitalTwinTopologyManifest {
         Default::default()
+    }
+}
+#[doc = "The unique identifier mapping the active inference dimension."]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"Dimension Id\","]
+#[doc = "  \"description\": \"The unique identifier mapping the active inference dimension.\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 128,"]
+#[doc = "  \"minLength\": 1"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct DimensionId(::std::string::String);
+impl ::std::ops::Deref for DimensionId {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<DimensionId> for ::std::string::String {
+    fn from(value: DimensionId) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for DimensionId {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 128usize {
+            return Err("longer than 128 characters".into());
+        }
+        if value.chars().count() < 1usize {
+            return Err("shorter than 1 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for DimensionId {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for DimensionId {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for DimensionId {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for DimensionId {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
     }
 }
 #[doc = "The topological relationship."]
@@ -48176,6 +48362,76 @@ impl OracleExecutionReceipt {
         Default::default()
     }
 }
+#[doc = "The sovereign URN of the agent executing the verified transaction."]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"Originating Agent Urn\","]
+#[doc = "  \"description\": \"The sovereign URN of the agent executing the verified transaction.\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 256"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct OriginatingAgentUrn(::std::string::String);
+impl ::std::ops::Deref for OriginatingAgentUrn {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<OriginatingAgentUrn> for ::std::string::String {
+    fn from(value: OriginatingAgentUrn) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for OriginatingAgentUrn {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 256usize {
+            return Err("longer than 256 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for OriginatingAgentUrn {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for OriginatingAgentUrn {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for OriginatingAgentUrn {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for OriginatingAgentUrn {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
 #[doc = "The outcome variable (Y) to estimate the effect for."]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -49677,6 +49933,71 @@ impl<'de> ::serde::Deserialize<'de> for PolicyCid {
             .map_err(|e: self::error::ConversionError| {
                 <D::Error as ::serde::de::Error>::custom(e.to_string())
             })
+    }
+}
+#[doc = "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Declares the normalized coordinate metrics comparing expected human boundaries with active agent execution paths.\n\nCAUSAL AFFORDANCE: Empowers the EpistemicDeficitRadar to plot the Free Energy Gap divergence canvas.\n\nEPISTEMIC BOUNDS: All metric values are strictly clamped within the closed coordinate interval [0.0, 1.0].\n\nMCP ROUTING TRIGGERS: Policy Coordinates, Active Inference telemetry, Polar Radar Canvas, VFE Divergence"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"PolicyCoordinates\","]
+#[doc = "  \"description\": \"CoReason Shared Kernel Ontology\\n\\nAGENT INSTRUCTION: Declares the normalized coordinate metrics comparing expected human boundaries with active agent execution paths.\\n\\nCAUSAL AFFORDANCE: Empowers the EpistemicDeficitRadar to plot the Free Energy Gap divergence canvas.\\n\\nEPISTEMIC BOUNDS: All metric values are strictly clamped within the closed coordinate interval [0.0, 1.0].\\n\\nMCP ROUTING TRIGGERS: Policy Coordinates, Active Inference telemetry, Polar Radar Canvas, VFE Divergence\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"dimension_id\","]
+#[doc = "    \"dimension_name\","]
+#[doc = "    \"metric_value\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"dimension_id\": {"]
+#[doc = "      \"title\": \"Dimension Id\","]
+#[doc = "      \"description\": \"The unique identifier mapping the active inference dimension.\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"maxLength\": 128,"]
+#[doc = "      \"minLength\": 1"]
+#[doc = "    },"]
+#[doc = "    \"dimension_name\": {"]
+#[doc = "      \"title\": \"Dimension Name\","]
+#[doc = "      \"description\": \"The human-readable label of the coordination axis.\","]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"metric_value\": {"]
+#[doc = "      \"title\": \"Metric Value\","]
+#[doc = "      \"description\": \"The normalized value of the metric coordinate.\","]
+#[doc = "      \"type\": \"number\","]
+#[doc = "      \"maximum\": 1.0,"]
+#[doc = "      \"minimum\": 0.0"]
+#[doc = "    },"]
+#[doc = "    \"tenant_cid\": {"]
+#[doc = "      \"title\": \"Tenant Cid\","]
+#[doc = "      \"description\": \"The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\\\"date_of_incorporation\\\":\\\"2025-10-16\\\",\\\"file_number\\\":\\\"10369312\\\",\\\"jurisdiction\\\":\\\"US-DE\\\",\\\"legal_name\\\":\\\"CoReason, Inc.\\\"}\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"maxLength\": 128,"]
+#[doc = "      \"minLength\": 4,"]
+#[doc = "      \"pattern\": \"^[a-zA-Z0-9_.:-]+$\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct PolicyCoordinates {
+    #[doc = "The unique identifier mapping the active inference dimension."]
+    pub dimension_id: DimensionId,
+    #[doc = "The human-readable label of the coordination axis."]
+    pub dimension_name: ::std::string::String,
+    #[doc = "The normalized value of the metric coordinate."]
+    pub metric_value: f64,
+    #[doc = "The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\"date_of_incorporation\":\"2025-10-16\",\"file_number\":\"10369312\",\"jurisdiction\":\"US-DE\",\"legal_name\":\"CoReason, Inc.\"}"]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub tenant_cid: ::std::option::Option<TenantCid>,
+}
+impl PolicyCoordinates {
+    pub fn builder() -> builder::PolicyCoordinates {
+        Default::default()
     }
 }
 #[doc = "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: The definitive output of a successful latent manifold alignment. Represents a dynamic assembly of a standardized entity (Base Concept + Contextual Modifiers) to achieve infinite semantic specificity without requiring an infinitely large pre-coordinated vocabulary.\n\n    CAUSAL AFFORDANCE: Physically authorizes the orchestrator to assemble a standardized entity with contextual modifiers.\n\n    EPISTEMIC BOUNDS: Bounded to strict JSON schema validation constraints defined in the manifest.\n\n    MCP ROUTING TRIGGERS: Post-Coordinated Semantics, Latent Manifold Alignment, Semantic Specificity, Entity Assembly"]
@@ -54150,6 +54471,85 @@ impl<'de> ::serde::Deserialize<'de> for RefundTargetNodeCid {
             .map_err(|e: self::error::ConversionError| {
                 <D::Error as ::serde::de::Error>::custom(e.to_string())
             })
+    }
+}
+#[doc = "The Pearl SCM structural classification of the causal edge."]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"Relation Type\","]
+#[doc = "  \"description\": \"The Pearl SCM structural classification of the causal edge.\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"confounder\","]
+#[doc = "    \"collider\","]
+#[doc = "    \"direct_cause\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum RelationType {
+    #[serde(rename = "confounder")]
+    Confounder,
+    #[serde(rename = "collider")]
+    Collider,
+    #[serde(rename = "direct_cause")]
+    DirectCause,
+}
+impl ::std::fmt::Display for RelationType {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Confounder => f.write_str("confounder"),
+            Self::Collider => f.write_str("collider"),
+            Self::DirectCause => f.write_str("direct_cause"),
+        }
+    }
+}
+impl ::std::str::FromStr for RelationType {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "confounder" => Ok(Self::Confounder),
+            "collider" => Ok(Self::Collider),
+            "direct_cause" => Ok(Self::DirectCause),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for RelationType {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for RelationType {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for RelationType {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
     }
 }
 #[doc = "A declarative pointer to the SLA or QA rubric required to release the funds."]
@@ -61150,6 +61550,86 @@ impl<'de> ::serde::Deserialize<'de> for SourceNodeCid {
             })
     }
 }
+#[doc = "The source CID representing the causal parent."]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"Source Node Id\","]
+#[doc = "  \"description\": \"The source CID representing the causal parent.\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 128,"]
+#[doc = "  \"minLength\": 1,"]
+#[doc = "  \"pattern\": \"^[a-zA-Z0-9_.:-]+$\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct SourceNodeId(::std::string::String);
+impl ::std::ops::Deref for SourceNodeId {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<SourceNodeId> for ::std::string::String {
+    fn from(value: SourceNodeId) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for SourceNodeId {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 128usize {
+            return Err("longer than 128 characters".into());
+        }
+        if value.chars().count() < 1usize {
+            return Err("shorter than 1 characters".into());
+        }
+        static PATTERN: ::std::sync::LazyLock<::regress::Regex> =
+            ::std::sync::LazyLock::new(|| ::regress::Regex::new("^[a-zA-Z0-9_.:-]+$").unwrap());
+        if PATTERN.find(value).is_none() {
+            return Err("doesn't match pattern \"^[a-zA-Z0-9_.:-]+$\"".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for SourceNodeId {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for SourceNodeId {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for SourceNodeId {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for SourceNodeId {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
 #[doc = "The origin namespace (e.g., ICD-10, USC)."]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -63410,6 +63890,112 @@ pub struct SpeculativeExecutionPolicy {
 }
 impl SpeculativeExecutionPolicy {
     pub fn builder() -> builder::SpeculativeExecutionPolicy {
+        Default::default()
+    }
+}
+#[doc = "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Defines the speculative logit node contract representing token branches before validation target commitments.\n\nCAUSAL AFFORDANCE: Permits the visual renderer to draw predictive decay paths and transition committed logs.\n\nEPISTEMIC BOUNDS: The `logit_probability` is strictly clamped [0.0, 1.0]. The `token_id` must match `^tok_[a-zA-Z0-9_.-]+$`.\n\nMCP ROUTING TRIGGERS: Speculative Logits, Token Branch, SVG Decay, Visual Telemetry"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"SpeculativeTokenNode\","]
+#[doc = "  \"description\": \"CoReason Shared Kernel Ontology\\n\\nAGENT INSTRUCTION: Defines the speculative logit node contract representing token branches before validation target commitments.\\n\\nCAUSAL AFFORDANCE: Permits the visual renderer to draw predictive decay paths and transition committed logs.\\n\\nEPISTEMIC BOUNDS: The `logit_probability` is strictly clamped [0.0, 1.0]. The `token_id` must match `^tok_[a-zA-Z0-9_.-]+$`.\\n\\nMCP ROUTING TRIGGERS: Speculative Logits, Token Branch, SVG Decay, Visual Telemetry\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"logit_probability\","]
+#[doc = "    \"token_id\","]
+#[doc = "    \"token_value\","]
+#[doc = "    \"validation_status\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"associated_urn\": {"]
+#[doc = "      \"title\": \"Associated Urn\","]
+#[doc = "      \"description\": \"Optional URN identifier associated with the generating model.\","]
+#[doc = "      \"anyOf\": ["]
+#[doc = "        {"]
+#[doc = "          \"type\": \"string\""]
+#[doc = "        },"]
+#[doc = "        {"]
+#[doc = "          \"type\": \"null\""]
+#[doc = "        }"]
+#[doc = "      ]"]
+#[doc = "    },"]
+#[doc = "    \"child_speculations\": {"]
+#[doc = "      \"title\": \"Child Speculations\","]
+#[doc = "      \"description\": \"Topological child logit nodes in the prediction tree.\","]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/$defs/SpeculativeTokenNode\""]
+#[doc = "      },"]
+#[doc = "      \"coreason_topological_exemption\": true"]
+#[doc = "    },"]
+#[doc = "    \"logit_probability\": {"]
+#[doc = "      \"title\": \"Logit Probability\","]
+#[doc = "      \"description\": \"The mathematical probability value of this logit node.\","]
+#[doc = "      \"type\": \"number\","]
+#[doc = "      \"maximum\": 1.0,"]
+#[doc = "      \"minimum\": 0.0"]
+#[doc = "    },"]
+#[doc = "    \"tenant_cid\": {"]
+#[doc = "      \"title\": \"Tenant Cid\","]
+#[doc = "      \"description\": \"The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\\\"date_of_incorporation\\\":\\\"2025-10-16\\\",\\\"file_number\\\":\\\"10369312\\\",\\\"jurisdiction\\\":\\\"US-DE\\\",\\\"legal_name\\\":\\\"CoReason, Inc.\\\"}\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"maxLength\": 128,"]
+#[doc = "      \"minLength\": 4,"]
+#[doc = "      \"pattern\": \"^[a-zA-Z0-9_.:-]+$\""]
+#[doc = "    },"]
+#[doc = "    \"token_id\": {"]
+#[doc = "      \"title\": \"Token Id\","]
+#[doc = "      \"description\": \"The unique token logit identification string.\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"maxLength\": 128,"]
+#[doc = "      \"minLength\": 1,"]
+#[doc = "      \"pattern\": \"^tok_[a-zA-Z0-9_.-]+$\""]
+#[doc = "    },"]
+#[doc = "    \"token_value\": {"]
+#[doc = "      \"title\": \"Token Value\","]
+#[doc = "      \"description\": \"The decoded string value of the predicted token.\","]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"validation_status\": {"]
+#[doc = "      \"title\": \"Validation Status\","]
+#[doc = "      \"description\": \"The current evaluation state of the speculative logit.\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"enum\": ["]
+#[doc = "        \"speculative_draft\","]
+#[doc = "        \"target_validated\","]
+#[doc = "        \"target_rejected\""]
+#[doc = "      ]"]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct SpeculativeTokenNode {
+    #[doc = "Optional URN identifier associated with the generating model."]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub associated_urn: ::std::option::Option<::std::string::String>,
+    #[doc = "Topological child logit nodes in the prediction tree."]
+    #[serde(default, skip_serializing_if = "::std::vec::Vec::is_empty")]
+    pub child_speculations: ::std::vec::Vec<SpeculativeTokenNode>,
+    #[doc = "The mathematical probability value of this logit node."]
+    pub logit_probability: f64,
+    #[doc = "The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\"date_of_incorporation\":\"2025-10-16\",\"file_number\":\"10369312\",\"jurisdiction\":\"US-DE\",\"legal_name\":\"CoReason, Inc.\"}"]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub tenant_cid: ::std::option::Option<TenantCid>,
+    #[doc = "The unique token logit identification string."]
+    pub token_id: TokenId,
+    #[doc = "The decoded string value of the predicted token."]
+    pub token_value: ::std::string::String,
+    #[doc = "The current evaluation state of the speculative logit."]
+    pub validation_status: ValidationStatus,
+}
+impl SpeculativeTokenNode {
+    pub fn builder() -> builder::SpeculativeTokenNode {
         Default::default()
     }
 }
@@ -68606,6 +69192,86 @@ impl<'de> ::serde::Deserialize<'de> for TargetNodeHash {
             })
     }
 }
+#[doc = "The target CID representing the downstream dependent node."]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"Target Node Id\","]
+#[doc = "  \"description\": \"The target CID representing the downstream dependent node.\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 128,"]
+#[doc = "  \"minLength\": 1,"]
+#[doc = "  \"pattern\": \"^[a-zA-Z0-9_.:-]+$\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct TargetNodeId(::std::string::String);
+impl ::std::ops::Deref for TargetNodeId {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<TargetNodeId> for ::std::string::String {
+    fn from(value: TargetNodeId) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for TargetNodeId {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 128usize {
+            return Err("longer than 128 characters".into());
+        }
+        if value.chars().count() < 1usize {
+            return Err("shorter than 1 characters".into());
+        }
+        static PATTERN: ::std::sync::LazyLock<::regress::Regex> =
+            ::std::sync::LazyLock::new(|| ::regress::Regex::new("^[a-zA-Z0-9_.:-]+$").unwrap());
+        if PATTERN.find(value).is_none() {
+            return Err("doesn't match pattern \"^[a-zA-Z0-9_.:-]+$\"".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for TargetNodeId {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for TargetNodeId {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for TargetNodeId {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for TargetNodeId {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
 #[doc = "The explicitly declared target node classification or structural grain."]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -72378,6 +73044,86 @@ impl TokenBurnReceipt {
         Default::default()
     }
 }
+#[doc = "The unique token logit identification string."]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"Token Id\","]
+#[doc = "  \"description\": \"The unique token logit identification string.\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 128,"]
+#[doc = "  \"minLength\": 1,"]
+#[doc = "  \"pattern\": \"^tok_[a-zA-Z0-9_.-]+$\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct TokenId(::std::string::String);
+impl ::std::ops::Deref for TokenId {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<TokenId> for ::std::string::String {
+    fn from(value: TokenId) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for TokenId {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 128usize {
+            return Err("longer than 128 characters".into());
+        }
+        if value.chars().count() < 1usize {
+            return Err("shorter than 1 characters".into());
+        }
+        static PATTERN: ::std::sync::LazyLock<::regress::Regex> =
+            ::std::sync::LazyLock::new(|| ::regress::Regex::new("^tok_[a-zA-Z0-9_.-]+$").unwrap());
+        if PATTERN.find(value).is_none() {
+            return Err("doesn't match pattern \"^tok_[a-zA-Z0-9_.-]+$\"".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for TokenId {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for TokenId {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for TokenId {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for TokenId {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
 #[doc = "A string linking this burn back to the specific ToolInvocationEvent CID."]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -73501,6 +74247,80 @@ impl<'de> ::serde::Deserialize<'de> for TrainingLineageHash {
             })
     }
 }
+#[doc = "The unique cryptographic transaction CID."]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"Transaction Id\","]
+#[doc = "  \"description\": \"The unique cryptographic transaction CID.\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"maxLength\": 128,"]
+#[doc = "  \"minLength\": 1"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Serialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[serde(transparent)]
+pub struct TransactionId(::std::string::String);
+impl ::std::ops::Deref for TransactionId {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
+}
+impl ::std::convert::From<TransactionId> for ::std::string::String {
+    fn from(value: TransactionId) -> Self {
+        value.0
+    }
+}
+impl ::std::str::FromStr for TransactionId {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        if value.chars().count() > 128usize {
+            return Err("longer than 128 characters".into());
+        }
+        if value.chars().count() < 1usize {
+            return Err("shorter than 1 characters".into());
+        }
+        Ok(Self(value.to_string()))
+    }
+}
+impl ::std::convert::TryFrom<&str> for TransactionId {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for TransactionId {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for TransactionId {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for TransactionId {
+    fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        ::std::string::String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e: self::error::ConversionError| {
+                <D::Error as ::serde::de::Error>::custom(e.to_string())
+            })
+    }
+}
 #[doc = "AGENT INSTRUCTION: Dictates the exact algorithmic or logical mechanism utilized to forge a semantic connection or transmute a bimodal data state, allowing downstream agents to weigh epistemic reliability."]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -73699,6 +74519,86 @@ pub struct TransitionEdgeProfile {
 }
 impl TransitionEdgeProfile {
     pub fn builder() -> builder::TransitionEdgeProfile {
+        Default::default()
+    }
+}
+#[doc = "CoReason Shared Kernel Ontology\n\nAGENT INSTRUCTION: Represents a cryptographically signed receipt of zk-SNARK attestation proof results and SD-JWT routing checks.\n\nCAUSAL AFFORDANCE: Updates the caging verification badge state on the Sensory Command Center from unverified to attested or forged.\n\nEPISTEMIC BOUNDS: Anchors transaction CIDs and requires hex-encoded proof receipts.\n\nMCP ROUTING TRIGGERS: Transmutation Receipt, zk-SNARK proof, SD-JWT attestation, Cryptographic Verification badge"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"TransmutationReceipt\","]
+#[doc = "  \"description\": \"CoReason Shared Kernel Ontology\\n\\nAGENT INSTRUCTION: Represents a cryptographically signed receipt of zk-SNARK attestation proof results and SD-JWT routing checks.\\n\\nCAUSAL AFFORDANCE: Updates the caging verification badge state on the Sensory Command Center from unverified to attested or forged.\\n\\nEPISTEMIC BOUNDS: Anchors transaction CIDs and requires hex-encoded proof receipts.\\n\\nMCP ROUTING TRIGGERS: Transmutation Receipt, zk-SNARK proof, SD-JWT attestation, Cryptographic Verification badge\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"originating_agent_urn\","]
+#[doc = "    \"sd_jwt_attestation_hash\","]
+#[doc = "    \"transaction_id\","]
+#[doc = "    \"verification_timestamp\","]
+#[doc = "    \"zk_snark_proof_hex\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"originating_agent_urn\": {"]
+#[doc = "      \"title\": \"Originating Agent Urn\","]
+#[doc = "      \"description\": \"The sovereign URN of the agent executing the verified transaction.\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"maxLength\": 256"]
+#[doc = "    },"]
+#[doc = "    \"sd_jwt_attestation_hash\": {"]
+#[doc = "      \"title\": \"Sd Jwt Attestation Hash\","]
+#[doc = "      \"description\": \"The SHA-256 selectively disclosed credential receipt hash.\","]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"tenant_cid\": {"]
+#[doc = "      \"title\": \"Tenant Cid\","]
+#[doc = "      \"description\": \"The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\\\"date_of_incorporation\\\":\\\"2025-10-16\\\",\\\"file_number\\\":\\\"10369312\\\",\\\"jurisdiction\\\":\\\"US-DE\\\",\\\"legal_name\\\":\\\"CoReason, Inc.\\\"}\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"maxLength\": 128,"]
+#[doc = "      \"minLength\": 4,"]
+#[doc = "      \"pattern\": \"^[a-zA-Z0-9_.:-]+$\""]
+#[doc = "    },"]
+#[doc = "    \"transaction_id\": {"]
+#[doc = "      \"title\": \"Transaction Id\","]
+#[doc = "      \"description\": \"The unique cryptographic transaction CID.\","]
+#[doc = "      \"type\": \"string\","]
+#[doc = "      \"maxLength\": 128,"]
+#[doc = "      \"minLength\": 1"]
+#[doc = "    },"]
+#[doc = "    \"verification_timestamp\": {"]
+#[doc = "      \"title\": \"Verification Timestamp\","]
+#[doc = "      \"description\": \"The ISO-8601 formatted verification timestamp.\","]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"zk_snark_proof_hex\": {"]
+#[doc = "      \"title\": \"Zk Snark Proof Hex\","]
+#[doc = "      \"description\": \"The hex-encoded succinct proof attestation.\","]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    }"]
+#[doc = "  },"]
+#[doc = "  \"additionalProperties\": false"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct TransmutationReceipt {
+    #[doc = "The sovereign URN of the agent executing the verified transaction."]
+    pub originating_agent_urn: OriginatingAgentUrn,
+    #[doc = "The SHA-256 selectively disclosed credential receipt hash."]
+    pub sd_jwt_attestation_hash: ::std::string::String,
+    #[doc = "The Hard Multi-Tenancy segregation identifier. Enforces mathematical quarantine by binding the state physically to a specific sovereign client environment. Defaults to the RFC 8785 (JCS) SHA-256 hash of the CoReason, Inc. incorporation JSON: {\"date_of_incorporation\":\"2025-10-16\",\"file_number\":\"10369312\",\"jurisdiction\":\"US-DE\",\"legal_name\":\"CoReason, Inc.\"}"]
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub tenant_cid: ::std::option::Option<TenantCid>,
+    #[doc = "The unique cryptographic transaction CID."]
+    pub transaction_id: TransactionId,
+    #[doc = "The ISO-8601 formatted verification timestamp."]
+    pub verification_timestamp: ::std::string::String,
+    #[doc = "The hex-encoded succinct proof attestation."]
+    pub zk_snark_proof_hex: ::std::string::String,
+}
+impl TransmutationReceipt {
+    pub fn builder() -> builder::TransmutationReceipt {
         Default::default()
     }
 }
@@ -74629,6 +75529,85 @@ impl ::std::convert::TryFrom<&::std::string::String> for ValidationFailureAction
     }
 }
 impl ::std::convert::TryFrom<::std::string::String> for ValidationFailureAction {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+#[doc = "The current evaluation state of the speculative logit."]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"title\": \"Validation Status\","]
+#[doc = "  \"description\": \"The current evaluation state of the speculative logit.\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"speculative_draft\","]
+#[doc = "    \"target_validated\","]
+#[doc = "    \"target_rejected\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum ValidationStatus {
+    #[serde(rename = "speculative_draft")]
+    SpeculativeDraft,
+    #[serde(rename = "target_validated")]
+    TargetValidated,
+    #[serde(rename = "target_rejected")]
+    TargetRejected,
+}
+impl ::std::fmt::Display for ValidationStatus {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::SpeculativeDraft => f.write_str("speculative_draft"),
+            Self::TargetValidated => f.write_str("target_validated"),
+            Self::TargetRejected => f.write_str("target_rejected"),
+        }
+    }
+}
+impl ::std::str::FromStr for ValidationStatus {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "speculative_draft" => Ok(Self::SpeculativeDraft),
+            "target_validated" => Ok(Self::TargetValidated),
+            "target_rejected" => Ok(Self::TargetRejected),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for ValidationStatus {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for ValidationStatus {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ValidationStatus {
     type Error = self::error::ConversionError;
     fn try_from(
         value: ::std::string::String,
@@ -81085,6 +82064,89 @@ pub mod builder {
         }
     }
     #[derive(Clone, Debug)]
+    pub struct CausalRelationEdge {
+        relation_type: ::std::result::Result<super::RelationType, ::std::string::String>,
+        source_node_id: ::std::result::Result<super::SourceNodeId, ::std::string::String>,
+        target_node_id: ::std::result::Result<super::TargetNodeId, ::std::string::String>,
+        tenant_cid:
+            ::std::result::Result<::std::option::Option<super::TenantCid>, ::std::string::String>,
+    }
+    impl ::std::default::Default for CausalRelationEdge {
+        fn default() -> Self {
+            Self {
+                relation_type: Err("no value supplied for relation_type".to_string()),
+                source_node_id: Err("no value supplied for source_node_id".to_string()),
+                target_node_id: Err("no value supplied for target_node_id".to_string()),
+                tenant_cid: Ok(Default::default()),
+            }
+        }
+    }
+    impl CausalRelationEdge {
+        pub fn relation_type<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<super::RelationType>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.relation_type = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for relation_type: {e}"));
+            self
+        }
+        pub fn source_node_id<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<super::SourceNodeId>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.source_node_id = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for source_node_id: {e}"));
+            self
+        }
+        pub fn target_node_id<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<super::TargetNodeId>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.target_node_id = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for target_node_id: {e}"));
+            self
+        }
+        pub fn tenant_cid<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<super::TenantCid>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.tenant_cid = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for tenant_cid: {e}"));
+            self
+        }
+    }
+    impl ::std::convert::TryFrom<CausalRelationEdge> for super::CausalRelationEdge {
+        type Error = super::error::ConversionError;
+        fn try_from(
+            value: CausalRelationEdge,
+        ) -> ::std::result::Result<Self, super::error::ConversionError> {
+            Ok(Self {
+                relation_type: value.relation_type?,
+                source_node_id: value.source_node_id?,
+                target_node_id: value.target_node_id?,
+                tenant_cid: value.tenant_cid?,
+            })
+        }
+    }
+    impl ::std::convert::From<super::CausalRelationEdge> for CausalRelationEdge {
+        fn from(value: super::CausalRelationEdge) -> Self {
+            Self {
+                relation_type: Ok(value.relation_type),
+                source_node_id: Ok(value.source_node_id),
+                target_node_id: Ok(value.target_node_id),
+                tenant_cid: Ok(value.tenant_cid),
+            }
+        }
+    }
+    #[derive(Clone, Debug)]
     pub struct CircuitBreakerEvent {
         error_signature: ::std::result::Result<super::ErrorSignature, ::std::string::String>,
         event_cid: ::std::result::Result<super::EventCid, ::std::string::String>,
@@ -81548,6 +82610,10 @@ pub mod builder {
         >,
         causal_propagation_intent: ::std::result::Result<
             ::std::option::Option<super::CausalPropagationIntent>,
+            ::std::string::String,
+        >,
+        causal_relation_edge: ::std::result::Result<
+            ::std::option::Option<super::CausalRelationEdge>,
             ::std::string::String,
         >,
         circuit_breaker_event: ::std::result::Result<
@@ -82474,6 +83540,10 @@ pub mod builder {
             ::std::option::Option<super::PersistenceCommitReceipt>,
             ::std::string::String,
         >,
+        policy_coordinates: ::std::result::Result<
+            ::std::option::Option<super::PolicyCoordinates>,
+            ::std::string::String,
+        >,
         post_coordinated_semantic_state: ::std::result::Result<
             ::std::option::Option<super::PostCoordinatedSemanticState>,
             ::std::string::String,
@@ -82712,6 +83782,10 @@ pub mod builder {
             ::std::option::Option<super::SpeculativeExecutionPolicy>,
             ::std::string::String,
         >,
+        speculative_token_node: ::std::result::Result<
+            ::std::option::Option<super::SpeculativeTokenNode>,
+            ::std::string::String,
+        >,
         sse_transport_profile: ::std::result::Result<
             ::std::option::Option<super::SseTransportProfile>,
             ::std::string::String,
@@ -82908,6 +83982,10 @@ pub mod builder {
             ::std::option::Option<super::TransitionEdgeProfile>,
             ::std::string::String,
         >,
+        transmutation_receipt: ::std::result::Result<
+            ::std::option::Option<super::TransmutationReceipt>,
+            ::std::string::String,
+        >,
         truth_maintenance_policy: ::std::result::Result<
             ::std::option::Option<super::TruthMaintenancePolicy>,
             ::std::string::String,
@@ -83016,6 +84094,7 @@ pub mod builder {
                 causal_explanation_event: Ok(Default::default()),
                 causal_interval_profile: Ok(Default::default()),
                 causal_propagation_intent: Ok(Default::default()),
+                causal_relation_edge: Ok(Default::default()),
                 circuit_breaker_event: Ok(Default::default()),
                 clinical_vocabulary_mapping_state: Ok(Default::default()),
                 cognitive_action_space_manifest: Ok(Default::default()),
@@ -83248,6 +84327,7 @@ pub mod builder {
                 peft_adapter_contract: Ok(Default::default()),
                 permission_boundary_policy: Ok(Default::default()),
                 persistence_commit_receipt: Ok(Default::default()),
+                policy_coordinates: Ok(Default::default()),
                 post_coordinated_semantic_state: Ok(Default::default()),
                 post_quantum_signature_receipt: Ok(Default::default()),
                 prediction_market_policy: Ok(Default::default()),
@@ -83308,6 +84388,7 @@ pub mod builder {
                 spatial_taxonomic_restructure_intent: Ok(Default::default()),
                 spatial_tool_manifest: Ok(Default::default()),
                 speculative_execution_policy: Ok(Default::default()),
+                speculative_token_node: Ok(Default::default()),
                 sse_transport_profile: Ok(Default::default()),
                 state_contract: Ok(Default::default()),
                 state_differential_manifest: Ok(Default::default()),
@@ -83357,6 +84438,7 @@ pub mod builder {
                 trace_context_state: Ok(Default::default()),
                 transformation_mechanism_profile: Ok(Default::default()),
                 transition_edge_profile: Ok(Default::default()),
+                transmutation_receipt: Ok(Default::default()),
                 truth_maintenance_policy: Ok(Default::default()),
                 upper_ontology_class_profile: Ok(Default::default()),
                 utility_justification_graph_receipt: Ok(Default::default()),
@@ -83864,6 +84946,16 @@ pub mod builder {
         {
             self.causal_propagation_intent = value.try_into().map_err(|e| {
                 format!("error converting supplied value for causal_propagation_intent: {e}")
+            });
+            self
+        }
+        pub fn causal_relation_edge<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<super::CausalRelationEdge>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.causal_relation_edge = value.try_into().map_err(|e| {
+                format!("error converting supplied value for causal_relation_edge: {e}")
             });
             self
         }
@@ -86269,6 +87361,16 @@ pub mod builder {
             });
             self
         }
+        pub fn policy_coordinates<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<super::PolicyCoordinates>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.policy_coordinates = value.try_into().map_err(|e| {
+                format!("error converting supplied value for policy_coordinates: {e}")
+            });
+            self
+        }
         pub fn post_coordinated_semantic_state<T>(mut self, value: T) -> Self
         where
             T: ::std::convert::TryInto<::std::option::Option<super::PostCoordinatedSemanticState>>,
@@ -86897,6 +87999,16 @@ pub mod builder {
             });
             self
         }
+        pub fn speculative_token_node<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<super::SpeculativeTokenNode>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.speculative_token_node = value.try_into().map_err(|e| {
+                format!("error converting supplied value for speculative_token_node: {e}")
+            });
+            self
+        }
         pub fn sse_transport_profile<T>(mut self, value: T) -> Self
         where
             T: ::std::convert::TryInto<::std::option::Option<super::SseTransportProfile>>,
@@ -87397,6 +88509,16 @@ pub mod builder {
             });
             self
         }
+        pub fn transmutation_receipt<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<super::TransmutationReceipt>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.transmutation_receipt = value.try_into().map_err(|e| {
+                format!("error converting supplied value for transmutation_receipt: {e}")
+            });
+            self
+        }
         pub fn truth_maintenance_policy<T>(mut self, value: T) -> Self
         where
             T: ::std::convert::TryInto<::std::option::Option<super::TruthMaintenancePolicy>>,
@@ -87596,6 +88718,7 @@ pub mod builder {
                 causal_explanation_event: value.causal_explanation_event?,
                 causal_interval_profile: value.causal_interval_profile?,
                 causal_propagation_intent: value.causal_propagation_intent?,
+                causal_relation_edge: value.causal_relation_edge?,
                 circuit_breaker_event: value.circuit_breaker_event?,
                 clinical_vocabulary_mapping_state: value.clinical_vocabulary_mapping_state?,
                 cognitive_action_space_manifest: value.cognitive_action_space_manifest?,
@@ -87841,6 +88964,7 @@ pub mod builder {
                 peft_adapter_contract: value.peft_adapter_contract?,
                 permission_boundary_policy: value.permission_boundary_policy?,
                 persistence_commit_receipt: value.persistence_commit_receipt?,
+                policy_coordinates: value.policy_coordinates?,
                 post_coordinated_semantic_state: value.post_coordinated_semantic_state?,
                 post_quantum_signature_receipt: value.post_quantum_signature_receipt?,
                 prediction_market_policy: value.prediction_market_policy?,
@@ -87902,6 +89026,7 @@ pub mod builder {
                 spatial_taxonomic_restructure_intent: value.spatial_taxonomic_restructure_intent?,
                 spatial_tool_manifest: value.spatial_tool_manifest?,
                 speculative_execution_policy: value.speculative_execution_policy?,
+                speculative_token_node: value.speculative_token_node?,
                 sse_transport_profile: value.sse_transport_profile?,
                 state_contract: value.state_contract?,
                 state_differential_manifest: value.state_differential_manifest?,
@@ -87951,6 +89076,7 @@ pub mod builder {
                 trace_context_state: value.trace_context_state?,
                 transformation_mechanism_profile: value.transformation_mechanism_profile?,
                 transition_edge_profile: value.transition_edge_profile?,
+                transmutation_receipt: value.transmutation_receipt?,
                 truth_maintenance_policy: value.truth_maintenance_policy?,
                 upper_ontology_class_profile: value.upper_ontology_class_profile?,
                 utility_justification_graph_receipt: value.utility_justification_graph_receipt?,
@@ -88020,6 +89146,7 @@ pub mod builder {
                 causal_explanation_event: Ok(value.causal_explanation_event),
                 causal_interval_profile: Ok(value.causal_interval_profile),
                 causal_propagation_intent: Ok(value.causal_propagation_intent),
+                causal_relation_edge: Ok(value.causal_relation_edge),
                 circuit_breaker_event: Ok(value.circuit_breaker_event),
                 clinical_vocabulary_mapping_state: Ok(value.clinical_vocabulary_mapping_state),
                 cognitive_action_space_manifest: Ok(value.cognitive_action_space_manifest),
@@ -88278,6 +89405,7 @@ pub mod builder {
                 peft_adapter_contract: Ok(value.peft_adapter_contract),
                 permission_boundary_policy: Ok(value.permission_boundary_policy),
                 persistence_commit_receipt: Ok(value.persistence_commit_receipt),
+                policy_coordinates: Ok(value.policy_coordinates),
                 post_coordinated_semantic_state: Ok(value.post_coordinated_semantic_state),
                 post_quantum_signature_receipt: Ok(value.post_quantum_signature_receipt),
                 prediction_market_policy: Ok(value.prediction_market_policy),
@@ -88340,6 +89468,7 @@ pub mod builder {
                 spatial_taxonomic_restructure_intent: Ok(value.spatial_taxonomic_restructure_intent),
                 spatial_tool_manifest: Ok(value.spatial_tool_manifest),
                 speculative_execution_policy: Ok(value.speculative_execution_policy),
+                speculative_token_node: Ok(value.speculative_token_node),
                 sse_transport_profile: Ok(value.sse_transport_profile),
                 state_contract: Ok(value.state_contract),
                 state_differential_manifest: Ok(value.state_differential_manifest),
@@ -88389,6 +89518,7 @@ pub mod builder {
                 trace_context_state: Ok(value.trace_context_state),
                 transformation_mechanism_profile: Ok(value.transformation_mechanism_profile),
                 transition_edge_profile: Ok(value.transition_edge_profile),
+                transmutation_receipt: Ok(value.transmutation_receipt),
                 truth_maintenance_policy: Ok(value.truth_maintenance_policy),
                 upper_ontology_class_profile: Ok(value.upper_ontology_class_profile),
                 utility_justification_graph_receipt: Ok(value.utility_justification_graph_receipt),
@@ -114844,6 +115974,89 @@ pub mod builder {
         }
     }
     #[derive(Clone, Debug)]
+    pub struct PolicyCoordinates {
+        dimension_id: ::std::result::Result<super::DimensionId, ::std::string::String>,
+        dimension_name: ::std::result::Result<::std::string::String, ::std::string::String>,
+        metric_value: ::std::result::Result<f64, ::std::string::String>,
+        tenant_cid:
+            ::std::result::Result<::std::option::Option<super::TenantCid>, ::std::string::String>,
+    }
+    impl ::std::default::Default for PolicyCoordinates {
+        fn default() -> Self {
+            Self {
+                dimension_id: Err("no value supplied for dimension_id".to_string()),
+                dimension_name: Err("no value supplied for dimension_name".to_string()),
+                metric_value: Err("no value supplied for metric_value".to_string()),
+                tenant_cid: Ok(Default::default()),
+            }
+        }
+    }
+    impl PolicyCoordinates {
+        pub fn dimension_id<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<super::DimensionId>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.dimension_id = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for dimension_id: {e}"));
+            self
+        }
+        pub fn dimension_name<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::string::String>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.dimension_name = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for dimension_name: {e}"));
+            self
+        }
+        pub fn metric_value<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<f64>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.metric_value = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for metric_value: {e}"));
+            self
+        }
+        pub fn tenant_cid<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<super::TenantCid>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.tenant_cid = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for tenant_cid: {e}"));
+            self
+        }
+    }
+    impl ::std::convert::TryFrom<PolicyCoordinates> for super::PolicyCoordinates {
+        type Error = super::error::ConversionError;
+        fn try_from(
+            value: PolicyCoordinates,
+        ) -> ::std::result::Result<Self, super::error::ConversionError> {
+            Ok(Self {
+                dimension_id: value.dimension_id?,
+                dimension_name: value.dimension_name?,
+                metric_value: value.metric_value?,
+                tenant_cid: value.tenant_cid?,
+            })
+        }
+    }
+    impl ::std::convert::From<super::PolicyCoordinates> for PolicyCoordinates {
+        fn from(value: super::PolicyCoordinates) -> Self {
+            Self {
+                dimension_id: Ok(value.dimension_id),
+                dimension_name: Ok(value.dimension_name),
+                metric_value: Ok(value.metric_value),
+                tenant_cid: Ok(value.tenant_cid),
+            }
+        }
+    }
+    #[derive(Clone, Debug)]
     pub struct PostCoordinatedSemanticState {
         alignment_metric_used:
             ::std::result::Result<super::ManifoldAlignmentMetricProfile, ::std::string::String>,
@@ -121145,6 +122358,137 @@ pub mod builder {
         }
     }
     #[derive(Clone, Debug)]
+    pub struct SpeculativeTokenNode {
+        associated_urn: ::std::result::Result<
+            ::std::option::Option<::std::string::String>,
+            ::std::string::String,
+        >,
+        child_speculations: ::std::result::Result<
+            ::std::vec::Vec<super::SpeculativeTokenNode>,
+            ::std::string::String,
+        >,
+        logit_probability: ::std::result::Result<f64, ::std::string::String>,
+        tenant_cid:
+            ::std::result::Result<::std::option::Option<super::TenantCid>, ::std::string::String>,
+        token_id: ::std::result::Result<super::TokenId, ::std::string::String>,
+        token_value: ::std::result::Result<::std::string::String, ::std::string::String>,
+        validation_status: ::std::result::Result<super::ValidationStatus, ::std::string::String>,
+    }
+    impl ::std::default::Default for SpeculativeTokenNode {
+        fn default() -> Self {
+            Self {
+                associated_urn: Ok(Default::default()),
+                child_speculations: Ok(Default::default()),
+                logit_probability: Err("no value supplied for logit_probability".to_string()),
+                tenant_cid: Ok(Default::default()),
+                token_id: Err("no value supplied for token_id".to_string()),
+                token_value: Err("no value supplied for token_value".to_string()),
+                validation_status: Err("no value supplied for validation_status".to_string()),
+            }
+        }
+    }
+    impl SpeculativeTokenNode {
+        pub fn associated_urn<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<::std::string::String>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.associated_urn = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for associated_urn: {e}"));
+            self
+        }
+        pub fn child_speculations<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::vec::Vec<super::SpeculativeTokenNode>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.child_speculations = value.try_into().map_err(|e| {
+                format!("error converting supplied value for child_speculations: {e}")
+            });
+            self
+        }
+        pub fn logit_probability<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<f64>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.logit_probability = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for logit_probability: {e}"));
+            self
+        }
+        pub fn tenant_cid<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<super::TenantCid>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.tenant_cid = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for tenant_cid: {e}"));
+            self
+        }
+        pub fn token_id<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<super::TokenId>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.token_id = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for token_id: {e}"));
+            self
+        }
+        pub fn token_value<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::string::String>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.token_value = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for token_value: {e}"));
+            self
+        }
+        pub fn validation_status<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<super::ValidationStatus>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.validation_status = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for validation_status: {e}"));
+            self
+        }
+    }
+    impl ::std::convert::TryFrom<SpeculativeTokenNode> for super::SpeculativeTokenNode {
+        type Error = super::error::ConversionError;
+        fn try_from(
+            value: SpeculativeTokenNode,
+        ) -> ::std::result::Result<Self, super::error::ConversionError> {
+            Ok(Self {
+                associated_urn: value.associated_urn?,
+                child_speculations: value.child_speculations?,
+                logit_probability: value.logit_probability?,
+                tenant_cid: value.tenant_cid?,
+                token_id: value.token_id?,
+                token_value: value.token_value?,
+                validation_status: value.validation_status?,
+            })
+        }
+    }
+    impl ::std::convert::From<super::SpeculativeTokenNode> for SpeculativeTokenNode {
+        fn from(value: super::SpeculativeTokenNode) -> Self {
+            Self {
+                associated_urn: Ok(value.associated_urn),
+                child_speculations: Ok(value.child_speculations),
+                logit_probability: Ok(value.logit_probability),
+                tenant_cid: Ok(value.tenant_cid),
+                token_id: Ok(value.token_id),
+                token_value: Ok(value.token_value),
+                validation_status: Ok(value.validation_status),
+            }
+        }
+    }
+    #[derive(Clone, Debug)]
     pub struct SseTransportProfile {
         headers: ::std::result::Result<
             ::std::collections::HashMap<
@@ -125850,6 +127194,125 @@ pub mod builder {
                 target_node_cid: Ok(value.target_node_cid),
                 tenant_cid: Ok(value.tenant_cid),
                 topology_class: Ok(value.topology_class),
+            }
+        }
+    }
+    #[derive(Clone, Debug)]
+    pub struct TransmutationReceipt {
+        originating_agent_urn:
+            ::std::result::Result<super::OriginatingAgentUrn, ::std::string::String>,
+        sd_jwt_attestation_hash:
+            ::std::result::Result<::std::string::String, ::std::string::String>,
+        tenant_cid:
+            ::std::result::Result<::std::option::Option<super::TenantCid>, ::std::string::String>,
+        transaction_id: ::std::result::Result<super::TransactionId, ::std::string::String>,
+        verification_timestamp: ::std::result::Result<::std::string::String, ::std::string::String>,
+        zk_snark_proof_hex: ::std::result::Result<::std::string::String, ::std::string::String>,
+    }
+    impl ::std::default::Default for TransmutationReceipt {
+        fn default() -> Self {
+            Self {
+                originating_agent_urn: Err(
+                    "no value supplied for originating_agent_urn".to_string()
+                ),
+                sd_jwt_attestation_hash: Err(
+                    "no value supplied for sd_jwt_attestation_hash".to_string()
+                ),
+                tenant_cid: Ok(Default::default()),
+                transaction_id: Err("no value supplied for transaction_id".to_string()),
+                verification_timestamp: Err(
+                    "no value supplied for verification_timestamp".to_string()
+                ),
+                zk_snark_proof_hex: Err("no value supplied for zk_snark_proof_hex".to_string()),
+            }
+        }
+    }
+    impl TransmutationReceipt {
+        pub fn originating_agent_urn<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<super::OriginatingAgentUrn>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.originating_agent_urn = value.try_into().map_err(|e| {
+                format!("error converting supplied value for originating_agent_urn: {e}")
+            });
+            self
+        }
+        pub fn sd_jwt_attestation_hash<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::string::String>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.sd_jwt_attestation_hash = value.try_into().map_err(|e| {
+                format!("error converting supplied value for sd_jwt_attestation_hash: {e}")
+            });
+            self
+        }
+        pub fn tenant_cid<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<super::TenantCid>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.tenant_cid = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for tenant_cid: {e}"));
+            self
+        }
+        pub fn transaction_id<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<super::TransactionId>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.transaction_id = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for transaction_id: {e}"));
+            self
+        }
+        pub fn verification_timestamp<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::string::String>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.verification_timestamp = value.try_into().map_err(|e| {
+                format!("error converting supplied value for verification_timestamp: {e}")
+            });
+            self
+        }
+        pub fn zk_snark_proof_hex<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::string::String>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.zk_snark_proof_hex = value.try_into().map_err(|e| {
+                format!("error converting supplied value for zk_snark_proof_hex: {e}")
+            });
+            self
+        }
+    }
+    impl ::std::convert::TryFrom<TransmutationReceipt> for super::TransmutationReceipt {
+        type Error = super::error::ConversionError;
+        fn try_from(
+            value: TransmutationReceipt,
+        ) -> ::std::result::Result<Self, super::error::ConversionError> {
+            Ok(Self {
+                originating_agent_urn: value.originating_agent_urn?,
+                sd_jwt_attestation_hash: value.sd_jwt_attestation_hash?,
+                tenant_cid: value.tenant_cid?,
+                transaction_id: value.transaction_id?,
+                verification_timestamp: value.verification_timestamp?,
+                zk_snark_proof_hex: value.zk_snark_proof_hex?,
+            })
+        }
+    }
+    impl ::std::convert::From<super::TransmutationReceipt> for TransmutationReceipt {
+        fn from(value: super::TransmutationReceipt) -> Self {
+            Self {
+                originating_agent_urn: Ok(value.originating_agent_urn),
+                sd_jwt_attestation_hash: Ok(value.sd_jwt_attestation_hash),
+                tenant_cid: Ok(value.tenant_cid),
+                transaction_id: Ok(value.transaction_id),
+                verification_timestamp: Ok(value.verification_timestamp),
+                zk_snark_proof_hex: Ok(value.zk_snark_proof_hex),
             }
         }
     }

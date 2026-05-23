@@ -21185,6 +21185,7 @@
           "title": "Associated Urn"
         },
         "child_speculations": {
+          "coreason_topological_exemption": true,
           "description": "Topological child logit nodes in the prediction tree.",
           "items": {
             "$ref": "#/$defs/SpeculativeTokenNode"
