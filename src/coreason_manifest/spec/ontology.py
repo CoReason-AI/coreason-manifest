@@ -14767,6 +14767,99 @@ CommercialLicenseState.model_rebuild()
 CommercialOverrideReceipt.model_rebuild()
 
 
+class SpeculativeTokenNode(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Defines the speculative logit node contract representing token branches before validation target commitments.
+
+    CAUSAL AFFORDANCE: Permits the visual renderer to draw predictive decay paths and transition committed logs.
+
+    EPISTEMIC BOUNDS: The `logit_probability` is strictly clamped [0.0, 1.0]. The `token_id` must match `^tok_[a-zA-Z0-9_.-]+$`.
+
+    MCP ROUTING TRIGGERS: Speculative Logits, Token Branch, SVG Decay, Visual Telemetry
+    """
+
+    token_id: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^tok_[a-zA-Z0-9_.-]+$")] = Field(
+        description="The unique token logit identification string."
+    )
+    token_value: str = Field(description="The decoded string value of the predicted token.")
+    logit_probability: float = Field(
+        ge=0.0, le=1.0, description="The mathematical probability value of this logit node."
+    )
+    validation_status: Literal["speculative_draft", "target_validated", "target_rejected"] = Field(
+        description="The current evaluation state of the speculative logit."
+    )
+    associated_urn: Annotated[str | None, StringConstraints(max_length=256)] = Field(
+        default=None, description="Optional URN identifier associated with the generating model."
+    )
+    child_speculations: list[SpeculativeTokenNode] = Field(
+        default_factory=list, description="Topological child logit nodes in the prediction tree."
+    )
+
+
+class PolicyCoordinates(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Declares the normalized coordinate metrics comparing expected human boundaries with active agent execution paths.
+
+    CAUSAL AFFORDANCE: Empowers the EpistemicDeficitRadar to plot the Free Energy Gap divergence canvas.
+
+    EPISTEMIC BOUNDS: All metric values are strictly clamped within the closed coordinate interval [0.0, 1.0].
+
+    MCP ROUTING TRIGGERS: Policy Coordinates, Active Inference telemetry, Polar Radar Canvas, VFE Divergence
+    """
+
+    dimension_id: Annotated[str, StringConstraints(min_length=1, max_length=128)] = Field(
+        description="The unique identifier mapping the active inference dimension."
+    )
+    dimension_name: str = Field(description="The human-readable label of the coordination axis.")
+    metric_value: float = Field(
+        ge=0.0, le=1.0, description="The normalized value of the metric coordinate."
+    )
+
+
+class CausalRelationEdge(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Maps the causal relational directed edges inside the active topological DAG.
+
+    CAUSAL AFFORDANCE: Enables do-calculus estimation and blast radius visualizations before performing node overrides.
+
+    EPISTEMIC BOUNDS: Edges strictly map source and target CIDs and resolve relation typings under Pearl's SCM.
+
+    MCP ROUTING TRIGGERS: Causal Graph Edge, Directed Relation, Do-Calculus Interaction, SCM Boundary
+    """
+
+    source_node_id: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="The source CID representing the causal parent."
+    )
+    target_node_id: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
+        description="The target CID representing the downstream dependent node."
+    )
+    relation_type: Literal["confounder", "collider", "direct_cause"] = Field(
+        description="The Pearl SCM structural classification of the causal edge."
+    )
+
+
+class TransmutationReceipt(CoreasonBaseState):
+    """
+    AGENT INSTRUCTION: Represents a cryptographically signed receipt of zk-SNARK attestation proof results and SD-JWT routing checks.
+
+    CAUSAL AFFORDANCE: Updates the caging verification badge state on the Sensory Command Center from unverified to attested or forged.
+
+    EPISTEMIC BOUNDS: Anchors transaction CIDs and requires hex-encoded proof receipts.
+
+    MCP ROUTING TRIGGERS: Transmutation Receipt, zk-SNARK proof, SD-JWT attestation, Cryptographic Verification badge
+    """
+
+    transaction_id: Annotated[str, StringConstraints(min_length=1, max_length=128)] = Field(
+        description="The unique cryptographic transaction CID."
+    )
+    originating_agent_urn: Annotated[str, StringConstraints(max_length=256)] = Field(
+        description="The sovereign URN of the agent executing the verified transaction."
+    )
+    zk_snark_proof_hex: str = Field(description="The hex-encoded succinct proof attestation.")
+    sd_jwt_attestation_hash: str = Field(description="The SHA-256 selectively disclosed credential receipt hash.")
+    verification_timestamp: str = Field(description="The ISO-8601 formatted verification timestamp.")
+
+
 class GeometricSchemaIntent(CoreasonBaseState):
     """
     AGENT INSTRUCTION: Mathematically defines the nested, topological URN boundaries for UI rendering without runtime execution limits.
@@ -14991,6 +15084,10 @@ SensoryMultimodalProjectionIntent.model_rebuild()
 SensoryMultimodalProjectionEvent.model_rebuild()
 SensoryMultimodalCaptureIntent.model_rebuild()
 SensoryMultimodalCaptureEvent.model_rebuild()
+SpeculativeTokenNode.model_rebuild()
+PolicyCoordinates.model_rebuild()
+CausalRelationEdge.model_rebuild()
+TransmutationReceipt.model_rebuild()
 
 COREASON_ED25519_PUBKEY_HEX = "f1725478400f0c231ffb35383a9275c464069e26460989f5fa6953977f491b61"
 COREASON_ML_DSA_PUBKEY_HEX = "c4e999a2033fb0e19d9f88d62662838f682405572ca756db8bd96285c44df213802addf7b873c9e5e3e23dc7667f9febd79d10d02c0da3e12f202e90f7edd10579600190751452c391cfd8c44a3ee30d7cb679cfa2e1d10cf4aa50b7d9e65915ac775a3486dbdcbedc13b02faf279f4beba033a46a249324654d8b100720291c7d9666f7065307f05ef970fe7a82f75becf6d7e69b85da1f098c648e252146322d4cb0025e99ea155946fb8d5323899f0e2a8418d9a1108e8699b45e02f831314d03fa52bd0cf36733b6518201e1d4180507426c1526268a14245d32cfadea87315b4ea72dd269678b74522531dc32ca56f74bc9f2d3a0061f024e627244b2e869670c10a7575921a8bcf771f118325438ce89cf4b50102c7f81c3e21f379a3812163b1c2735d502b10c1ae38d1701d5c13e99d578d7c588d135636cb06484cca704bcecdc5aa6cc093dc766d9e8874c668f42df0057935c753c5c14d8fac43170dd3ad10d981c7562f39668af44bf426203214de3b50ea8faddca8686bea2e6efb1ec7f88b76822d23e45566ccb4345b50931ed005606259aeca3477cfaba986c6aa709d5796f3b4b3df075ed4ca04e21cf27752b61c4aa9c2a58e99930e940409ffcbd07b644d509ce4a33ffaf810c03b14d16b032b071a6d146225b476158313ec3180a904df1a5c0e3b7ef46747910f70abbf58b355ee0cc0d618c0af8720705a09fcbe48f49e02f65c59540ddb6a1fe1318f0b30360c120582bb3b2c1589ee1c70d21388ebe82992e3df500629025453195d88bab22dd36fa6c63653dbcfdc4ab16626cdc2e13330429d12224dbf22642591147ba44d86dea5538e7a36e3dcbb51461b39ff3e33b0272737f7cb91c529f30a2536c6cfe651021de0c3b0cf9b4d225da4a7624f79e03374182eff721ab22f879a14b92e2e9a2124e1e9f79ae867c668ae078dda89d5e5b3e65f43838c1157e1b6d1e4a593b6b695d795451fbad0c26c9760ba5929931dcd2ee8763402b56b02a1f4ea0faf4acfcd6280c296fe9fbbee3407d0f8fe7ae88a8a2ce2c24e2132e7ef3efd209d98c6315075e871aac1b1c6a8bac035c26190e9d6a04728f8548f9b603b827ddf34289a2799ebeec8a5e4bc9356ab0d2db6151c90f9f4466c1668e442cb3f4f99a93efc5bc04256fa57bc6c5d711d6d7b122ed3fefb2782ea013f7cc0b7edc4f6e258b21e3ded35d287f8bcd23997d98b476540e4fd463e8e8117b54f4694faf2f448891c285fccd9d305d014b3d978fc24ebcb12f5be28a17d773b6bec543d3ce6a8fd2cc36bbfcbda2b12ac2c44e1e759fa12e0bf5d1f3fc131c8152b16d9f33040503199b4f8a1dee1ab6d9b8c0b9571b2347ff0483577a4ee6a33f98c59b6d6f5556fb1c4f1ade2df98761ac7f76a4dbe2852faa7d20189c26da3383ef38f5436297bd18fdbb503a6e9a63cd430776298d80dfe678d71c03ba2a8108557d9acdbc45b580a800b5e70fae0e6647830e6d1d1e1fd6d8e1666905f4e74600732d3dcb66e5c77c1dba10cf12a4ba143c18f9db84ba3c3512ecd0aec566fd279bb03c2c24e23519fd6402751307a3b40faeb006226e17cb7aed1dfa7cf4392865a760801be7d2c3df305dc479d3be9fe09de878683868d39925ef06cc54597cfb4b0795bdbce51b83d5e621bee539261383b32fa7597ebdb7b79a56a9bcce2503a96eafe54f2990d40deb4b9b0e1f86e70f83ac2561c71cb5c0801650532af2beb7515a0e42815f67fb2c58634e843539c3e4a3774c268ec331da56c443f0e764b1f8e3433c7d33bc90aad04a89cf23f73ca95dcbb910e6f56bed761d2f1963e915fe39b85b0f48b4fbd46fff90b7071fa9cb7e6ee24e9a357da2fd9f257070baa764b2cf17174c0e17f6a2f7a438e430dfd7b4d515d36f91edeb5f0526b5435b739e2e3f832539ae7c1a206162f2ef2afdf5c6c9814c8837533a4f7613256cee01c1134ec6098c75520f5b439d84e3e4b04261f005fd2bd6737642543cdc6daad300a59f4802fd958c86033ea784075a0056fae91409974655a45833a3c04fd329343da4e7e5a5dc9d836fe53ecbf314865a53563c0aabb1baaa29df8ddfa500d1506bae50680f8f450219fb3dbc463b2ab97081d2a78ff32092d3dd2f2c64d35e8e708833f6e2c02f9883f5e8e2eb3b811bbc19fcea5ff92a718bc8f536fb8ad78879731eeed6bd229ac01010e5c6654c57e227c8975beffa3eccdbadbd43d3b845ae3d1a0ce897a15e6c29354ddb403dc7fc49fc8190ed8ec96ddfcf86ccb9e216fce87d5413f9a47e63a47ae16e9529b8c2a72d70c6fa32ff72dae3f682abece772e19cb5ae6a7ae9545d67d02ef35d03a05c0b384a9b92ddb641f722958b9562390f5f6b436922debe94b419c678a0a74aaba0a80436ca7b05531dbb5ad82b9e2ffb93ad9e4718b0e2f7b399d1955c1e22aea03b79f895ccf9b57cf1a599d9401aa32cc0f201ff7c4819b3187b468fbf3379dfdf48ff1d7cb08fc191690f5beaa88bfe2a3d396bf9d3540fecf3c2c8396e8ccb5b472bf3229b91b4fa194a446c7e951661219833fecfe81e1b59eaaf5695543b28aee8fec2b549cdc98133deefa448cab9e4b904e58367a77ccddb2d89cbd6354b607442de6d1d7543511cbe08431a74eb254cc89b5a0bd7300406efd2ae657b512513398df7ee70344b9c05aecebf57f2b3f7e879be4ece3e792071a6bb0bfe1da6ce14bfa132c320d4cf13c43af88459cf"
