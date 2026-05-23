@@ -14811,9 +14811,7 @@ class PolicyCoordinates(CoreasonBaseState):
         description="The unique identifier mapping the active inference dimension."
     )
     dimension_name: str = Field(description="The human-readable label of the coordination axis.")
-    metric_value: float = Field(
-        ge=0.0, le=1.0, description="The normalized value of the metric coordinate."
-    )
+    metric_value: float = Field(ge=0.0, le=1.0, description="The normalized value of the metric coordinate.")
 
 
 class CausalRelationEdge(CoreasonBaseState):
@@ -14827,11 +14825,11 @@ class CausalRelationEdge(CoreasonBaseState):
     MCP ROUTING TRIGGERS: Causal Graph Edge, Directed Relation, Do-Calculus Interaction, SCM Boundary
     """
 
-    source_node_id: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="The source CID representing the causal parent."
+    source_node_id: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
+        Field(description="The source CID representing the causal parent.")
     )
-    target_node_id: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = Field(
-        description="The target CID representing the downstream dependent node."
+    target_node_id: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
+        Field(description="The target CID representing the downstream dependent node.")
     )
     relation_type: Literal["confounder", "collider", "direct_cause"] = Field(
         description="The Pearl SCM structural classification of the causal edge."
