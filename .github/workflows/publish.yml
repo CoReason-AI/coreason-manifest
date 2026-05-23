@@ -121,8 +121,6 @@ jobs:
           cd bindings/typescript
           npm version "$VERSION" --no-git-tag-version --allow-same-version
       - name: Publish TypeScript Bindings
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           cd bindings/typescript
           npm ci
@@ -131,9 +129,7 @@ jobs:
           if npm view "@coreason-ai/coreason-manifest@$VERSION" version >/dev/null 2>&1; then
             echo "Version $VERSION already exists on the npm registry. Skipping publish."
           else
-            # NOTE: npm provenance verification only supports public repositories.
-            # Re-enable when the repository is made public.
-            npm publish --access public --verbose
+            npm publish --access public --provenance --verbose
           fi
 
   publish-crate:
