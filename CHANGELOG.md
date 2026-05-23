@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.97.1](https://github.com/CoReason-AI/coreason-manifest/compare/v0.97.0...v0.97.1) (2026-05-23)
+
+
+### Bug Fixes
+
+* resolve CI failures in cryptographic determinism and publish workflow ([e587f10](https://github.com/CoReason-AI/coreason-manifest/commit/e587f10087d5d92e76a232555a2e8bfd6f784e2d))
+
 ## [0.97.0](https://github.com/CoReason-AI/coreason-manifest/compare/v0.96.1...v0.97.0) (2026-05-23)
 
 
