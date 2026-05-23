@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.95.0](https://github.com/CoReason-AI/coreason-manifest/compare/v0.94.12...v0.95.0) (2026-05-23)
+
+
+### Features
+
+* **ontology:** support ES256 signature algorithm and update cross-language bindings ([c68e161](https://github.com/CoReason-AI/coreason-manifest/commit/c68e161d869e9497cfe78a31f1a0a47b3954ec94))
+
 ## [0.94.12](https://github.com/CoReason-AI/coreason-manifest/compare/v0.94.11...v0.94.12) (2026-05-22)
 
 
