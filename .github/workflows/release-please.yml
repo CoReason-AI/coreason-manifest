@@ -94,7 +94,7 @@ jobs:
                       f.write(f"config_overrides={config_json}\n")
           '
 
-      - uses: googleapis/release-please-action@v4
+      - uses: googleapis/release-please-action@v5
         id: release
         with:
           token: ${{ secrets.GITOPS_PROMOTION_TOKEN || secrets.GITHUB_TOKEN }}
