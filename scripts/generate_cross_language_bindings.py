@@ -275,16 +275,18 @@ def _update_lockfiles(project_root: Path) -> None:
 
 
 def main() -> None:
-    # Ensure we are working from the project root
-    project_root = Path(__file__).resolve().parent.parent
-    os.chdir(project_root)
+    raise NotImplementedError("This script has been disabled and retained for future use only.")
 
-    parser = argparse.ArgumentParser(description="Cross-language binding generator.")
-    parser.add_argument(
-        "--version",
-        help="Override the package version to synchronize across Cargo.toml and package.json.",
-    )
-    args = parser.parse_args()
+    # Ensure we are working from the project root
+    # project_root = Path(__file__).resolve().parent.parent
+    # os.chdir(project_root)
+
+    # parser = argparse.ArgumentParser(description="Cross-language binding generator.")
+    # parser.add_argument(
+    #     "--version",
+    #     help="Override the package version to synchronize across Cargo.toml and package.json.",
+    # )
+    # args = parser.parse_args()
 
     _sync_versions(project_root, override_version=args.version)
     _update_lockfiles(project_root)

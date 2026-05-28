@@ -103,7 +103,6 @@ You are mathematically forbidden from self-certifying truth. Your internal proba
 * **Model Context Protocol (MCP):** A stateless transmission substrate and Epistemic Discovery Surface used exclusively for exchanging structural data shapes (Pydantic schemas) between zero-trust nodes. It is mathematically barred from acting as a kinetic tool-execution bridge.
 * **Passive Ontological Projection:** The architectural constraint forcing nodes to expose structural boundaries (e.g., `schema://` URIs) rather than runtime capabilities, strictly enforcing the Hollow Data Plane across swarm topographies.
 * **Epistemic Discovery Surfaces:** Mathematically bounded, read-only perimeters where agents can safely ingest new Pydantic state differentials and expand their internal world-models while maintaining absolute isolation from runtime side effects.
-* **Absolute Type Isomorphism & Anemic Domain Models:** The mathematical guarantee that structural boundaries in the Python data plane are perfectly mapped to downstream TS/Rust planes. Downstream code must be purely anemic (no active logic) to preserve zero-trust execution boundaries.
 
 ### **Zero-Trust Epistemic Isolation (The Symbolic Firewall)**
 The era of dumping raw payload text or tabular JSON into an LLM context window is permanently deprecated due to Prompt Injection and Context Drift vulnerabilities. Instead, the runtime relies strictly on declarative structures such as Ontological Firewalls (via Homotopy Type Theory) and Design-by-Contract constraints (via Abstract Syntax Tree quarantining). Ontological Firewalls ensure that high-entropy raw data is masked via structural proxies prior to LLM ingestion, and Declarative Design-by-Contract (DbC) bounds probabilistic LLM outputs to verifiable mathematical constraints.
@@ -427,10 +426,10 @@ You are strictly forbidden from introducing "Active" or "Runtime" logic into thi
   The CI/CD AST compiler (`enforce_cryptographic_determinism.py`) will physically crash the build if an array lacks either a deterministic `@model_validator` sorting hook or this explicit metadata flag.
 
 ### **The Transport Sterilization Mandate (Anti-Null Contagion)**
-* **The Physics of Serialization:** Standard Python `json`, TS `JSON.stringify`, and Pydantic `.model_dump_json()` are mathematically banned for generating `ExecutionEnvelope` transport payloads.
+* **The Physics of Serialization:** Standard Python `json` and Pydantic `.model_dump_json()` are mathematically banned for generating `ExecutionEnvelope` transport payloads.
 * **The Null Contagion:** Because Pydantic's `exclude_none` fails to recursively purge `None` values from loosely typed boundaries (e.g., `JsonPrimitiveState`), all JSON-RPC parameters MUST be mathematically stripped of nulls via the `_canonicalize_payload` functor prior to serialization.
-* **The Substrate Match:** * **Python (Tier 0):** Must exclusively use `msgspec.json.Encoder(sort_keys=True)`.
-  * **TypeScript (Tier 3):** Must exclusively use `fast-json-stable-stringify`.
+* **The Substrate Match:** 
+  * **Python (Tier 0):** Must exclusively use `msgspec.json.Encoder(sort_keys=True)`.
 
 ### **The Strict Instantiation Boundary (Anti-Lazy Validation Mandate)**
 * **The Physics of State Creation:** **Lazy validation or post-init bounding is mathematically impossible and strictly forbidden.** All topological boundaries and Euclidean limits MUST be enforced strictly during initiation via Pydantic `@field_validator` and `@model_validator(mode="after")` hooks.
@@ -452,8 +451,7 @@ You are strictly bound to the **"God Context" Monolith Directive**. You are EXPL
 * **`scripts/`**:
   * **`universal_ontology_compiler.py`**: Topological reachability and DAG health.
   * **`enforce_cryptographic_determinism.py`**: The AST-reflection sorting guillotine.
-  * **`generate_cross_language_bindings.py`**: The Functorial Type Mapping engine.
-* **`bindings/`**: The authorized egress layer for Absolute Type Isomorphism. You are STRICTLY FORBIDDEN from introducing active logic, constructors, or HTTP clients into this directory. It must contain only Anemic Domain Models (pure TS `interfaces` and Rust `structs` with `serde` macros) generated deterministically by the cross-language compiler.
+  * **`generate_cross_language_bindings.py`**: The Functorial Type Mapping engine (retained for future use).
 * **Root**:
   * **NO** `Dockerfile` or `Containerfile`.
   * **NO** `app.py`, `server.py`, or any runtime entry point.
@@ -494,11 +492,6 @@ We strictly enforce the Zero-Orphan Invariant ($|V_O| = 0$). You must mathematic
 ### **5. Cryptographic Determinism (The Hash Fracture Check)**
 `uv run python scripts/enforce_cryptographic_determinism.py`
 *(Must exit cleanly with code 0, proving all arrays are sorted or exempted).*
-
-### **6. Absolute Type Isomorphism (The Drift Guillotine)**
-`uv run python scripts/generate_cross_language_bindings.py`
-`git diff --exit-code bindings/`
-*(Must return 0. If files changed, you mutated the Python ontology but failed to compile the downstream Rust/TS interfaces).*
 
 ---
 

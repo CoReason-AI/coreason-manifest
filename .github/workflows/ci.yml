@@ -54,28 +54,6 @@ jobs:
       - name: Enforce Cryptographic Determinism
         run: uv run python scripts/enforce_cryptographic_determinism.py
 
-      - name: Setup Node.js (For json-schema-to-typescript)
-        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.1
-        with:
-          node-version: '24.x'
-
-      - name: Setup Rust (For Cargo Typify/Fmt)
-        uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # v1
-        with:
-          toolchain: stable
-
-      - name: Install cargo-typify
-        run: cargo install cargo-typify
-
-      - name: Generate Cross-Language Bindings
-        run: uv run python scripts/generate_cross_language_bindings.py
-
-      - name: Enforce Absolute Type Isomorphism (Drift Guillotine)
-        run: |
-          git add bindings/
-          # We ignore version changes in package.json and Cargo.toml as they are dynamic
-          git diff --staged --exit-code -I 'version'
-
 
       - name: Deptry Check
         run: uv run deptry src/
