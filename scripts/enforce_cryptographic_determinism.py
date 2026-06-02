@@ -107,15 +107,6 @@ def check_ast_for_sort(cls: type, field_name: str) -> bool:
                         arg2 = call.args[2]
                         if isinstance(arg2, ast.Call) and isinstance(arg2.func, ast.Name) and arg2.func.id == "sorted":
                             return True
-
-            # Or look for in-place sort like self.field_name.sort(...)
-            if (
-                isinstance(call.func, ast.Attribute)
-                and call.func.attr == "sort"
-                and isinstance(call.func.value, ast.Attribute)
-                and call.func.value.attr == field_name
-            ):
-                return True
     return False
 
 
