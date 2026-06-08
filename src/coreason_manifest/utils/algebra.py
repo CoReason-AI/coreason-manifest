@@ -557,6 +557,10 @@ def _validate_ssrf_safety(url: Any) -> Any:
     return url
 
 
+
+_JSON_ENCODER = msgspec.json.Encoder(order="deterministic")
+
+
 def _canonicalize_json_and_hash(schema: dict[str, Any]) -> tuple[bytes, str]:
     """AGENT INSTRUCTION: Canonicalize a JSON-serializable dict and compute its SHA-256 hash.
 
@@ -582,19 +586,21 @@ def _canonicalize_json_and_hash(schema: dict[str, Any]) -> tuple[bytes, str]:
     def canonicalize(v: Any) -> Any:
         if isinstance(v, dict):
             new_dict = {}
-            for k in sorted(v.keys()):
-                cv = canonicalize(v[k])
-                if cv is not None:
-                    new_dict[k] = cv
+            for k, val in v.items():
+                if val is not None:
+                    if isinstance(val, (dict, list)):
+                        cv = canonicalize(val)
+                        if cv is not None:
+                            new_dict[k] = cv
+                    else:
+                        new_dict[k] = val
             return new_dict
         if isinstance(v, list):
-            return [canonicalize(item) for item in v]
+            return [canonicalize(item) if isinstance(item, (dict, list)) else item for item in v]
         return v
 
-    import json
-
     canonical = canonicalize(schema)
-    canonical_bytes = json.dumps(canonical, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    canonical_bytes = _JSON_ENCODER.encode(canonical)
     digest = hashlib.sha256(canonical_bytes).hexdigest()
     return canonical_bytes, digest
 
