@@ -557,7 +557,6 @@ def _validate_ssrf_safety(url: Any) -> Any:
     return url
 
 
-
 _JSON_ENCODER = msgspec.json.Encoder(order="deterministic")
 
 
