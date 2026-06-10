@@ -8001,18 +8001,14 @@ class CognitiveActionSpaceManifest(CoreasonBaseState):
                 return f"intent:{edge.target_intent.min_isometry_score}:{struct_types}"
             return "unknown"
 
-        for key in self.transition_matrix:
-            object.__setattr__(
-                self,
-                "transition_matrix",
-                {
-                    **self.transition_matrix,
-                    key: sorted(
-                        self.transition_matrix[key],
-                        key=edge_sort_key,
-                    ),
-                },
-            )
+        # ⚡ Bolt Optimization: Replace O(n^2) dictionary spread inside a loop
+        # with an O(n) dict comprehension to drastically improve performance
+        # during validation of large transition matrices.
+        object.__setattr__(
+            self,
+            "transition_matrix",
+            {key: sorted(val, key=edge_sort_key) for key, val in self.transition_matrix.items()},
+        )
 
         return self
 
