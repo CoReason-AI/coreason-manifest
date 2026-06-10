@@ -50,5 +50,5 @@ class DeterministicTransportAdapter:
             "params": canonical_dict,
             "id": request_cid,  # Note: External Protocol Exemption.
         }
-        encoder = msgspec.json.Encoder(order="deterministic")
-        return encoder.encode(wrapped_payload)
+        encoder: msgspec.json.Encoder = msgspec.json.Encoder(order="deterministic")
+        return bytes(encoder.encode(wrapped_payload))
