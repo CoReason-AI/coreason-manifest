@@ -434,6 +434,60 @@ def transmute_to_pycrdt_doc(manifest: ontology.TemporalGraphCRDTManifest) -> Any
     return doc
 
 
+def _parse_relaxed_ipv4(hostname: str) -> ipaddress.IPv4Address | None:
+    parts = hostname.split(".")
+    if len(parts) > 4:
+        return None
+
+    parsed_parts = []
+    for part in parts:
+        if not part:
+            return None
+        # Handle hex
+        if part.lower().startswith("0x"):
+            try:
+                val = int(part, 16)
+            except ValueError:
+                return None
+        # Handle octal
+        elif part.startswith("0") and len(part) > 1:
+            try:
+                val = int(part, 8)
+            except ValueError:
+                return None
+        # Handle decimal
+        else:
+            try:
+                val = int(part, 10)
+            except ValueError:
+                return None
+        parsed_parts.append(val)
+
+    if len(parsed_parts) == 4:
+        if any(p > 255 for p in parsed_parts):
+            return None
+        val = (parsed_parts[0] << 24) | (parsed_parts[1] << 16) | (parsed_parts[2] << 8) | parsed_parts[3]
+    elif len(parsed_parts) == 3:
+        if parsed_parts[0] > 255 or parsed_parts[1] > 255 or parsed_parts[2] > 65535:
+            return None
+        val = (parsed_parts[0] << 24) | (parsed_parts[1] << 16) | parsed_parts[2]
+    elif len(parsed_parts) == 2:
+        if parsed_parts[0] > 255 or parsed_parts[1] > 16777215:
+            return None
+        val = (parsed_parts[0] << 24) | parsed_parts[1]
+    elif len(parsed_parts) == 1:
+        if parsed_parts[0] > 4294967295:
+            return None
+        val = parsed_parts[0]
+    else:
+        return None
+
+    try:
+        return ipaddress.IPv4Address(val)
+    except ValueError:
+        return None
+
+
 def _validate_ssrf_safety(url: Any) -> Any:
     """
     Mechanistically evaluates an HttpUrl or AnyUrl to prevent Server-Side Request Forgery (SSRF).
@@ -457,9 +511,14 @@ def _validate_ssrf_safety(url: Any) -> Any:
         if hostname.startswith("[") and hostname.endswith("]"):
             hostname = hostname[1:-1]
 
+        ip = None
         try:
             ip = ipaddress.ip_address(hostname)
         except ValueError:
+            # Try relaxed IPv4 parsing for SSRF obfuscation
+            ip = _parse_relaxed_ipv4(hostname)
+
+        if not ip:
             # Not an IP address, so no IP-based check is possible without DNS resolution,
             # which is forbidden by the Air-Gap Mandate.
             return url
