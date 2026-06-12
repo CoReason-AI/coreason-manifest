@@ -21,7 +21,6 @@ The CI drift guillotine (`git diff --exit-code bindings/`) enforces that committ
 bindings always match the current schema.
 """
 
-import argparse
 import json
 import os
 import re
@@ -276,20 +275,6 @@ def _update_lockfiles(project_root: Path) -> None:
 
 def main() -> None:
     raise NotImplementedError("This script has been disabled and retained for future use only.")
-
-    # Ensure we are working from the project root
-    # project_root = Path(__file__).resolve().parent.parent
-    # os.chdir(project_root)
-
-    # parser = argparse.ArgumentParser(description="Cross-language binding generator.")
-    # parser.add_argument(
-    #     "--version",
-    #     help="Override the package version to synchronize across Cargo.toml and package.json.",
-    # )
-    # args = parser.parse_args()
-
-    _sync_versions(project_root, override_version=args.version)
-    _update_lockfiles(project_root)
 
     schema_file = "coreason_ontology.schema.json"
     ts_out = "bindings/typescript/src/ontology.ts"
