@@ -462,7 +462,7 @@ def _validate_ssrf_safety(url: Any) -> Any:
             try:
                 standardized_ip = socket.inet_ntoa(socket.inet_aton(hostname))
                 ip = ipaddress.ip_address(standardized_ip)
-            except (OSError, ValueError):
+            except OSError, ValueError:
                 ip = ipaddress.ip_address(hostname)
         except ValueError:
             # Not an IP address, so no IP-based check is possible without DNS resolution,
