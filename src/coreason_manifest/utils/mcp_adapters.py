@@ -19,9 +19,13 @@ def _canonicalize_payload(payload: Any) -> Any:
     """
     Recursively strips all `None` values from dictionaries and lists to mathematically prevent Null Contagion.
     """
-    if isinstance(payload, dict):
+    # ⚡ Bolt Optimization: Using exact type checks (type(payload) is dict) instead of
+    # isinstance() speeds up deep recursive processing significantly. This is perfectly
+    # safe here because Pydantic's model_dump(mode="json") guarantees native dicts/lists.
+    ptype = type(payload)
+    if ptype is dict:
         return {k: _canonicalize_payload(v) for k, v in payload.items() if v is not None}
-    if isinstance(payload, list):
+    if ptype is list:
         return [_canonicalize_payload(v) for v in payload if v is not None]
     return payload
 
@@ -37,8 +41,13 @@ class DeterministicTransportAdapter:
     MCP ROUTING TRIGGERS: JSON-RPC 2.0, Byte Serialization, Zero-Trust Execution, msgspec, Deterministic Network Transport
     """
 
-    @staticmethod
-    def serialize_envelope(envelope: ExecutionEnvelopeState[Any]) -> bytes:
+    # ⚡ Bolt Optimization: msgspec Encoders are designed to be reused.
+    # Caching the instance here avoids the overhead of instantiating a new C-level
+    # encoder for every single envelope, significantly boosting serialization throughput.
+    _encoder = msgspec.json.Encoder(order="deterministic")
+
+    @classmethod
+    def serialize_envelope(cls, envelope: ExecutionEnvelopeState[Any]) -> bytes:
         payload_dict = envelope.model_dump(mode="json", exclude_none=True, by_alias=True)
         canonical_dict = _canonicalize_payload(payload_dict)
         trace_context = payload_dict.get("trace_context", {})
@@ -50,5 +59,4 @@ class DeterministicTransportAdapter:
             "params": canonical_dict,
             "id": request_cid,  # Note: External Protocol Exemption.
         }
-        encoder = msgspec.json.Encoder(order="deterministic")
-        return encoder.encode(wrapped_payload)
+        return bytes(cls._encoder.encode(wrapped_payload))
