@@ -31,3 +31,15 @@ def test_validate_ssrf_safety() -> None:
         _validate_ssrf_safety(AnyUrl("http://localhost/api"))
     with pytest.raises(ValueError, match="SSRF"):
         _validate_ssrf_safety(AnyUrl("http://localhost.localdomain/api"))
+
+    # Octal, Hex, and integer bypass attempts
+    with pytest.raises(ValueError, match="SSRF"):
+        _validate_ssrf_safety(AnyUrl("http://0177.0.0.1/api"))
+    with pytest.raises(ValueError, match="SSRF"):
+        _validate_ssrf_safety(AnyUrl("http://0x7f.0.0.1/api"))
+    with pytest.raises(ValueError, match="SSRF"):
+        _validate_ssrf_safety(AnyUrl("http://127.1/api"))
+    with pytest.raises(ValueError, match="SSRF"):
+        _validate_ssrf_safety(AnyUrl("http://012.0.0.1/api")) # 10.0.0.1
+    with pytest.raises(ValueError, match="SSRF"):
+        _validate_ssrf_safety(AnyUrl("http://0xa.0.0.1/api")) # 10.0.0.1
