@@ -281,6 +281,7 @@ def main() -> None:
     os.chdir(project_root)
 
     import argparse
+
     parser = argparse.ArgumentParser(description="Cross-language binding generator.")
     parser.add_argument(
         "--version",
