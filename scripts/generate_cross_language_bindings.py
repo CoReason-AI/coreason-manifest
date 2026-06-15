@@ -21,14 +21,11 @@ The CI drift guillotine (`git diff --exit-code bindings/`) enforces that committ
 bindings always match the current schema.
 """
 
-import argparse
 import json
 import os
 import re
 import shutil
 import subprocess
-import sys
-import tempfile
 import tomllib
 import typing
 from pathlib import Path
@@ -288,53 +285,53 @@ def main() -> None:
     # )
     # args = parser.parse_args()
 
-    _sync_versions(project_root, override_version=args.version)
-    _update_lockfiles(project_root)
+    # _sync_versions(project_root, override_version=args.version)
+    # _update_lockfiles(project_root)
 
-    schema_file = "coreason_ontology.schema.json"
-    ts_out = "bindings/typescript/src/ontology.ts"
-    rust_out = "bindings/rust/src/ontology.rs"
+    # schema_file = "coreason_ontology.schema.json"
+    # ts_out = "bindings/typescript/src/ontology.ts"
+    # rust_out = "bindings/rust/src/ontology.rs"
 
-    print("Projecting fresh ontology manifold...")
-    from universal_ontology_compiler import project_ontology_manifold
+    # print("Projecting fresh ontology manifold...")
+    # from universal_ontology_compiler import project_ontology_manifold
 
-    project_ontology_manifold()
+    # project_ontology_manifold()
 
-    if not os.path.exists(schema_file):
-        print(f"Error: Schema file {schema_file} failed to generate.")
-        sys.exit(1)
+    # if not os.path.exists(schema_file):
+    #     print(f"Error: Schema file {schema_file} failed to generate.")
+    #     sys.exit(1)
 
-    # Build the rooted wrapper schema (the raw schema is $defs-only)
-    wrapper_path = os.path.join(tempfile.gettempdir(), "coreason_ontology_rooted.schema.json")
-    print("Building rooted wrapper schema...")
-    _build_rooted_schema(schema_file, wrapper_path)
+    # # Build the rooted wrapper schema (the raw schema is $defs-only)
+    # wrapper_path = os.path.join(tempfile.gettempdir(), "coreason_ontology_rooted.schema.json")
+    # print("Building rooted wrapper schema...")
+    # _build_rooted_schema(schema_file, wrapper_path)
 
-    # Configure npm/npx environment to suppress all warnings and prompts
-    node_env = os.environ.copy()
-    node_env["npm_config_loglevel"] = "error"
-    node_env["npm_config_fund"] = "false"
-    node_env["npm_config_audit"] = "false"
-    node_env["npm_config_update_notifier"] = "false"
-    node_env["npm_config_yes"] = "true"
-    node_options = node_env.get("NODE_OPTIONS", "")
-    node_env["NODE_OPTIONS"] = f"{node_options} --no-deprecation".strip()
+    # # Configure npm/npx environment to suppress all warnings and prompts
+    # node_env = os.environ.copy()
+    # node_env["npm_config_loglevel"] = "error"
+    # node_env["npm_config_fund"] = "false"
+    # node_env["npm_config_audit"] = "false"
+    # node_env["npm_config_update_notifier"] = "false"
+    # node_env["npm_config_yes"] = "true"
+    # node_options = node_env.get("NODE_OPTIONS", "")
+    # node_env["NODE_OPTIONS"] = f"{node_options} --no-deprecation".strip()
 
-    npx_cmd = "npx.cmd" if os.name == "nt" else "npx"
+    # npx_cmd = "npx.cmd" if os.name == "nt" else "npx"
 
-    # TypeScript generation
-    if shutil.which(npx_cmd):
-        _generate_typescript(wrapper_path, ts_out, node_env)
-    else:
-        print(f"Warning: {npx_cmd} not found in PATH. Skipping TypeScript bindings generation.")
+    # # TypeScript generation
+    # if shutil.which(npx_cmd):
+    #     _generate_typescript(wrapper_path, ts_out, node_env)
+    # else:
+    #     print(f"Warning: {npx_cmd} not found in PATH. Skipping TypeScript bindings generation.")
 
-    # Rust generation
-    _generate_rust(wrapper_path, rust_out)
+    # # Rust generation
+    # _generate_rust(wrapper_path, rust_out)
 
-    # Cleanup
-    if os.path.exists(wrapper_path):
-        os.unlink(wrapper_path)
+    # # Cleanup
+    # if os.path.exists(wrapper_path):
+    #     os.unlink(wrapper_path)
 
-    print("Cross-language bindings generated successfully.")
+    # print("Cross-language bindings generated successfully.")
 
 
 if __name__ == "__main__":

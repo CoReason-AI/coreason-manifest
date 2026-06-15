@@ -462,11 +462,11 @@ def _validate_ssrf_safety(url: Any) -> Any:
         except ValueError:
             import socket
             try:
-                if ":" in hostname:
-                    packed = socket.inet_pton(socket.AF_INET6, hostname)
+                if ":" in str(hostname):
+                    packed = socket.inet_pton(socket.AF_INET6, str(hostname))
                     ip_str = socket.inet_ntop(socket.AF_INET6, packed)
                 else:
-                    packed = socket.inet_aton(hostname)
+                    packed = socket.inet_aton(str(hostname))
                     ip_str = socket.inet_ntoa(packed)
                 ip = ipaddress.ip_address(ip_str)
             except OSError:
