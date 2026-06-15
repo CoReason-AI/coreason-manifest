@@ -200,6 +200,12 @@ class TestEpistemicAttentionState:
     @given(uv=unit_vector_strategy())
     @settings(max_examples=15, deadline=None)
     def test_normalized_vector_always_valid(self, uv: tuple[float, float, float]) -> None:
+        import math
+
+        # Manually normalize since Hypothesis strategy normalization might suffer from floating point errors
+        mag_init = math.hypot(*uv)
+        uv = (1.0, 0.0, 0.0) if mag_init == 0.0 else (uv[0] / mag_init, uv[1] / mag_init, uv[2] / mag_init)
+
         obj = EpistemicAttentionState(
             origin=self._se3(),
             direction_unit_vector=uv,

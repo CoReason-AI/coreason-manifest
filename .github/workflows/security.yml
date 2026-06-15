@@ -88,5 +88,3 @@ jobs:
             pip-audit-report.html
             npm-audit.json
           retention-days: 14
-
-
