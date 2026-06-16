@@ -13,7 +13,6 @@ from __future__ import annotations
 import ast
 import math
 import operator
-import re
 import typing
 from enum import StrEnum
 from typing import Annotated, Any, Literal, Self
@@ -3251,7 +3250,7 @@ class EphemeralNamespacePartitionState(CoreasonBaseState):
     execution_runtime: Literal["wasm32-wasi", "riscv32-zkvm", "bpf"] = Field(
         description="The strict virtual machine target mandated for dynamic execution."
     )
-    authorized_bytecode_hashes: list[Annotated[str, StringConstraints(min_length=1, max_length=128)]] = Field(
+    authorized_bytecode_hashes: list[Annotated[str, StringConstraints(pattern=r"^[a-f0-9]{64}$")]] = Field(
         min_length=1, description="The explicit whitelist of SHA-256 hashes allowed to execute within this partition."
     )
     max_ttl_seconds: int = Field(
@@ -3268,13 +3267,6 @@ class EphemeralNamespacePartitionState(CoreasonBaseState):
     allow_subprocess_spawning: bool = Field(
         default=False, description="Capability-based flag to allow or deny OS-level process spawning."
     )
-
-    @model_validator(mode="after")
-    def validate_cryptographic_hashes(self) -> Self:
-        for h in self.authorized_bytecode_hashes:
-            if not re.fullmatch(r"^[a-f0-9]{64}$", h):
-                raise ValueError(f"Invalid SHA-256 hash in whitelist: {h}")
-        return self
 
     @model_validator(mode="after")
     def _enforce_canonical_sort(self) -> Self:
