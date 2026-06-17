@@ -8021,8 +8021,7 @@
         "authorized_bytecode_hashes": {
           "description": "The explicit whitelist of SHA-256 hashes allowed to execute within this partition.",
           "items": {
-            "maxLength": 128,
-            "minLength": 1,
+            "pattern": "^[a-f0-9]{64}$",
             "type": "string"
           },
           "minItems": 1,
