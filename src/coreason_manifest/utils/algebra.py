@@ -341,10 +341,9 @@ def compute_merkle_directory_cid(file_contents: dict[str, bytes]) -> str:
     Returns:
         A string in the format ``sha256:<64-char hex digest>``.
     """
-    file_hashes: list[str] = []
-    for filename in sorted(file_contents.keys()):
-        file_hash = hashlib.sha256(file_contents[filename]).hexdigest()
-        file_hashes.append(f"{filename}:{file_hash}")
+    file_hashes: list[str] = [
+        f"{filename}:{hashlib.sha256(file_contents[filename]).hexdigest()}" for filename in sorted(file_contents.keys())
+    ]
 
     merkle_input = "\n".join(file_hashes).encode("utf-8")
     return f"sha256:{hashlib.sha256(merkle_input).hexdigest()}"
