@@ -457,12 +457,19 @@ def _validate_ssrf_safety(url: Any) -> Any:
         if hostname.startswith("[") and hostname.endswith("]"):
             hostname = hostname[1:-1]
 
+        import socket
+
         try:
             ip = ipaddress.ip_address(hostname)
         except ValueError:
-            # Not an IP address, so no IP-based check is possible without DNS resolution,
-            # which is forbidden by the Air-Gap Mandate.
-            return url
+            # Check for alternative IPv4 formats like 127.1, 0x7f000001
+            try:
+                ip_bytes = socket.inet_aton(hostname)
+                ip = ipaddress.ip_address(socket.inet_ntoa(ip_bytes))
+            except (OSError, ValueError):
+                # Not an IP address, so no IP-based check is possible without DNS resolution,
+                # which is forbidden by the Air-Gap Mandate.
+                return url
 
         if (
             not ip.is_global
