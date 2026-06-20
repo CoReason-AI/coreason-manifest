@@ -439,6 +439,8 @@ def _validate_ssrf_safety(url: Any) -> Any:
     Mechanistically evaluates an HttpUrl or AnyUrl to prevent Server-Side Request Forgery (SSRF).
     Mathematically blocks local, loopback, private, and bogon IP space without invoking dynamic DNS resolution.
     """
+    import socket
+
     try:
         url_str = str(url)
         parsed = urllib.parse.urlparse(url_str)
@@ -460,9 +462,25 @@ def _validate_ssrf_safety(url: Any) -> Any:
         try:
             ip = ipaddress.ip_address(hostname)
         except ValueError:
-            # Not an IP address, so no IP-based check is possible without DNS resolution,
-            # which is forbidden by the Air-Gap Mandate.
-            return url
+            ip = None
+            if hostname:
+                try:
+                    ip_bytes = socket.inet_aton(hostname)
+                    ip = ipaddress.ip_address(socket.inet_ntoa(ip_bytes))
+                except (OSError, ValueError, TypeError):
+                    pass
+
+                if not ip and hasattr(socket, "AF_INET6"):
+                    try:
+                        ip_bytes = socket.inet_pton(socket.AF_INET6, hostname)
+                        ip = ipaddress.ip_address(socket.inet_ntop(socket.AF_INET6, ip_bytes))
+                    except (OSError, ValueError, TypeError):
+                        pass
+
+            if not ip:
+                # Not an IP address, so no IP-based check is possible without DNS resolution,
+                # which is forbidden by the Air-Gap Mandate.
+                return url
 
         if (
             not ip.is_global
