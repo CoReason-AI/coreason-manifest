@@ -463,18 +463,19 @@ def _validate_ssrf_safety(url: Any) -> Any:
             ip = ipaddress.ip_address(hostname)
         except ValueError:
             ip = None
-            try:
-                ip_bytes = socket.inet_aton(hostname)
-                ip = ipaddress.ip_address(socket.inet_ntoa(ip_bytes))
-            except (socket.error, ValueError):
-                pass
-
-            if not ip and hasattr(socket, "AF_INET6"):
+            if hostname:
                 try:
-                    ip_bytes = socket.inet_pton(socket.AF_INET6, hostname)
-                    ip = ipaddress.ip_address(socket.inet_ntop(socket.AF_INET6, ip_bytes))
-                except (socket.error, ValueError):
+                    ip_bytes = socket.inet_aton(hostname)
+                    ip = ipaddress.ip_address(socket.inet_ntoa(ip_bytes))
+                except (OSError, ValueError, TypeError):
                     pass
+
+                if not ip and hasattr(socket, "AF_INET6"):
+                    try:
+                        ip_bytes = socket.inet_pton(socket.AF_INET6, hostname)
+                        ip = ipaddress.ip_address(socket.inet_ntop(socket.AF_INET6, ip_bytes))
+                    except (OSError, ValueError, TypeError):
+                        pass
 
             if not ip:
                 # Not an IP address, so no IP-based check is possible without DNS resolution,
