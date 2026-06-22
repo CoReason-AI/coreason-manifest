@@ -21,7 +21,6 @@ The CI drift guillotine (`git diff --exit-code bindings/`) enforces that committ
 bindings always match the current schema.
 """
 
-import argparse
 import json
 import os
 import re
@@ -288,8 +287,8 @@ def main() -> None:
     # )
     # args = parser.parse_args()
 
-    _sync_versions(project_root, override_version=args.version)
-    _update_lockfiles(project_root)
+# _sync_versions(project_root, override_version=args.version)
+# _update_lockfiles(project_root)
 
     schema_file = "coreason_ontology.schema.json"
     ts_out = "bindings/typescript/src/ontology.ts"
