@@ -442,6 +442,12 @@ def _validate_ssrf_safety(url: Any) -> Any:
     try:
         url_str = str(url)
         parsed = urllib.parse.urlparse(url_str)
+
+        if parsed.scheme.lower() not in ["http", "https"]:
+            raise ValueError(
+                f"SSRF Security Violation: The URL scheme '{parsed.scheme}' is not permitted. Only HTTP and HTTPS are allowed."
+            )
+
         hostname = parsed.hostname
 
         if not hostname:
