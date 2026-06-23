@@ -31,3 +31,11 @@ def test_validate_ssrf_safety() -> None:
         _validate_ssrf_safety(AnyUrl("http://localhost/api"))
     with pytest.raises(ValueError, match="SSRF"):
         _validate_ssrf_safety(AnyUrl("http://localhost.localdomain/api"))
+
+    # Invalid schemes
+    with pytest.raises(ValueError, match=r"SSRF Security Violation.*scheme.*not permitted"):
+        _validate_ssrf_safety(AnyUrl("file:///etc/passwd"))
+    with pytest.raises(ValueError, match=r"SSRF Security Violation.*scheme.*not permitted"):
+        _validate_ssrf_safety(AnyUrl("ftp://example.com/"))
+    with pytest.raises(ValueError, match=r"SSRF Security Violation.*scheme.*not permitted"):
+        _validate_ssrf_safety(AnyUrl("gopher://1.1.1.1/"))
