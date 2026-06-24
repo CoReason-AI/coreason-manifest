@@ -27,6 +27,7 @@ import copy
 import hashlib
 import ipaddress
 import math
+import socket
 import typing
 import urllib.parse
 from collections.abc import Sequence
@@ -452,6 +453,14 @@ def _validate_ssrf_safety(url: Any) -> Any:
             raise ValueError(
                 f"SSRF Security Violation: The target hostname '{hostname}' resolves to the local loopback network."
             )
+
+        # Try to normalize alternative IPv4 representations (e.g., 127.1, 0x7f000001, 0)
+        # to standard dotted-quad format before parsing.
+        try:
+            packed_ip = socket.inet_aton(hostname)
+            hostname = socket.inet_ntoa(packed_ip)
+        except OSError:
+            pass
 
         # Remove IPv6 brackets if present
         if hostname.startswith("[") and hostname.endswith("]"):
