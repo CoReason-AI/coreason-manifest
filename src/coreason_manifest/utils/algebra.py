@@ -24,6 +24,7 @@
 import ast
 import base64
 import copy
+import functools
 import hashlib
 import ipaddress
 import math
@@ -270,6 +271,18 @@ def calculate_remaining_compute(ledger: ontology.EpistemicLedgerState, initial_e
     return remaining
 
 
+@functools.lru_cache(maxsize=4096)
+def _decode_and_norm_vector(vector_base64: str) -> tuple[np.ndarray, float]:
+    """Caches the decoded numpy array and its norm to prevent redundant expensive operations."""
+    try:
+        b = base64.b64decode(vector_base64)
+    except Exception as e:
+        raise ValueError("Topological Contradiction: Invalid base64 encoding.") from e
+    arr = np.frombuffer(b, dtype=np.float32)
+    norm = float(np.linalg.norm(arr))
+    return arr, norm
+
+
 def calculate_latent_alignment(
     v1: VectorEmbeddingState, v2: VectorEmbeddingState, policy: EpistemicOntologicalAlignmentPolicy
 ) -> float:
@@ -280,17 +293,8 @@ def calculate_latent_alignment(
     if v1.foundation_matrix_name != v2.foundation_matrix_name or v1.dimensionality != v2.dimensionality:
         raise ValueError("Topological Contradiction: Vector geometries are incommensurable.")
 
-    try:
-        b1 = base64.b64decode(v1.vector_base64)
-    except Exception as e:
-        raise ValueError("Topological Contradiction: Invalid base64 encoding.") from e
-    arr1 = np.frombuffer(b1, dtype=np.float32)
-
-    try:
-        b2 = base64.b64decode(v2.vector_base64)
-    except Exception as e:
-        raise ValueError("Topological Contradiction: Invalid base64 encoding.") from e
-    arr2 = np.frombuffer(b2, dtype=np.float32)
+    arr1, norm1 = _decode_and_norm_vector(v1.vector_base64)
+    arr2, norm2 = _decode_and_norm_vector(v2.vector_base64)
 
     if len(arr1) != v1.dimensionality or len(arr2) != v2.dimensionality:
         raise ValueError("Byte length does not match declared dimensionality.")
@@ -299,8 +303,6 @@ def calculate_latent_alignment(
     # and overflow for large vectors (yielding 0.0 similarity instead of 1.0).
     # We MUST use np.linalg.norm to ensure BLAS-level scaling (snrm2) for mathematical correctness.
     with np.errstate(all="ignore"):
-        norm1 = float(np.linalg.norm(arr1))
-        norm2 = float(np.linalg.norm(arr2))
         similarity = 0.0 if norm1 == 0.0 or norm2 == 0.0 else float(np.dot(arr1, arr2) / (norm1 * norm2))
 
     if math.isnan(similarity):
