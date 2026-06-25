@@ -927,7 +927,16 @@ def test_calculate_latent_alignment_edge_cases() -> None:
     # Clamping tests for precision drift
     # Force dot product to be very large via mocking or edge case values
 
-    with unittest.mock.patch("numpy.dot") as mock_dot:
+    from coreason_manifest.utils.algebra import _decode_and_norm_vector
+
+    _decode_and_norm_vector.cache_clear()
+
+    with (
+        unittest.mock.patch("coreason_manifest.utils.algebra.np.dot") as mock_dot,
+        unittest.mock.patch(
+            "coreason_manifest.utils.algebra._decode_and_norm_vector", new=_decode_and_norm_vector.__wrapped__
+        ),
+    ):
         # Force dot_product > mag1 * mag2 (so similarity > 1.0)
         # We need dot product to return 1.1 when vectors are different (arr1, arr2)
         # but 1.0 when vectors are the same (arr1, arr1 or arr2, arr2) for mag1/mag2
@@ -947,7 +956,16 @@ def test_calculate_latent_alignment_edge_cases() -> None:
         )
         assert calculate_latent_alignment(v1, v2, policy) == 1.0
 
-    with unittest.mock.patch("numpy.dot") as mock_dot:
+    from coreason_manifest.utils.algebra import _decode_and_norm_vector
+
+    _decode_and_norm_vector.cache_clear()
+
+    with (
+        unittest.mock.patch("coreason_manifest.utils.algebra.np.dot") as mock_dot,
+        unittest.mock.patch(
+            "coreason_manifest.utils.algebra._decode_and_norm_vector", new=_decode_and_norm_vector.__wrapped__
+        ),
+    ):
         # Force dot_product < -mag1 * mag2 (so similarity < -1.0)
         def mock_dot_side_effect2(a: Any, b: Any) -> float:
             if a is b:
@@ -965,7 +983,16 @@ def test_calculate_latent_alignment_edge_cases() -> None:
         )
         assert calculate_latent_alignment(v1, v2, policy) == -1.0
 
-    with unittest.mock.patch("numpy.dot") as mock_dot:
+    from coreason_manifest.utils.algebra import _decode_and_norm_vector
+
+    _decode_and_norm_vector.cache_clear()
+
+    with (
+        unittest.mock.patch("coreason_manifest.utils.algebra.np.dot") as mock_dot,
+        unittest.mock.patch(
+            "coreason_manifest.utils.algebra._decode_and_norm_vector", new=_decode_and_norm_vector.__wrapped__
+        ),
+    ):
         # Force similarity to be NaN by returning float('nan') for dot_product
         def mock_dot_side_effect3(a: Any, b: Any) -> float:
             if a is b:
