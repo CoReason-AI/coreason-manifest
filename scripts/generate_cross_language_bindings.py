@@ -21,7 +21,6 @@ The CI drift guillotine (`git diff --exit-code bindings/`) enforces that committ
 bindings always match the current schema.
 """
 
-import argparse
 import json
 import os
 import re
