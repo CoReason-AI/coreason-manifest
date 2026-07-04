@@ -467,7 +467,7 @@ def _validate_ssrf_safety(url: Any) -> Any:
             try:
                 packed = socket.inet_aton(hostname)
                 ip = ipaddress.ip_address(socket.inet_ntoa(packed))
-            except (OSError, ValueError):
+            except OSError, ValueError:
                 pass
 
             if ip is None:
