@@ -52,12 +52,13 @@ def _pure_python_is_dag(adjacency: dict[str, list[str]]) -> bool:
         for t in targets:
             in_degree[t] = in_degree.get(t, 0) + 1
 
-    queue: list[str] = [n for n, d in in_degree.items() if d == 0]
+    queue = [n for n, d in in_degree.items() if d == 0]
     visited = 0
+    get_adj = adjacency.get
     while queue:
         node = queue.pop()
         visited += 1
-        for t in adjacency.get(node, []):
+        for t in get_adj(node, []):
             in_degree[t] -= 1
             if in_degree[t] == 0:
                 queue.append(t)
@@ -71,14 +72,17 @@ def _pure_python_longest_path_length(adjacency: dict[str, list[str]]) -> int:
         for t in targets:
             in_degree[t] = in_degree.get(t, 0) + 1
 
-    queue: list[str] = [n for n, d in in_degree.items() if d == 0]
-    dist: dict[str, int] = dict.fromkeys(adjacency, 0)
+    queue = [n for n, d in in_degree.items() if d == 0]
+    dist = dict.fromkeys(adjacency, 0)
 
+    get_adj = adjacency.get
+
+    max_dist = 0
     while queue:
         node = queue.pop()
-        node_dist = dist.get(node, 0)
+        node_dist = dist[node]
 
-        for t in adjacency.get(node, []):
+        for t in get_adj(node, []):
             in_degree[t] -= 1
             if in_degree[t] == 0:
                 queue.append(t)
@@ -86,8 +90,10 @@ def _pure_python_longest_path_length(adjacency: dict[str, list[str]]) -> int:
             candidate = node_dist + 1
             if candidate > dist.get(t, 0):
                 dist[t] = candidate
+                if candidate > max_dist:
+                    max_dist = candidate
 
-    return max(dist.values()) if dist else 0
+    return max_dist
 
 
 def _validate_payload_bounds(
