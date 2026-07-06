@@ -1,0 +1,3 @@
+## 2025-02-15 - Caching decoded base64 array in calculation loop
+**Learning:** In a codebase with frozen `pydantic` models that define mathematically immutable boundaries via `__hash__` and structural serialization, bypassing immutability bounds with `object.__setattr__` is an established convention for internal caching. I successfully applied this to avoid repeatedly decoding large base64 strings to NumPy arrays and calculating their norms in `calculate_latent_alignment`.
+**Action:** When working on frozen Pydantic models with expensive derived values, use `object.__getattribute__` and `object.__setattr__` with `_cached_` prefixes for private caching to safely achieve dramatic performance gains without breaking structural validation rules.
