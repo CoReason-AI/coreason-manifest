@@ -460,12 +460,12 @@ def _validate_ssrf_safety(url: Any) -> Any:
 
         try:
             # Prevent obfuscated IP addresses (octal, hex, dword, missing dots) bypassing the check
-            packed_ip = socket.inet_aton(hostname)
-            ip = ipaddress.IPv4Address(packed_ip)
+            packed_ipv4 = socket.inet_aton(hostname)
+            ip: ipaddress.IPv4Address | ipaddress.IPv6Address = ipaddress.IPv4Address(packed_ipv4)
         except OSError:
             try:
-                packed_ip = socket.inet_pton(socket.AF_INET6, hostname)
-                ip = ipaddress.IPv6Address(packed_ip)
+                packed_ipv6 = socket.inet_pton(socket.AF_INET6, hostname)
+                ip = ipaddress.IPv6Address(packed_ipv6)
             except OSError:
                 # Not an IP address, so no IP-based check is possible without DNS resolution,
                 # which is forbidden by the Air-Gap Mandate.
