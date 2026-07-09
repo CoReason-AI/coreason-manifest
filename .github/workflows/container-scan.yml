@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
 
 jobs:
   trivy:
@@ -40,5 +40,3 @@ jobs:
         with:
           sarif_file: 'trivy-results.sarif'
         continue-on-error: true
-
-

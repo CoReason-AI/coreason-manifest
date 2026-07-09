@@ -12,7 +12,7 @@ on:
 permissions: read-all
 
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
 
 jobs:
   secret-scan:
@@ -88,5 +88,3 @@ jobs:
             pip-audit-report.html
             npm-audit.json
           retention-days: 14
-
-

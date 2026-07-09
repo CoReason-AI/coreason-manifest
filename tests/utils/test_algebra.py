@@ -40,4 +40,4 @@ def test_validate_ssrf_safety() -> None:
     with pytest.raises(ValueError, match="SSRF"):
         _validate_ssrf_safety(AnyUrl("http://0177.0.0.1/api"))  # 127.0.0.1 with octal part
     with pytest.raises(ValueError, match="SSRF"):
-        _validate_ssrf_safety(AnyUrl("http://127.1/api"))       # 127.0.0.1 shortened
+        _validate_ssrf_safety(AnyUrl("http://127.1/api"))  # 127.0.0.1 shortened

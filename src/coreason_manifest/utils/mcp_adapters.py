@@ -8,6 +8,7 @@
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
+import typing
 from typing import Any
 
 import msgspec
@@ -51,4 +52,4 @@ class DeterministicTransportAdapter:
             "id": request_cid,  # Note: External Protocol Exemption.
         }
         encoder = msgspec.json.Encoder(order="deterministic")
-        return encoder.encode(wrapped_payload)
+        return typing.cast("bytes", encoder.encode(wrapped_payload))
