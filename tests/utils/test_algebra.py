@@ -31,3 +31,13 @@ def test_validate_ssrf_safety() -> None:
         _validate_ssrf_safety(AnyUrl("http://localhost/api"))
     with pytest.raises(ValueError, match="SSRF"):
         _validate_ssrf_safety(AnyUrl("http://localhost.localdomain/api"))
+
+    # Invalid non-standard IP representations (should be blocked)
+    with pytest.raises(ValueError, match="SSRF"):
+        _validate_ssrf_safety(AnyUrl("http://2130706433/api"))  # 127.0.0.1 in decimal
+    with pytest.raises(ValueError, match="SSRF"):
+        _validate_ssrf_safety(AnyUrl("http://0x7f000001/api"))  # 127.0.0.1 in hex
+    with pytest.raises(ValueError, match="SSRF"):
+        _validate_ssrf_safety(AnyUrl("http://0177.0.0.1/api"))  # 127.0.0.1 with octal part
+    with pytest.raises(ValueError, match="SSRF"):
+        _validate_ssrf_safety(AnyUrl("http://127.1/api"))       # 127.0.0.1 shortened
