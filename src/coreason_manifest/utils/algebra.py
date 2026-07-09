@@ -27,6 +27,7 @@ import copy
 import hashlib
 import ipaddress
 import math
+import socket
 import typing
 import urllib.parse
 from collections.abc import Sequence
@@ -456,6 +457,13 @@ def _validate_ssrf_safety(url: Any) -> Any:
         # Remove IPv6 brackets if present
         if hostname.startswith("[") and hostname.endswith("]"):
             hostname = hostname[1:-1]
+
+        try:
+            packed_ip = socket.inet_aton(hostname)
+            hostname = socket.inet_ntoa(packed_ip)
+        except OSError:
+            # If inet_aton fails, it might be an IPv6 address or a domain name.
+            pass
 
         try:
             ip = ipaddress.ip_address(hostname)

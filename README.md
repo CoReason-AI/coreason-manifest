@@ -206,5 +206,3 @@ Licensed under the **Prosperity Public License 3.0**.
 For full license details, see the `LICENSE` file. For commercial licensing exceptions or inquiries, please explicitly contact `license@coreason.ai` or `gowtham.rao@coreason.ai`.
 
 *(Genesis Commit: Initialized per CoReason Clean Room Protocol PIP-001 on 2026-01-01).*
-
-
