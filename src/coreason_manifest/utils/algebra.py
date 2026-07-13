@@ -423,13 +423,15 @@ def transmute_to_pycrdt_doc(manifest: ontology.TemporalGraphCRDTManifest) -> Any
     import pycrdt
 
     doc: Any = pycrdt.Doc()
-    map_node: Any = pycrdt.Map()
-    doc["crdt_state"] = map_node
 
-    # This avoids multiple O(1) Rust-boundary crossings during sequential appends,
-    # yielding a ~2.03x speedup on CRDT array initialization.
-    map_node["add_set"] = pycrdt.Array(manifest.add_set)
-    map_node["terminate_set"] = pycrdt.Array([term.target_edge_cid for term in manifest.terminate_set])
+    # ⚡ Bolt Optimization: Batch initialization to prevent sequential Rust boundary crossings
+    # and unnecessary Python dictionary lookups, improving CRDT construction speed.
+    doc["crdt_state"] = pycrdt.Map(
+        {
+            "add_set": pycrdt.Array(manifest.add_set),
+            "terminate_set": pycrdt.Array([term.target_edge_cid for term in manifest.terminate_set]),
+        }
+    )
 
     return doc
 
