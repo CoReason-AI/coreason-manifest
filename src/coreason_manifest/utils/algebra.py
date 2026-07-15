@@ -464,7 +464,7 @@ def _validate_ssrf_safety(url: Any) -> Any:
             try:
                 # Attempt to parse alternate IP formats (e.g., 127.1, 0x7f000001)
                 ip = ipaddress.IPv4Address(socket.inet_aton(hostname))
-            except (ValueError, OSError):
+            except ValueError, OSError:
                 # Not an IP address, so no IP-based check is possible without DNS resolution,
                 # which is forbidden by the Air-Gap Mandate.
                 return url
