@@ -80,9 +80,6 @@ All models subclass `CoreasonBaseState`, enforcing `frozen=True` immutability. A
 
 ## Cross-Language Ecosystem Integration (Polyglot Bindings)
 
-Because `coreason-manifest` is the definitive "God Context" for the swarm, it strictly publishes pure, stateless data schema bindings to downstream language ecosystems:
-* **TypeScript (`npm`)**: Auto-generated TS bounds published to `@coreason/coreason-manifest`.
-* **Rust (`crates.io`)**: Strict Struct bindings generated via `cargo-typify` and published to `coreason-manifest`.
 * **Python (`PyPI`)**: The core declarative `pydantic` models distributed natively as `coreason_manifest`.
 
 These downstream bindings are mathematically proven to be stateless Anemic Domain Models, guaranteeing zero active logic bleed across network boundaries.
@@ -103,9 +100,6 @@ coreason_manifest/
 │   ├── advanced-security.yml # Deep SAST, GitGuardian secrets, and ClamAV sweeps
 │   ├── publish.yml           # Zero-Trust OIDC artifact publishing & Sigstore
 │   └── security.yml          # OSV & Pip dependencies auditing
-├── bindings/
-│   ├── rust/                 # Cargo-typify stateless structs
-│   └── typescript/           # json-schema-to-typescript ecosystem bounds
 ├── src/coreason_manifest/
 │   ├── spec/
 │   │   └── ontology.py       # THE GOD CONTEXT: All Pydantic models, TypeAliases, and Enums.
