@@ -31,3 +31,11 @@ def test_validate_ssrf_safety() -> None:
         _validate_ssrf_safety(AnyUrl("http://localhost/api"))
     with pytest.raises(ValueError, match="SSRF"):
         _validate_ssrf_safety(AnyUrl("http://localhost.localdomain/api"))
+
+    # Check alternate format SSRF bypass attempts
+    with pytest.raises(ValueError, match="SSRF Security Violation"):
+        _validate_ssrf_safety(AnyUrl("http://127.1/"))
+    with pytest.raises(ValueError, match="SSRF Security Violation"):
+        _validate_ssrf_safety(AnyUrl("http://0x7f000001/"))
+    with pytest.raises(ValueError, match="SSRF Security Violation"):
+        _validate_ssrf_safety(AnyUrl("http://2130706433/"))
