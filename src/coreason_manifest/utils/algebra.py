@@ -26,8 +26,8 @@ import base64
 import copy
 import hashlib
 import ipaddress
-import socket
 import math
+import socket
 import typing
 import urllib.parse
 from collections.abc import Sequence
