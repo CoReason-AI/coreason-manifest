@@ -19,9 +19,24 @@ def _canonicalize_payload(payload: Any) -> Any:
     """
     Recursively strips all `None` values from dictionaries and lists to mathematically prevent Null Contagion.
     """
-    if isinstance(payload, dict):
+    typ = type(payload)
+    if typ is dict:
+        has_none = False
+        for v in payload.values():
+            if v is None or type(v) in (dict, list):
+                has_none = True
+                break
+        if not has_none:
+            return payload
         return {k: _canonicalize_payload(v) for k, v in payload.items() if v is not None}
-    if isinstance(payload, list):
+    if typ is list:
+        has_complex = False
+        for v in payload:
+            if v is None or type(v) in (dict, list):
+                has_complex = True
+                break
+        if not has_complex:
+            return payload
         return [_canonicalize_payload(v) for v in payload if v is not None]
     return payload
 
