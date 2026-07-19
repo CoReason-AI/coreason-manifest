@@ -34,8 +34,8 @@ def test_validate_ssrf_safety() -> None:
 
     # Obfuscated IP formats
     with pytest.raises(ValueError, match="SSRF"):
-        _validate_ssrf_safety(AnyUrl("http://2130706433/")) # Integer format for 127.0.0.1
+        _validate_ssrf_safety(AnyUrl("http://2130706433/"))  # Integer format for 127.0.0.1
     with pytest.raises(ValueError, match="SSRF"):
-        _validate_ssrf_safety(AnyUrl("http://0x7f.0.0.1/")) # Hex format for 127.0.0.1
+        _validate_ssrf_safety(AnyUrl("http://0x7f.0.0.1/"))  # Hex format for 127.0.0.1
     with pytest.raises(ValueError, match="SSRF"):
-        _validate_ssrf_safety(AnyUrl("http://0177.0.0.1/")) # Octal format for 127.0.0.1
+        _validate_ssrf_safety(AnyUrl("http://0177.0.0.1/"))  # Octal format for 127.0.0.1
