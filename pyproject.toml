@@ -36,7 +36,6 @@ dependencies = [
     "canonicaljson>=2.0.0",
     "msgspec>=0.21.1",
     "pycrdt>=0.12.50",
-    "rustworkx>=0.17.1",
 ]
 
 [project.optional-dependencies]

@@ -123,7 +123,6 @@ dependencies = [
     { name = "numpy" },
     { name = "pycrdt" },
     { name = "pydantic" },
-    { name = "rustworkx" },
 ]
 
 [package.optional-dependencies]
@@ -160,7 +159,6 @@ requires-dist = [
     { name = "numpy", specifier = ">=2.4" },
     { name = "pycrdt", specifier = ">=0.12.50" },
     { name = "pydantic", specifier = ">=2.12.5" },
-    { name = "rustworkx", specifier = ">=0.17.1" },
     { name = "rustworkx", marker = "extra == 'graph'", specifier = ">=0.17.1" },
 ]
 provides-extras = ["graph"]
