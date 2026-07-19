@@ -153,8 +153,22 @@ def _canonicalize_payload(obj: Any) -> Any:
 
     typ = type(obj)
     if typ is dict:
+        has_none = False
+        for v in obj.values():
+            if v is None or type(v) in (dict, list):
+                has_none = True
+                break
+        if not has_none:
+            return obj
         return {k: _canonicalize_payload(v) for k, v in obj.items() if v is not None}
     if typ is list:
+        has_complex = False
+        for v in obj:
+            if type(v) in (dict, list):
+                has_complex = True
+                break
+        if not has_complex:
+            return obj
         return [_canonicalize_payload(v) for v in obj]
     return obj
 

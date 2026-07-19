@@ -331,7 +331,7 @@ Unstructured `text_chunks` are lossy and prone to LLM hallucination during cross
 To maintain the absolute integrity of the Tripartite Manifold during high-velocity schema updates, you must adhere to the **Pydantic Model Rebuilding Mandate**.
 
 ### **1. The Polymorphic Union Guillotine**
-When expanding the global polymorphic unions (e.g., `AnyIntent`, `AnyStateEvent`, `AnyReceipt`), you are strictly forbidden from simply appending the new class name. 
+When expanding the global polymorphic unions (e.g., `AnyIntent`, `AnyStateEvent`, `AnyReceipt`), you are strictly forbidden from simply appending the new class name.
 
 **The Mandate:** You MUST explicitly invoke `[ClassName].model_rebuild()` at the physical bottom of `ontology.py` for every intent, event, or receipt involved in a forward-reference union. This mathematically forces Pydantic to re-evaluate the type hints and resolve the polymorphic discriminators, preventing `AttributeError` and `ImportError` regressions in the downstream `coreason-runtime` orchestrator.
 
@@ -428,7 +428,7 @@ You are strictly forbidden from introducing "Active" or "Runtime" logic into thi
 ### **The Transport Sterilization Mandate (Anti-Null Contagion)**
 * **The Physics of Serialization:** Standard Python `json` and Pydantic `.model_dump_json()` are mathematically banned for generating `ExecutionEnvelope` transport payloads.
 * **The Null Contagion:** Because Pydantic's `exclude_none` fails to recursively purge `None` values from loosely typed boundaries (e.g., `JsonPrimitiveState`), all JSON-RPC parameters MUST be mathematically stripped of nulls via the `_canonicalize_payload` functor prior to serialization.
-* **The Substrate Match:** 
+* **The Substrate Match:**
   * **Python (Tier 0):** Must exclusively use `msgspec.json.Encoder(sort_keys=True)`.
 
 ### **The Strict Instantiation Boundary (Anti-Lazy Validation Mandate)**
@@ -511,4 +511,3 @@ We strictly enforce the Zero-Orphan Invariant ($|V_O| = 0$). You must mathematic
 
 ## The "Zero-Waste Engineering" Mandate
 You are strictly bound by the "Borrow vs. Build" philosophy. You MUST maximize the use of stable Open Source Software (OSS) whenever available. You are mathematically forbidden from building custom, proprietary implementations for logging, tracing, graph layout, container routing, UI components, or serialization if a mature OSS standard (e.g., OpenTelemetry, Zep Graphiti, Pi.dev, React Flow) exists to solve the problem.
-
