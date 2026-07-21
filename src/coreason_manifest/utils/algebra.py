@@ -459,7 +459,24 @@ def _validate_ssrf_safety(url: Any) -> Any:
 
         try:
             ip = ipaddress.ip_address(hostname)
-        except ValueError:
+        except ValueError as err:
+            # Check for IP bypasses (e.g. octal, hex, dword, or short-form IPs) which fail ipaddress parsing
+            # but would be resolved as IPs by HTTP clients. Also block internal TLDs.
+            parts = hostname.lower().split(".")
+            is_numeric_bypass = all(
+                p.isdigit() or (p.startswith("0x") and all(c in "0123456789abcdefx" for c in p)) for p in parts
+            )
+
+            if is_numeric_bypass:
+                raise ValueError(
+                    f"SSRF Security Violation: The target hostname '{hostname}' is a non-standard IP address format."
+                ) from err
+
+            if any(hostname.lower().endswith(tld) for tld in [".local", ".internal", ".test"]):
+                raise ValueError(
+                    f"SSRF Security Violation: The target hostname '{hostname}' resolves to a blocked internal TLD."
+                ) from err
+
             # Not an IP address, so no IP-based check is possible without DNS resolution,
             # which is forbidden by the Air-Gap Mandate.
             return url
