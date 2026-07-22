@@ -50,16 +50,20 @@ def _pure_python_is_dag(adjacency: dict[str, list[str]]) -> bool:
     in_degree: dict[str, int] = dict.fromkeys(adjacency, 0)
     for targets in adjacency.values():
         for t in targets:
-            in_degree[t] = in_degree.get(t, 0) + 1
+            try:
+                in_degree[t] += 1
+            except KeyError:
+                in_degree[t] = 1
 
-    queue: list[str] = [n for n, d in in_degree.items() if d == 0]
+    queue: list[str] = [n for n, d in in_degree.items() if not d]
     visited = 0
     while queue:
         node = queue.pop()
         visited += 1
         for t in adjacency.get(node, []):
-            in_degree[t] -= 1
-            if in_degree[t] == 0:
+            val = in_degree[t] - 1
+            in_degree[t] = val
+            if not val:
                 queue.append(t)
     return visited == len(in_degree)
 
@@ -69,22 +73,26 @@ def _pure_python_longest_path_length(adjacency: dict[str, list[str]]) -> int:
     in_degree: dict[str, int] = dict.fromkeys(adjacency, 0)
     for targets in adjacency.values():
         for t in targets:
-            in_degree[t] = in_degree.get(t, 0) + 1
+            try:
+                in_degree[t] += 1
+            except KeyError:
+                in_degree[t] = 1
 
-    queue: list[str] = [n for n, d in in_degree.items() if d == 0]
+    queue: list[str] = [n for n, d in in_degree.items() if not d]
     dist: dict[str, int] = dict.fromkeys(adjacency, 0)
+    get_dist = dist.get
 
     while queue:
         node = queue.pop()
-        node_dist = dist.get(node, 0)
+        candidate = get_dist(node, 0) + 1
 
         for t in adjacency.get(node, []):
-            in_degree[t] -= 1
-            if in_degree[t] == 0:
+            val = in_degree[t] - 1
+            in_degree[t] = val
+            if not val:
                 queue.append(t)
 
-            candidate = node_dist + 1
-            if candidate > dist.get(t, 0):
+            if candidate > get_dist(t, 0):
                 dist[t] = candidate
 
     return max(dist.values()) if dist else 0
