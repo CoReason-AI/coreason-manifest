@@ -84,7 +84,7 @@ def test_model_construction_attempt(name: str, model_cls: type[BaseModel]) -> No
         obj = model_cls.model_validate(kwargs)
         # If it succeeds, the model is valid
         assert obj is not None
-    except ValidationError, ValueError, TypeError:
+    except (ValidationError, ValueError, TypeError):
         # Expected — validators are still exercised (coverage!)
         pass
 
@@ -128,7 +128,7 @@ def test_model_construction_nonempty(name: str, model_cls: type[BaseModel]) -> N
     try:
         obj = model_cls.model_validate(kwargs)
         assert obj is not None
-    except ValidationError, ValueError, TypeError:
+    except (ValidationError, ValueError, TypeError):
         pass
 
 
@@ -142,5 +142,5 @@ def test_model_construction_all_fields(name: str, model_cls: type[BaseModel]) ->
     try:
         obj = model_cls.model_validate(kwargs)
         assert obj is not None
-    except ValidationError, ValueError, TypeError:
+    except (ValidationError, ValueError, TypeError):
         pass
