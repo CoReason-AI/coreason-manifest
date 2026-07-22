@@ -21,13 +21,13 @@
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
-import socket
 import ast
 import base64
 import copy
 import hashlib
 import ipaddress
 import math
+import socket
 import typing
 import urllib.parse
 from collections.abc import Sequence
@@ -464,7 +464,7 @@ def _validate_ssrf_safety(url: Any) -> Any:
                 packed_ip = socket.inet_aton(hostname)
                 ip_str = socket.inet_ntoa(packed_ip)
                 ip = ipaddress.ip_address(ip_str)
-            except socket.error:
+            except OSError:
                 # Fallback to ipaddress module for standard IPv4/IPv6 strings
                 ip = ipaddress.ip_address(hostname)
         except ValueError:
