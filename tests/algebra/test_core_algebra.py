@@ -1012,3 +1012,35 @@ def test_align_semantic_manifolds_semantic_graph() -> None:
     res = align_semantic_manifolds("t1", ["text"], ["text", "semantic_graph"], "e1")  # type: ignore[list-item]
     assert res is not None
     assert res.schema_governance is not None
+
+import pytest
+from coreason_manifest.utils.algebra import _validate_ssrf_safety
+
+def test_validate_ssrf_safety_bypasses() -> None:
+    # Valid urls
+    assert _validate_ssrf_safety("http://example.com") == "http://example.com"
+    assert _validate_ssrf_safety("http://8.8.8.8") == "http://8.8.8.8"
+    assert _validate_ssrf_safety("http://example") == "http://example"
+    assert _validate_ssrf_safety("notanurl") == "notanurl"
+
+    # Blocked URLs due to SSRF
+    with pytest.raises(ValueError, match="SSRF Security Violation"):
+        _validate_ssrf_safety("http://127.0.0.1")
+
+    with pytest.raises(ValueError, match="SSRF Security Violation"):
+        _validate_ssrf_safety("http://localhost")
+
+    with pytest.raises(ValueError, match="SSRF Security Violation"):
+        _validate_ssrf_safety("http://2130706433")
+
+    with pytest.raises(ValueError, match="SSRF Security Violation"):
+        _validate_ssrf_safety("http://0x7f000001")
+
+    with pytest.raises(ValueError, match="SSRF Security Violation"):
+        _validate_ssrf_safety("http://0177.0000.0000.0001")
+
+    with pytest.raises(ValueError, match="SSRF Security Violation"):
+        _validate_ssrf_safety("http://127.1")
+
+    with pytest.raises(ValueError, match="SSRF Security Violation"):
+        _validate_ssrf_safety("http://[::1]")
