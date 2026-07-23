@@ -443,12 +443,12 @@ def _parse_ip_flexibly(hostname: str) -> ipaddress.IPv4Address | ipaddress.IPv6A
     try:
         b = socket.inet_aton(hostname)
         return ipaddress.IPv4Address(b)
-    except Exception:  # noqa: S110
+    except Exception:  # nosec B110  # noqa: S110
         pass
     try:
         b = socket.inet_pton(socket.AF_INET6, hostname)
         return ipaddress.IPv6Address(b)
-    except Exception:  # noqa: S110
+    except Exception:  # nosec B110  # noqa: S110
         pass
     return None
 
