@@ -27,6 +27,7 @@ import copy
 import hashlib
 import ipaddress
 import math
+import socket
 import typing
 import urllib.parse
 from collections.abc import Sequence
@@ -434,6 +435,24 @@ def transmute_to_pycrdt_doc(manifest: ontology.TemporalGraphCRDTManifest) -> Any
     return doc
 
 
+def _parse_ip_flexibly(hostname: str) -> ipaddress.IPv4Address | ipaddress.IPv6Address | None:
+    try:
+        return ipaddress.ip_address(hostname)
+    except ValueError:
+        pass
+    try:
+        b = socket.inet_aton(hostname)
+        return ipaddress.IPv4Address(b)
+    except Exception:  # nosec B110  # noqa: S110
+        pass
+    try:
+        b = socket.inet_pton(socket.AF_INET6, hostname)
+        return ipaddress.IPv6Address(b)
+    except Exception:  # nosec B110  # noqa: S110
+        pass
+    return None
+
+
 def _validate_ssrf_safety(url: Any) -> Any:
     """
     Mechanistically evaluates an HttpUrl or AnyUrl to prevent Server-Side Request Forgery (SSRF).
@@ -457,9 +476,8 @@ def _validate_ssrf_safety(url: Any) -> Any:
         if hostname.startswith("[") and hostname.endswith("]"):
             hostname = hostname[1:-1]
 
-        try:
-            ip = ipaddress.ip_address(hostname)
-        except ValueError:
+        ip = _parse_ip_flexibly(hostname)
+        if not ip:
             # Not an IP address, so no IP-based check is possible without DNS resolution,
             # which is forbidden by the Air-Gap Mandate.
             return url
