@@ -23,6 +23,7 @@
 
 import ast
 import base64
+import contextlib
 import copy
 import hashlib
 import ipaddress
@@ -459,19 +460,14 @@ def _validate_ssrf_safety(url: Any) -> Any:
             hostname = hostname[1:-1]
 
         ip = None
-        try:
+        with contextlib.suppress(ValueError):
             ip = ipaddress.ip_address(hostname)
-        except ValueError:
-            pass
 
         if ip is None:
-            try:
+            with contextlib.suppress(OSError):
                 # Use inet_aton to handle octal, hex, and short forms like 127.1
                 packed_ip = socket.inet_aton(hostname)
                 ip = ipaddress.IPv4Address(packed_ip)
-            except OSError:
-                # Not a valid IPv4 address literal
-                pass
 
         if ip is None:
             # Not an IP address, so no IP-based check is possible without DNS resolution,
