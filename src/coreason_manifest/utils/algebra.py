@@ -458,7 +458,7 @@ def _validate_ssrf_safety(url: Any) -> Any:
         if hostname.startswith("[") and hostname.endswith("]"):
             hostname = hostname[1:-1]
 
-        ip = None
+        ip: ipaddress.IPv4Address | ipaddress.IPv6Address | None = None
         try:
             packed = socket.inet_aton(hostname)
             ip = ipaddress.IPv4Address(packed)
