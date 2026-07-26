@@ -461,7 +461,7 @@ def _validate_ssrf_safety(url: Any) -> Any:
         try:
             # Attempt to parse as IPv4 using C library semantics (handles octal, hex, integer formats)
             packed_ip = socket.inet_aton(hostname)
-            ip = ipaddress.IPv4Address(packed_ip)
+            ip: ipaddress.IPv4Address | ipaddress.IPv6Address = ipaddress.IPv4Address(packed_ip)
         except OSError:
             try:
                 ip = ipaddress.ip_address(hostname)
