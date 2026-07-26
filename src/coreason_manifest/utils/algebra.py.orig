@@ -342,7 +342,8 @@ def compute_merkle_directory_cid(file_contents: dict[str, bytes]) -> str:
         A string in the format ``sha256:<64-char hex digest>``.
     """
     merkle_input = "\n".join(
-        f"{filename}:{hashlib.sha256(file_contents[filename]).hexdigest()}" for filename in sorted(file_contents.keys())
+        f"{filename}:{hashlib.sha256(file_contents[filename]).hexdigest()}"
+        for filename in sorted(file_contents.keys())
     ).encode("utf-8")
     return f"sha256:{hashlib.sha256(merkle_input).hexdigest()}"
 
@@ -385,13 +386,12 @@ def verify_ast_safety(payload: str) -> bool:
     except SyntaxError as e:
         raise ValueError("Payload is not valid syntax.") from e
 
-    allowlist = _AST_ALLOWLIST
-    forbidden = (ast.Pow, ast.LShift, ast.RShift)
-
     for node in ast.walk(tree):
-        if not isinstance(node, allowlist):
+        if not isinstance(node, _AST_ALLOWLIST):
             raise ValueError(f"Kinetic execution bleed detected. Forbidden AST node: {type(node).__name__}")
-        if isinstance(node, forbidden):
+        if isinstance(node, ast.Pow):
+            raise ValueError("Kinetic execution bleed detected. Forbidden AST node: Pow")
+        if isinstance(node, (ast.LShift, ast.RShift)):
             raise ValueError(f"Kinetic execution bleed detected. Forbidden AST node: {type(node).__name__}")
 
     return True
@@ -401,13 +401,9 @@ def transmute_state_differential(
     current_state: dict[str, Any], differential: ontology.StateDifferentialManifest
 ) -> dict[str, Any]:
     patch_list = [
-        {"op": p.op, "path": p.path, "value": p.value}
-        if p.value is not None
-        else (
-            {"op": p.op, "path": p.path, "from": p.from_path}
-            if p.from_path is not None
-            else {"op": p.op, "path": p.path}
-        )
+        {"op": p.op, "path": p.path, "value": p.value} if p.value is not None else
+        ({"op": p.op, "path": p.path, "from": p.from_path} if p.from_path is not None else
+         {"op": p.op, "path": p.path})
         for p in differential.patches
     ]
     try:
