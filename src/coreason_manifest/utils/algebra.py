@@ -27,6 +27,7 @@ import copy
 import hashlib
 import ipaddress
 import math
+import socket
 import typing
 import urllib.parse
 from collections.abc import Sequence
@@ -457,8 +458,16 @@ def _validate_ssrf_safety(url: Any) -> Any:
         if hostname.startswith("[") and hostname.endswith("]"):
             hostname = hostname[1:-1]
 
+        # Normalize non-standard IP formats (e.g., 2130706433, 0x7f.0.0.1, 0177.0.0.1)
+        # to their standard dotted-quad representation using socket.inet_ntoa(socket.inet_aton(...))
+        # This prevents SSRF bypasses where non-standard formats slip past ipaddress.ip_address.
         try:
-            ip = ipaddress.ip_address(hostname)
+            normalized_hostname = socket.inet_ntoa(socket.inet_aton(hostname))
+        except Exception:
+            normalized_hostname = hostname
+
+        try:
+            ip = ipaddress.ip_address(normalized_hostname)
         except ValueError:
             # Not an IP address, so no IP-based check is possible without DNS resolution,
             # which is forbidden by the Air-Gap Mandate.
