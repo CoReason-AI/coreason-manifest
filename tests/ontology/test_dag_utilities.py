@@ -15,7 +15,7 @@ from hypothesis import strategies as st
 
 from coreason_manifest.spec.ontology import (
     _pure_python_is_dag,
-    _pure_python_longest_path_length,
+    _pure_python_is_dag_and_longest_path,
 )
 
 
@@ -59,25 +59,30 @@ class TestPurePythonLongestPathLength:
     """Verify longest path computation via topological-order DP."""
 
     def test_empty_graph(self) -> None:
-        assert _pure_python_longest_path_length({}) == 0
+        _, length = _pure_python_is_dag_and_longest_path({})
+        assert length == 0
 
     def test_single_node(self) -> None:
-        assert _pure_python_longest_path_length({"a": []}) == 0
+        _, length = _pure_python_is_dag_and_longest_path({"a": []})
+        assert length == 0
 
     def test_linear_chain_length(self) -> None:
         # a -> b -> c -> d: longest path = 3 edges
         adj = {"a": ["b"], "b": ["c"], "c": ["d"], "d": []}
-        assert _pure_python_longest_path_length(adj) == 3
+        _, length = _pure_python_is_dag_and_longest_path(adj)
+        assert length == 3
 
     def test_diamond_longest_path(self) -> None:
         # a -> b -> d, a -> c -> d: longest = 2 edges
         adj = {"a": ["b", "c"], "b": ["d"], "c": ["d"], "d": []}
-        assert _pure_python_longest_path_length(adj) == 2
+        _, length = _pure_python_is_dag_and_longest_path(adj)
+        assert length == 2
 
     def test_wide_graph(self) -> None:
         # a -> b, a -> c, a -> d: longest = 1 edge
         adj = {"a": ["b", "c", "d"], "b": [], "c": [], "d": []}
-        assert _pure_python_longest_path_length(adj) == 1
+        _, length = _pure_python_is_dag_and_longest_path(adj)
+        assert length == 1
 
     @given(
         st.integers(min_value=2, max_value=15).flatmap(
@@ -88,4 +93,5 @@ class TestPurePythonLongestPathLength:
     def test_linear_chain_property(self, adjacency: dict[str, list[str]]) -> None:
         """A linear chain of n nodes has n-1 edges as its longest path."""
         n = len(adjacency)
-        assert _pure_python_longest_path_length(adjacency) == n - 1
+        _, length = _pure_python_is_dag_and_longest_path(adjacency)
+        assert length == n - 1
