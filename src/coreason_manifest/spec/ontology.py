@@ -64,8 +64,11 @@ def _pure_python_is_dag(adjacency: dict[str, list[str]]) -> bool:
     return visited == len(in_degree)
 
 
-def _pure_python_longest_path_length(adjacency: dict[str, list[str]]) -> int:
-    """Longest path in a DAG via topological-order dynamic programming. Returns edge count."""
+def _pure_python_is_dag_and_longest_path(adjacency: dict[str, list[str]]) -> tuple[bool, int]:
+    """
+    ⚡ Bolt Optimization: Computes both DAG verification and longest path in a single
+    O(V+E) topological pass, preventing redundant in_degree calculations and traversals.
+    """
     in_degree: dict[str, int] = dict.fromkeys(adjacency, 0)
     for targets in adjacency.values():
         for t in targets:
@@ -73,9 +76,11 @@ def _pure_python_longest_path_length(adjacency: dict[str, list[str]]) -> int:
 
     queue: list[str] = [n for n, d in in_degree.items() if d == 0]
     dist: dict[str, int] = dict.fromkeys(adjacency, 0)
+    visited = 0
 
     while queue:
         node = queue.pop()
+        visited += 1
         node_dist = dist.get(node, 0)
 
         for t in adjacency.get(node, []):
@@ -87,7 +92,7 @@ def _pure_python_longest_path_length(adjacency: dict[str, list[str]]) -> int:
             if candidate > dist.get(t, 0):
                 dist[t] = candidate
 
-    return max(dist.values()) if dist else 0
+    return visited == len(in_degree), (max(dist.values()) if dist else 0)
 
 
 def _validate_payload_bounds(
@@ -730,10 +735,10 @@ type JsonPrimitiveState = (
     | int
     | float
     | bool
-    | None
     | list["JsonPrimitiveState"]
     | dict[str, "JsonPrimitiveState"]
     | EpistemicProxyState[Any]
+    | None
 )
 
 
@@ -11310,9 +11315,10 @@ class DAGTopologyManifest(CoreasonBaseState):
                     raise EpistemicTopologicalParadoxFalsificationEvent("Graph contains cycles")
                 max_calculated_depth = (_rx.dag_longest_path_length(graph) + 1) if len(self.nodes) > 0 else 0
             else:
-                if not _pure_python_is_dag(adjacency):
+                is_dag, longest_path = _pure_python_is_dag_and_longest_path(adjacency)
+                if not is_dag:
                     raise EpistemicTopologicalParadoxFalsificationEvent("Graph contains cycles")
-                max_calculated_depth = (_pure_python_longest_path_length(adjacency) + 1) if len(self.nodes) > 0 else 0
+                max_calculated_depth = (longest_path + 1) if len(self.nodes) > 0 else 0
 
             if max_calculated_depth > self.max_depth:
                 raise ValueError(
