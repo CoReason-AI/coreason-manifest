@@ -23,10 +23,12 @@
 
 import ast
 import base64
+import contextlib
 import copy
 import hashlib
 import ipaddress
 import math
+import socket
 import typing
 import urllib.parse
 from collections.abc import Sequence
@@ -457,8 +459,15 @@ def _validate_ssrf_safety(url: Any) -> Any:
         if hostname.startswith("[") and hostname.endswith("]"):
             hostname = hostname[1:-1]
 
+        strict_ip_str = hostname
         try:
-            ip = ipaddress.ip_address(hostname)
+            strict_ip_str = socket.inet_ntoa(socket.inet_aton(hostname))
+        except OSError:
+            with contextlib.suppress(OSError):
+                strict_ip_str = socket.inet_ntop(socket.AF_INET6, socket.inet_pton(socket.AF_INET6, hostname))
+
+        try:
+            ip = ipaddress.ip_address(strict_ip_str)
         except ValueError:
             # Not an IP address, so no IP-based check is possible without DNS resolution,
             # which is forbidden by the Air-Gap Mandate.
