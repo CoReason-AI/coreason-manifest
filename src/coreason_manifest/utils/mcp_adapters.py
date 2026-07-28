@@ -19,11 +19,16 @@ def _canonicalize_payload(payload: Any) -> Any:
     """
     Recursively strips all `None` values from dictionaries and lists to mathematically prevent Null Contagion.
     """
-    if isinstance(payload, dict):
+    _type = type(payload)
+    if _type is dict:
         return {k: _canonicalize_payload(v) for k, v in payload.items() if v is not None}
-    if isinstance(payload, list):
+    if _type is list:
         return [_canonicalize_payload(v) for v in payload if v is not None]
     return payload
+
+
+# Global encoder instantiation for performance
+_DETERMINISTIC_ENCODER = msgspec.json.Encoder(order="deterministic")
 
 
 class DeterministicTransportAdapter:
@@ -50,5 +55,4 @@ class DeterministicTransportAdapter:
             "params": canonical_dict,
             "id": request_cid,  # Note: External Protocol Exemption.
         }
-        encoder = msgspec.json.Encoder(order="deterministic")
-        return encoder.encode(wrapped_payload)
+        return _DETERMINISTIC_ENCODER.encode(wrapped_payload)
