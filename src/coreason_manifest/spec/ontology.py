@@ -48,8 +48,8 @@ except ModuleNotFoundError:
 def _pure_python_is_dag(adjacency: dict[str, list[str]]) -> bool:
     """Kahn's algorithm - returns True iff the graph is a DAG (no cycles)."""
     in_degree: dict[str, int] = dict.fromkeys(adjacency, 0)
-    for targets in adjacency.values():
-        for t in targets:
+    for targets_vals in adjacency.values():
+        for t in targets_vals:
             # ⚡ Bolt: Avoid `.get(t, 0)` function call overhead in tight loop
             if t in in_degree:
                 in_degree[t] += 1
@@ -63,9 +63,9 @@ def _pure_python_is_dag(adjacency: dict[str, list[str]]) -> bool:
         visited += 1
 
         # ⚡ Bolt: Avoid allocating an empty list `[]` via `.get(node, [])` on every leaf node miss
-        targets = adjacency.get(node)
-        if targets:
-            for t in targets:
+        targets_node = adjacency.get(node)
+        if targets_node:
+            for t in targets_node:
                 in_degree[t] -= 1
                 if in_degree[t] == 0:
                     queue.append(t)
@@ -75,8 +75,8 @@ def _pure_python_is_dag(adjacency: dict[str, list[str]]) -> bool:
 def _pure_python_longest_path_length(adjacency: dict[str, list[str]]) -> int:
     """Longest path in a DAG via topological-order dynamic programming. Returns edge count."""
     in_degree: dict[str, int] = dict.fromkeys(adjacency, 0)
-    for targets in adjacency.values():
-        for t in targets:
+    for targets_vals in adjacency.values():
+        for t in targets_vals:
             # ⚡ Bolt: Avoid `.get(t, 0)` function call overhead in tight loop
             if t in in_degree:
                 in_degree[t] += 1
@@ -91,9 +91,9 @@ def _pure_python_longest_path_length(adjacency: dict[str, list[str]]) -> int:
         node_dist = dist.get(node, 0)
 
         # ⚡ Bolt: Avoid allocating an empty list `[]` via `.get(node, [])` on every leaf node miss
-        targets = adjacency.get(node)
-        if targets:
-            for t in targets:
+        targets_node = adjacency.get(node)
+        if targets_node:
+            for t in targets_node:
                 in_degree[t] -= 1
                 if in_degree[t] == 0:
                     queue.append(t)
