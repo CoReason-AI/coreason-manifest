@@ -48,28 +48,40 @@ except ModuleNotFoundError:
 def _pure_python_is_dag(adjacency: dict[str, list[str]]) -> bool:
     """Kahn's algorithm - returns True iff the graph is a DAG (no cycles)."""
     in_degree: dict[str, int] = dict.fromkeys(adjacency, 0)
-    for targets in adjacency.values():
-        for t in targets:
-            in_degree[t] = in_degree.get(t, 0) + 1
+    for targets_vals in adjacency.values():
+        for t in targets_vals:
+            # ⚡ Bolt: Avoid `.get(t, 0)` function call overhead in tight loop
+            if t in in_degree:
+                in_degree[t] += 1
+            else:
+                in_degree[t] = 1
 
     queue: list[str] = [n for n, d in in_degree.items() if d == 0]
     visited = 0
     while queue:
         node = queue.pop()
         visited += 1
-        for t in adjacency.get(node, []):
-            in_degree[t] -= 1
-            if in_degree[t] == 0:
-                queue.append(t)
+
+        # ⚡ Bolt: Avoid allocating an empty list `[]` via `.get(node, [])` on every leaf node miss
+        targets_node = adjacency.get(node)
+        if targets_node:
+            for t in targets_node:
+                in_degree[t] -= 1
+                if in_degree[t] == 0:
+                    queue.append(t)
     return visited == len(in_degree)
 
 
 def _pure_python_longest_path_length(adjacency: dict[str, list[str]]) -> int:
     """Longest path in a DAG via topological-order dynamic programming. Returns edge count."""
     in_degree: dict[str, int] = dict.fromkeys(adjacency, 0)
-    for targets in adjacency.values():
-        for t in targets:
-            in_degree[t] = in_degree.get(t, 0) + 1
+    for targets_vals in adjacency.values():
+        for t in targets_vals:
+            # ⚡ Bolt: Avoid `.get(t, 0)` function call overhead in tight loop
+            if t in in_degree:
+                in_degree[t] += 1
+            else:
+                in_degree[t] = 1
 
     queue: list[str] = [n for n, d in in_degree.items() if d == 0]
     dist: dict[str, int] = dict.fromkeys(adjacency, 0)
@@ -78,14 +90,17 @@ def _pure_python_longest_path_length(adjacency: dict[str, list[str]]) -> int:
         node = queue.pop()
         node_dist = dist.get(node, 0)
 
-        for t in adjacency.get(node, []):
-            in_degree[t] -= 1
-            if in_degree[t] == 0:
-                queue.append(t)
+        # ⚡ Bolt: Avoid allocating an empty list `[]` via `.get(node, [])` on every leaf node miss
+        targets_node = adjacency.get(node)
+        if targets_node:
+            for t in targets_node:
+                in_degree[t] -= 1
+                if in_degree[t] == 0:
+                    queue.append(t)
 
-            candidate = node_dist + 1
-            if candidate > dist.get(t, 0):
-                dist[t] = candidate
+                candidate = node_dist + 1
+                if candidate > dist.get(t, 0):
+                    dist[t] = candidate
 
     return max(dist.values()) if dist else 0
 
@@ -730,10 +745,10 @@ type JsonPrimitiveState = (
     | int
     | float
     | bool
-    | None
     | list["JsonPrimitiveState"]
     | dict[str, "JsonPrimitiveState"]
     | EpistemicProxyState[Any]
+    | None
 )
 
 
