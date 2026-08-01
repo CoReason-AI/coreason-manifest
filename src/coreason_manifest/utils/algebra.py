@@ -27,6 +27,7 @@ import copy
 import hashlib
 import ipaddress
 import math
+import socket
 import typing
 import urllib.parse
 from collections.abc import Sequence
@@ -460,9 +461,15 @@ def _validate_ssrf_safety(url: Any) -> Any:
         try:
             ip = ipaddress.ip_address(hostname)
         except ValueError:
-            # Not an IP address, so no IP-based check is possible without DNS resolution,
-            # which is forbidden by the Air-Gap Mandate.
-            return url
+            try:
+                # Fallback to handle non-standard IPv4 representations (e.g. hex, octal, decimal bypasses)
+                # socket.inet_aton parses a wide variety of these standard forms.
+                ip_str = socket.inet_ntoa(socket.inet_aton(hostname))
+                ip = ipaddress.ip_address(ip_str)
+            except (OSError, ValueError):
+                # Not an IP address, so no IP-based check is possible without DNS resolution,
+                # which is forbidden by the Air-Gap Mandate.
+                return url
 
         if (
             not ip.is_global
