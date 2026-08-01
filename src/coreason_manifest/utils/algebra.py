@@ -466,7 +466,7 @@ def _validate_ssrf_safety(url: Any) -> Any:
                 # socket.inet_aton parses a wide variety of these standard forms.
                 ip_str = socket.inet_ntoa(socket.inet_aton(hostname))
                 ip = ipaddress.ip_address(ip_str)
-            except (OSError, ValueError):
+            except OSError, ValueError:
                 # Not an IP address, so no IP-based check is possible without DNS resolution,
                 # which is forbidden by the Air-Gap Mandate.
                 return url
