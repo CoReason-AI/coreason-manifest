@@ -2,6 +2,7 @@ import pytest
 
 from coreason_manifest.utils.algebra import _validate_ssrf_safety
 
+
 def test_ssrf_safety_valid_domains():
     """Test that valid non-IP domains are allowed."""
     assert _validate_ssrf_safety("http://google.com") == "http://google.com"
