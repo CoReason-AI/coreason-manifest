@@ -726,7 +726,14 @@ class EpistemicProxyState[T](CoreasonBaseState):
 
 
 type JsonPrimitiveState = (
-    str | int | float | bool | list["JsonPrimitiveState"] | dict[str, "JsonPrimitiveState"] | EpistemicProxyState[Any] | None
+    str
+    | int
+    | float
+    | bool
+    | list["JsonPrimitiveState"]
+    | dict[str, "JsonPrimitiveState"]
+    | EpistemicProxyState[Any]
+    | None
 )
 
 
