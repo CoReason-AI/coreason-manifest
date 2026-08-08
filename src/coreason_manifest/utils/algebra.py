@@ -441,8 +441,17 @@ def _validate_ssrf_safety(url: Any) -> Any:
     """
     try:
         url_str = str(url)
-        parsed = urllib.parse.urlparse(url_str)
-        hostname = parsed.hostname
+
+        if hasattr(url, "host"):
+            hostname = url.host
+        else:
+            from pydantic import AnyUrl, ValidationError
+            try:
+                temp_url = AnyUrl(url_str)
+                hostname = temp_url.host
+            except ValidationError:
+                parsed = urllib.parse.urlparse(url_str)
+                hostname = parsed.hostname
 
         if not hostname:
             return url
