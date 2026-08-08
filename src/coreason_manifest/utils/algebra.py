@@ -445,16 +445,53 @@ def _validate_ssrf_safety(url: Any) -> Any:
         if hasattr(url, "host"):
             hostname = url.host
         else:
-            from pydantic import AnyUrl, ValidationError
-            try:
-                temp_url = AnyUrl(url_str)
-                hostname = temp_url.host
-            except ValidationError:
-                parsed = urllib.parse.urlparse(url_str)
-                hostname = parsed.hostname
+            parsed = urllib.parse.urlparse(url_str)
+            hostname = parsed.hostname
 
         if not hostname:
             return url
+
+        # Normalize alternative IP encodings (octal, hex, decimal) across all platforms
+        # without invoking dynamic DNS resolution.
+        try:
+            # Try to interpret the hostname as an integer or mixed-part IP address.
+            if hostname.lower().startswith("0x") and "." not in hostname:
+                num = int(hostname, 16)
+            elif hostname.startswith("0") and len(hostname) > 1 and "." not in hostname:
+                num = int(hostname, 8)
+            elif "." not in hostname:
+                num = int(hostname)
+            else:
+                parts = hostname.split(".")
+                if len(parts) <= 4:
+                    parsed_parts = []
+                    for p in parts:
+                        if p == "":
+                            parsed_parts.append(0)
+                        elif p.lower().startswith("0x"):
+                            parsed_parts.append(int(p, 16))
+                        elif p.startswith("0") and len(p) > 1:
+                            parsed_parts.append(int(p, 8))
+                        else:
+                            parsed_parts.append(int(p))
+
+                    if len(parsed_parts) == 4:
+                        num = (
+                            (parsed_parts[0] << 24) + (parsed_parts[1] << 16) + (parsed_parts[2] << 8) + parsed_parts[3]
+                        )
+                    elif len(parsed_parts) == 3:
+                        num = (parsed_parts[0] << 24) + (parsed_parts[1] << 16) + parsed_parts[2]
+                    elif len(parsed_parts) == 2:
+                        num = (parsed_parts[0] << 24) + parsed_parts[1]
+                    else:
+                        raise ValueError()
+                else:
+                    raise ValueError()
+
+            if 0 <= num <= 0xFFFFFFFF:
+                hostname = str(ipaddress.IPv4Address(num))
+        except (ValueError, OverflowError):
+            pass
 
         # Hardcode block for localhost and local domains
         if hostname.lower() in ["localhost", "localhost.localdomain"] or hostname.lower().endswith(".localhost"):
