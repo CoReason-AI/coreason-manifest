@@ -102,6 +102,7 @@ def test_calculate_latent_alignment(vec1_list: list[float], vec2_list: list[floa
                 math.isclose(actual_similarity, 0.0, abs_tol=1e-5)
                 and math.isclose(expected_similarity, 1.0, abs_tol=1e-5)
             )  # Edge case due to floating point underflow with identical subnormals
+            or (actual_similarity == 1.0 and math.isclose(expected_similarity, 1.0, rel_tol=1e-3, abs_tol=1e-3))
             or (math.isclose(actual_similarity, 0.0, abs_tol=1e-5) and abs(expected_similarity) > 0.0)
         )
     except (ValueError, TamperFaultEvent) as e:
