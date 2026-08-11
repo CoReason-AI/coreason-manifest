@@ -462,6 +462,7 @@ def _validate_ssrf_safety(url: Any) -> Any:
         except ValueError:
             try:
                 import socket
+
                 packed = socket.inet_aton(hostname)
                 ip = ipaddress.IPv4Address(packed)
             except OSError:
