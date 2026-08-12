@@ -29,4 +29,3 @@ All tests MUST execute against real local servers, real environment state, or de
 
 ## The "Zero-Waste Engineering" Mandate
 You are strictly bound by the "Borrow vs. Build" philosophy. You MUST maximize the use of stable Open Source Software (OSS) whenever available. You are mathematically forbidden from building custom, proprietary implementations for logging, tracing, graph layout, container routing, UI components, or serialization if a mature OSS standard (e.g., OpenTelemetry, Zep Graphiti, Pi.dev, React Flow) exists to solve the problem.
-

@@ -40,5 +40,3 @@ jobs:
         with:
           sarif_file: 'trivy-results.sarif'
         continue-on-error: true
-
-
