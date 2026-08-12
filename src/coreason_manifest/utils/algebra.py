@@ -458,6 +458,16 @@ def _validate_ssrf_safety(url: Any) -> Any:
             hostname = hostname[1:-1]
 
         try:
+            import socket
+
+            # Normalize IPv4 formats (octal, hex, dword) without DNS resolution
+            packed = socket.inet_aton(hostname)
+            hostname = socket.inet_ntoa(packed)
+        except OSError:
+            # Not a valid IPv4 string accepted by inet_aton
+            pass
+
+        try:
             ip = ipaddress.ip_address(hostname)
         except ValueError:
             # Not an IP address, so no IP-based check is possible without DNS resolution,
