@@ -1,0 +1,4 @@
+## 2025-02-28 - SSRF IP Obfuscation Bypass Fixed
+**Vulnerability:** The SSRF validation logic in `_validate_ssrf_safety` (`src/coreason_manifest/utils/algebra.py`) only used `ipaddress.ip_address` for checking global accessibility. This missed obfuscated IP formats like octal (`0177.0.0.01`), decimal (`2130706433`), and hex (`0x7f.0x0.0x0.0x1`), allowing bypassing of loopback/private IP protections.
+**Learning:** `ipaddress.ip_address` strictly expects traditional IPv4 dotted-decimal format. It does not parse standard POSIX obfuscated formats that are actively translated by low-level networking libraries.
+**Prevention:** Always use `socket.inet_aton` as a fallback parser when dealing with strict IP string validations to catch and normalize obfuscated IPv4 formats before applying security checks like `.is_global`.
