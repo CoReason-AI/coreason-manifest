@@ -469,7 +469,7 @@ def _validate_ssrf_safety(url: Any) -> Any:
                 packed = socket.inet_aton(hostname)
                 canonical_ip = socket.inet_ntoa(packed)
                 ip = ipaddress.ip_address(canonical_ip)
-            except (OSError, ValueError):
+            except OSError, ValueError:
                 # Not an IP address, so no IP-based check is possible without DNS resolution,
                 # which is forbidden by the Air-Gap Mandate.
                 return url
