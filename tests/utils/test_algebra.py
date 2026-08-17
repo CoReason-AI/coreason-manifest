@@ -31,3 +31,11 @@ def test_validate_ssrf_safety() -> None:
         _validate_ssrf_safety(AnyUrl("http://localhost/api"))
     with pytest.raises(ValueError, match="SSRF"):
         _validate_ssrf_safety(AnyUrl("http://localhost.localdomain/api"))
+
+    # Invalid alternate IP encodings
+    with pytest.raises(ValueError, match="SSRF"):
+        _validate_ssrf_safety(AnyUrl("http://2130706433/api")) # Decimal for 127.0.0.1
+    with pytest.raises(ValueError, match="SSRF"):
+        _validate_ssrf_safety(AnyUrl("http://0x7f000001/api")) # Hex for 127.0.0.1
+    with pytest.raises(ValueError, match="SSRF"):
+        _validate_ssrf_safety(AnyUrl("http://0177.0.0.1/api")) # Octal for 127.0.0.1
