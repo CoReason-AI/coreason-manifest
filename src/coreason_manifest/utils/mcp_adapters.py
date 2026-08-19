@@ -26,6 +26,12 @@ def _canonicalize_payload(payload: Any) -> Any:
     return payload
 
 
+# ⚡ Bolt Optimization: Instantiate the encoder once at the module level.
+# Recreating the encoder per request carries a significant overhead. Reusing a thread-safe
+# global instance improves serialization throughput measurably.
+_msgspec_encoder = msgspec.json.Encoder(order="deterministic")
+
+
 class DeterministicTransportAdapter:
     """
     AGENT INSTRUCTION: Strictly serializes execution envelopes into deterministic JSON-RPC 2.0 bytes.
@@ -50,5 +56,4 @@ class DeterministicTransportAdapter:
             "params": canonical_dict,
             "id": request_cid,  # Note: External Protocol Exemption.
         }
-        encoder = msgspec.json.Encoder(order="deterministic")
-        return encoder.encode(wrapped_payload)
+        return _msgspec_encoder.encode(wrapped_payload)
