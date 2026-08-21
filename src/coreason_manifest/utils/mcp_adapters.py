@@ -14,14 +14,17 @@ import msgspec
 
 from coreason_manifest.spec.ontology import ExecutionEnvelopeState
 
+_ENCODER = msgspec.json.Encoder(order="deterministic")
+
 
 def _canonicalize_payload(payload: Any) -> Any:
     """
     Recursively strips all `None` values from dictionaries and lists to mathematically prevent Null Contagion.
     """
-    if isinstance(payload, dict):
+    typ = type(payload)
+    if typ is dict:
         return {k: _canonicalize_payload(v) for k, v in payload.items() if v is not None}
-    if isinstance(payload, list):
+    if typ is list:
         return [_canonicalize_payload(v) for v in payload if v is not None]
     return payload
 
@@ -50,5 +53,4 @@ class DeterministicTransportAdapter:
             "params": canonical_dict,
             "id": request_cid,  # Note: External Protocol Exemption.
         }
-        encoder = msgspec.json.Encoder(order="deterministic")
-        return encoder.encode(wrapped_payload)
+        return _ENCODER.encode(wrapped_payload)
