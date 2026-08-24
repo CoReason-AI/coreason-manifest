@@ -460,9 +460,16 @@ def _validate_ssrf_safety(url: Any) -> Any:
         try:
             ip = ipaddress.ip_address(hostname)
         except ValueError:
-            # Not an IP address, so no IP-based check is possible without DNS resolution,
-            # which is forbidden by the Air-Gap Mandate.
-            return url
+            import socket
+
+            try:
+                packed = socket.inet_aton(hostname)
+                ip_str = socket.inet_ntoa(packed)
+                ip = ipaddress.ip_address(ip_str)
+            except OSError:
+                # Not an IP address, so no IP-based check is possible without DNS resolution,
+                # which is forbidden by the Air-Gap Mandate.
+                return url
 
         if (
             not ip.is_global

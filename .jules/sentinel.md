@@ -1,0 +1,4 @@
+## 2026-08-24 - SSRF Bypass via IP Obfuscation
+**Vulnerability:** The SSRF validation logic `_validate_ssrf_safety` used `ipaddress.ip_address` directly which strictly expects properly formatted IPv4 or IPv6 addresses. Obfuscated IPs representing localhost (e.g. integer `2130706433`, octal `0177.0.0.1`, hex `0x7f.0.0.1`) bypassed this check by throwing a ValueError but were treated as safe hostnames, while underlying HTTP clients would still resolve them.
+**Learning:** `ipaddress.ip_address` is not sufficient for complete SSRF protection because it is stricter than standard networking libraries/browsers which parse octal, hex, and decimal representations.
+**Prevention:** For robust SSRF checks without invoking DNS resolution (to maintain an air-gap), parse hostnames using `socket.inet_aton` (and normalize with `socket.inet_ntoa`) to correctly decode obfuscated IPv4 formats before validating the IP against forbidden ranges.
