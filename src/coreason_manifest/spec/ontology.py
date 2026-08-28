@@ -50,16 +50,27 @@ def _pure_python_is_dag(adjacency: dict[str, list[str]]) -> bool:
     in_degree: dict[str, int] = dict.fromkeys(adjacency, 0)
     for targets in adjacency.values():
         for t in targets:
-            in_degree[t] = in_degree.get(t, 0) + 1
+            # OPTIMIZATION: try/except is faster than .get() in tight loops when the key is often present
+            try:
+                in_degree[t] += 1
+            except KeyError:
+                in_degree[t] = 1
 
-    queue: list[str] = [n for n, d in in_degree.items() if d == 0]
+    queue: list[str] = [n for n, d in in_degree.items() if not d]
     visited = 0
     while queue:
         node = queue.pop()
         visited += 1
-        for t in adjacency.get(node, []):
+        # OPTIMIZATION: try/except is faster than .get()
+        try:
+            targets = adjacency[node]
+        except KeyError:
+            continue
+
+        for t in targets:
             in_degree[t] -= 1
-            if in_degree[t] == 0:
+            # OPTIMIZATION: `if not` is slightly faster than `if == 0`
+            if not in_degree[t]:
                 queue.append(t)
     return visited == len(in_degree)
 
@@ -69,22 +80,33 @@ def _pure_python_longest_path_length(adjacency: dict[str, list[str]]) -> int:
     in_degree: dict[str, int] = dict.fromkeys(adjacency, 0)
     for targets in adjacency.values():
         for t in targets:
-            in_degree[t] = in_degree.get(t, 0) + 1
+            # OPTIMIZATION: try/except is faster than .get() in tight loops
+            try:
+                in_degree[t] += 1
+            except KeyError:
+                in_degree[t] = 1
 
-    queue: list[str] = [n for n, d in in_degree.items() if d == 0]
-    dist: dict[str, int] = dict.fromkeys(adjacency, 0)
+    queue: list[str] = [n for n, d in in_degree.items() if not d]
+    # OPTIMIZATION: Pre-populate dist to avoid .get() during iteration
+    dist: dict[str, int] = dict.fromkeys(in_degree, 0)
 
     while queue:
         node = queue.pop()
-        node_dist = dist.get(node, 0)
+        node_dist = dist[node]
 
-        for t in adjacency.get(node, []):
+        # OPTIMIZATION: try/except is faster than .get()
+        try:
+            targets = adjacency[node]
+        except KeyError:
+            continue
+
+        candidate = node_dist + 1
+        for t in targets:
             in_degree[t] -= 1
-            if in_degree[t] == 0:
+            if not in_degree[t]:
                 queue.append(t)
 
-            candidate = node_dist + 1
-            if candidate > dist.get(t, 0):
+            if candidate > dist[t]:
                 dist[t] = candidate
 
     return max(dist.values()) if dist else 0
@@ -730,10 +752,10 @@ type JsonPrimitiveState = (
     | int
     | float
     | bool
-    | None
     | list["JsonPrimitiveState"]
     | dict[str, "JsonPrimitiveState"]
     | EpistemicProxyState[Any]
+    | None
 )
 
 
