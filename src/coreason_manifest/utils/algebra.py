@@ -26,8 +26,8 @@ import base64
 import copy
 import hashlib
 import ipaddress
-import socket
 import math
+import socket
 import typing
 import urllib.parse
 from collections.abc import Sequence
@@ -466,7 +466,7 @@ def _validate_ssrf_safety(url: Any) -> Any:
                 # Fallback to inet_aton to catch obscure IPv4 formats (e.g. octal, hex, short)
                 packed_ip = socket.inet_aton(hostname)
                 ip = ipaddress.IPv4Address(packed_ip)
-            except (socket.error, OSError):
+            except OSError:
                 # Not an IP address, so no IP-based check is possible without DNS resolution,
                 # which is forbidden by the Air-Gap Mandate.
                 return url
@@ -481,7 +481,7 @@ def _validate_ssrf_safety(url: Any) -> Any:
             or ip.is_reserved
         ):
             raise ValueError(
-                f"SSRF Security Violation: The target IP address '{str(ip)}' is not a valid global routing address."
+                f"SSRF Security Violation: The target IP address '{ip!s}' is not a valid global routing address."
             )
 
     except Exception as e:
