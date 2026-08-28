@@ -1,0 +1,4 @@
+## 2025-03-01 - SSRF Evasion using Obscure IPv4 Formats
+**Vulnerability:** The SSRF validation logic in `_validate_ssrf_safety` used `ipaddress.ip_address(hostname)` to parse IP addresses. This strict parser rejects obscure IPv4 formats like octal (`0177.0.0.1`), hex (`0x7f000001`), integer (`2130706433`), or dot-less/short forms (`127.1`). If rejected, the check was bypassed, but underlying network clients (e.g. `urllib`, `requests`) would resolve these to standard IP addresses like `127.0.0.1`, leading to an SSRF vulnerability.
+**Learning:** Strict IP parsers like Python's `ipaddress` module can create parser-differential vulnerabilities when the underlying HTTP/networking stack uses a more permissive parser (like the OS's `inet_aton`).
+**Prevention:** When validating IP addresses for SSRF protection, always normalize obscure representations to a standard format using permissive parsers like `socket.inet_aton` before applying blocklist rules.
