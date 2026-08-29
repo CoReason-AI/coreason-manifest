@@ -23,7 +23,12 @@ import urllib.request
 from pathlib import Path
 from typing import Annotated, Any, ForwardRef, TypeAliasType, Union, cast, get_args, get_origin, get_type_hints
 
-import rustworkx as rx
+try:
+    import rustworkx as rx
+
+    _HAS_RUSTWORKX = True
+except ImportError:
+    _HAS_RUSTWORKX = False
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT / "src"))
@@ -350,6 +355,10 @@ def evaluate_topological_reachability() -> None:
         if cls.__name__.split("[")[0] not in excluded_base_classes
     }
     alias_registry = {name: obj.__value__ for name, obj in vars(onto).items() if isinstance(obj, TypeAliasType)}
+
+    if not _HAS_RUSTWORKX:
+        print("Skipping evaluate_topological_reachability: rustworkx is not installed.")
+        return
 
     graph = rx.PyDiGraph()
     name_to_idx = {}
