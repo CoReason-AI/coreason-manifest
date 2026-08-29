@@ -8,7 +8,7 @@
 #
 # Source Code: <https://github.com/CoReason-AI/coreason-manifest>
 
-from typing import Any
+from typing import Any, ClassVar
 
 import msgspec
 
@@ -37,8 +37,10 @@ class DeterministicTransportAdapter:
     MCP ROUTING TRIGGERS: JSON-RPC 2.0, Byte Serialization, Zero-Trust Execution, msgspec, Deterministic Network Transport
     """
 
-    @staticmethod
-    def serialize_envelope(envelope: ExecutionEnvelopeState[Any]) -> bytes:
+    _encoder: ClassVar[msgspec.json.Encoder] = msgspec.json.Encoder(order="deterministic")
+
+    @classmethod
+    def serialize_envelope(cls, envelope: ExecutionEnvelopeState[Any]) -> bytes:
         payload_dict = envelope.model_dump(mode="json", exclude_none=True, by_alias=True)
         canonical_dict = _canonicalize_payload(payload_dict)
         trace_context = payload_dict.get("trace_context", {})
@@ -50,5 +52,5 @@ class DeterministicTransportAdapter:
             "params": canonical_dict,
             "id": request_cid,  # Note: External Protocol Exemption.
         }
-        encoder = msgspec.json.Encoder(order="deterministic")
-        return encoder.encode(wrapped_payload)
+        res: bytes = cls._encoder.encode(wrapped_payload)
+        return res
