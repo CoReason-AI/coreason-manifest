@@ -57,10 +57,13 @@ def _pure_python_is_dag(adjacency: dict[str, list[str]]) -> bool:
     while queue:
         node = queue.pop()
         visited += 1
-        for t in adjacency.get(node, []):
-            in_degree[t] -= 1
-            if in_degree[t] == 0:
-                queue.append(t)
+
+        node_targets: list[str] | None = adjacency.get(node)
+        if node_targets:
+            for t in node_targets:
+                in_degree[t] -= 1
+                if in_degree[t] == 0:
+                    queue.append(t)
     return visited == len(in_degree)
 
 
@@ -78,14 +81,16 @@ def _pure_python_longest_path_length(adjacency: dict[str, list[str]]) -> int:
         node = queue.pop()
         node_dist = dist.get(node, 0)
 
-        for t in adjacency.get(node, []):
-            in_degree[t] -= 1
-            if in_degree[t] == 0:
-                queue.append(t)
-
+        node_targets: list[str] | None = adjacency.get(node)
+        if node_targets:
             candidate = node_dist + 1
-            if candidate > dist.get(t, 0):
-                dist[t] = candidate
+            for t in node_targets:
+                in_degree[t] -= 1
+                if in_degree[t] == 0:
+                    queue.append(t)
+
+                if candidate > dist.get(t, 0):
+                    dist[t] = candidate
 
     return max(dist.values()) if dist else 0
 
