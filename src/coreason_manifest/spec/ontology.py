@@ -730,10 +730,10 @@ type JsonPrimitiveState = (
     | int
     | float
     | bool
-    | None
     | list["JsonPrimitiveState"]
     | dict[str, "JsonPrimitiveState"]
     | EpistemicProxyState[Any]
+    | None
 )
 
 
@@ -4981,6 +4981,13 @@ class EpistemicSemanticValidationSLA(CoreasonBaseState):
 
     linkml_schema_uri: AnyUrl
 
+    @field_validator("linkml_schema_uri", mode="after")
+    @classmethod
+    def _enforce_ssrf(cls, v: Any) -> Any:
+        from coreason_manifest.utils.algebra import _validate_ssrf_safety
+
+        return _validate_ssrf_safety(v)
+
 
 class EpistemicOntologicalCrosswalkIntent(CoreasonBaseState):
     """
@@ -5054,6 +5061,14 @@ class SchemaDrivenExtractionSLA(CoreasonBaseState):
     schema_registry_uri: AnyUrl = Field(
         description="RFC 8785 canonicalized URI to the exact Pydantic template or LinkML definition."
     )
+
+    @field_validator("schema_registry_uri", mode="after")
+    @classmethod
+    def _enforce_ssrf(cls, v: Any) -> Any:
+        from coreason_manifest.utils.algebra import _validate_ssrf_safety
+
+        return _validate_ssrf_safety(v)
+
     extraction_framework: Annotated[str, StringConstraints(pattern=r"^urn:coreason:.*$")] = Field(
         description="The URN of the specific extraction framework utilized (e.g., 'urn:coreason:extraction:docling_graph_explicit')."
     )
@@ -6745,6 +6760,14 @@ class SHACLValidationSLA(CoreasonBaseState):
     """
 
     shacl_shape_graph_uri: AnyUrl
+
+    @field_validator("shacl_shape_graph_uri", mode="after")
+    @classmethod
+    def _enforce_ssrf(cls, v: Any) -> Any:
+        from coreason_manifest.utils.algebra import _validate_ssrf_safety
+
+        return _validate_ssrf_safety(v)
+
     violation_action: Literal["DROP_GRAPH", "STRIP_TRIPLES", "HALT_EXECUTION"]
 
 
@@ -6822,6 +6845,14 @@ class RDFSerializationIntent(CoreasonBaseState):
     target_graph_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")]
     target_format: Literal["turtle", "xml", "json-ld", "ntriples"] = "turtle"
     base_uri_namespace: AnyUrl
+
+    @field_validator("base_uri_namespace", mode="after")
+    @classmethod
+    def _enforce_ssrf(cls, v: Any) -> Any:
+        from coreason_manifest.utils.algebra import _validate_ssrf_safety
+
+        return _validate_ssrf_safety(v)
+
     shacl_governance: SHACLValidationSLA | None = Field(
         default=None, description="The structural shape constraints governing the exported RDF graph."
     )
@@ -7272,6 +7303,14 @@ class InterventionPolicy(CoreasonBaseState):
     async_observation_port: AnyUrl | None = Field(
         default=None, max_length=2000, description="The endpoint for emitting non-blocking shadow telemetry."
     )
+
+    @field_validator("async_observation_port", mode="after")
+    @classmethod
+    def _enforce_ssrf(cls, v: Any) -> Any:
+        from coreason_manifest.utils.algebra import _validate_ssrf_safety
+
+        return _validate_ssrf_safety(v) if v is not None else v
+
     emit_telemetry_on_revision: bool = Field(
         default=False, description="The toggle to enable shadow monitoring on revision loops."
     )
@@ -10630,6 +10669,14 @@ class SemanticNodeState(CoreasonBaseState):
         json_schema_extra={"rdf_subject": True},
     )
     canonical_uri: AnyUrl | None = Field(default=None, json_schema_extra={"rdf_predicate": "owl:sameAs"})
+
+    @field_validator("canonical_uri", mode="after")
+    @classmethod
+    def _enforce_ssrf(cls, v: Any) -> Any:
+        from coreason_manifest.utils.algebra import _validate_ssrf_safety
+
+        return _validate_ssrf_safety(v) if v is not None else v
+
     label: Annotated[str, StringConstraints(max_length=2000)] = Field(
         description="The categorical label of the node (e.g., 'Person', 'Concept').",
         json_schema_extra={"rdf_predicate": "rdfs:label"},
