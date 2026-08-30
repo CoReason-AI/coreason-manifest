@@ -5068,6 +5068,7 @@ class SchemaDrivenExtractionSLA(CoreasonBaseState):
         from coreason_manifest.utils.algebra import _validate_ssrf_safety
 
         return _validate_ssrf_safety(v)
+
     extraction_framework: Annotated[str, StringConstraints(pattern=r"^urn:coreason:.*$")] = Field(
         description="The URN of the specific extraction framework utilized (e.g., 'urn:coreason:extraction:docling_graph_explicit')."
     )
@@ -6766,6 +6767,7 @@ class SHACLValidationSLA(CoreasonBaseState):
         from coreason_manifest.utils.algebra import _validate_ssrf_safety
 
         return _validate_ssrf_safety(v)
+
     violation_action: Literal["DROP_GRAPH", "STRIP_TRIPLES", "HALT_EXECUTION"]
 
 
@@ -6850,6 +6852,7 @@ class RDFSerializationIntent(CoreasonBaseState):
         from coreason_manifest.utils.algebra import _validate_ssrf_safety
 
         return _validate_ssrf_safety(v)
+
     shacl_governance: SHACLValidationSLA | None = Field(
         default=None, description="The structural shape constraints governing the exported RDF graph."
     )
@@ -7307,6 +7310,7 @@ class InterventionPolicy(CoreasonBaseState):
         from coreason_manifest.utils.algebra import _validate_ssrf_safety
 
         return _validate_ssrf_safety(v) if v is not None else v
+
     emit_telemetry_on_revision: bool = Field(
         default=False, description="The toggle to enable shadow monitoring on revision loops."
     )
@@ -10672,6 +10676,7 @@ class SemanticNodeState(CoreasonBaseState):
         from coreason_manifest.utils.algebra import _validate_ssrf_safety
 
         return _validate_ssrf_safety(v) if v is not None else v
+
     label: Annotated[str, StringConstraints(max_length=2000)] = Field(
         description="The categorical label of the node (e.g., 'Person', 'Concept').",
         json_schema_extra={"rdf_predicate": "rdfs:label"},
