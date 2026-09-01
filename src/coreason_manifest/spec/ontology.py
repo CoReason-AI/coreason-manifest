@@ -18,7 +18,7 @@ import typing
 from enum import StrEnum
 from typing import Annotated, Any, Literal, Self
 
-import canonicaljson
+import msgspec
 from pydantic import (
     AnyUrl,
     BaseModel,
@@ -43,6 +43,8 @@ try:
     _HAS_RUSTWORKX: bool = True
 except ModuleNotFoundError:
     _HAS_RUSTWORKX = False
+
+_msgspec_encoder = msgspec.json.Encoder(order="deterministic")
 
 
 def _pure_python_is_dag(adjacency: dict[str, list[str]]) -> bool:
@@ -701,7 +703,7 @@ class CoreasonBaseState(BaseModel):
         except AttributeError:
             raw_dict = self.model_dump(mode="json", exclude_none=True, by_alias=True)
             canonical_payload = _canonicalize_payload(raw_dict)
-            canonical_dump: bytes = canonicaljson.encode_canonical_json(canonical_payload)
+            canonical_dump: bytes = _msgspec_encoder.encode(canonical_payload)
             object.__setattr__(self, "_cached_canonical_dump", canonical_dump)
             return canonical_dump
 
