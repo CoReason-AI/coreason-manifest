@@ -732,10 +732,10 @@ type JsonPrimitiveState = (
     | int
     | float
     | bool
-    | None
     | list["JsonPrimitiveState"]
     | dict[str, "JsonPrimitiveState"]
     | EpistemicProxyState[Any]
+    | None
 )
 
 
