@@ -730,10 +730,10 @@ type JsonPrimitiveState = (
     | int
     | float
     | bool
-    | None
     | list["JsonPrimitiveState"]
     | dict[str, "JsonPrimitiveState"]
     | EpistemicProxyState[Any]
+    | None
 )
 
 
@@ -3778,6 +3778,7 @@ class EpistemicOntologyDiscoveryIntent(BoundedJSONRPCIntent):
     @classmethod
     def _enforce_ssrf_target_registry(cls, v: Any) -> Any:
         from coreason_manifest.utils.algebra import _validate_ssrf_safety
+
         return _validate_ssrf_safety(v) if v is not None else v
 
     query_concept_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
@@ -4992,6 +4993,7 @@ class EpistemicSemanticValidationSLA(CoreasonBaseState):
     @classmethod
     def _enforce_ssrf_linkml(cls, v: Any) -> Any:
         from coreason_manifest.utils.algebra import _validate_ssrf_safety
+
         return _validate_ssrf_safety(v) if v is not None else v
 
 
@@ -5072,6 +5074,7 @@ class SchemaDrivenExtractionSLA(CoreasonBaseState):
     @classmethod
     def _enforce_ssrf_schema_registry(cls, v: Any) -> Any:
         from coreason_manifest.utils.algebra import _validate_ssrf_safety
+
         return _validate_ssrf_safety(v) if v is not None else v
 
     extraction_framework: Annotated[str, StringConstraints(pattern=r"^urn:coreason:.*$")] = Field(
@@ -6770,6 +6773,7 @@ class SHACLValidationSLA(CoreasonBaseState):
     @classmethod
     def _enforce_ssrf_shacl(cls, v: Any) -> Any:
         from coreason_manifest.utils.algebra import _validate_ssrf_safety
+
         return _validate_ssrf_safety(v) if v is not None else v
 
     violation_action: Literal["DROP_GRAPH", "STRIP_TRIPLES", "HALT_EXECUTION"]
@@ -7304,6 +7308,7 @@ class InterventionPolicy(CoreasonBaseState):
     @classmethod
     def _enforce_ssrf_observation_port(cls, v: Any) -> Any:
         from coreason_manifest.utils.algebra import _validate_ssrf_safety
+
         return _validate_ssrf_safety(v) if v is not None else v
 
     emit_telemetry_on_revision: bool = Field(
