@@ -3773,6 +3773,13 @@ class EpistemicOntologyDiscoveryIntent(BoundedJSONRPCIntent):
     target_registry_uri: HttpUrl = Field(
         description="The standard ontology registry endpoint (e.g., EBI-OLS, BioPortal)."
     )
+
+    @field_validator("target_registry_uri", mode="after")
+    @classmethod
+    def _enforce_ssrf_target_registry(cls, v: Any) -> Any:
+        from coreason_manifest.utils.algebra import _validate_ssrf_safety
+        return _validate_ssrf_safety(v) if v is not None else v
+
     query_concept_cid: Annotated[str, StringConstraints(min_length=1, max_length=128, pattern="^[a-zA-Z0-9_.:-]+$")] = (
         Field(description="The internal standard CID the agent is checking for deprecation or semantic drift.")
     )
@@ -4981,6 +4988,12 @@ class EpistemicSemanticValidationSLA(CoreasonBaseState):
 
     linkml_schema_uri: AnyUrl
 
+    @field_validator("linkml_schema_uri", mode="after")
+    @classmethod
+    def _enforce_ssrf_linkml(cls, v: Any) -> Any:
+        from coreason_manifest.utils.algebra import _validate_ssrf_safety
+        return _validate_ssrf_safety(v) if v is not None else v
+
 
 class EpistemicOntologicalCrosswalkIntent(CoreasonBaseState):
     """
@@ -5054,6 +5067,13 @@ class SchemaDrivenExtractionSLA(CoreasonBaseState):
     schema_registry_uri: AnyUrl = Field(
         description="RFC 8785 canonicalized URI to the exact Pydantic template or LinkML definition."
     )
+
+    @field_validator("schema_registry_uri", mode="after")
+    @classmethod
+    def _enforce_ssrf_schema_registry(cls, v: Any) -> Any:
+        from coreason_manifest.utils.algebra import _validate_ssrf_safety
+        return _validate_ssrf_safety(v) if v is not None else v
+
     extraction_framework: Annotated[str, StringConstraints(pattern=r"^urn:coreason:.*$")] = Field(
         description="The URN of the specific extraction framework utilized (e.g., 'urn:coreason:extraction:docling_graph_explicit')."
     )
@@ -6745,6 +6765,13 @@ class SHACLValidationSLA(CoreasonBaseState):
     """
 
     shacl_shape_graph_uri: AnyUrl
+
+    @field_validator("shacl_shape_graph_uri", mode="after")
+    @classmethod
+    def _enforce_ssrf_shacl(cls, v: Any) -> Any:
+        from coreason_manifest.utils.algebra import _validate_ssrf_safety
+        return _validate_ssrf_safety(v) if v is not None else v
+
     violation_action: Literal["DROP_GRAPH", "STRIP_TRIPLES", "HALT_EXECUTION"]
 
 
@@ -7272,6 +7299,13 @@ class InterventionPolicy(CoreasonBaseState):
     async_observation_port: AnyUrl | None = Field(
         default=None, max_length=2000, description="The endpoint for emitting non-blocking shadow telemetry."
     )
+
+    @field_validator("async_observation_port", mode="after")
+    @classmethod
+    def _enforce_ssrf_observation_port(cls, v: Any) -> Any:
+        from coreason_manifest.utils.algebra import _validate_ssrf_safety
+        return _validate_ssrf_safety(v) if v is not None else v
+
     emit_telemetry_on_revision: bool = Field(
         default=False, description="The toggle to enable shadow monitoring on revision loops."
     )
