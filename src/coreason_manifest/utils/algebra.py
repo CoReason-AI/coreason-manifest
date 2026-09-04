@@ -439,6 +439,8 @@ def _validate_ssrf_safety(url: Any) -> Any:
     Mechanistically evaluates an HttpUrl or AnyUrl to prevent Server-Side Request Forgery (SSRF).
     Mathematically blocks local, loopback, private, and bogon IP space without invoking dynamic DNS resolution.
     """
+    import socket
+
     try:
         url_str = str(url)
         parsed = urllib.parse.urlparse(url_str)
@@ -457,21 +459,30 @@ def _validate_ssrf_safety(url: Any) -> Any:
         if hostname.startswith("[") and hostname.endswith("]"):
             hostname = hostname[1:-1]
 
+        ip_to_check = None
         try:
-            ip = ipaddress.ip_address(hostname)
+            # First try direct parsing (handles standard formatting and IPv6)
+            ip_to_check = ipaddress.ip_address(hostname)
         except ValueError:
-            # Not an IP address, so no IP-based check is possible without DNS resolution,
-            # which is forbidden by the Air-Gap Mandate.
-            return url
+            # Not a standard format. Let's see if the OS IP stack considers it an IPv4 address
+            # (handles hex, octal, integers, missing octets)
+            try:
+                packed = socket.inet_aton(hostname)
+                normalized = socket.inet_ntoa(packed)
+                ip_to_check = ipaddress.ip_address(normalized)
+            except OSError:
+                # Still not an IP address, so no IP-based check is possible without DNS resolution,
+                # which is forbidden by the Air-Gap Mandate.
+                pass
 
-        if (
-            not ip.is_global
-            or ip.is_private
-            or ip.is_loopback
-            or ip.is_link_local
-            or ip.is_multicast
-            or ip.is_unspecified
-            or ip.is_reserved
+        if ip_to_check and (
+            not ip_to_check.is_global
+            or ip_to_check.is_private
+            or ip_to_check.is_loopback
+            or ip_to_check.is_link_local
+            or ip_to_check.is_multicast
+            or ip_to_check.is_unspecified
+            or ip_to_check.is_reserved
         ):
             raise ValueError(
                 f"SSRF Security Violation: The target IP address '{hostname}' is not a valid global routing address."
