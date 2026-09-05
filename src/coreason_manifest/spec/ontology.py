@@ -124,13 +124,13 @@ def _validate_payload_bounds(
                 raise ValueError("Dictionary keys must be strings")
             if len(k) > 10000:
                 raise ValueError("Dictionary key exceeds max string length of 10000")
-            _validate_payload_bounds(typing.cast("JsonPrimitiveState", v), nxt_depth, state, max_nodes, max_recursion)
+            # ⚡ Bolt: removed typing.cast(..., v) to avoid function call overhead in tight recursive loop
+            _validate_payload_bounds(v, nxt_depth, state, max_nodes, max_recursion)
     elif typ is list:
         nxt_depth = current_depth + 1
         for item in value:  # type: ignore
-            _validate_payload_bounds(
-                typing.cast("JsonPrimitiveState", item), nxt_depth, state, max_nodes, max_recursion
-            )
+            # ⚡ Bolt: removed typing.cast(..., item) to avoid function call overhead in tight recursive loop
+            _validate_payload_bounds(item, nxt_depth, state, max_nodes, max_recursion)  # type: ignore[arg-type]
     elif typ is str:
         if len(value) > 10000:  # type: ignore
             raise ValueError("String exceeds max length of 10000")
@@ -730,10 +730,10 @@ type JsonPrimitiveState = (
     | int
     | float
     | bool
-    | None
     | list["JsonPrimitiveState"]
     | dict[str, "JsonPrimitiveState"]
     | EpistemicProxyState[Any]
+    | None
 )
 
 
