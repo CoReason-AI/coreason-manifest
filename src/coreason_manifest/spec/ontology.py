@@ -130,7 +130,7 @@ def _validate_payload_bounds(
         nxt_depth = current_depth + 1
         for item in value:  # type: ignore
             # ⚡ Bolt: removed typing.cast(..., item) to avoid function call overhead in tight recursive loop
-            _validate_payload_bounds(item, nxt_depth, state, max_nodes, max_recursion)  # type: ignore
+            _validate_payload_bounds(item, nxt_depth, state, max_nodes, max_recursion)  # type: ignore[arg-type]
     elif typ is str:
         if len(value) > 10000:  # type: ignore
             raise ValueError("String exceeds max length of 10000")
