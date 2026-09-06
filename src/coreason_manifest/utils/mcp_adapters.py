@@ -14,6 +14,11 @@ import msgspec
 
 from coreason_manifest.spec.ontology import ExecutionEnvelopeState
 
+# ⚡ Bolt Optimization: Instantiate the msgspec JSON encoder once at the module level.
+# Creating a new Encoder(order="deterministic") is an expensive operation (~2x overhead per call).
+# Caching it globally ensures blazing-fast serialization during high-frequency MCP executions.
+_ENCODER = msgspec.json.Encoder(order="deterministic")
+
 
 def _canonicalize_payload(payload: Any) -> Any:
     """
@@ -50,5 +55,4 @@ class DeterministicTransportAdapter:
             "params": canonical_dict,
             "id": request_cid,  # Note: External Protocol Exemption.
         }
-        encoder = msgspec.json.Encoder(order="deterministic")
-        return encoder.encode(wrapped_payload)
+        return _ENCODER.encode(wrapped_payload)
