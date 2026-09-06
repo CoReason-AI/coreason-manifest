@@ -27,6 +27,7 @@ import copy
 import hashlib
 import ipaddress
 import math
+import socket
 import typing
 import urllib.parse
 from collections.abc import Sequence
@@ -456,6 +457,22 @@ def _validate_ssrf_safety(url: Any) -> Any:
         # Remove IPv6 brackets if present
         if hostname.startswith("[") and hostname.endswith("]"):
             hostname = hostname[1:-1]
+
+        # Normalize obfuscated IPs (octal, hex, integer, short-hand) via OS-native
+        # inet parsing before handing off to the strict ipaddress module.
+        # This prevents attackers from bypassing SSRF protections using formats like
+        # 127.1, 0177.0.0.1, or 0x7f000001, which ipaddress.ip_address() rejects but
+        # underlying socket libraries accept. This does NOT trigger DNS resolution.
+        try:
+            packed = socket.inet_aton(hostname)
+            hostname = socket.inet_ntoa(packed)
+        except OSError:
+            try:
+                if hasattr(socket, "AF_INET6"):
+                    packed = socket.inet_pton(socket.AF_INET6, hostname)
+                    hostname = socket.inet_ntop(socket.AF_INET6, packed)
+            except OSError:
+                pass
 
         try:
             ip = ipaddress.ip_address(hostname)
