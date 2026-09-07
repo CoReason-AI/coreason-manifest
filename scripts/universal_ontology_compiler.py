@@ -623,19 +623,42 @@ def scan_epistemic_quarantine(source: str) -> None:
             if safe_ip is None:
                 raise ValueError(f"Could not resolve any IP for hostname: {parsed_url.hostname}")
 
-            # Prevent DNS rebinding by pinning the DNS resolution
-            original_getaddrinfo = socket.getaddrinfo
-            def pinned_getaddrinfo(host, port, family=0, type_=0, proto=0, flags=0):
-                if host == parsed_url.hostname:
-                    return [(socket.AF_INET6 if ":" in safe_ip else socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP, "", (safe_ip, port))]
-                return original_getaddrinfo(host, port, family, type_, proto, flags)
+            import http.client
+            import ssl
 
-            socket.getaddrinfo = pinned_getaddrinfo
-            try:
-                with urllib.request.urlopen(source, timeout=10) as response:  # noqa: S310 # nosec B310
-                    schema_dict = json.loads(response.read().decode("utf-8"))
-            finally:
-                socket.getaddrinfo = original_getaddrinfo
+            class SafeHTTPConnection(http.client.HTTPConnection):
+                def connect(self) -> None:
+                    self.sock = socket.create_connection((safe_ip, self.port), self.timeout, self.source_address)
+                    if self._tunnel_host:
+                        self._tunnel()
+
+            class SafeHTTPSConnection(http.client.HTTPSConnection):
+                def connect(self) -> None:
+                    self.sock = socket.create_connection((safe_ip, self.port), self.timeout, self.source_address)
+                    if self._tunnel_host:
+                        self._tunnel()
+                    context = getattr(self, "_context", None)
+                    if context is None:
+                        context = ssl.create_default_context()
+                    self.sock = context.wrap_socket(self.sock, server_hostname=self.host)
+
+            class SafeHTTPHandler(urllib.request.HTTPHandler):
+                def http_open(self, req: urllib.request.Request) -> Any:
+                    return self.do_open(SafeHTTPConnection, req)
+
+            class SafeHTTPSHandler(urllib.request.HTTPSHandler):
+                def https_open(self, req: urllib.request.Request) -> Any:
+                    return self.do_open(SafeHTTPSConnection, req, context=getattr(self, "_context", None))
+
+            class NoRedirectHandler(urllib.request.HTTPRedirectHandler):
+                def redirect_request(
+                    self, _req: urllib.request.Request, _fp: Any, _code: int, _msg: str, _headers: Any, newurl: str
+                ) -> None:  # type: ignore
+                    raise ValueError(f"SSRF Protection: Redirects are not allowed. Attempted redirect to {newurl}")
+
+            opener = urllib.request.build_opener(SafeHTTPHandler(), SafeHTTPSHandler(), NoRedirectHandler())
+            with opener.open(source, timeout=10) as response:
+                schema_dict = json.loads(response.read().decode("utf-8"))
         else:
             with open(source, encoding="utf-8") as f:
                 schema_dict = json.load(f)
