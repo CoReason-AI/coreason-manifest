@@ -625,10 +625,10 @@ def scan_epistemic_quarantine(source: str) -> None:
 
             # Prevent DNS rebinding by pinning the DNS resolution
             original_getaddrinfo = socket.getaddrinfo
-            def pinned_getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
+            def pinned_getaddrinfo(host, port, family=0, type_=0, proto=0, flags=0):
                 if host == parsed_url.hostname:
                     return [(socket.AF_INET6 if ":" in safe_ip else socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP, "", (safe_ip, port))]
-                return original_getaddrinfo(host, port, family, type, proto, flags)
+                return original_getaddrinfo(host, port, family, type_, proto, flags)
 
             socket.getaddrinfo = pinned_getaddrinfo
             try:
