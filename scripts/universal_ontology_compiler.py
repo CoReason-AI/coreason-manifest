@@ -640,6 +640,7 @@ def scan_epistemic_quarantine(source: str) -> None:
                     context = getattr(self, "_context", None)
                     if context is None:
                         context = ssl.create_default_context()
+                        context.minimum_version = ssl.TLSVersion.TLSv1_2
                     self.sock = context.wrap_socket(self.sock, server_hostname=self.host)
 
             class SafeHTTPHandler(urllib.request.HTTPHandler):
