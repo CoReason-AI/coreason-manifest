@@ -609,6 +609,7 @@ def scan_epistemic_quarantine(source: str) -> None:
             except socket.gaierror as e:
                 raise ValueError(f"Could not resolve hostname: {parsed_url.hostname}") from e
 
+            safe_ip = None
             for info in addr_info:
                 ip = info[4][0]
                 ip_obj = ipaddress.ip_address(ip)
@@ -616,9 +617,25 @@ def scan_epistemic_quarantine(source: str) -> None:
                     raise ValueError(
                         f"SSRF Protection: Resolution of {parsed_url.hostname} points to a restricted IP: {ip}"
                     )
+                if safe_ip is None:
+                    safe_ip = ip
 
-            with urllib.request.urlopen(source, timeout=10) as response:  # noqa: S310 # nosec B310
-                schema_dict = json.loads(response.read().decode("utf-8"))
+            if safe_ip is None:
+                raise ValueError(f"Could not resolve any IP for hostname: {parsed_url.hostname}")
+
+            # Prevent DNS rebinding by pinning the DNS resolution
+            original_getaddrinfo = socket.getaddrinfo
+            def pinned_getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
+                if host == parsed_url.hostname:
+                    return [(socket.AF_INET6 if ":" in safe_ip else socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP, "", (safe_ip, port))]
+                return original_getaddrinfo(host, port, family, type, proto, flags)
+
+            socket.getaddrinfo = pinned_getaddrinfo
+            try:
+                with urllib.request.urlopen(source, timeout=10) as response:  # noqa: S310 # nosec B310
+                    schema_dict = json.loads(response.read().decode("utf-8"))
+            finally:
+                socket.getaddrinfo = original_getaddrinfo
         else:
             with open(source, encoding="utf-8") as f:
                 schema_dict = json.load(f)
